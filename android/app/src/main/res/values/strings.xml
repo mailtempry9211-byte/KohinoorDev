@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Phone Link Hub</string>
+    <string name="server_ip_hint">e.g. 192.168.1.42</string>
+    <string name="notification_channel_name">Phone Link</string>
+    <string name="notification_channel_desc">Keeps the phone connected to your dashboard</string>
+    <string name="notification_listener_label">Phone Link notifier</string>
+</resources>

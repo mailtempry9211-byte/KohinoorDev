@@ -1,0 +1,20 @@
+{
+  "name": "phone-link-server",
+  "version": "1.0.0",
+  "description": "WebSocket relay server for Android phone management",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch src/index.js",
+    "start": "node src/index.js",
+    "mock": "node src/mock-device.js",
+    "verify": "node scripts/verify-pipeline.mjs",
+    "verify:protocol": "node scripts/verify-protocol-aliases.mjs"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "ws": "^8.17.1",
+    "cors": "^2.8.5",
+    "lowdb": "^7.0.1"
+  }
+}
