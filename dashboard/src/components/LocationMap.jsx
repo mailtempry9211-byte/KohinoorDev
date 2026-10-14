@@ -1,14 +1,14 @@
 import { useEffect, useState } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Circle, useMap } from 'react-leaflet';
 import L from 'leaflet';
-import { Navigation, Clock } from 'lucide-react';
+import { Navigation, Clock, RefreshCw } from 'lucide-react';
 import { useStore } from '../store/StoreContext';
 
 const defaultIcon = L.divIcon({
   className: 'custom-pin',
   html: `<div style="
     width:22px;height:22px;border-radius:50% 50% 50% 0;
-    background:#6366f1;border:3px solid #fff;
+    background:#14b8a6;border:3px solid #fff;
     transform:rotate(-45deg);
     box-shadow:0 2px 8px rgba(0,0,0,.5);
   "></div>`,
@@ -26,8 +26,9 @@ function Recenter({ position, zoom }) {
 }
 
 export default function LocationMap() {
-  const { activeDeviceId, activeDevice, locations } = useStore();
+  const { activeDeviceId, activeDevice, locations, sendCommand } = useStore();
   const [autoCenter, setAutoCenter] = useState(true);
+  const [locRefreshing, setLocRefreshing] = useState(false);
 
   const location = activeDeviceId ? locations[activeDeviceId] : null;
 
@@ -63,7 +64,7 @@ export default function LocationMap() {
     <div className="mx-auto h-full max-w-5xl space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-600/20 text-indigo-400">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-teal-600/20 text-teal-400">
             <Navigation className="h-5 w-5" />
           </div>
           <div>
@@ -73,15 +74,31 @@ export default function LocationMap() {
             </p>
           </div>
         </div>
-        <label className="flex items-center gap-2 text-xs text-gray-400">
-          <input
-            type="checkbox"
-            checked={autoCenter}
-            onChange={(e) => setAutoCenter(e.target.checked)}
-            className="h-3.5 w-3.5 rounded border-gray-600 bg-gray-800 accent-indigo-500"
-          />
-          Auto-center on fix
-        </label>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={async () => {
+              if (!activeDeviceId || locRefreshing) return;
+              setLocRefreshing(true);
+              await sendCommand('request-location', { deviceId: activeDeviceId });
+              setLocRefreshing(false);
+            }}
+            disabled={!activeDeviceId || locRefreshing}
+            className="flex items-center gap-1.5 rounded-lg bg-gray-900 px-3 py-2 text-xs text-gray-400 transition-colors hover:bg-gray-800 hover:text-gray-200 disabled:opacity-40"
+            title="Request a fresh GPS fix from the phone"
+          >
+            <RefreshCw className={`h-3.5 w-3.5 ${locRefreshing ? 'animate-spin' : ''}`} />
+            Refresh
+          </button>
+          <label className="flex items-center gap-2 text-xs text-gray-400">
+            <input
+              type="checkbox"
+              checked={autoCenter}
+              onChange={(e) => setAutoCenter(e.target.checked)}
+              className="h-3.5 w-3.5 rounded border-gray-600 bg-gray-800 accent-teal-500"
+            />
+            Auto-center on fix
+          </label>
+        </div>
       </div>
 
       {hasFix ? (
@@ -121,7 +138,7 @@ export default function LocationMap() {
                 <Circle
                   center={[location.latitude, location.longitude]}
                   radius={location.accuracy}
-                  pathOptions={{ color: '#6366f1', fillColor: '#6366f1', fillOpacity: 0.12, weight: 1 }}
+                  pathOptions={{ color: '#14b8a6', fillColor: '#14b8a6', fillOpacity: 0.12, weight: 1 }}
                 />
               )}
             </MapContainer>

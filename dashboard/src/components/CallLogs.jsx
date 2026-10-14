@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { PhoneIncoming, PhoneOutgoing, PhoneMissed, Phone, PhoneOff } from 'lucide-react';
+import { PhoneIncoming, PhoneOutgoing, PhoneMissed, Phone, PhoneOff, RefreshCw } from 'lucide-react';
 import { useStore } from '../store/StoreContext';
 
 const FILTERS = [
@@ -10,8 +10,16 @@ const FILTERS = [
 ];
 
 export default function CallLogs() {
-  const { activeDeviceId, calls } = useStore();
+  const { activeDeviceId, calls, sendCommand } = useStore();
   const [filter, setFilter] = useState('all');
+  const [refreshing, setRefreshing] = useState(false);
+
+  const refresh = async () => {
+    if (!activeDeviceId || refreshing) return;
+    setRefreshing(true);
+    await sendCommand('request-calls', { deviceId: activeDeviceId });
+    setRefreshing(false);
+  };
 
   const list = useMemo(() => {
     const all = calls[activeDeviceId] || [];
@@ -26,19 +34,30 @@ export default function CallLogs() {
     <div className="mx-auto max-w-4xl space-y-4">
       <div className="flex items-center justify-between gap-4">
         <h2 className="text-lg font-semibold">Call History</h2>
-        <div className="flex gap-1 rounded-lg bg-gray-900 p-1">
-          {FILTERS.map(({ id, label, icon: Icon }) => (
-            <button
-              key={id}
-              onClick={() => setFilter(id)}
-              className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
-                filter === id ? 'bg-gray-700 text-white' : 'text-gray-400 hover:text-gray-200'
-              }`}
-            >
-              <Icon className="h-3.5 w-3.5" />
-              {label}
-            </button>
-          ))}
+        <div className="flex items-center gap-2">
+          <button
+            onClick={refresh}
+            disabled={!activeDeviceId || refreshing}
+            className="flex items-center gap-1.5 rounded-lg bg-gray-900 px-3 py-2 text-xs text-gray-400 transition-colors hover:bg-gray-800 hover:text-gray-200 disabled:opacity-40"
+            title="Request fresh call log from the phone"
+          >
+            <RefreshCw className={`h-3.5 w-3.5 ${refreshing ? 'animate-spin' : ''}`} />
+            Refresh
+          </button>
+          <div className="flex gap-1 rounded-lg bg-gray-900 p-1">
+            {FILTERS.map(({ id, label, icon: Icon }) => (
+              <button
+                key={id}
+                onClick={() => setFilter(id)}
+                className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
+                  filter === id ? 'bg-gray-700 text-white' : 'text-gray-400 hover:text-gray-200'
+                }`}
+              >
+                <Icon className="h-3.5 w-3.5" />
+                {label}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -81,7 +100,7 @@ export default function CallLogs() {
 
               <a
                 href={`tel:${call.number}`}
-                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gray-800 text-gray-400 transition-colors hover:bg-indigo-600 hover:text-white"
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gray-800 text-gray-400 transition-colors hover:bg-teal-600 hover:text-white"
                 title="Callback"
               >
                 <Phone className="h-4 w-4" />

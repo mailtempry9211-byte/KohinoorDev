@@ -74,7 +74,7 @@ export default function Contacts() {
         <div className="divide-y divide-gray-800 rounded-lg border border-gray-800 bg-gray-900/50">
           {filtered.map((c) => (
             <div key={c.id} className="flex items-center gap-3 px-4 py-3">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-indigo-600/20 text-indigo-400"><Phone className="h-4 w-4" /></div>
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-teal-600/20 text-teal-400"><Phone className="h-4 w-4" /></div>
               <div className="min-w-0">
                 <p className="truncate text-sm font-medium">{c.name || 'Unknown'}</p>
                 <p className="truncate text-xs text-gray-500">{(c.numbers || []).join(' · ')}</p>
@@ -112,13 +112,13 @@ function AddContactForm() {
     <form onSubmit={handleAdd} className="flex flex-wrap items-end gap-2 rounded-lg border border-gray-800 bg-gray-900/50 p-3">
       <div className="min-w-40 flex-1">
         <label className="text-[11px] text-gray-500">Name</label>
-        <input value={name} onChange={(e) => setName(e.target.value)} placeholder="New contact name" className="mt-1 w-full rounded-lg bg-gray-800 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500" />
+        <input value={name} onChange={(e) => setName(e.target.value)} placeholder="New contact name" className="mt-1 w-full rounded-lg bg-gray-800 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-teal-500" />
       </div>
       <div className="min-w-40 flex-1">
         <label className="text-[11px] text-gray-500">Phone number</label>
-        <input value={number} onChange={(e) => setNumber(e.target.value)} placeholder="+91…" className="mt-1 w-full rounded-lg bg-gray-800 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500" />
+        <input value={number} onChange={(e) => setNumber(e.target.value)} placeholder="+91…" className="mt-1 w-full rounded-lg bg-gray-800 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-teal-500" />
       </div>
-      <button type="submit" disabled={adding || !name.trim() || !number.trim()} className="flex items-center gap-1.5 rounded-lg bg-indigo-600 px-4 py-2 text-sm text-white hover:bg-indigo-500 disabled:opacity-40"><Plus className="h-4 w-4" />{adding ? 'Adding…' : 'Add contact'}</button>
+      <button type="submit" disabled={adding || !name.trim() || !number.trim()} className="flex items-center gap-1.5 rounded-lg bg-teal-600 px-4 py-2 text-sm text-white hover:bg-teal-500 disabled:opacity-40"><Plus className="h-4 w-4" />{adding ? 'Adding…' : 'Add contact'}</button>
     </form>
   );
 }

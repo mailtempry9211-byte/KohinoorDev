@@ -65,7 +65,7 @@ class WebSocketClient(
             return
         }
 
-        val url = "ws://$ip:$port"
+        val url = buildUrl(ip, port)
         Log.i(TAG, "connecting to $url")
 
         val request = Request.Builder().url(url).build()
@@ -130,6 +130,29 @@ class WebSocketClient(
             listener.onCommand(event, payload)
         } catch (e: Exception) {
             Log.e(TAG, "bad message from server", e)
+        }
+    }
+
+    /**
+     * Builds the final ws(s):// URL from whatever the user typed.
+     * Accepts: bare IP (ws://ip:port), bare domain (wss://domain — ngrok
+     * default), host:port, or a full ws://|wss://|http://|https:// URL.
+     */
+    private fun buildUrl(raw: String, port: Int): String {
+        val s = raw.trim().trimEnd('/')
+        // Full URLs pass straight through (scheme-normalised for http(s)).
+        val lower = s.lowercase()
+        return when {
+            lower.startsWith("wss://") -> s
+            lower.startsWith("ws://") -> s
+            lower.startsWith("https://") -> "wss://" + s.substring(8)
+            lower.startsWith("http://") -> "ws://" + s.substring(7)
+            // host:port — treat as ws with the given port (local dev).
+            s.contains(':') && s.substringAfterLast(':').all { it.isDigit() } -> "ws://$s"
+            // Bare IPv4 address — use the configured default port.
+            s.matches(Regex("""^\d{1,3}(\.\d{1,3}){3}$""")) -> "ws://$s:$port"
+            // Bare domain (e.g. ngrok) — default to secure wss on 443.
+            else -> "wss://$s"
         }
     }
 

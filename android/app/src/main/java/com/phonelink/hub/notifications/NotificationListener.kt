@@ -43,6 +43,8 @@ class NotificationListener : NotificationListenerService() {
                 Log.d(TAG, "dropped notification from ${sbn.packageName}: socket not connected yet (listener bound before service)")
                 return
             }
+            // deviceId yahin tag karo — server/client kabhi "undefined" file na kare.
+            try { payload.put("deviceId", com.phonelink.hub.data.DevicePrefs.deviceId) } catch (_: Exception) { }
             ws.send(com.phonelink.hub.data.Events.NOTIFICATION_POSTED, payload)
             Log.d(TAG, "sent notification from ${sbn.packageName} title=${payload.optString("title")}")
         } catch (e: Exception) {

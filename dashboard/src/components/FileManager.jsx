@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Folder as FolderIcon, File as FileIcon, ChevronRight, Download, Upload, HardDrive, ArrowUp } from 'lucide-react';
+import { Folder as FolderIcon, File as FileIcon, ChevronRight, Download, Upload, HardDrive, ArrowUp, RefreshCw } from 'lucide-react';
 import { useStore } from '../store/StoreContext';
 
 export default function FileManager() {
@@ -7,6 +7,7 @@ export default function FileManager() {
   const [downloaded, setDownloaded] = useState(null);
   const [uploadOpen, setUploadOpen] = useState(false);
   const [uploadTarget, setUploadTarget] = useState(null);
+  const [downloading, setDownloading] = useState(null);
 
   useEffect(() => {
     if (activeDeviceId) sendCommand('file-list', { deviceId: activeDeviceId, path: '/' });
@@ -23,6 +24,8 @@ export default function FileManager() {
       setDownloaded({ url: URL.createObjectURL(blob), name });
     } catch (e) {
       setDownloaded(null);
+    } finally {
+      setDownloading(null);
     }
   }, [files.download]);
 
@@ -30,6 +33,7 @@ export default function FileManager() {
 
   const download = (entry) => {
     setDownloaded(null);
+    setDownloading(entry.path);
     sendCommand('file-download', { deviceId: activeDeviceId, path: entry.path, name: entry.name, mimeType: entry.mimeType });
   };
 
@@ -53,13 +57,23 @@ export default function FileManager() {
           <h2 className="text-lg font-semibold">File Explorer</h2>
           <p className="text-xs text-gray-500">Internal storage</p>
         </div>
-        <button
-          onClick={() => setUploadOpen(true)}
-          className="flex items-center gap-2 rounded-lg bg-indigo-600 px-3.5 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-500"
-        >
-          <Upload className="h-4 w-4" />
-          Upload
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => openFolder(files.path || '/')}
+            className="flex items-center gap-1.5 rounded-lg bg-gray-800 px-3 py-2 text-xs text-gray-300 transition-colors hover:bg-gray-700"
+            title="Refresh this folder"
+          >
+            <RefreshCw className="h-3.5 w-3.5" />
+            Refresh
+          </button>
+          <button
+            onClick={() => setUploadOpen(true)}
+            className="flex items-center gap-2 rounded-lg bg-teal-600 px-3.5 py-2 text-sm font-medium text-white transition-colors hover:bg-teal-500"
+          >
+            <Upload className="h-4 w-4" />
+            Upload
+          </button>
+        </div>
       </div>
 
       <nav className="flex flex-wrap items-center gap-1 rounded-lg bg-gray-900 px-3 py-2 text-sm">
@@ -119,8 +133,8 @@ export default function FileManager() {
                   <div className="flex items-center gap-3">
                     {entry.isDirectory ? (
                       <button onClick={() => openFolder(entry.path)} className="flex min-w-0 items-center gap-3">
-                        <FolderIcon className="h-4 w-4 shrink-0 text-indigo-400" />
-                        <span className="truncate font-medium text-indigo-300 hover:text-indigo-200">{entry.name}</span>
+                        <FolderIcon className="h-4 w-4 shrink-0 text-teal-400" />
+                        <span className="truncate font-medium text-teal-300 hover:text-teal-200">{entry.name}</span>
                       </button>
                     ) : (
                       <>
@@ -140,10 +154,11 @@ export default function FileManager() {
                   {!entry.isDirectory && (
                     <button
                       onClick={() => download(entry)}
-                      className="inline-flex items-center gap-1.5 rounded-md bg-gray-800 px-2.5 py-1.5 text-xs text-gray-300 transition-colors hover:bg-indigo-600 hover:text-white"
+                      disabled={downloading === entry.path}
+                      className="inline-flex items-center gap-1.5 rounded-md bg-gray-800 px-2.5 py-1.5 text-xs text-gray-300 transition-colors hover:bg-teal-600 hover:text-white disabled:opacity-50"
                     >
-                      <Download className="h-3.5 w-3.5" />
-                      Download
+                      <Download className={`h-3.5 w-3.5 ${downloading === entry.path ? 'animate-bounce' : ''}`} />
+                      {downloading === entry.path ? 'Fetching…' : 'Download'}
                     </button>
                   )}
                 </td>
@@ -165,7 +180,7 @@ export default function FileManager() {
                 href={downloaded.url}
                 download={downloaded.name}
                 onClick={() => setDownloaded(null)}
-                className="flex-1 rounded-lg bg-indigo-600 py-2 text-center text-sm font-medium text-white hover:bg-indigo-500"
+                className="flex-1 rounded-lg bg-teal-600 py-2 text-center text-sm font-medium text-white hover:bg-teal-500"
               >
                 Save file
               </a>
@@ -221,7 +236,7 @@ function UploadModal({ currentPath, onClose, onPickTarget, uploadTarget, onUploa
           <input
             value={targetPath}
             onChange={(e) => setTargetPath(e.target.value)}
-            className="min-w-0 flex-1 rounded-lg bg-gray-800 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500"
+            className="min-w-0 flex-1 rounded-lg bg-gray-800 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-teal-500"
           />
           <button
             onClick={() => onPickTarget(targetPath)}
@@ -235,7 +250,7 @@ function UploadModal({ currentPath, onClose, onPickTarget, uploadTarget, onUploa
         <input
           type="file"
           onChange={(e) => setSelected(e.target.files?.[0])}
-          className="mt-1 block w-full text-sm text-gray-300 file:mr-3 file:rounded-lg file:border-0 file:bg-indigo-600 file:px-3 file:py-2 file:text-sm file:text-white hover:file:bg-indigo-500"
+          className="mt-1 block w-full text-sm text-gray-300 file:mr-3 file:rounded-lg file:border-0 file:bg-teal-600 file:px-3 file:py-2 file:text-sm file:text-white hover:file:bg-teal-500"
         />
 
         <p className="mt-3 rounded-lg bg-gray-800/60 px-3 py-2 text-[11px] text-gray-500">
@@ -246,7 +261,7 @@ function UploadModal({ currentPath, onClose, onPickTarget, uploadTarget, onUploa
           <button
             onClick={() => selected && onUpload(selected)}
             disabled={!selected}
-            className="flex-1 rounded-lg bg-indigo-600 py-2 text-sm font-medium text-white hover:bg-indigo-500 disabled:opacity-40"
+            className="flex-1 rounded-lg bg-teal-600 py-2 text-sm font-medium text-white hover:bg-teal-500 disabled:opacity-40"
           >
             Upload
           </button>

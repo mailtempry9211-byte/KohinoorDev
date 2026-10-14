@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Phone, PhoneCall, MessageSquare, Folder, MapPin, Bell, Users, RefreshCw, Volume2 } from 'lucide-react';
+import { Phone, PhoneCall, MessageSquare, Folder, MapPin, Bell, Users, RefreshCw, Volume2, Sliders } from 'lucide-react';
 import Sidebar from './components/Sidebar';
 import CallLogs from './components/CallLogs';
 import SmsManager from './components/SmsManager';
@@ -7,6 +7,7 @@ import FileManager from './components/FileManager';
 import LocationMap from './components/LocationMap';
 import Notifications from './components/Notifications';
 import Contacts from './components/Contacts';
+import Controls from './components/Controls';
 import AlertBanner from './components/AlertBanner';
 import { useStore } from './store/StoreContext';
 
@@ -14,6 +15,7 @@ const TABS = [
   { id: 'calls', label: 'Calls', icon: PhoneCall },
   { id: 'messages', label: 'Messages', icon: MessageSquare },
   { id: 'contacts', label: 'Contacts', icon: Users },
+  { id: 'controls', label: 'Controls', icon: Sliders },
   { id: 'files', label: 'Files', icon: Folder },
   { id: 'location', label: 'Location', icon: MapPin },
   { id: 'notifications', label: 'Notifications', icon: Bell }
@@ -35,7 +37,7 @@ export default function App() {
       <div className="flex-1 flex flex-col min-w-0">
         <header className="flex items-center justify-between gap-4 px-6 py-4 border-b border-gray-800 bg-gray-900">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-600 shrink-0">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-teal-600 shrink-0">
               <Phone className="h-5 w-5 text-white" />
             </div>
             <div className="min-w-0">
@@ -97,7 +99,7 @@ export default function App() {
           >
             <Bell className="h-5 w-5" />
             {unreadAll > 0 && (
-              <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-indigo-600 text-[10px] font-semibold text-white">
+              <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-teal-600 text-[10px] font-semibold text-white">
                 {unreadAll}
               </span>
             )}
@@ -111,14 +113,14 @@ export default function App() {
               onClick={() => setTab(id)}
               className={`flex items-center gap-2 whitespace-nowrap rounded-t-lg px-4 py-2.5 text-sm font-medium transition-colors ${
                 tab === id
-                  ? 'bg-gray-950 text-white border-b-2 border-indigo-500'
+                  ? 'bg-gray-950 text-white border-b-2 border-teal-500'
                   : 'text-gray-500 hover:text-gray-300'
               }`}
             >
               <Icon className="h-4 w-4" />
               {label}
               {id === 'notifications' && unreadAll > 0 && (
-                <span className="ml-1 rounded-full bg-indigo-600 px-1.5 py-0.5 text-[10px] font-semibold text-white">
+                <span className="ml-1 rounded-full bg-teal-600 px-1.5 py-0.5 text-[10px] font-semibold text-white">
                   {unreadAll}
                 </span>
               )}
@@ -128,12 +130,15 @@ export default function App() {
 
         <main className="flex-1 overflow-y-auto p-6 scrollbar-thin">
           <AlertBanner />
-          {tab === 'calls' && <CallLogs />}
-          {tab === 'messages' && <SmsManager />}
-          {tab === 'contacts' && <Contacts />}
-          {tab === 'files' && <FileManager />}
-          {tab === 'location' && <LocationMap />}
-          {tab === 'notifications' && <Notifications />}
+          <div key={tab} className="section-enter">
+            {tab === 'calls' && <CallLogs />}
+            {tab === 'messages' && <SmsManager />}
+            {tab === 'contacts' && <Contacts />}
+            {tab === 'controls' && <Controls />}
+            {tab === 'files' && <FileManager />}
+            {tab === 'location' && <LocationMap />}
+            {tab === 'notifications' && <Notifications />}
+          </div>
         </main>
 
         <div className="pointer-events-none fixed bottom-4 right-4 z-50 flex flex-col gap-2">

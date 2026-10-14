@@ -32,15 +32,15 @@ export default function AlertBanner() {
       )}
 
       {smsAlert && !incomingCallAlert && (
-        <div className="mb-4 flex items-center gap-3 rounded-lg border border-indigo-700/60 bg-indigo-950/60 px-4 py-3 shadow-lg animate-in slide-in-from-top">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-indigo-600 text-white">
+        <div className="mb-4 flex items-center gap-3 rounded-lg border border-teal-700/60 bg-teal-950/60 px-4 py-3 shadow-lg animate-in slide-in-from-top">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-teal-600 text-white">
             <MessageSquare className="h-4 w-4" />
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-sm font-semibold text-indigo-100">New message from {smsAlert.address}</p>
-            <p className="truncate text-xs text-indigo-300">{smsAlert.body}</p>
+            <p className="text-sm font-semibold text-teal-100">New message from {smsAlert.address}</p>
+            <p className="truncate text-xs text-teal-300">{smsAlert.body}</p>
           </div>
-          <button onClick={dismissSmsAlert} className="text-indigo-400 hover:text-indigo-200">
+          <button onClick={dismissSmsAlert} className="text-teal-400 hover:text-teal-200">
             <X className="h-4 w-4" />
           </button>
         </div>

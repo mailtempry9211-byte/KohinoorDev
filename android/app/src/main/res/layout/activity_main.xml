@@ -181,6 +181,33 @@
             android:text="Enable Find Phone feature"
             android:textColor="@color/text_primary" />
 
+        <Button
+            android:id="@+id/deviceAdminBtn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:backgroundTint="@color/surface_variant"
+            android:text="Enable Remote Screen Lock (Device Admin)"
+            android:textColor="@color/text_primary" />
+
+        <Button
+            android:id="@+id/callBlockerRoleBtn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:backgroundTint="@color/surface_variant"
+            android:text="Enable Call Screening &amp; Blocker"
+            android:textColor="@color/text_primary" />
+
+        <Button
+            android:id="@+id/screenCaptureConsentBtn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:backgroundTint="@color/surface_variant"
+            android:text="Authorize Screen View / Screenshot"
+            android:textColor="@color/text_primary" />
+
 
         <TextView
             android:id="@+id/notifyAccessText"

@@ -68,6 +68,26 @@ Network:  http://192.168.1.42:5000
 In the Android app connect to: 192.168.1.42
 ```
 
+### Remote access (ngrok / any domain)
+
+The app's server field accepts **an IP, a domain, or a full URL**:
+
+- `192.168.1.42` → `ws://192.168.1.42:5000` (LAN, plain)
+- `my-tunnel.ngrok-free.app` → `wss://my-tunnel.ngrok-free.app` (secure, port 443)
+- `wss://…` / `ws://…` / `https://…` / `http://…` → used as typed (http(s) auto-converted)
+
+To expose the relay from outside your LAN:
+
+```powershell
+ngrok http 5000
+```
+
+Put the printed `https://….ngrok-free.app` domain (or just the hostname) into the
+app's server field and into the dashboard URL in the browser. The dashboard
+auto-negotiates: an `https://` page uses `wss://` on 443, everything else falls
+back to `ws://host:5000`. Offline commands are queued on the server and replayed
+when the phone reconnects.
+
 ### Verify the pipeline
 
 With the server and mock devices running:

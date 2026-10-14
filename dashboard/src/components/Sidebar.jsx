@@ -33,14 +33,14 @@ export default function Sidebar() {
               onClick={() => setActiveDeviceId(device.deviceId)}
               className={`w-full cursor-pointer rounded-lg p-3 text-left transition-colors ${
                 isActive
-                  ? 'bg-indigo-600/20 border border-indigo-500/40'
+                  ? 'bg-teal-600/20 border border-teal-500/40'
                   : 'bg-gray-800/50 border border-transparent hover:bg-gray-800'
               }`}
             >
               <div className="flex items-start justify-between gap-2">
                 <div className="flex items-center gap-2 min-w-0">
                   <Smartphone
-                    className={`h-5 w-5 shrink-0 ${isActive ? 'text-indigo-400' : 'text-gray-400'}`}
+                    className={`h-5 w-5 shrink-0 ${isActive ? 'text-teal-400' : 'text-gray-400'}`}
                   />
                   <span className="truncate text-sm font-medium">{device.deviceName}</span>
                 </div>
@@ -81,7 +81,7 @@ export default function Sidebar() {
                           ? 'bg-emerald-500'
                           : lowBattery
                           ? 'bg-red-500'
-                          : 'bg-indigo-500'
+                          : 'bg-teal-500'
                       }`}
                       style={{ width: `${device.battery}%` }}
                     />

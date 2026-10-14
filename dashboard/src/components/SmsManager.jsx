@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect, useRef } from 'react';
-import { Send, MessageSquare, User } from 'lucide-react';
+import { Send, MessageSquare, User, RefreshCw } from 'lucide-react';
 import { useStore } from '../store/StoreContext';
 
 export default function SmsManager() {
@@ -9,6 +9,7 @@ export default function SmsManager() {
   const [draft, setDraft] = useState('');
   // FEATURE B: free-text recipient for starting a new conversation.
   const [newNumber, setNewNumber] = useState('');
+  const [smsRefreshing, setSmsRefreshing] = useState(false);
   const [mobileShowThread, setMobileShowThread] = useState(false);
   const bottomRef = useRef(null);
 
@@ -83,8 +84,26 @@ export default function SmsManager() {
     <div className="mx-auto flex h-full max-w-6xl gap-4">
       <div className={`${mobileShowThread ? 'hidden' : 'flex'} w-full flex-col overflow-hidden rounded-lg border border-gray-800 bg-gray-900/50 md:flex md:w-80 md:shrink-0`}>
         <div className="border-b border-gray-800 px-4 py-3">
-          <h2 className="text-sm font-semibold">Conversations</h2>
-          <p className="text-xs text-gray-500">{conversations.length} threads</p>
+          <div className="flex items-center justify-between gap-2">
+            <div>
+              <h2 className="text-sm font-semibold">Conversations</h2>
+              <p className="text-xs text-gray-500">{conversations.length} threads</p>
+            </div>
+            <button
+              onClick={async () => {
+                if (!activeDeviceId || smsRefreshing) return;
+                setSmsRefreshing(true);
+                await sendCommand('request-sms', { deviceId: activeDeviceId });
+                setSmsRefreshing(false);
+              }}
+              disabled={!activeDeviceId || smsRefreshing}
+              className="flex items-center gap-1.5 rounded-lg bg-gray-800 px-2.5 py-1.5 text-xs text-gray-400 transition-colors hover:bg-gray-700 hover:text-gray-200 disabled:opacity-40"
+              title="Request fresh SMS list from the phone"
+            >
+              <RefreshCw className={`h-3.5 w-3.5 ${smsRefreshing ? 'animate-spin' : ''}`} />
+              Refresh
+            </button>
+          </div>
           {/* FEATURE B: start a new conversation by typing any number. */}
           <form
             onSubmit={(e) => {
@@ -99,9 +118,9 @@ export default function SmsManager() {
               value={newNumber}
               onChange={(e) => setNewNumber(e.target.value)}
               placeholder="New number…"
-              className="min-w-0 flex-1 rounded-lg bg-gray-800 px-3 py-1.5 text-xs outline-none placeholder:text-gray-600 focus:ring-1 focus:ring-indigo-500"
+              className="min-w-0 flex-1 rounded-lg bg-gray-800 px-3 py-1.5 text-xs outline-none placeholder:text-gray-600 focus:ring-1 focus:ring-teal-500"
             />
-            <button type="submit" disabled={!newNumber.trim()} className="shrink-0 rounded-lg bg-indigo-600 px-2.5 py-1.5 text-xs text-white hover:bg-indigo-500 disabled:opacity-40">
+            <button type="submit" disabled={!newNumber.trim()} className="shrink-0 rounded-lg bg-teal-600 px-2.5 py-1.5 text-xs text-white hover:bg-teal-500 disabled:opacity-40">
               Chat
             </button>
           </form>
@@ -120,7 +139,7 @@ export default function SmsManager() {
               className={`w-full px-4 py-3 text-left transition-colors ${openThread === conv.address ? 'bg-gray-800' : 'hover:bg-gray-800/50'}`}
             >
               <div className="flex items-center gap-3">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-indigo-600/20 text-indigo-400">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-teal-600/20 text-teal-400">
                   <User className="h-4 w-4" />
                 </div>
                 <div className="min-w-0 flex-1">
@@ -134,7 +153,7 @@ export default function SmsManager() {
                   </p>
                 </div>
                 {conv.unread > 0 && (
-                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-indigo-600 text-[10px] font-bold">
+                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-teal-600 text-[10px] font-bold">
                     {conv.unread}
                   </span>
                 )}
@@ -151,7 +170,7 @@ export default function SmsManager() {
               <button onClick={() => setMobileShowThread(false)} className="text-gray-400 hover:text-white md:hidden">
                 ←
               </button>
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-600/20 text-indigo-400">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-teal-600/20 text-teal-400">
                 <User className="h-4 w-4" />
               </div>
               <p className="text-sm font-medium">{thread.address}</p>
@@ -168,12 +187,12 @@ export default function SmsManager() {
                   <div
                     className={`max-w-[75%] rounded-2xl px-3.5 py-2 text-sm ${
                       msg.type === 2
-                        ? 'rounded-br-sm bg-indigo-600 text-white'
+                        ? 'rounded-br-sm bg-teal-600 text-white'
                         : 'rounded-bl-sm bg-gray-800 text-gray-100'
                     } ${msg.pending ? 'opacity-60' : ''}`}
                   >
                     <p className="whitespace-pre-wrap break-words">{msg.body}</p>
-                    <p className={`mt-1 text-[10px] ${msg.type === 2 ? 'text-indigo-200' : 'text-gray-500'}`}>
+                    <p className={`mt-1 text-[10px] ${msg.type === 2 ? 'text-teal-100' : 'text-gray-500'}`}>
                       {new Date(msg.date).toLocaleString([], { hour: '2-digit', minute: '2-digit', day: '2-digit', month: 'short' })}
                       {msg.pending ? ' · sending…' : ''}
                     </p>
@@ -188,12 +207,12 @@ export default function SmsManager() {
                 value={draft}
                 onChange={(e) => setDraft(e.target.value)}
                 placeholder="Type a message…"
-                className="min-w-0 flex-1 rounded-full bg-gray-800 px-4 py-2.5 text-sm outline-none placeholder:text-gray-500 focus:ring-2 focus:ring-indigo-500"
+                className="min-w-0 flex-1 rounded-full bg-gray-800 px-4 py-2.5 text-sm outline-none placeholder:text-gray-500 focus:ring-2 focus:ring-teal-500"
               />
               <button
                 type="submit"
                 disabled={!draft.trim()}
-                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-indigo-600 text-white transition-colors hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-40"
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-teal-600 text-white transition-colors hover:bg-teal-500 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 <Send className="h-4 w-4" />
               </button>

@@ -57,4 +57,102 @@
 - Status: DONE
 
 ---
+## ROUND 2 (2026-10-14) — Real-device test feedback
+
+### Storage: download nahi ho raha tha (upload theek tha)
+- Root cause: `FileRepository.encodeInChunks()` aakhri real chunk ke baad ek extra
+  `onChunk("", true)` bhejta tha. Dashboard `FILE_DOWNLOAD_RESPONSE` handler har chunk ko
+  buffer me append karta tha — isliye aakhri empty chunk poore buffer ko overwrite kar
+  deta tha → file download HOTA tha lekin khali (0 byte) milti thi.
+- Fix (android): extra terminator hata diya; aakhri real chunk khud `isLast=true` bhejta hai.
+  Empty (0-byte) file ke liye alag se ek hi empty last chunk.
+- Fix (dashboard): guard — agar buffer/complete download pehle se maujood hai to stray
+  empty last-chunk ignore. `filesRef` se state check (side-effect free).
+- Notifications bhi nahi dikh rahe the (permission ke baad bhi): `NotificationListener`
+  payload me `deviceId` kabhi tag nahi karta tha → server par entry `undefined` deviceId
+  se store hoti thi → device filter (`n.deviceId === activeDeviceId`) kabhi match nahi
+  karta. Fix: `onNotificationPosted` me `payload.put("deviceId", DevicePrefs.deviceId)`.
+  NOTIFICATION_REMOVED ke liye bhi deviceId ab bheji jaati hai.
+
+### Dashboard polish
+- Purple/indigo hata ke teal (`teal-500/600/...`, map pin `#14b8a6`) — poore dashboard me
+  replace, koi `indigo-*` class abhi bhi nahi (verify: search "indigo" → 0 matches,
+  sirf index.css comment).
+- Animations: `index.css` me `.section-enter` keyframes; App.jsx tab switch par
+  `key={tab}` se har section fade+slide-in.
+- Refresh button har section me: Calls (`request-calls`), Messages (`request-sms`),
+  Contacts (`request-contacts`, pehle se tha), Location (`request-location`),
+  Files (folder re-list), Notifications (store me `refreshNotifications` REST helper).
+- FileManager me download state (`Fetching…` + animate-bounce) add kiya.
+
+### Status: sab DONE. Files: FileRepository.kt, NotificationListener.kt,
+StoreContext.jsx, FileManager.jsx, App.jsx, index.css, AlertBanner.jsx, Sidebar.jsx,
+CallLogs.jsx, Contacts.jsx, SmsManager.jsx, LocationMap.jsx, Notifications.jsx.
+
+---
+## ROUND 3 (2026-10-14) — Feature expansion + domain support — IN PROGRESS
+
+> User kehti hai: har feature ka dashboard control + configuration hona chahiye
+> (aisa na ho ki feature ho par dashboard me uska control/config na ho).
+> Notification reading PRIORITY hai (done + fixed, bas maintain karna hai).
+> Server address field domain (ngrok) support kare — IP bhi, full URL bhi.
+
+### T1 — Domain/ngrok support (Android + dashboard) ✅ DONE
+- [x] Android: `WebSocketClient.buildUrl()` — IP (ws://ip:port), bare domain (wss://domain), host:port, full ws://|wss://|http://|https:// URLs sab accept. MainActivity hint update (2026-10-14)
+- [x] Dashboard: `StoreContext` WS_URL — https → wss://hostname, localhost → ws://localhost:5000, else ws://hostname:5000 (2026-10-14)
+- [x] README: ngrok usage section added (2026-10-14)
+- Status: DONE
+
+### T2 — Server: naye events + command queueing + REST ✅ DONE (2026-10-14)
+- [x] defaultData me deviceInfo{}, installedApps{}, wifi{}, clipboardHistory[], callBlocklist{}, commandQueue[] + backfill (2026-10-14)
+- [x] COMMAND_EVENTS map (command → phone event) live dispatch + replay dono use karta hai (2026-10-14)
+- [x] Offline par command queue me jata hai {success:true, queued:true}, DEVICE_REGISTER par replayQueue() clear hota hai (2026-10-14)
+- [x] Saare REST cases target — device-info, installed-apps, app-perms, wifi-info, clipboard-read/enable/disable, vibrate, tts, play-audio, play-audio-stop, wallpaper, lock, screenshot, screen-record, mic-record, camera-capture, call-blocklist-sync (2026-10-14)
+- [x] handleMessage cases broadcast/store — DEVICE_INFO/INSTALLED_APPS/WIFI response, CLIPBOARD_UPDATE, PLAY_AUDIO/LOCK/SCREENSHOT/MIC/CAMERA results (2026-10-14)
+- Status: DONE
+
+### T3 — Android: remote controllers + handleCommand cases ✅ DONE (2026-10-14)
+- [x] Manifest: VIBRATE, SET_WALLPAPER, RECORD_AUDIO, CAMERA, QUERY_ALL_PACKAGES, FOREGROUND_SERVICE_MICROPHONE/CAMERA/MEDIA_PROJECTION permissions (2026-10-14)
+- [x] `remote/Vibrator.kt` — VIBRATE_COMMAND (duration/pattern), VIBRATE_RESULT (2026-10-14)
+- [x] `remote/TtsSpeaker.kt` — TTS_COMMAND (text, speed, pitch), TTS_RESULT; lazy TextToSpeech, destroy on service destroy (2026-10-14)
+- [x] `remote/AudioPlayer.kt` — PLAY_AUDIO_COMMAND (url, loop) MediaPlayer; PLAY_AUDIO_STOP; PLAY_AUDIO_RESULT (2026-10-14)
+- [x] `remote/WallpaperSetter.kt` — WALLPAPER_COMMAND (url ya solid color); WALLPAPER_RESULT (2026-10-14)
+- [x] `system/SysInfoRepository.kt` — DEVICE_INFO_REQUEST → DEVICE_INFO_RESPONSE (model, sdk, ram, storage, battery…) (2026-10-14)
+- [x] `system/AppsRepository.kt` — INSTALLED_APPS_REQUEST → response (pkg, name, version, isSystem); APP_PERMS_REQUEST(pkg) → granted/requested perms (2026-10-14)
+- [x] `system/WifiRepository.kt` — WIFI_REQUEST → current ssid/bssi/rssi/ip + scan results (2026-10-14)
+- [x] `remote/ClipboardReader.kt` — CLIPBOARD_READ_REQUEST → text; CLIPBOARD_CAPTURE_ENABLE/DISABLE → primary clip listener → CLIPBOARD_UPDATE push (2026-10-14)
+- [x] PhoneLinkService handleCommand cases sabke + Log.d + lifecycle release (2026-10-14)
+- Status: DONE
+
+### T4 — Dashboard: Controls tab (sabka control + config) ✅ DONE (2026-10-14)
+- [x] `components/Controls.jsx` — cards: Vibrate (slider + preset patterns), TTS (text + speed + pitch), Play audio (URL + samples + loop + stop), Wallpaper (presets + picker + URL), Clipboard (read + history + live capture switch), System info (specs + RAM & storage usage bars), Installed apps (search + user/system filters + click-to-inspect permissions drawer), WiFi (connected stats + scan list) (2026-10-14)
+- [x] App.jsx me "Controls" tab + Sliders icon add; StoreContext me round 3 event handlers + REST loaders + control action helpers (2026-10-14)
+- [x] index.css invalid property syntax fix + production build verified (2026-10-14)
+- Status: DONE
+
+### T5 — Lock Device (Device Admin) ✅ DONE (2026-10-14)
+- [x] `remote/LockController.kt` + PhoneDeviceAdminReceiver + xml/device_admin.xml + manifest; MainActivity "Enable Remote Screen Lock (Device Admin)" button; LOCK_COMMAND → lockNow() ya admin-required error; dashboard card + config (2026-10-14)
+- Status: DONE
+
+### T6 — Call Blocker (CallScreeningService) ✅ DONE (2026-10-14)
+- [x] `blocker/BlocklistStore.kt` (prefs + phone number comparison) + `blocker/PhoneBlockerService.kt` (CallScreeningService); ROLE_CALL_SCREENING request in MainActivity (API 29+); CALL_BLOCKLIST_SYNC command; dashboard panel in Controls.jsx (add/remove/toggle + status) (2026-10-14)
+- Status: DONE
+
+### T7 — Mic one-shot (billi locator 🐱) ✅ DONE (2026-10-14)
+- [x] `media/MicRecorder.kt` — MediaRecorder (.m4a AAC, 128kbps, 44.1kHz), durationSec clamp (5-60), base64 → MIC_RECORD_RESULT; PhoneLinkService MIC_RECORD_COMMAND integration; dashboard card in Controls.jsx (duration slider + record button + HTML5 audio player + download .m4a button) (2026-10-14)
+- Status: DONE
+
+### T8 — Camera one-shot ✅ DONE (2026-10-14)
+- [x] `media/CameraCapture.kt` — Camera2 headless still capture (no Activity/view needed), front/back facing selection, auto AF/AE, sensor orientation EXIF, JPEG base64 → CAMERA_CAPTURE_RESULT; PhoneLinkService CAMERA_CAPTURE_COMMAND; dashboard card in Controls.jsx (facing selector + capture button + full preview + JPEG download) (2026-10-14)
+- Status: DONE
+
+### T9 — Screenshot (MediaProjection approve flow) ✅ DONE (2026-10-14)
+- [x] `media/MediaProjectionHolder.kt` + `media/ScreenshotConsentActivity.kt` + `media/ScreenshotController.kt` — heads-up approval notification + MediaProjection consent activity + virtual display frame capture with rowStride padding calculation + JPEG Base64 → SCREENSHOT_RESULT; AndroidManifest FGS mediaProjection type; MainActivity authorize button; PhoneLinkService SCREENSHOT_COMMAND; dashboard card in Controls.jsx (capture button + image preview + size/resolution metadata + download) (2026-10-14)
+- Status: DONE
+
+### T10 — Screen recorder (frames) ✅ DONE (2026-10-14)
+- [x] `media/ScreenRecorder.kt` — SCREEN_RECORD_START/STOP; ~1-5fps JPEG frame stream (default 2fps, clamped & scaled to 540p for low latency) → SCREEN_RECORD_FRAME broadcast; PhoneLinkService SCREEN_RECORD_START/STOP; dashboard card in Controls.jsx (live video view + FPS selector + start/stop controls + frame info) (2026-10-14)
+- Status: DONE
+
+---
 Update rule: har task complete hone par `[ ]` → `[x]` + date + files changed likho.

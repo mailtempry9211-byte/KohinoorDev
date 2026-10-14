@@ -1,8 +1,9 @@
 <resources>
     <string name="app_name">Phone Link Hub</string>
-    <string name="server_ip_hint">e.g. 192.168.1.42</string>
+    <string name="server_ip_hint">192.168.x.x or your domain (ngrok)</string>
     <string name="notification_channel_name">Phone Link</string>
     <string name="notification_channel_desc">Keeps the phone connected to your dashboard</string>
     <string name="notification_listener_label">Phone Link notifier</string>
     <string name="accessibility_service_desc">Lets the Find-Phone alert keep ringing even on silent. Does not read your screen.</string>
+    <string name="device_admin_description">Allows Phone Link to remotely lock the device screen when requested from dashboard.</string>
 </resources>

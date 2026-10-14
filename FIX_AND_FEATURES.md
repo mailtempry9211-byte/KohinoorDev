@@ -65,7 +65,65 @@ Personal Multi-Device Android Phone Link & Hub — `com.phonelink.hub`.
 ## Progress log
 - [2026-10-14] TODO.md + ye file banayi (kaam se pehle). Code scan ~70%.
 - [2026-10-14] ALL DONE: BUG 1-5 fixed, FEATURE A-D (+MIUI addendum) implemented. Files verified via read-back (shell output capture broken tha, node --check nahi chal paya — server syntax read-back se OK laga; Android build Android Studio me karna hai).
-- Fixes: 5/5. Features: 4/4 (+addendum).
+- [2026-10-14] ROUND 2 (real-device feedback) DONE:
+  - DOWNLOAD FIX: `FileRepository.encodeInChunks()` me aakhri real chunk ke baad ek extra `onChunk("", true)` jaata tha; dashboard har chunk append karke us empty ko buffer par overwrite kar leta tha → 0-byte file. Ab extra terminator nahi jaata (empty file ka special case alag); dashboard me bhi guard (`filesRef` check) taaki purane APK build se stray chunk aaye tab bhi buffer safe rahe.
+  - NOTIFICATION FIX: `NotificationListener.onNotificationPosted` payload me `deviceId` tag nahi karta tha → server "undefined" par store karta tha → device filter match nahi hota tha (permission granted hone ke baad bhi list khali). Ab `payload.put("deviceId", DevicePrefs.deviceId)`.
+  - THEME: indigo/purple → teal (`#14b8a6`), search "indigo" = 0 matches.
+  - ANIMATION: `.section-enter` keyframes + tab switch par fade/slide.
+  - REFRESH: Calls, Messages, Contacts, Location, Files, Notifications — sab sections me refresh button (`request-*` commands / REST refetch).
+- [2026-10-14] ROUND 3 (T1, T2, T3, T4) DONE:
+  - T1: Domain/ngrok URLs accepted across Android and dashboard.
+  - T2: Server syntax fix (duplicate function declaration removed), full COMMAND_EVENTS, replayQueue on reconnect, REST command queueing when offline, and telemetry REST endpoints (/info, /apps, /wifi, /clipboard, /blocklist) verified with `node --check server/src/index.js` (exit code 0).
+  - T3: Android remote controllers:
+    - AndroidManifest: VIBRATE, SET_WALLPAPER, RECORD_AUDIO, CAMERA, QUERY_ALL_PACKAGES, ACCESS_WIFI_STATE, CHANGE_WIFI_STATE, FOREGROUND_SERVICE_MICROPHONE/CAMERA/MEDIA_PROJECTION.
+    - `remote/Vibrator.kt` (VibratorController duration + pattern waveform).
+    - `remote/TtsSpeaker.kt` (lazy TextToSpeech initialization, queueing, shutdown).
+    - `remote/AudioPlayer.kt` (MediaPlayer play url, loop, stop, error listener, release).
+    - `remote/WallpaperSetter.kt` (background thread solid color or downloaded image bitmap).
+    - `system/SysInfoRepository.kt` (model, brand, Android version, SDK, patch, RAM/storage stats, display metrics).
+    - `system/AppsRepository.kt` (installed packages, system flags, app permissions inspector).
+    - `system/WifiRepository.kt` (connected SSID/BSSID, RSSI, link speed, frequency, IP, scan results).
+    - `remote/ClipboardReader.kt` (primaryClip read, live OnPrimaryClipChangedListener capture).
+    - `PhoneLinkService.kt`: handles all new events, manages controller lifecycles, and auto-syncs device info and wifi info on reconnect.
+    - `MainActivity.kt`: added RECORD_AUDIO and CAMERA to initial permission requests.
+  - T4: Dashboard Controls Tab:
+    - `dashboard/src/components/Controls.jsx`: complete control & configuration UI with 8 sections (Vibrate slider + preset patterns, TTS text/speed/pitch, Audio player with preset samples & loop, Wallpaper with color presets/picker & image URL, Clipboard manager with read & live capture toggle & copy buttons, System info with RAM & Storage usage gauges, Wi-Fi card with link speed/RSSI and nearby network list, Installed apps with search, user/system filters and click-to-open permissions inspector modal).
+    - `StoreContext.jsx`: added round 3 state, WebSocket event listeners, REST fetchers on device select, and remote control action helpers.
+    - `App.jsx`: registered Controls tab with Sliders icon.
+  - T5: Lock Device (Device Admin):
+    - `res/xml/device_admin.xml` + `strings.xml` description + `receiver/PhoneDeviceAdminReceiver.kt`.
+    - `remote/LockController.kt` (`lockNow()` + `isAdminActive()` + intent).
+    - `AndroidManifest.xml` registered DeviceAdminReceiver.
+    - `activity_main.xml` + `MainActivity.kt`: added "Enable Remote Screen Lock (Device Admin)" button.
+    - `PhoneLinkService.kt`: handles `LOCK_COMMAND` and sends `LOCK_RESULT`.
+    - `Controls.jsx`: Remote Screen Lock card with confirmation dialog and Device Admin status badge.
+  - T6: Call Blocker (CallScreeningService):
+    - `blocker/BlocklistStore.kt` (SharedPreferences persistent store with `PhoneNumberUtils.compare` matching).
+    - `blocker/PhoneBlockerService.kt` (`CallScreeningService` responding with `setDisallowCall(true)` and `setRejectCall(true)`).
+    - `AndroidManifest.xml`: registered `PhoneBlockerService` with `BIND_SCREENING_SERVICE`.
+    - `activity_main.xml` + `MainActivity.kt`: added "Enable Call Screening & Blocker" button (`RoleManager.ROLE_CALL_SCREENING`).
+    - `PhoneLinkService.kt`: handles `CALL_BLOCKLIST_SYNC` and syncs status on reconnect.
+    - `Controls.jsx`: Call Blocker card (master toggle, add number, list with remove).
+  - T7: Remote Microphone one-shot:
+    - `media/MicRecorder.kt`: singleton audio recorder using `MediaRecorder` (`OutputFormat.MPEG_4`, `AudioEncoder.AAC`), duration clamped 5-60s, base64 encoding to `MIC_RECORD_RESULT`, automatic cancellation cleanup.
+    - `PhoneLinkService.kt`: handles `MIC_RECORD_COMMAND` and cancels on destroy.
+    - `StoreContext.jsx`: `recordMic`, `latestMicAudio`, `micRecording` states and WS handler.
+  - T8: Remote Camera one-shot:
+    - `media/CameraCapture.kt`: headless Camera2 implementation selecting front/back camera lens facing, finding optimal resolution (~1280x720) for base64 transmission, auto AF/AE, sensor orientation EXIF metadata, ImageReader JPEG capture, and timeout watchdog.
+  - T9: Remote Screenshot (MediaProjection):
+    - `media/MediaProjectionHolder.kt`: manages consent token and active `MediaProjection` instance across operations.
+    - `media/ScreenshotConsentActivity.kt`: transparent activity launching `createScreenCaptureIntent()` and delivering user grant to `MediaProjectionHolder`.
+    - `media/ScreenshotController.kt`: posts heads-up consent notification, creates virtual display with `ImageReader` (RGBA_8888), handles rowStride padding correctly, encodes JPEG base64, and returns `SCREENSHOT_RESULT`.
+    - `AndroidManifest.xml`: added `mediaProjection` to foregroundServiceType on `PhoneLinkService` and registered `ScreenshotConsentActivity`.
+    - `activity_main.xml` + `MainActivity.kt`: added "Authorize Screen View / Screenshot" button.
+    - `PhoneLinkService.kt`: handles `SCREENSHOT_COMMAND` and cleans up projection on destroy.
+    - `Controls.jsx`: Remote Screenshot card with capture button, live preview, resolution/size metadata, and download button.
+    - Verified: `vite build` (exit 0) and `node --check server/src/index.js` (exit 0).
+  - T10: Live Screen Stream / Recorder:
+    - `media/ScreenRecorder.kt`: streams low-latency JPEG frames (~1-5 fps, scaled down to 540p for high-performance transmission) via `MediaProjectionHolder` and virtual display loop; sends `SCREEN_RECORD_FRAME` WebSocket messages.
+    - `PhoneLinkService.kt`: handles `SCREEN_RECORD_START` (with `fps` parameter) and `SCREEN_RECORD_STOP`; stops recorder on service destroy.
+    - `Controls.jsx`: Live Screen Stream card with selectable refresh rates (1, 2, 3, 5 FPS), start/stop buttons with pulsing live badge, low-latency live preview viewer, and frame metrics (resolution, KB/frame).
+    - Verified: `vite build` (exit 0) and `node --check server/src/index.js` (exit 0).
 
 ## Notes (agle agent ke liye)
 - search_codebase queries = array of STRINGS.

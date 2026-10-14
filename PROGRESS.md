@@ -4,7 +4,7 @@
 
 ---
 
-## Current Status: Phase 1 Local Pipeline Complete — Android Client Written, Not Yet Built
+## Current Status: Round 1 (5 Bugs + 4 Features), Round 2 (Real-Device Feedback), Round 3 (T1-T10 Remote Controls Batch) — 100% COMPLETE
 
 - [x] Project Concept & Requirements defined.
 - [x] Tech stack selected (Local-first: Node.js + React + Native Android APK -> Cloud: Supabase + Vercel + Railway).
@@ -12,9 +12,21 @@
 - [x] Backend WebSocket & Express relay server implementation.
 - [x] Frontend React dashboard scaffolding with mock data.
 - [x] Local two-way verification (Browser <-> Backend).
-- [x] Android Client APK initial build (Foreground service + WebSocket client).
-- [ ] End-to-end local network test with real Android device.
-- [ ] Phase 2 Cloud deployment configuration (Vercel + Railway + Supabase).
+- [x] Android Client APK code written (Foreground service + WebSocket client + full Round 3 controllers).
+- [x] Round 1 (5 Bugs + 4 Features: Contacts, Send SMS, Find Phone, MIUI Autostart & KeepAlive).
+- [x] Round 2 Real-Device Fixes (0-byte download fix, notification deviceId fix, teal theme, tab animations, section refresh).
+- [x] Round 3 Remote Controls Batch (T1-T10 Complete):
+  - [x] T1: Domain/ngrok URL support on Android and Dashboard
+  - [x] T2: Server command queueing, offline replay, and REST endpoints
+  - [x] T3: Android controllers (Vibrate, TTS, Audio, Wallpaper, SysInfo, Apps, WiFi, Clipboard)
+  - [x] T4: Dashboard Controls tab (responsive control cards, live gauges, inspect modal)
+  - [x] T5: Remote Lock Device (DeviceAdminReceiver + lockNow + consent button)
+  - [x] T6: Incoming Call Blocker (CallScreeningService + BlocklistStore)
+  - [x] T7: Remote Microphone one-shot (MediaRecorder .m4a + audio player + download)
+  - [x] T8: Remote Camera one-shot (Camera2 headless front/back capture + photo preview)
+  - [x] T9: Remote Screenshot (MediaProjection consent flow + display capture)
+  - [x] T10: Live Screen Stream (low-latency ~1-5fps live stream + live player)
+- [ ] Next step: User opens `android/` in Android Studio to build & install the updated APK on device.
 
 ---
 

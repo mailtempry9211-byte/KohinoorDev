@@ -2,6 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --accent: 13 148 136; /* teal-600 — theme accent, replaces old indigo */
+}
+.accent-rgb {
+  color: rgb(var(--accent));
+}
+
 .leaflet-container {
   height: 100%;
   width: 100%;
@@ -23,5 +30,20 @@
   .scrollbar-thin::-webkit-scrollbar-thumb {
     background-color: theme('colors.gray.600');
     border-radius: 3px;
+  }
+}
+
+/* Shared fade/slide-in used by every section's list + banner. */
+.section-enter {
+  animation: sectionEnter 0.35s ease-out both;
+}
+@keyframes sectionEnter {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

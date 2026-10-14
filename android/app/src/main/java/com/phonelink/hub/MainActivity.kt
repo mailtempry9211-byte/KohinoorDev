@@ -55,6 +55,30 @@ class MainActivity : AppCompatActivity() {
             com.phonelink.hub.util.AutostartHelper.openAutostartSettings(this)
         }
         findViewById<Button>(R.id.findPhoneBtn).setOnClickListener { openAccessibilitySettings() }
+        findViewById<Button>(R.id.deviceAdminBtn).setOnClickListener {
+            if (!com.phonelink.hub.remote.LockController.isAdminActive(this)) {
+                startActivity(com.phonelink.hub.remote.LockController.getAdminIntent(this))
+            } else {
+                android.widget.Toast.makeText(this, "Device Admin already active", android.widget.Toast.LENGTH_SHORT).show()
+            }
+        }
+        findViewById<Button>(R.id.callBlockerRoleBtn).setOnClickListener {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                val rm = getSystemService(android.app.role.RoleManager::class.java)
+                if (rm != null && rm.isRoleAvailable(android.app.role.RoleManager.ROLE_CALL_SCREENING)) {
+                    if (!rm.isRoleHeld(android.app.role.RoleManager.ROLE_CALL_SCREENING)) {
+                        startActivity(rm.createRequestRoleIntent(android.app.role.RoleManager.ROLE_CALL_SCREENING))
+                    } else {
+                        android.widget.Toast.makeText(this, "Call Screening role is already active", android.widget.Toast.LENGTH_SHORT).show()
+                    }
+                }
+            } else {
+                android.widget.Toast.makeText(this, "Call Screening is active on this Android version", android.widget.Toast.LENGTH_SHORT).show()
+            }
+        }
+        findViewById<Button>(R.id.screenCaptureConsentBtn).setOnClickListener {
+            com.phonelink.hub.media.ScreenshotConsentActivity.launch(this)
+        }
         findViewById<Button>(R.id.notifyAccessBtn).setOnClickListener { openNotificationAccessSettings() }
         findViewById<Button>(R.id.startBtn).setOnClickListener { startService() }
         findViewById<Button>(R.id.stopBtn).setOnClickListener { stopService() }
@@ -160,7 +184,10 @@ class MainActivity : AppCompatActivity() {
             Manifest.permission.RECEIVE_SMS,
             // FEATURE A: view + add contacts.
             Manifest.permission.READ_CONTACTS,
-            Manifest.permission.WRITE_CONTACTS
+            Manifest.permission.WRITE_CONTACTS,
+            // Round 3 remote media permissions
+            Manifest.permission.RECORD_AUDIO,
+            Manifest.permission.CAMERA
         )
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             wanted += Manifest.permission.POST_NOTIFICATIONS

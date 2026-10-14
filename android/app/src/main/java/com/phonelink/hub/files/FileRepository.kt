@@ -121,11 +121,22 @@ object FileRepository {
         Log.d(TAG, "encodeInChunks: path=$path resolved=${file.absolutePath} hasPermission=$permitted isFile=${file.isFile} canRead=${file.canRead()} exists=${file.exists()}")
         if (!permitted) return false
         if (!file.isFile || !file.canRead()) return false
+        if (file.length() == 0L) {
+            Log.d(TAG, "encodeInChunks: empty file, sending single last chunk")
+            onChunk("", true)
+            return true
+        }
 
         return try {
             file.inputStream().use { stream ->
                 val buffer = ByteArray(CHUNK_BYTES)
                 var remaining = file.length()
+                // NOTE (download fix): the old loop always emitted a trailing
+                // ("", true) AFTER the final real chunk. The dashboard treated
+                // that stray empty chunk as a second transfer that overwrote
+                // the full buffer with "" — so small files (<32KB, one chunk)
+                // always downloaded as EMPTY. Now the final real chunk itself
+                // carries isLast=true and no stray terminator is sent.
                 while (remaining > 0) {
                     val read = stream.read(buffer)
                     if (read <= 0) break
@@ -133,8 +144,6 @@ object FileRepository {
                     val payload = Base64.encodeToString(buffer.copyOf(read), Base64.NO_WRAP)
                     onChunk(payload, remaining <= 0)
                 }
-                // Always terminate so the dashboard can finish the transfer.
-                onChunk("", true)
             }
             true
         } catch (e: Exception) {

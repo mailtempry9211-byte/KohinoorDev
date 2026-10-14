@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect } from 'react';
-import { Bell, X, Smartphone } from 'lucide-react';
+import { Bell, X, Smartphone, RefreshCw } from 'lucide-react';
 import { useStore } from '../store/StoreContext';
 
 export default function Notifications() {
@@ -9,9 +9,11 @@ export default function Notifications() {
     activeDeviceId,
     markNotificationRead,
     dismissNotification,
-    dismissAllNotifications
+    dismissAllNotifications,
+    refreshNotifications
   } = useStore();
   const [filterUnread, setFilterUnread] = useState(false);
+  const [notifRefreshing, setNotifRefreshing] = useState(false);
 
   useEffect(() => {
     // request browser permission to show system popups
@@ -53,12 +55,26 @@ export default function Notifications() {
           </p>
         </div>
         <div className="flex items-center gap-2">
+          <button
+            onClick={() => {
+              if (notifRefreshing) return;
+              setNotifRefreshing(true);
+              refreshNotifications?.();
+              setNotifRefreshing(false);
+            }}
+            disabled={!activeDeviceId || notifRefreshing}
+            className="flex items-center gap-1.5 rounded-lg bg-gray-900 px-3 py-2 text-xs text-gray-400 transition-colors hover:bg-gray-800 hover:text-gray-200 disabled:cursor-not-allowed disabled:opacity-40"
+            title="Reload mirrored notifications"
+          >
+            <RefreshCw className={`h-3.5 w-3.5 ${notifRefreshing ? 'animate-spin' : ''}`} />
+            Refresh
+          </button>
           <label className="flex items-center gap-2 rounded-lg border border-gray-800 bg-gray-900 px-3 py-2 text-xs text-gray-400">
             <input
               type="checkbox"
               checked={filterUnread}
               onChange={(e) => setFilterUnread(e.target.checked)}
-              className="h-3.5 w-3.5 rounded border-gray-600 bg-gray-800 accent-indigo-500"
+              className="h-3.5 w-3.5 rounded border-gray-600 bg-gray-800 accent-teal-500"
             />
             Unread only
           </label>
@@ -103,14 +119,14 @@ function NotificationRow({ note, onRead, onDismiss }) {
       onMouseEnter={onRead}
     >
       <div className="flex items-start gap-3">
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-indigo-600/20 text-indigo-400">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-teal-600/20 text-teal-400">
           <Smartphone className="h-4 w-4" />
         </div>
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
             <p className="truncate text-sm font-medium">{note.title || note.appName || 'Notification'}</p>
             {!note.read && (
-              <span className="rounded-full bg-indigo-600 px-2 py-0.5 text-[10px] uppercase tracking-wide text-white">
+              <span className="rounded-full bg-teal-600 px-2 py-0.5 text-[10px] uppercase tracking-wide text-white">
                 New
               </span>
             )}

