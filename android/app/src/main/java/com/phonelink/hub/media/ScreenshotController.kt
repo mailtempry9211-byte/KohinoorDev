@@ -106,14 +106,14 @@ object ScreenshotController {
             return
         }
 
-        val metrics = Resources.system.displayMetrics
+        val metrics = context.resources.displayMetrics
         val screenWidth = metrics.widthPixels
         val screenHeight = metrics.heightPixels
         val density = metrics.densityDpi
 
         // Scale down to max 1080p width to optimize base64 size and transmission
-        val targetWidth = if (screenWidth > 1080) 1080 else screenWidth
-        val targetHeight = (screenHeight.toDouble() * (targetWidth.toDouble() / screenWidth.toDouble())).toInt()
+        val targetWidth: Int = if (screenWidth > 1080) 1080 else screenWidth
+        val targetHeight: Int = (screenHeight.toDouble() * (targetWidth.toDouble() / screenWidth.toDouble())).toInt()
 
         val thread = HandlerThread("ScreenshotThread").apply { start() }
         val handler = Handler(thread.looper)
@@ -175,10 +175,10 @@ object ScreenshotController {
                     put("success", true)
                     put("mimeType", "image/jpeg")
                     put("data", base64)
-                    put("width", targetWidth)
-                    put("height", targetHeight)
-                    put("sizeBytes", bytes.size)
-                    put("timestamp", System.currentTimeMillis())
+                    put("width", targetWidth as Int)
+                    put("height", targetHeight as Int)
+                    put("sizeBytes", bytes.size as Int)
+                    put("timestamp", System.currentTimeMillis() as Long)
                 })
             } catch (e: Exception) {
                 Log.e(TAG, "Error encoding screenshot frame", e)

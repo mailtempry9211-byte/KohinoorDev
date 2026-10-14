@@ -72,14 +72,14 @@ object ScreenRecorder {
 
         isRunning.set(true)
 
-        val metrics = Resources.system.displayMetrics
+        val metrics = context.resources.displayMetrics
         val screenWidth = metrics.widthPixels
         val screenHeight = metrics.heightPixels
         val density = metrics.densityDpi
 
         // Scale down to 540p or 720p for fast transmission and low overhead
-        val targetWidth = if (screenWidth > 540) 540 else screenWidth
-        val targetHeight = (screenHeight.toDouble() * (targetWidth.toDouble() / screenWidth.toDouble())).toInt()
+        val targetWidth: Int = if (screenWidth > 540) 540 else screenWidth
+        val targetHeight: Int = (screenHeight.toDouble() * (targetWidth.toDouble() / screenWidth.toDouble())).toInt()
 
         val thread = HandlerThread("ScreenStreamThread").apply { start() }
         handlerThread = thread
@@ -147,11 +147,11 @@ object ScreenRecorder {
                             put("deviceId", DevicePrefs.deviceId)
                             put("data", base64)
                             put("mimeType", "image/jpeg")
-                            put("width", targetWidth)
-                            put("height", targetHeight)
-                            put("fps", fps)
-                            put("sizeBytes", bytes.size)
-                            put("timestamp", System.currentTimeMillis())
+                            put("width", targetWidth as Int)
+                            put("height", targetHeight as Int)
+                            put("fps", fps as Int)
+                            put("sizeBytes", bytes.size as Int)
+                            put("timestamp", System.currentTimeMillis() as Long)
                         })
                     }
                 } catch (e: Exception) {

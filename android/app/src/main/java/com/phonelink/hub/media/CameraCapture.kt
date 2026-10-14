@@ -183,10 +183,10 @@ object CameraCapture {
                                 put("facing", if (isFront) "front" else "back")
                                 put("mimeType", "image/jpeg")
                                 put("data", base64)
-                                put("width", targetSize.width)
-                                put("height", targetSize.height)
-                                put("sizeBytes", bytes.size)
-                                put("timestamp", System.currentTimeMillis())
+                                put("width", targetSize.width as Int)
+                                put("height", targetSize.height as Int)
+                                put("sizeBytes", bytes.size as Int)
+                                put("timestamp", System.currentTimeMillis() as Long)
                             })
                         }
                     }

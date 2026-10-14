@@ -1,6 +1,10 @@
 node_modules/
+dist/
+dashboard/dist/
 android/.gradle/
+android/build/
 android/app/build/
+.idea/
 server/data/db.json
 *.zip
 *.log

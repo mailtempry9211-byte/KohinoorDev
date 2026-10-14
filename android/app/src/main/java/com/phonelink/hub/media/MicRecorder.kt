@@ -114,10 +114,10 @@ object MicRecorder {
                         put("deviceId", DevicePrefs.deviceId)
                         put("success", true)
                         put("mimeType", "audio/mp4")
-                        put("durationSec", durationSec)
+                        put("durationSec", durationSec as Int)
                         put("data", base64)
-                        put("sizeBytes", bytes.size)
-                        put("timestamp", System.currentTimeMillis())
+                        put("sizeBytes", bytes.size as Int)
+                        put("timestamp", System.currentTimeMillis() as Long)
                     })
                 } else {
                     callback(JSONObject().apply {
