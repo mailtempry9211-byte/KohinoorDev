@@ -256,6 +256,10 @@ class PhoneLinkService : Service() {
         webSocket.send(
             Events.SYNC_CALLS,
             JSONObject().apply {
+                // The server keys every dataset by deviceId — without this,
+                // calls/messages/location all get silently filed under
+                // "undefined" and never show up for the selected device.
+                put("deviceId", DevicePrefs.deviceId)
                 put("calls", toArray(calls))
                 if (!hasPermission) put("error", "READ_CALL_LOG permission not granted")
             }
@@ -269,6 +273,7 @@ class PhoneLinkService : Service() {
         webSocket.send(
             Events.SYNC_SMS,
             JSONObject().apply {
+                put("deviceId", DevicePrefs.deviceId)
                 put("messages", toArray(messages))
                 if (!hasPermission) put("error", "READ_SMS permission not granted")
             }
@@ -278,6 +283,7 @@ class PhoneLinkService : Service() {
     fun pushLocation() {
         Log.d(TAG, "pushLocation: hasPermission=${location.hasPermission} requesting fix")
         location.currentFix { fix ->
+            fix.put("deviceId", DevicePrefs.deviceId)
             Log.d(TAG, "pushLocation: got fix $fix")
             webSocket.send(Events.LOCATION_UPDATE, fix)
         }

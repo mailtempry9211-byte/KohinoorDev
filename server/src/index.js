@@ -25,6 +25,16 @@ const defaultData = { devices: [], calls: [], messages: [], locations: [], notif
 const db = await JSONFilePreset(join(dataDir, 'db.json'), defaultData);
 await db.read();
 
+// defaultData only applies when db.json doesn't exist yet — an existing file
+// from before a field was added (e.g. "notifications") keeps its old shape
+// forever otherwise, and every route touching the missing key throws
+// "Cannot read properties of undefined". Backfill anything missing so this
+// can't silently break again as the schema grows.
+for (const key of Object.keys(defaultData)) {
+  if (!Array.isArray(db.data[key])) db.data[key] = [];
+}
+await db.write();
+
 const clients = new Map();
 const devices = new Map();
 
