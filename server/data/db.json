@@ -51,14 +51,38 @@
     {
       "id": "android-583189-97448",
       "deviceId": "android-583189-97448",
-      "deviceName": "Xiaomi Mi 10",
+      "deviceName": "Xiaomi Mi 10 PRO",
       "battery": 79,
       "isCharging": false,
       "wifiName": null,
-      "lastSeen": 1791891941752,
-      "last_seen": 1791891941752,
+      "lastSeen": 1791893835245,
+      "last_seen": 1791893835245,
+      "online": false,
+      "wsClientId": null
+    },
+    {
+      "id": "android-244903-5703",
+      "deviceId": "android-244903-5703",
+      "deviceName": "Xiaomi Mi 10",
+      "battery": 78,
+      "isCharging": false,
+      "wifiName": null,
+      "lastSeen": 1791894256776,
+      "last_seen": 1791894256776,
+      "online": false,
+      "wsClientId": null
+    },
+    {
+      "id": "android-869450-39365",
+      "deviceId": "android-869450-39365",
+      "deviceName": "Xiaomi Mi 10",
+      "battery": 92,
+      "isCharging": true,
+      "wifiName": null,
+      "lastSeen": 1791959423350,
+      "last_seen": 1791959423350,
       "online": true,
-      "wsClientId": "d61a5796-bb0c-468b-928f-f711e624a998"
+      "wsClientId": "b0962307-8713-4a8a-8308-5f8deb30d499"
     }
   ],
   "calls": [
@@ -71042,6 +71066,272 @@
       "longitude": 80.6748708,
       "accuracy": 100,
       "timestamp": 1791891984192
+    },
+    {
+      "id": "6edf518e-f554-4a3f-96d3-637b9c683f12",
+      "latitude": 27.5718991,
+      "longitude": 80.6748708,
+      "accuracy": 100,
+      "timestamp": 1791894105691
+    },
+    {
+      "id": "631234ea-d8ed-411b-9314-00aac2b51ba6",
+      "latitude": 27.5718991,
+      "longitude": 80.6748708,
+      "accuracy": 100,
+      "timestamp": 1791894106055
+    },
+    {
+      "id": "60f7c788-51b4-4f9e-b4ff-008fca866c21",
+      "latitude": 27.5718991,
+      "longitude": 80.6748708,
+      "accuracy": 100,
+      "timestamp": 1791894135761
+    },
+    {
+      "id": "5a68b782-1a43-4b0e-93ed-2a2dde6e7088",
+      "latitude": 27.5718991,
+      "longitude": 80.6748708,
+      "accuracy": 100,
+      "timestamp": 1791894216973
+    },
+    {
+      "id": "5747abea-d111-4943-90d1-7a86b85a475f",
+      "latitude": 27.5718991,
+      "longitude": 80.6748708,
+      "accuracy": 100,
+      "timestamp": 1791894255509
+    },
+    {
+      "id": "0d7afbf9-f233-4ac4-9b76-94f28042996c",
+      "latitude": 27.5718991,
+      "longitude": 80.6748708,
+      "accuracy": 100,
+      "timestamp": 1791894311766
+    },
+    {
+      "id": "5214d1e6-8e60-44e1-b800-c0baac816c0b",
+      "latitude": 27.5719135,
+      "longitude": 80.6745605,
+      "accuracy": 100,
+      "timestamp": 1791958939818
+    },
+    {
+      "id": "f6a9fbf6-9212-475d-a1af-367550b0c225",
+      "latitude": 27.5719135,
+      "longitude": 80.6745605,
+      "accuracy": 100,
+      "timestamp": 1791958963501
+    },
+    {
+      "id": "eaecba47-66c2-4d36-b2e8-b46041de8d39",
+      "latitude": 27.5719135,
+      "longitude": 80.6745605,
+      "accuracy": 100,
+      "timestamp": 1791958993605
+    },
+    {
+      "id": "2fb5e742-ff16-4464-bfa7-2eee220efe85",
+      "latitude": 27.5719135,
+      "longitude": 80.6745605,
+      "accuracy": 100,
+      "timestamp": 1791959023715
+    },
+    {
+      "id": "9cebb694-a9d4-4095-8f14-1502f6af563e",
+      "latitude": 27.5719135,
+      "longitude": 80.6745605,
+      "accuracy": 100,
+      "timestamp": 1791959053722
+    },
+    {
+      "id": "b4f908e3-241f-4c24-a223-eca590b922af",
+      "latitude": 27.5719135,
+      "longitude": 80.6745605,
+      "accuracy": 100,
+      "timestamp": 1791959083826
+    },
+    {
+      "id": "7ce90c84-f076-41d1-ae59-e206376f0902",
+      "latitude": 27.5719135,
+      "longitude": 80.6745605,
+      "accuracy": 100,
+      "timestamp": 1791959113931
+    },
+    {
+      "id": "1cf9517a-674e-4546-b6d0-52c138e32d36",
+      "latitude": 27.5719135,
+      "longitude": 80.6745605,
+      "accuracy": 100,
+      "timestamp": 1791959144036
+    },
+    {
+      "id": "ab05a2a4-025a-44d9-b999-96cd04d6b3cf",
+      "latitude": 27.5719135,
+      "longitude": 80.6745605,
+      "accuracy": 100,
+      "timestamp": 1791959174141
+    },
+    {
+      "id": "9cd119ca-e107-4208-b2d6-fa498ccb9aca",
+      "latitude": 27.5719135,
+      "longitude": 80.6745605,
+      "accuracy": 100,
+      "timestamp": 1791959204245
+    },
+    {
+      "id": "0a299e43-1622-405c-b9ff-8ab26f4d58c9",
+      "latitude": 27.5719135,
+      "longitude": 80.6745605,
+      "accuracy": 100,
+      "timestamp": 1791959234263
+    },
+    {
+      "id": "63204744-8c5c-4c3f-8862-c76086097c73",
+      "latitude": 27.5719135,
+      "longitude": 80.6745605,
+      "accuracy": 100,
+      "timestamp": 1791959264269
+    },
+    {
+      "id": "b20eb49a-f888-4a30-ab6e-d5926e40a1c9",
+      "latitude": 27.5719135,
+      "longitude": 80.6745605,
+      "accuracy": 100,
+      "timestamp": 1791959294277
+    },
+    {
+      "id": "5811a21d-9362-47a3-92a2-1eac6a5414b3",
+      "latitude": 27.5719135,
+      "longitude": 80.6745605,
+      "accuracy": 100,
+      "timestamp": 1791959324288
+    },
+    {
+      "id": "c7fbc4e1-71a2-4be7-a3f1-dd7df802dce4",
+      "latitude": 27.5719135,
+      "longitude": 80.6745605,
+      "accuracy": 100,
+      "timestamp": 1791959354292
+    },
+    {
+      "id": "655f4b1e-de86-4b1b-a695-b21b3017af7c",
+      "latitude": 27.5719135,
+      "longitude": 80.6745605,
+      "accuracy": 100,
+      "timestamp": 1791959384305
+    },
+    {
+      "id": "2aa5e073-4d33-49c5-8d56-320cad08edd8",
+      "latitude": 27.5719135,
+      "longitude": 80.6745605,
+      "accuracy": 100,
+      "timestamp": 1791959407948
+    },
+    {
+      "id": "ca5ffcfc-bda3-46c6-be92-7cbbe9dc4d01",
+      "latitude": 27.5719135,
+      "longitude": 80.6745605,
+      "accuracy": 100,
+      "timestamp": 1791959419895
+    },
+    {
+      "id": "73e16817-6ec6-4ccf-a8fd-2f61201734c5",
+      "latitude": 27.5719135,
+      "longitude": 80.6745605,
+      "accuracy": 100,
+      "timestamp": 1791959420199
+    },
+    {
+      "id": "9df55206-5710-4e9a-8970-18629b7bd790",
+      "latitude": 27.5719147,
+      "longitude": 80.6748786,
+      "accuracy": 19.006000518798828,
+      "timestamp": 1791959442624
+    },
+    {
+      "id": "111fbe6a-6f17-4aea-b66c-7efe4e20146f",
+      "latitude": 27.5719099,
+      "longitude": 80.6748813,
+      "accuracy": 32.29800033569336,
+      "timestamp": 1791959453062
+    },
+    {
+      "id": "c33169e6-d272-462b-8c9c-09a468673bb6",
+      "latitude": 27.5719053,
+      "longitude": 80.6748358,
+      "accuracy": 58.014801025390625,
+      "timestamp": 1791959488863
+    },
+    {
+      "id": "6c915dd7-5b9e-44f9-9dfe-6b772131eaff",
+      "latitude": 27.5719053,
+      "longitude": 80.6748358,
+      "accuracy": 100,
+      "timestamp": 1791959518966
+    },
+    {
+      "id": "1bf00b0a-b656-4640-8ade-2654b2c861e7",
+      "latitude": 27.5719053,
+      "longitude": 80.6748358,
+      "accuracy": 100,
+      "timestamp": 1791959548969
+    },
+    {
+      "id": "08993330-dd4e-40c4-b61b-240f29cc36a5",
+      "latitude": 27.5719053,
+      "longitude": 80.6748358,
+      "accuracy": 100,
+      "timestamp": 1791959578981
+    },
+    {
+      "id": "160960cf-9ccc-4cde-9b4a-1b632f6432e8",
+      "latitude": 27.5719053,
+      "longitude": 80.6748358,
+      "accuracy": 100,
+      "timestamp": 1791959609086
+    },
+    {
+      "id": "0a622b0b-2b84-4373-84f1-3f8ee2a0a9c3",
+      "latitude": 27.5719053,
+      "longitude": 80.6748358,
+      "accuracy": 100,
+      "timestamp": 1791959639192
+    },
+    {
+      "id": "87a75fdf-daba-4a62-9694-3242e9d8ca88",
+      "latitude": 27.5719053,
+      "longitude": 80.6748358,
+      "accuracy": 100,
+      "timestamp": 1791959669296
+    },
+    {
+      "id": "f95934b0-117c-4278-9bf4-3ce2633bc25e",
+      "latitude": 27.5719053,
+      "longitude": 80.6748358,
+      "accuracy": 100,
+      "timestamp": 1791959699400
+    },
+    {
+      "id": "2c34f24f-d5c2-4a8a-8c22-8ca962dc3f80",
+      "latitude": 27.5719053,
+      "longitude": 80.6748358,
+      "accuracy": 100,
+      "timestamp": 1791959729504
+    },
+    {
+      "id": "9e34aa1b-8335-4fcd-aa7a-d125c116e3a8",
+      "latitude": 27.5719053,
+      "longitude": 80.6748358,
+      "accuracy": 100,
+      "timestamp": 1791959759608
+    },
+    {
+      "id": "3b2d55ff-b7fa-44aa-a8d5-2045938eb1ef",
+      "latitude": 27.5719053,
+      "longitude": 80.6748358,
+      "accuracy": 100,
+      "timestamp": 1791959789711
     }
   ]
 }

@@ -49,6 +49,7 @@ class PhoneLinkService : Service() {
             listener = object : WebSocketClient.Listener {
 
                 override fun onOpen() {
+                    Log.d(TAG, "socket onOpen: registering + syncing everything")
                     pushStatus()
                     // Give the notification listener the live socket so it can
                     // mirror without owning a connection itself.
@@ -145,6 +146,7 @@ class PhoneLinkService : Service() {
     private fun handleFileDownload(payload: JSONObject) {
         val path = payload.optString("path")
         val meta = FileRepository.metaOf(path)
+        Log.d(TAG, "handleFileDownload: path=$path hasPermission=${FileRepository.hasPermission(this)}")
 
         val started = FileRepository.encodeInChunks(this, path) { chunk, isLast ->
             val body = JSONObject().apply {
@@ -156,6 +158,7 @@ class PhoneLinkService : Service() {
             }
             webSocket.send(Events.FILE_DOWNLOAD_RESPONSE, body)
         }
+        Log.d(TAG, "handleFileDownload: started=$started")
 
         if (!started) {
             webSocket.send(
@@ -249,6 +252,7 @@ class PhoneLinkService : Service() {
         // it actually was.
         val hasPermission = CallLogRepository.hasPermission(this)
         val calls = if (hasPermission) CallLogRepository.readCalls(this, 300) else emptyList()
+        Log.d(TAG, "pushCalls: hasPermission=$hasPermission count=${calls.size}")
         webSocket.send(
             Events.SYNC_CALLS,
             JSONObject().apply {
@@ -261,6 +265,7 @@ class PhoneLinkService : Service() {
     fun pushSms() {
         val hasPermission = SmsRepository.hasReadPermission(this)
         val messages = if (hasPermission) SmsRepository.readAll(this, 600) else emptyList()
+        Log.d(TAG, "pushSms: hasPermission=$hasPermission count=${messages.size}")
         webSocket.send(
             Events.SYNC_SMS,
             JSONObject().apply {
@@ -271,7 +276,11 @@ class PhoneLinkService : Service() {
     }
 
     fun pushLocation() {
-        location.currentFix { fix -> webSocket.send(Events.LOCATION_UPDATE, fix) }
+        Log.d(TAG, "pushLocation: hasPermission=${location.hasPermission} requesting fix")
+        location.currentFix { fix ->
+            Log.d(TAG, "pushLocation: got fix $fix")
+            webSocket.send(Events.LOCATION_UPDATE, fix)
+        }
     }
 
     private fun pushFileListAt(path: String) {
