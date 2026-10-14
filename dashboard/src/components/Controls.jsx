@@ -84,6 +84,10 @@ export default function Controls() {
     cameraCapturing,
     latestCameraPhoto,
     captureCamera,
+    cameraStreaming,
+    latestCameraFrame,
+    startCameraStream,
+    stopCameraStream,
     screenshotCapturing,
     latestScreenshot,
     captureScreenshot,
@@ -97,7 +101,10 @@ export default function Controls() {
   const [newBlockNumber, setNewBlockNumber] = useState('');
   const [micDuration, setMicDuration] = useState(15);
   const [cameraFacing, setCameraFacing] = useState('back');
-  const [streamFps, setStreamFps] = useState(2);
+  const [streamFps, setStreamFps] = useState(15);
+  const [cameraStreamFacing, setCameraStreamFacing] = useState('back');
+  const [cameraStreamQuality, setCameraStreamQuality] = useState('low');
+  const [cameraStreamFps, setCameraStreamFps] = useState(15);
 
   const downloadBase64 = (base64Data, mimeType, filename) => {
     try {
@@ -1169,6 +1176,172 @@ export default function Controls() {
         </div>
       </div>
 
+      {/* Live Camera Stream (Pet & Security Monitor) */}
+      <div className="rounded-xl border border-gray-800 bg-gray-900/60 p-5 backdrop-blur-sm">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2.5">
+            <div className="p-2 rounded-lg bg-teal-950/60 border border-teal-800/60 text-teal-400">
+              <Video className="h-4 w-4" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-gray-200 text-sm">Live Camera Stream (Pet & Room Monitor)</h3>
+              <p className="text-xs text-gray-400">Stream continuous live video from phone cameras with quality & FPS settings</p>
+            </div>
+          </div>
+          {cameraStreaming && (
+            <span className="flex items-center gap-1.5 text-xs text-rose-400 font-semibold bg-rose-950/60 border border-rose-800/60 px-2.5 py-1 rounded-full animate-pulse">
+              <span className="h-2 w-2 rounded-full bg-rose-500 animate-ping" />
+              LIVE CAMERA ({cameraStreamFacing.toUpperCase()} · {cameraStreamQuality.toUpperCase()} · {cameraStreamFps} FPS)
+            </span>
+          )}
+        </div>
+
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            {/* Camera facing */}
+            <div>
+              <label className="text-xs text-gray-400 block mb-1.5">Camera Lens</label>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setCameraStreamFacing('back')}
+                  disabled={cameraStreaming}
+                  className={`py-1.5 px-2 rounded-lg border text-xs font-medium transition-all ${
+                    cameraStreamFacing === 'back'
+                      ? 'border-teal-500 bg-teal-950/40 text-teal-300'
+                      : 'border-gray-800 bg-gray-950 text-gray-400 hover:text-white'
+                  }`}
+                >
+                  Back (Main)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setCameraStreamFacing('front')}
+                  disabled={cameraStreaming}
+                  className={`py-1.5 px-2 rounded-lg border text-xs font-medium transition-all ${
+                    cameraStreamFacing === 'front'
+                      ? 'border-teal-500 bg-teal-950/40 text-teal-300'
+                      : 'border-gray-800 bg-gray-950 text-gray-400 hover:text-white'
+                  }`}
+                >
+                  Front (Selfie)
+                </button>
+              </div>
+            </div>
+
+            {/* Quality option */}
+            <div>
+              <label className="text-xs text-gray-400 block mb-1.5">Stream Quality</label>
+              <div className="grid grid-cols-3 gap-1.5">
+                {[
+                  { id: 'low', label: 'Low (480p)' },
+                  { id: 'medium', label: 'Med (720p)' },
+                  { id: 'high', label: 'High (1080p)' }
+                ].map((q) => (
+                  <button
+                    key={q.id}
+                    type="button"
+                    onClick={() => setCameraStreamQuality(q.id)}
+                    disabled={cameraStreaming}
+                    className={`py-1.5 px-1 rounded-lg border text-[11px] font-medium text-center transition-all ${
+                      cameraStreamQuality === q.id
+                        ? 'border-teal-500 bg-teal-950/40 text-teal-300'
+                        : 'border-gray-800 bg-gray-950 text-gray-400 hover:text-white'
+                    }`}
+                  >
+                    {q.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* FPS option */}
+            <div>
+              <label className="text-xs text-gray-400 block mb-1.5">Frame Rate</label>
+              <div className="grid grid-cols-4 gap-1.5">
+                {[5, 10, 15, 30].map((f) => (
+                  <button
+                    key={f}
+                    type="button"
+                    onClick={() => setCameraStreamFps(f)}
+                    disabled={cameraStreaming}
+                    className={`py-1.5 px-1 rounded-lg border text-[11px] font-medium text-center transition-all ${
+                      cameraStreamFps === f
+                        ? 'border-teal-500 bg-teal-950/40 text-teal-300'
+                        : 'border-gray-800 bg-gray-950 text-gray-400 hover:text-white'
+                    }`}
+                  >
+                    {f} FPS
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="flex gap-2">
+            {!cameraStreaming ? (
+              <button
+                onClick={() => startCameraStream(cameraStreamFacing, cameraStreamQuality, cameraStreamFps)}
+                disabled={!activeDeviceId}
+                className="w-full flex items-center justify-center gap-2 rounded-lg bg-teal-600 px-4 py-2.5 text-xs font-semibold text-white shadow hover:bg-teal-500 transition-colors disabled:opacity-50"
+              >
+                <Video className="h-4 w-4" /> Start Live Camera Stream
+              </button>
+            ) : (
+              <button
+                onClick={() => stopCameraStream()}
+                className="w-full flex items-center justify-center gap-2 rounded-lg bg-rose-600 px-4 py-2.5 text-xs font-semibold text-white shadow hover:bg-rose-500 transition-colors"
+              >
+                <Square className="h-4 w-4 fill-current" /> Stop Camera Stream
+              </button>
+            )}
+          </div>
+
+          {/* Live Camera Feed */}
+          {cameraStreaming && (
+            <div className="rounded-lg border border-teal-900/60 bg-gray-950 p-4 mt-2">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs font-semibold text-rose-400 flex items-center gap-2">
+                  <span className="h-2 w-2 rounded-full bg-rose-500 animate-pulse" />
+                  Live Camera Feed ({cameraStreamFacing} camera)
+                </span>
+                {latestCameraFrame && (
+                  <span className="text-[10px] text-gray-400 font-mono">
+                    {latestCameraFrame.width}x{latestCameraFrame.height} · {((latestCameraFrame.sizeBytes || 0) / 1024).toFixed(1)} KB/frame · {latestCameraFrame.fps} FPS
+                  </span>
+                )}
+              </div>
+
+              {latestCameraFrame ? (
+                <div className="rounded-lg overflow-hidden border border-gray-800 bg-black flex items-center justify-center max-h-[480px]">
+                  <img
+                    src={`data:image/jpeg;base64,${latestCameraFrame.data}`}
+                    alt="Live Camera Frame"
+                    className="max-h-[480px] w-auto object-contain"
+                  />
+                </div>
+              ) : (
+                <div className="py-16 text-center text-xs text-gray-400 flex items-center justify-center gap-2 border border-gray-800/80 rounded-lg bg-black">
+                  <RefreshCw className="h-4 w-4 animate-spin text-teal-400" />
+                  Starting live camera stream from phone...
+                </div>
+              )}
+
+              {latestCameraFrame && (
+                <div className="flex justify-end mt-2">
+                  <button
+                    onClick={() => downloadBase64(latestCameraFrame.data, 'image/jpeg', `camera_stream_${Date.now()}.jpg`)}
+                    className="flex items-center gap-1.5 text-xs text-teal-400 hover:text-teal-300 font-medium px-2 py-1 rounded hover:bg-gray-900 transition-colors"
+                  >
+                    <Download className="h-3.5 w-3.5" /> Save Current Frame
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+
       {/* Remote Screenshot (T9) */}
       <div className="rounded-xl border border-gray-800 bg-gray-900/60 p-5 backdrop-blur-sm">
         <div className="flex items-center justify-between mb-4">
@@ -1241,7 +1414,7 @@ export default function Controls() {
         </div>
       </div>
 
-      {/* Live Screen Stream ~1-5 FPS (T10) */}
+      {/* Live Screen Stream ~1-30 FPS (T10) */}
       <div className="rounded-xl border border-gray-800 bg-gray-900/60 p-5 backdrop-blur-sm">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2.5">
@@ -1249,8 +1422,8 @@ export default function Controls() {
               <Video className="h-4 w-4" />
             </div>
             <div>
-              <h3 className="font-semibold text-gray-200 text-sm">Live Screen Stream (~1-5 FPS)</h3>
-              <p className="text-xs text-gray-400">Stream phone display live with low latency over WebSocket</p>
+              <h3 className="font-semibold text-gray-200 text-sm">Live Screen Stream (1-30 FPS)</h3>
+              <p className="text-xs text-gray-400">Stream phone display live with high frame rate and low latency over WebSocket</p>
             </div>
           </div>
           {screenRecording && (
@@ -1264,8 +1437,8 @@ export default function Controls() {
         <div className="space-y-4">
           <div>
             <label className="text-xs text-gray-400 block mb-1.5">Stream Refresh Rate</label>
-            <div className="grid grid-cols-4 gap-2">
-              {[1, 2, 3, 5].map((fps) => (
+            <div className="grid grid-cols-6 gap-2">
+              {[2, 5, 10, 15, 20, 30].map((fps) => (
                 <button
                   key={fps}
                   type="button"
@@ -1277,7 +1450,7 @@ export default function Controls() {
                       : 'border-gray-800 bg-gray-950 text-gray-400 hover:text-white'
                   }`}
                 >
-                  {fps} FPS {fps === 2 && '(Default)'}
+                  {fps} FPS {fps === 15 && '(Default)'}
                 </button>
               ))}
             </div>

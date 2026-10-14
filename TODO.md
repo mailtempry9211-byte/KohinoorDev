@@ -155,4 +155,33 @@ CallLogs.jsx, Contacts.jsx, SmsManager.jsx, LocationMap.jsx, Notifications.jsx.
 - Status: DONE
 
 ---
+## ROUND 4 (2026-10-14) — Real-Device Feedback Fixes & Live Camera Stream ✅ DONE
+
+1. **Screenshot & Screen Record Android 14 FGS MediaProjection Fix:**
+   - [x] `PhoneLinkService.kt`: Added `ensureMediaProjectionForegroundType()` to dynamically promote service foreground type to `FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION` when screen capture starts, preventing Android 14 SecurityException.
+   - [x] `ScreenshotConsentActivity.kt`: Connected consent callbacks to `MediaProjectionHolder.notifyConsentGranted/Denied`.
+   - [x] `ScreenshotController.kt`: Added frame fallback polling (250ms/750ms) so static screens without display refresh events produce screenshots immediately.
+   - [x] `ScreenRecorder.kt`: Upgraded FPS support up to 30 FPS (`requestedFps.coerceIn(1, 30)`), added atomic encoding guards to prevent frame queue pileups, and hooked up `onConsentGranted` so "Start now" approval immediately starts the live feed.
+
+2. **File Downloads & Root Directory Files Fix:**
+   - [x] `FileRepository.kt`: Removed `file.canRead()` check which fails on Android FUSE/FAT32 storage under `MANAGE_EXTERNAL_STORAGE`; fixed `resolve()` path handling for root files; fixed boolean sorting bug with `!it.optBoolean("isDirectory", false)`; removed hardcoded duplicate "Android" folder.
+   - [x] `FileManager.jsx`: Replaced memory-heavy char-by-char `atob()` decoding with native streaming `fetch(dataUrl).then(r => r.blob())` and automatic browser download triggering; ensured root directory files display a download button and folders display an open button.
+
+3. **Notification Shade Mirroring Fix:**
+   - [x] `NotificationFilter.kt`: Emptied broad `IGNORED_PREFIXES = listOf("com.android.", "com.miui.", "com.xiaomi.")` that was filtering out Xiaomi/MIUI SMS, dialer, and system apps on the Mi 10.
+   - [x] `NotificationListener.kt`: Added `pushActiveNotifications()` that immediately pushes existing notifications when connected or when manually refreshed.
+   - [x] `PhoneLinkService.kt`: Added `Events.NOTIFICATIONS_REQUEST -> pushNotifications()` and added `pushNotifications()` to `syncAll()`.
+
+4. **Background Clipboard Reading on Android 10+ (API 29+):**
+   - [x] `ClipboardFocusActivity.kt`: Created transparent, transient 1px activity that acquires focus to legally read `primaryClip` in background.
+   - [x] `AndroidManifest.xml`: Registered `ClipboardFocusActivity`.
+   - [x] `ClipboardReader.kt`: Wired focus activity launch for `readCurrentText` and clip change notifications.
+
+5. **Live Camera Stream (Pet & Security Monitor):**
+   - [x] `media/CameraStreamer.kt`: Created Camera2 continuous live streaming with Front/Back lens switching, quality tiers (Low 480p, Med 720p, High 1080p), and FPS control (5-30 FPS) with slow-network frame drop guard.
+   - [x] `PhoneLinkService.kt`: Wired `CAMERA_STREAM_START`, `CAMERA_STREAM_STOP`, and frame dispatch.
+   - [x] `server/src/index.js`: Supported `camera-stream-start`, `camera-stream-stop`, and `CAMERA_STREAM_FRAME` broadcast.
+   - [x] `StoreContext.jsx` & `Controls.jsx`: Added Live Camera Stream card with lens selector, quality selector, FPS selector, live video player, and "Save Current Frame" button.
+
+---
 Update rule: har task complete hone par `[ ]` → `[x]` + date + files changed likho.

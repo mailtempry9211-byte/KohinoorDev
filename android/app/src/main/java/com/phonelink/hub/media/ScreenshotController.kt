@@ -130,66 +130,77 @@ object ScreenshotController {
             isBusy.set(false)
         }
 
+        val processImage: (android.media.Image) -> Unit = { image ->
+            if (!hasCaptured) {
+                hasCaptured = true
+                try {
+                    val planes = image.planes
+                    val buffer = planes[0].buffer
+                    val pixelStride = planes[0].pixelStride
+                    val rowStride = planes[0].rowStride
+                    val rowPadding = rowStride - pixelStride * targetWidth
+
+                    val rawBitmap = Bitmap.createBitmap(
+                        targetWidth + rowPadding / pixelStride,
+                        targetHeight,
+                        Bitmap.Config.ARGB_8888
+                    )
+                    rawBitmap.copyPixelsFromBuffer(buffer)
+                    image.close()
+
+                    val finalBitmap = if (rowPadding > 0) {
+                        Bitmap.createBitmap(rawBitmap, 0, 0, targetWidth, targetHeight).also {
+                            rawBitmap.recycle()
+                        }
+                    } else {
+                        rawBitmap
+                    }
+
+                    val outStream = ByteArrayOutputStream()
+                    finalBitmap.compress(Bitmap.CompressFormat.JPEG, 80, outStream)
+                    finalBitmap.recycle()
+
+                    val bytes = outStream.toByteArray()
+                    val base64 = Base64.encodeToString(bytes, Base64.NO_WRAP)
+                    Log.d(TAG, "Screenshot captured successfully: ${bytes.size} bytes (${targetWidth}x$targetHeight)")
+
+                    cleanup()
+
+                    val cb = pendingCallback
+                    pendingCallback = null
+                    cb?.invoke(JSONObject().apply {
+                        put("deviceId", DevicePrefs.deviceId)
+                        put("success", true)
+                        put("mimeType", "image/jpeg")
+                        put("data", base64)
+                        put("width", targetWidth as Int)
+                        put("height", targetHeight as Int)
+                        put("sizeBytes", bytes.size as Int)
+                        put("timestamp", System.currentTimeMillis() as Long)
+                    })
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error encoding screenshot frame", e)
+                    cleanup()
+                    val cb = pendingCallback
+                    pendingCallback = null
+                    cb?.invoke(JSONObject().apply {
+                        put("deviceId", DevicePrefs.deviceId)
+                        put("success", false)
+                        put("error", "Error capturing frame: ${e.message}")
+                    })
+                }
+            } else {
+                try { image.close() } catch (_: Exception) {}
+            }
+        }
+
         imageReader.setOnImageAvailableListener({ reader ->
             if (hasCaptured) return@setOnImageAvailableListener
             try {
                 val image = reader.acquireLatestImage() ?: return@setOnImageAvailableListener
-                hasCaptured = true
-
-                val planes = image.planes
-                val buffer = planes[0].buffer
-                val pixelStride = planes[0].pixelStride
-                val rowStride = planes[0].rowStride
-                val rowPadding = rowStride - pixelStride * targetWidth
-
-                val rawBitmap = Bitmap.createBitmap(
-                    targetWidth + rowPadding / pixelStride,
-                    targetHeight,
-                    Bitmap.Config.ARGB_8888
-                )
-                rawBitmap.copyPixelsFromBuffer(buffer)
-                image.close()
-
-                val finalBitmap = if (rowPadding > 0) {
-                    Bitmap.createBitmap(rawBitmap, 0, 0, targetWidth, targetHeight).also {
-                        rawBitmap.recycle()
-                    }
-                } else {
-                    rawBitmap
-                }
-
-                val outStream = ByteArrayOutputStream()
-                finalBitmap.compress(Bitmap.CompressFormat.JPEG, 80, outStream)
-                finalBitmap.recycle()
-
-                val bytes = outStream.toByteArray()
-                val base64 = Base64.encodeToString(bytes, Base64.NO_WRAP)
-                Log.d(TAG, "Screenshot captured successfully: ${bytes.size} bytes (${targetWidth}x$targetHeight)")
-
-                cleanup()
-
-                val cb = pendingCallback
-                pendingCallback = null
-                cb?.invoke(JSONObject().apply {
-                    put("deviceId", DevicePrefs.deviceId)
-                    put("success", true)
-                    put("mimeType", "image/jpeg")
-                    put("data", base64)
-                    put("width", targetWidth as Int)
-                    put("height", targetHeight as Int)
-                    put("sizeBytes", bytes.size as Int)
-                    put("timestamp", System.currentTimeMillis() as Long)
-                })
+                processImage(image)
             } catch (e: Exception) {
-                Log.e(TAG, "Error encoding screenshot frame", e)
-                cleanup()
-                val cb = pendingCallback
-                pendingCallback = null
-                cb?.invoke(JSONObject().apply {
-                    put("deviceId", DevicePrefs.deviceId)
-                    put("success", false)
-                    put("error", "Error capturing frame: ${e.message}")
-                })
+                Log.w(TAG, "onImageAvailable exception", e)
             }
         }, handler)
 
@@ -205,6 +216,26 @@ object ScreenshotController {
                 handler
             )
             Log.d(TAG, "Virtual display created for screenshot ($targetWidth x $targetHeight)")
+
+            // Immediate and delayed frame acquisition in case screen buffer is static
+            handler.postDelayed({
+                if (!hasCaptured) {
+                    try {
+                        val img = imageReader.acquireLatestImage()
+                        if (img != null) processImage(img)
+                    } catch (_: Exception) {}
+                }
+            }, 250)
+
+            handler.postDelayed({
+                if (!hasCaptured) {
+                    try {
+                        val img = imageReader.acquireLatestImage()
+                        if (img != null) processImage(img)
+                    } catch (_: Exception) {}
+                }
+            }, 750)
+
         } catch (e: Exception) {
             Log.e(TAG, "Error creating virtual display", e)
             cleanup()

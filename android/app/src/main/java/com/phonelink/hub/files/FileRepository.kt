@@ -77,19 +77,10 @@ object FileRepository {
             }
         }
 
-        entries.put(
-            JSONObject().apply {
-                put("name", "Android")
-                put("path", "/Android")
-                put("isDirectory", true)
-                put("size", JSONObject.NULL)
-                put("lastModified", storageRoot().takeIf { it.exists() }?.lastModified())
-                put("mimeType", JSONObject.NULL)
-            }
-        )
+        val relPath = if (dir == storageRoot()) "" else dir.relativeTo(storageRoot()).path.replace('\\', '/').trim('/')
 
         return JSONObject().apply {
-            put("path", "/" + dir.relativeTo(storageRoot()).path.trim('/'))
+            put("path", if (relPath.isEmpty()) "/" else "/$relPath")
             put("entries", sortDirectoriesFirst(entries))
             put("error", if (dir.isDirectory) JSONObject.NULL else "Not a directory or does not exist")
         }
@@ -98,17 +89,20 @@ object FileRepository {
     private fun sortDirectoriesFirst(array: org.json.JSONArray): org.json.JSONArray {
         val items = mutableListOf<JSONObject>()
         for (i in 0 until array.length()) items += array.getJSONObject(i)
-        items.sortWith(compareBy<JSONObject> { it.optInt("isDirectory", 0) == 0 }.thenBy { it.optString("name").lowercase() })
+        items.sortWith(compareBy<JSONObject> { !it.optBoolean("isDirectory", false) }.thenBy { it.optString("name").lowercase() })
         return org.json.JSONArray().apply { items.forEach { put(it) } }
     }
 
     private fun describe(file: File): JSONObject = JSONObject().apply {
+        val rel = file.relativeTo(storageRoot()).path.replace('\\', '/').trimStart('/')
+        val isDir = try { file.isDirectory } catch (_: Exception) { false }
+        val size = try { if (isDir) JSONObject.NULL else file.length() } catch (_: Exception) { 0L }
         put("name", file.name.ifEmpty { "/" })
-        put("path", "/" + file.relativeTo(storageRoot()).path.trim('/'))
-        put("isDirectory", file.isDirectory)
-        put("size", if (file.isDirectory) JSONObject.NULL else file.length())
-        put("lastModified", file.lastModified())
-        put("mimeType", if (file.isDirectory) JSONObject.NULL else mimeOf(file.name))
+        put("path", "/" + rel)
+        put("isDirectory", isDir)
+        put("size", size)
+        put("lastModified", try { file.lastModified() } catch (_: Exception) { 0L })
+        put("mimeType", if (isDir) JSONObject.NULL else mimeOf(file.name))
     }
 
     /**
@@ -118,9 +112,12 @@ object FileRepository {
     fun encodeInChunks(context: Context, path: String, onChunk: (String, Boolean) -> Unit): Boolean {
         val permitted = hasPermission(context)
         val file = resolve(path)
-        Log.d(TAG, "encodeInChunks: path=$path resolved=${file.absolutePath} hasPermission=$permitted isFile=${file.isFile} canRead=${file.canRead()} exists=${file.exists()}")
+        Log.d(TAG, "encodeInChunks: path=$path resolved=${file.absolutePath} hasPermission=$permitted exists=${file.exists()} isDir=${file.isDirectory}")
         if (!permitted) return false
-        if (!file.isFile || !file.canRead()) return false
+        if (!file.exists() || file.isDirectory) {
+            Log.e(TAG, "encodeInChunks: file does not exist or is directory: ${file.absolutePath}")
+            return false
+        }
         if (file.length() == 0L) {
             Log.d(TAG, "encodeInChunks: empty file, sending single last chunk")
             onChunk("", true)
@@ -131,12 +128,6 @@ object FileRepository {
             file.inputStream().use { stream ->
                 val buffer = ByteArray(CHUNK_BYTES)
                 var remaining = file.length()
-                // NOTE (download fix): the old loop always emitted a trailing
-                // ("", true) AFTER the final real chunk. The dashboard treated
-                // that stray empty chunk as a second transfer that overwrote
-                // the full buffer with "" — so small files (<32KB, one chunk)
-                // always downloaded as EMPTY. Now the final real chunk itself
-                // carries isLast=true and no stray terminator is sent.
                 while (remaining > 0) {
                     val read = stream.read(buffer)
                     if (read <= 0) break
@@ -147,7 +138,7 @@ object FileRepository {
             }
             true
         } catch (e: Exception) {
-            Log.e(TAG, "encode failed for $path", e)
+            Log.e(TAG, "encode failed for $path (${file.absolutePath})", e)
             false
         }
     }

@@ -1,7 +1,6 @@
 package com.phonelink.hub.media
 
 import android.content.Context
-import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.PixelFormat
 import android.hardware.display.DisplayManager
@@ -18,7 +17,7 @@ import java.io.ByteArrayOutputStream
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
- * Streams low-latency screen frames (~1-5 fps) over WebSocket for live preview.
+ * Streams low-latency screen frames (1-30 fps) over WebSocket for live screen preview.
  * Reuses MediaProjectionHolder for projection access.
  */
 object ScreenRecorder {
@@ -26,6 +25,8 @@ object ScreenRecorder {
     private const val TAG = "ScreenRecorder"
 
     private val isRunning = AtomicBoolean(false)
+    private val isEncoding = AtomicBoolean(false)
+
     private var handlerThread: HandlerThread? = null
     private var backgroundHandler: Handler? = null
     private var virtualDisplay: VirtualDisplay? = null
@@ -33,34 +34,48 @@ object ScreenRecorder {
     private var frameRunnable: Runnable? = null
     private var activeCallback: ((JSONObject) -> Unit)? = null
 
+    private var pendingFps: Int = 0
+    private var pendingContext: Context? = null
+
     val isActive: Boolean
         get() = isRunning.get()
 
-    fun start(context: Context, requestedFps: Int = 2, onFrame: (JSONObject) -> Unit) {
-        val fps = requestedFps.coerceIn(1, 5)
-        val intervalMs = (1000L / fps)
+    fun start(context: Context, requestedFps: Int = 15, onFrame: (JSONObject) -> Unit) {
+        val fps = requestedFps.coerceIn(1, 30)
+        val intervalMs = (1000L / fps).coerceAtLeast(33L)
+
+        activeCallback = onFrame
+        pendingFps = fps
+        pendingContext = context.applicationContext ?: context
 
         if (isRunning.get()) {
-            Log.d(TAG, "Screen recorder already active, updating callback and fps")
-            activeCallback = onFrame
+            Log.d(TAG, "Screen recorder already active, updating callback and fps=$fps")
             return
         }
 
-        activeCallback = onFrame
-
         if (!MediaProjectionHolder.hasConsent) {
-            Log.d(TAG, "MediaProjection consent required for screen streaming")
+            Log.d(TAG, "MediaProjection consent required for screen streaming, launching consent activity")
             ScreenshotConsentActivity.launch(context)
-            // Wait for consent or user interaction
-            Handler(Looper.getMainLooper()).postDelayed({
-                if (!isRunning.get() && MediaProjectionHolder.hasConsent) {
-                    startStreaming(context, intervalMs, fps)
-                }
-            }, 1500)
             return
         }
 
         startStreaming(context, intervalMs, fps)
+    }
+
+    fun onConsentGranted(context: Context) {
+        Log.d(TAG, "Consent granted callback received in ScreenRecorder")
+        val ctx = pendingContext ?: context
+        val fps = if (pendingFps > 0) pendingFps else 15
+        if (!isRunning.get() && activeCallback != null) {
+            val intervalMs = (1000L / fps).coerceAtLeast(33L)
+            startStreaming(ctx, intervalMs, fps)
+        }
+    }
+
+    fun onConsentDenied() {
+        Log.w(TAG, "Consent denied for ScreenRecorder")
+        pendingFps = 0
+        stop()
     }
 
     private fun startStreaming(context: Context, intervalMs: Long, fps: Int) {
@@ -71,6 +86,7 @@ object ScreenRecorder {
         }
 
         isRunning.set(true)
+        isEncoding.set(false)
 
         val metrics = context.resources.displayMetrics
         val screenWidth = metrics.widthPixels
@@ -107,55 +123,61 @@ object ScreenRecorder {
             return
         }
 
+        val quality = if (fps >= 20) 50 else if (fps >= 10) 60 else 70
+
         val runnable = object : Runnable {
             override fun run() {
                 if (!isRunning.get()) return
 
-                try {
-                    val image = reader.acquireLatestImage()
-                    if (image != null) {
-                        val planes = image.planes
-                        val buffer = planes[0].buffer
-                        val pixelStride = planes[0].pixelStride
-                        val rowStride = planes[0].rowStride
-                        val rowPadding = rowStride - pixelStride * targetWidth
+                if (isEncoding.compareAndSet(false, true)) {
+                    try {
+                        val image = reader.acquireLatestImage()
+                        if (image != null) {
+                            val planes = image.planes
+                            val buffer = planes[0].buffer
+                            val pixelStride = planes[0].pixelStride
+                            val rowStride = planes[0].rowStride
+                            val rowPadding = rowStride - pixelStride * targetWidth
 
-                        val rawBitmap = Bitmap.createBitmap(
-                            targetWidth + rowPadding / pixelStride,
-                            targetHeight,
-                            Bitmap.Config.ARGB_8888
-                        )
-                        rawBitmap.copyPixelsFromBuffer(buffer)
-                        image.close()
+                            val rawBitmap = Bitmap.createBitmap(
+                                targetWidth + rowPadding / pixelStride,
+                                targetHeight,
+                                Bitmap.Config.ARGB_8888
+                            )
+                            rawBitmap.copyPixelsFromBuffer(buffer)
+                            image.close()
 
-                        val finalBitmap = if (rowPadding > 0) {
-                            Bitmap.createBitmap(rawBitmap, 0, 0, targetWidth, targetHeight).also {
-                                rawBitmap.recycle()
+                            val finalBitmap = if (rowPadding > 0) {
+                                Bitmap.createBitmap(rawBitmap, 0, 0, targetWidth, targetHeight).also {
+                                    rawBitmap.recycle()
+                                }
+                            } else {
+                                rawBitmap
                             }
-                        } else {
-                            rawBitmap
+
+                            val outStream = ByteArrayOutputStream()
+                            finalBitmap.compress(Bitmap.CompressFormat.JPEG, quality, outStream)
+                            finalBitmap.recycle()
+
+                            val bytes = outStream.toByteArray()
+                            val base64 = Base64.encodeToString(bytes, Base64.NO_WRAP)
+
+                            activeCallback?.invoke(JSONObject().apply {
+                                put("deviceId", DevicePrefs.deviceId)
+                                put("data", base64)
+                                put("mimeType", "image/jpeg")
+                                put("width", targetWidth as Int)
+                                put("height", targetHeight as Int)
+                                put("fps", fps as Int)
+                                put("sizeBytes", bytes.size as Int)
+                                put("timestamp", System.currentTimeMillis() as Long)
+                            })
                         }
-
-                        val outStream = ByteArrayOutputStream()
-                        finalBitmap.compress(Bitmap.CompressFormat.JPEG, 65, outStream)
-                        finalBitmap.recycle()
-
-                        val bytes = outStream.toByteArray()
-                        val base64 = Base64.encodeToString(bytes, Base64.NO_WRAP)
-
-                        activeCallback?.invoke(JSONObject().apply {
-                            put("deviceId", DevicePrefs.deviceId)
-                            put("data", base64)
-                            put("mimeType", "image/jpeg")
-                            put("width", targetWidth as Int)
-                            put("height", targetHeight as Int)
-                            put("fps", fps as Int)
-                            put("sizeBytes", bytes.size as Int)
-                            put("timestamp", System.currentTimeMillis() as Long)
-                        })
+                    } catch (e: Exception) {
+                        Log.w(TAG, "Frame capture error: ${e.message}")
+                    } finally {
+                        isEncoding.set(false)
                     }
-                } catch (e: Exception) {
-                    Log.w(TAG, "Frame capture error: ${e.message}")
                 }
 
                 if (isRunning.get()) {
@@ -185,5 +207,7 @@ object ScreenRecorder {
         handlerThread = null
         backgroundHandler = null
         activeCallback = null
+        isEncoding.set(false)
+        pendingFps = 0
     }
 }

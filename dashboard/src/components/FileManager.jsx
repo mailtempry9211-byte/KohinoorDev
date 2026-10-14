@@ -14,17 +14,37 @@ export default function FileManager() {
   }, [activeDeviceId, sendCommand]);
 
   useEffect(() => {
-    if (!files.download || !files.download.data) return;
+    if (!files.download) return;
+    if (files.download.error) {
+      setDownloading(null);
+      return;
+    }
     const { data, name, mimeType } = files.download;
+    if (data == null) return;
     try {
-      const byteChars = atob(data);
-      const byteArray = new Uint8Array(byteChars.length);
-      for (let i = 0; i < byteChars.length; i++) byteArray[i] = byteChars.charCodeAt(i);
-      const blob = new Blob([byteArray], { type: mimeType || 'application/octet-stream' });
-      setDownloaded({ url: URL.createObjectURL(blob), name });
+      fetch(`data:${mimeType || 'application/octet-stream'};base64,${data}`)
+        .then((res) => res.blob())
+        .then((blob) => {
+          const url = URL.createObjectURL(blob);
+          const safeName = name || 'download';
+          setDownloaded({ url, name: safeName });
+          setDownloading(null);
+
+          // Auto-trigger browser download
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = safeName;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        })
+        .catch((err) => {
+          console.error('Blob conversion error:', err);
+          setDownloading(null);
+        });
     } catch (e) {
+      console.error('Download decode error:', e);
       setDownloaded(null);
-    } finally {
       setDownloading(null);
     }
   }, [files.download]);
@@ -127,43 +147,53 @@ export default function FileManager() {
                 </td>
               </tr>
             )}
-            {files.entries.map((entry) => (
-              <tr key={entry.path} className="transition-colors hover:bg-gray-800/40">
-                <td className="px-4 py-2.5">
-                  <div className="flex items-center gap-3">
-                    {entry.isDirectory ? (
-                      <button onClick={() => openFolder(entry.path)} className="flex min-w-0 items-center gap-3">
-                        <FolderIcon className="h-4 w-4 shrink-0 text-teal-400" />
-                        <span className="truncate font-medium text-teal-300 hover:text-teal-200">{entry.name}</span>
+            {files.entries.map((entry) => {
+              const isDir = Boolean(entry.isDirectory === true || entry.isDirectory === 'true' || entry.isDirectory === 1);
+              return (
+                <tr key={entry.path} className="transition-colors hover:bg-gray-800/40">
+                  <td className="px-4 py-2.5">
+                    <div className="flex items-center gap-3">
+                      {isDir ? (
+                        <button onClick={() => openFolder(entry.path)} className="flex min-w-0 items-center gap-3">
+                          <FolderIcon className="h-4 w-4 shrink-0 text-teal-400" />
+                          <span className="truncate font-medium text-teal-300 hover:text-teal-200">{entry.name}</span>
+                        </button>
+                      ) : (
+                        <div className="flex min-w-0 items-center gap-3">
+                          <FileIcon className="h-4 w-4 shrink-0 text-gray-500" />
+                          <span className="truncate text-gray-200">{entry.name}</span>
+                        </div>
+                      )}
+                    </div>
+                  </td>
+                  <td className="hidden px-4 py-2.5 text-gray-500 sm:table-cell">
+                    {isDir ? '—' : formatSize(entry.size)}
+                  </td>
+                  <td className="hidden px-4 py-2.5 text-gray-500 md:table-cell">
+                    {entry.lastModified ? new Date(entry.lastModified).toLocaleString() : '—'}
+                  </td>
+                  <td className="px-4 py-2.5 text-right">
+                    {!isDir ? (
+                      <button
+                        onClick={() => download(entry)}
+                        disabled={downloading === entry.path}
+                        className="inline-flex items-center gap-1.5 rounded-md bg-gray-800 px-2.5 py-1.5 text-xs text-gray-300 transition-colors hover:bg-teal-600 hover:text-white disabled:opacity-50"
+                      >
+                        <Download className={`h-3.5 w-3.5 ${downloading === entry.path ? 'animate-bounce' : ''}`} />
+                        {downloading === entry.path ? 'Fetching…' : 'Download'}
                       </button>
                     ) : (
-                      <>
-                        <FileIcon className="h-4 w-4 shrink-0 text-gray-500" />
-                        <span className="truncate">{entry.name}</span>
-                      </>
+                      <button
+                        onClick={() => openFolder(entry.path)}
+                        className="inline-flex items-center gap-1.5 rounded-md bg-gray-800/60 px-2.5 py-1.5 text-xs text-gray-400 hover:text-white"
+                      >
+                        Open
+                      </button>
                     )}
-                  </div>
-                </td>
-                <td className="hidden px-4 py-2.5 text-gray-500 sm:table-cell">
-                  {entry.isDirectory ? '—' : formatSize(entry.size)}
-                </td>
-                <td className="hidden px-4 py-2.5 text-gray-500 md:table-cell">
-                  {entry.lastModified ? new Date(entry.lastModified).toLocaleString() : '—'}
-                </td>
-                <td className="px-4 py-2.5 text-right">
-                  {!entry.isDirectory && (
-                    <button
-                      onClick={() => download(entry)}
-                      disabled={downloading === entry.path}
-                      className="inline-flex items-center gap-1.5 rounded-md bg-gray-800 px-2.5 py-1.5 text-xs text-gray-300 transition-colors hover:bg-teal-600 hover:text-white disabled:opacity-50"
-                    >
-                      <Download className={`h-3.5 w-3.5 ${downloading === entry.path ? 'animate-bounce' : ''}`} />
-                      {downloading === entry.path ? 'Fetching…' : 'Download'}
-                    </button>
-                  )}
-                </td>
-              </tr>
-            ))}
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>

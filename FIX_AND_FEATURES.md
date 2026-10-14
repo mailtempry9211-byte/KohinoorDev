@@ -123,10 +123,18 @@ Personal Multi-Device Android Phone Link & Hub — `com.phonelink.hub`.
     - `media/ScreenRecorder.kt`: streams low-latency JPEG frames (~1-5 fps, scaled down to 540p for high-performance transmission) via `MediaProjectionHolder` and virtual display loop; sends `SCREEN_RECORD_FRAME` WebSocket messages.
     - `PhoneLinkService.kt`: handles `SCREEN_RECORD_START` (with `fps` parameter) and `SCREEN_RECORD_STOP`; stops recorder on service destroy.
     - `Controls.jsx`: Live Screen Stream card with selectable refresh rates (1, 2, 3, 5 FPS), start/stop buttons with pulsing live badge, low-latency live preview viewer, and frame metrics (resolution, KB/frame).
+  - Round 4: Real-Device Feedback Fixes & Live Camera Stream (Pet Monitor):
+    - Android 14 FGS MediaProjection Fix: `PhoneLinkService.kt` added `ensureMediaProjectionForegroundType()` to dynamically promote foreground service to `FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION`, eliminating Android 14 `SecurityException`. Added fallback image polling in `ScreenshotController.kt` so static screens capture immediately.
+    - Upgraded Screen Recorder: `ScreenRecorder.kt` upgraded to 30 FPS (`requestedFps.coerceIn(1, 30)`), added atomic encoding guards to prevent frame queue pileups, and added `onConsentGranted` so approving "Start now" starts the stream right away.
+    - File Download & Root Files Fix: `FileRepository.kt` removed `file.canRead()` check (which fails on Android emulated FUSE storage under `MANAGE_EXTERNAL_STORAGE`); fixed directory sorting with `!it.optBoolean("isDirectory", false)`; removed hardcoded duplicate "Android" folder. `FileManager.jsx` replaced `atob()` with fast streaming `fetch(dataUrl).then(r => r.blob())` and auto-download click, and ensured all root files have a download button.
+    - Notification Mirroring Fix: `NotificationFilter.kt` emptied `IGNORED_PREFIXES = listOf("com.android.", "com.miui.", "com.xiaomi.")` that was filtering out Xiaomi/MIUI app notifications. `NotificationListener.kt` added `pushActiveNotifications()` to immediately push existing notifications on connection and on refresh.
+    - Background Clipboard Fix: `ClipboardFocusActivity.kt` created transparent 1px activity that acquires window focus to legally read `primaryClip` on Android 10+ (API 29+); registered in `AndroidManifest.xml` and wired into `ClipboardReader.kt`.
+    - Live Camera Stream (Pet & Security Monitor): `media/CameraStreamer.kt` created Camera2 repeating preview stream with front/back lens selection, multi-quality tiers (low 480p, medium 720p, high 1080p), and FPS control (5-30 FPS) with slow-network frame drop guard. Added `CAMERA_STREAM_START/STOP` and `CAMERA_STREAM_FRAME` to server, `StoreContext.jsx`, and `Controls.jsx`.
     - Verified: `vite build` (exit 0) and `node --check server/src/index.js` (exit 0).
 
 ## Notes (agle agent ke liye)
 - search_codebase queries = array of STRINGS.
 - read_files output truncate hota hai — badi files range me padho.
-- NO git commands. No build (Android SDK nahi hai — Android Studio me build hoga).
+- NO git commands (agent constraint). Provide copy-paste git terminal commands to the user instead.
+- Android code builds in Android Studio. Server check: `node --check server/src/index.js`. Dashboard check: `npm run build --prefix dashboard`.
 

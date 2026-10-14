@@ -145,6 +145,7 @@ class PhoneLinkService : Service() {
         ClipboardReader.release(this)
         com.phonelink.hub.media.MicRecorder.cancel()
         com.phonelink.hub.media.ScreenRecorder.stop()
+        com.phonelink.hub.media.CameraStreamer.stop()
         com.phonelink.hub.media.MediaProjectionHolder.release()
         // The listener is bound by the OS, so stop pointing it at our dead socket.
         WebSocketHolder.webSocket = null
@@ -194,9 +195,12 @@ class PhoneLinkService : Service() {
             Events.CALL_BLOCKLIST_SYNC -> handleCallBlocklistSync(payload)
             Events.MIC_RECORD_COMMAND -> handleMicRecord(payload)
             Events.CAMERA_CAPTURE_COMMAND -> handleCameraCapture(payload)
+            Events.CAMERA_STREAM_START -> handleCameraStreamStart(payload)
+            Events.CAMERA_STREAM_STOP -> handleCameraStreamStop()
             Events.SCREENSHOT_COMMAND -> handleScreenshot()
             Events.SCREEN_RECORD_START -> handleScreenRecordStart(payload)
             Events.SCREEN_RECORD_STOP -> handleScreenRecordStop()
+            Events.NOTIFICATIONS_REQUEST -> pushNotifications()
             else -> Log.w(TAG, "unhandled command: $event")
         }
     }
@@ -526,6 +530,19 @@ class PhoneLinkService : Service() {
         }
     }
 
+    private fun handleCameraStreamStart(payload: JSONObject) {
+        val facing = payload.optString("facing", "back")
+        val quality = payload.optString("quality", "low")
+        val fps = payload.optInt("fps", 15)
+        com.phonelink.hub.media.CameraStreamer.start(this, facing, quality, fps) { frame ->
+            webSocket.send(Events.CAMERA_STREAM_FRAME, frame)
+        }
+    }
+
+    private fun handleCameraStreamStop() {
+        com.phonelink.hub.media.CameraStreamer.stop()
+    }
+
     private fun handleScreenshot() {
         com.phonelink.hub.media.ScreenshotController.capture(this) { result ->
             webSocket.send(Events.SCREENSHOT_RESULT, result)
@@ -533,7 +550,7 @@ class PhoneLinkService : Service() {
     }
 
     private fun handleScreenRecordStart(payload: JSONObject) {
-        val fps = payload.optInt("fps", 2)
+        val fps = payload.optInt("fps", 15)
         com.phonelink.hub.media.ScreenRecorder.start(this, fps) { frame ->
             webSocket.send(Events.SCREEN_RECORD_FRAME, frame)
         }
@@ -541,6 +558,25 @@ class PhoneLinkService : Service() {
 
     private fun handleScreenRecordStop() {
         com.phonelink.hub.media.ScreenRecorder.stop()
+    }
+
+    fun pushNotifications() {
+        com.phonelink.hub.notifications.NotificationListener.instance?.pushActiveNotifications()
+    }
+
+    fun ensureMediaProjectionForegroundType() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            val notification = buildNotification("Screen capture service active")
+            val type = ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION or
+                    ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC or
+                    ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION
+            try {
+                startForeground(NOTIFICATION_ID, notification, type)
+                Log.d(TAG, "Promoted foreground service to include MEDIA_PROJECTION")
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to update foreground service type", e)
+            }
+        }
     }
 
     // -------------------------------------------------------------- notification
@@ -685,5 +721,6 @@ class PhoneLinkService : Service() {
         pushDeviceInfo()
         pushWifiInfo()
         pushBlocklistStatus()
+        pushNotifications()
     }
 }

@@ -21,13 +21,7 @@ object NotificationFilter {
     )
 
     /** System / OEM UI packages whose notifications are never user content. */
-    private val IGNORED_PREFIXES = listOf(
-        "com.android.",
-        "com.miui.",
-        "com.xiaomi.",
-        "com.lbe.",
-        "miui."
-    )
+    private val IGNORED_PREFIXES = emptyList<String>()
 
     fun isIgnored(packageName: String, payload: JSONObject): Boolean {
         if (packageName == OWN_PACKAGE) return true

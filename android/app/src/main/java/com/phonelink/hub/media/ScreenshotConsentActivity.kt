@@ -24,10 +24,10 @@ class ScreenshotConsentActivity : ComponentActivity() {
         if (code == Activity.RESULT_OK && data != null) {
             Log.d(TAG, "Screen capture permission granted by user")
             MediaProjectionHolder.updateConsent(code, data)
-            ScreenshotController.onConsentGranted(this)
+            MediaProjectionHolder.notifyConsentGranted(applicationContext)
         } else {
             Log.w(TAG, "Screen capture permission denied by user (code=$code)")
-            ScreenshotController.onConsentDenied()
+            MediaProjectionHolder.notifyConsentDenied()
         }
         finish()
     }

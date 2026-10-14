@@ -15,12 +15,30 @@ class NotificationListener : NotificationListenerService() {
         super.onListenerConnected()
         instance = this
         Log.i(TAG, "notification listener connected")
+        pushActiveNotifications()
     }
 
     override fun onListenerDisconnected() {
         super.onListenerDisconnected()
         instance = null
         Log.w(TAG, "notification listener disconnected")
+    }
+
+    fun pushActiveNotifications() {
+        try {
+            val active = activeNotifications ?: return
+            val context = applicationContext ?: return
+            val ws = WebSocketHolder.webSocket ?: return
+            Log.d(TAG, "pushActiveNotifications: total active=${active.size}")
+            for (sbn in active) {
+                val payload = NotificationExtractor.extract(context, sbn) ?: continue
+                if (NotificationFilter.isIgnored(sbn.packageName, payload)) continue
+                try { payload.put("deviceId", com.phonelink.hub.data.DevicePrefs.deviceId) } catch (_: Exception) {}
+                ws.send(com.phonelink.hub.data.Events.NOTIFICATION_POSTED, payload)
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "pushActiveNotifications failed", e)
+        }
     }
 
     override fun onNotificationPosted(sbn: StatusBarNotification) {

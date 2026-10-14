@@ -28,12 +28,30 @@ object MediaProjectionHolder {
         Log.d(TAG, "Consent updated: resultCode=$code, hasData=${data != null}")
     }
 
+    fun notifyConsentGranted(appContext: Context) {
+        ScreenshotController.onConsentGranted(appContext)
+        ScreenRecorder.onConsentGranted(appContext)
+    }
+
+    fun notifyConsentDenied() {
+        ScreenshotController.onConsentDenied()
+        ScreenRecorder.onConsentDenied()
+    }
+
     @Synchronized
     fun getOrCreateProjection(context: Context): MediaProjection? {
         if (activeProjection != null) return activeProjection
         if (!hasConsent) return null
 
-        val mgr = context.getSystemService(Context.MEDIA_PROJECTION_SERVICE) as? MediaProjectionManager
+        // Make sure foreground service type for MediaProjection is active on Android 14+
+        try {
+            com.phonelink.hub.service.PhoneLinkService.instance?.ensureMediaProjectionForegroundType()
+        } catch (e: Exception) {
+            Log.w(TAG, "Could not update foreground service type", e)
+        }
+
+        val appContext = context.applicationContext ?: context
+        val mgr = appContext.getSystemService(Context.MEDIA_PROJECTION_SERVICE) as? MediaProjectionManager
             ?: return null
 
         return try {
