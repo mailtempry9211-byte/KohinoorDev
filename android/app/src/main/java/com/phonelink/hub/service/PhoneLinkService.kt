@@ -9,6 +9,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.ServiceInfo
 import android.os.Build
+import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
 import android.util.Log
@@ -16,9 +17,11 @@ import androidx.core.app.NotificationCompat
 import com.phonelink.hub.MainActivity
 import com.phonelink.hub.R
 import com.phonelink.hub.calls.CallLogRepository
+import com.phonelink.hub.contacts.ContactsRepository
 import com.phonelink.hub.data.DevicePrefs
 import com.phonelink.hub.data.Events
 import com.phonelink.hub.files.FileRepository
+import com.phonelink.hub.findphone.FindPhoneManager
 import com.phonelink.hub.location.LocationRepository
 import com.phonelink.hub.net.WebSocketClient
 import com.phonelink.hub.sms.SmsRepository
@@ -37,6 +40,32 @@ class PhoneLinkService : Service() {
 
     private lateinit var webSocket: WebSocketClient
     private lateinit var location: LocationRepository
+
+    // BUG 2: periodic refresh so calls/SMS stay fresh while the service runs
+    // (previously they synced only once inside onOpen/syncAll).
+    private val syncHandler = Handler(Looper.getMainLooper())
+    private val periodicSync = object : Runnable {
+        override fun run() {
+            try {
+                pushCalls()
+                pushSms()
+                pushContacts()
+                pushStatus()
+            } catch (e: Exception) {
+                Log.w(TAG, "periodic sync failed", e)
+            }
+            syncHandler.postDelayed(this, PERIODIC_SYNC_MS)
+        }
+    }
+
+    private fun startPeriodicSync() {
+        syncHandler.removeCallbacks(periodicSync)
+        syncHandler.postDelayed(periodicSync, PERIODIC_SYNC_MS)
+    }
+
+    private fun stopPeriodicSync() {
+        syncHandler.removeCallbacks(periodicSync)
+    }
 
     override fun onCreate() {
         super.onCreate()
@@ -87,11 +116,15 @@ class PhoneLinkService : Service() {
         location.startUpdates(LOCATION_INTERVAL_MS) { fix ->
             webSocket.send(Events.LOCATION_UPDATE, fix)
         }
+        startPeriodicSync()
+        // FEATURE D: safety net — reschedules the 15-min restart check.
+        try { com.phonelink.hub.receiver.KeepAliveWorker.schedule(this) } catch (_: Exception) { }
 
         return START_STICKY
     }
 
     override fun onDestroy() {
+        stopPeriodicSync()
         webSocket.disconnect()
         location.stopUpdates()
         // The listener is bound by the OS, so stop pointing it at our dead socket.
@@ -115,6 +148,14 @@ class PhoneLinkService : Service() {
             Events.FILE_DOWNLOAD_REQUEST -> handleFileDownload(payload)
             Events.FILE_UPLOAD_CHUNK -> handleFileUpload(payload)
             Events.LOCATION_REQUEST -> pushLocation()
+            // BUG 5: manual refresh from the dashboard (same as LOCATION_REQUEST).
+            Events.CALLS_REQUEST -> pushCalls()
+            Events.SMS_REQUEST -> pushSms()
+            Events.CONTACTS_REQUEST -> pushContacts()
+            // FEATURE A: dashboard adds a contact on the phone.
+            Events.ADD_CONTACT_COMMAND -> handleAddContact(payload)
+            // FEATURE C: loud alarm even on silent.
+            Events.FIND_PHONE_COMMAND -> FindPhoneManager.start(this)
             Events.NOTIFICATION_DISMISS_COMMAND -> handleNotificationDismiss(payload)
             Events.NOTIFICATION_CLEAR_ALL_COMMAND -> handleNotificationClearAll(payload)
             else -> Log.w(TAG, "unhandled command: $event")
@@ -289,6 +330,40 @@ class PhoneLinkService : Service() {
         }
     }
 
+    /** FEATURE A: same pattern as pushCalls/pushSms. */
+    fun pushContacts() {
+        val hasPermission = ContactsRepository.hasReadPermission(this)
+        val contacts = if (hasPermission) ContactsRepository.readAll(this, 1000) else emptyList()
+        Log.d(TAG, "pushContacts: hasPermission=$hasPermission count=${contacts.size}")
+        webSocket.send(
+            Events.SYNC_CONTACTS,
+            JSONObject().apply {
+                put("deviceId", DevicePrefs.deviceId)
+                put("contacts", toArray(contacts))
+                if (!hasPermission) put("error", "READ_CONTACTS permission not granted")
+            }
+        )
+    }
+
+    private fun handleAddContact(payload: JSONObject) {
+        val name = payload.optString("name")
+        val number = payload.optString("number")
+        val success = ContactsRepository.addContact(this, name, number)
+        Log.d(TAG, "handleAddContact: name=$name success=$success")
+        webSocket.send(
+            Events.ADD_CONTACT_RESULT,
+            JSONObject().apply {
+                put("deviceId", DevicePrefs.deviceId)
+                put("name", name)
+                put("number", number)
+                put("success", success)
+                if (!success) put("error", "WRITE_CONTACTS permission not granted or insert failed")
+            }
+        )
+        // Refresh the dashboard list without a manual reload.
+        if (success) pushContacts()
+    }
+
     private fun pushFileListAt(path: String) {
         webSocket.send(Events.FILE_LIST_RESPONSE, FileRepository.list(path))
     }
@@ -344,6 +419,7 @@ class PhoneLinkService : Service() {
         private const val CHANNEL_ID = "phonelink_service"
         private const val NOTIFICATION_ID = 4201
         private const val LOCATION_INTERVAL_MS = 20_000L
+        private const val PERIODIC_SYNC_MS = 45_000L
 
         @Volatile
         var instance: PhoneLinkService? = null
@@ -430,5 +506,6 @@ class PhoneLinkService : Service() {
         pushCalls()
         pushSms()
         pushLocation()
+        pushContacts()
     }
 }

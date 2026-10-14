@@ -21,7 +21,7 @@ app.use(express.json({ limit: '25mb' }));
 const httpServer = createServer(app);
 const wss = new WebSocketServer({ server: httpServer });
 
-const defaultData = { devices: [], calls: [], messages: [], locations: [], notifications: [] };
+const defaultData = { devices: [], calls: [], messages: [], locations: [], notifications: [], contacts: [] };
 const db = await JSONFilePreset(join(dataDir, 'db.json'), defaultData);
 await db.read();
 
@@ -32,6 +32,23 @@ await db.read();
 // can't silently break again as the schema grows.
 for (const key of Object.keys(defaultData)) {
   if (!Array.isArray(db.data[key])) db.data[key] = [];
+}
+// BUG 1 migration: registration is idempotent by deviceId (devices.set +
+// persistDevice filters by id), but old db.json files may hold stale rows.
+// Collapse exact duplicate ids on startup so the sidebar can't show the same
+// deviceId twice going forward. Rows with *different* ids (from the old
+// regenerating-id bug) are left alone — delete them via DELETE /api/devices/:id.
+{
+  const seen = new Set();
+  const deduped = [];
+  for (const d of db.data.devices) {
+    if (d && d.id && seen.has(d.id)) continue;
+    if (d && d.id) seen.add(d.id);
+    deduped.push(d);
+  }
+  if (deduped.length !== db.data.devices.length) {
+    db.data.devices = deduped;
+  }
 }
 await db.write();
 
@@ -281,6 +298,29 @@ function handleMessage(ws, msg) {
       break;
     }
 
+    // FEATURE A: contacts sync, same pattern as SYNC_CALLS/SYNC_SMS.
+    case 'SYNC_CONTACTS': {
+      const { deviceId, contacts = [] } = payload;
+      if (!deviceId) return;
+      // Replace the device's contact list wholesale (phone sends full list).
+      db.data.contacts = db.data.contacts.filter((c) => c.deviceId !== deviceId);
+      for (const contact of contacts) {
+        db.data.contacts.push({ ...contact, deviceId });
+      }
+      db.write();
+      broadcastToDashboard('CONTACTS_SYNCED', { deviceId, contacts });
+      console.log(`[sync] contacts from ${deviceId}: ${contacts.length}`);
+      break;
+    }
+
+    case 'ADD_CONTACT_RESULT':
+      broadcastToDashboard('ADD_CONTACT_RESULT', payload);
+      break;
+
+    case 'FIND_PHONE_STOPPED':
+      broadcastToDashboard('FIND_PHONE_STOPPED', payload);
+      break;
+
     // The user dismissed it on the phone side; tell the dashboard to drop it too.
     case 'NOTIFICATION_DISMISS_RESULT': {
       broadcastToDashboard('NOTIFICATION_REMOVED', { key: payload.key, deviceId: payload.deviceId });
@@ -349,6 +389,32 @@ app.get('/api/devices/:id/notifications', (req, res) => {
   );
 });
 
+// FEATURE A: contacts list for a device.
+app.get('/api/devices/:id/contacts', (req, res) => {
+  res.json(
+    (db.data.contacts || [])
+      .filter((c) => c.deviceId === req.params.id)
+      .slice(0, 2000)
+  );
+});
+
+// BUG 5: remove a device (e.g. stale duplicates from BUG 1) + its history.
+app.delete('/api/devices/:id', async (req, res) => {
+  const id = req.params.id;
+  const before = db.data.devices.length;
+  db.data.devices = db.data.devices.filter((d) => d.id !== id && d.deviceId !== id);
+  db.data.calls = db.data.calls.filter((c) => c.deviceId !== id);
+  db.data.messages = db.data.messages.filter((m) => m.deviceId !== id);
+  db.data.locations = db.data.locations.filter((l) => l.deviceId !== id);
+  db.data.notifications = db.data.notifications.filter((n) => n.deviceId !== id);
+  if (Array.isArray(db.data.contacts)) db.data.contacts = db.data.contacts.filter((c) => c.deviceId !== id);
+  devices.delete(id);
+  await db.write();
+  broadcastToDashboard('DEVICE_REMOVED', { deviceId: id });
+  console.log(`[device] removed ${id} (${before - db.data.devices.length} record(s))`);
+  res.json({ success: true, removed: before - db.data.devices.length });
+});
+
 app.post('/api/command/:name', (req, res) => {
   const { deviceId } = req.body || {};
   if (!deviceId) return res.status(400).json({ success: false, error: 'deviceId is required' });
@@ -371,6 +437,22 @@ app.post('/api/command/:name', (req, res) => {
       break;
     case 'request-location':
       sendToDevice(deviceId, 'LOCATION_REQUEST', {});
+      break;
+    // BUG 5: manual refresh targets (same pattern as request-location).
+    case 'request-calls':
+      sendToDevice(deviceId, 'CALLS_REQUEST', {});
+      break;
+    case 'request-sms':
+      sendToDevice(deviceId, 'SMS_REQUEST', {});
+      break;
+    case 'request-contacts':
+      sendToDevice(deviceId, 'CONTACTS_REQUEST', {});
+      break;
+    case 'add-contact':
+      sendToDevice(deviceId, 'ADD_CONTACT_COMMAND', { name: req.body.name, number: req.body.number });
+      break;
+    case 'find-phone':
+      sendToDevice(deviceId, 'FIND_PHONE_COMMAND', {});
       break;
     case 'notification-dismiss':
       sendToDevice(deviceId, 'NOTIFICATION_DISMISS_COMMAND', { key: req.body.key });

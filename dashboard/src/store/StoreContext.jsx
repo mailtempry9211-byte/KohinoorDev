@@ -12,6 +12,7 @@ export function StoreProvider({ children }) {
   const [calls, setCalls] = useState({});
   const [messages, setMessages] = useState({});
   const [locations, setLocations] = useState({});
+  const [contacts, setContacts] = useState({});
   const [files, setFiles] = useState({ path: '/', entries: [], downloadBuffer: '' });
   const [notifications, setNotifications] = useState([]);
   const [connected, setConnected] = useState(false);
@@ -188,6 +189,31 @@ function titleOrApp(appName, title, text) {
           break;
         }
 
+        case 'CONTACTS_SYNCED': {
+          setContacts((c) => ({ ...c, [p.deviceId]: p.contacts || [] }));
+          break;
+        }
+
+        case 'ADD_CONTACT_RESULT': {
+          pushToast(p.success ? `Contact ${p.name || ''} saved on phone` : `Add contact failed: ${p.error || 'unknown error'}`, p.success ? 'success' : 'error');
+          break;
+        }
+
+        case 'FIND_PHONE_STOPPED': {
+          pushToast('Phone finder alarm stopped on device', 'success');
+          break;
+        }
+
+        case 'DEVICE_REMOVED': {
+          setDevices((d) => {
+            const next = { ...d };
+            delete next[p.deviceId];
+            return next;
+          });
+          setActiveDeviceId((id) => (id === p.deviceId ? null : id));
+          break;
+        }
+
         default:
           break;
       }
@@ -241,6 +267,10 @@ function titleOrApp(appName, title, text) {
       .then((r) => r.json())
       .then((list) => setNotifications(list))
       .catch(() => {});
+    fetch(`/api/devices/${activeDeviceId}/contacts`)
+      .then((r) => r.json())
+      .then((list) => setContacts((c) => ({ ...c, [activeDeviceId]: list || [] })))
+      .catch(() => {});
   }, [activeDeviceId]);
 
   const sendCommand = useCallback(async (path, body) => {
@@ -265,6 +295,7 @@ function titleOrApp(appName, title, text) {
       calls,
       messages,
       locations,
+      contacts,
       files,
       notifications,
       connected,
@@ -283,9 +314,29 @@ function titleOrApp(appName, title, text) {
       dismissAllNotifications: () => {
         setNotifications([]);
         if (activeDeviceId) sendCommand('notification-clear-all', { deviceId: activeDeviceId });
+      },
+      removeDevice: async (deviceId) => {
+        try {
+          const res = await fetch(`/api/devices/${deviceId}`, { method: 'DELETE' });
+          const out = await res.json();
+          if (out && out.success) {
+            setDevices((d) => {
+              const next = { ...d };
+              delete next[deviceId];
+              return next;
+            });
+            setActiveDeviceId((id) => (id === deviceId ? null : id));
+            pushToast('Device removed', 'success');
+            return true;
+          }
+          pushToast(`Remove failed: ${out.error || 'unknown error'}`, 'error');
+        } catch (e) {
+          pushToast(`Remove failed: ${String(e)}`, 'error');
+        }
+        return false;
       }
     }),
-    [devices, activeDeviceId, calls, messages, locations, files, notifications, connected, incomingCallAlert, smsAlert, toasts, sendCommand, dismissAlert, dismissSmsAlert, pushToast]
+    [devices, activeDeviceId, calls, messages, locations, contacts, files, notifications, connected, incomingCallAlert, smsAlert, toasts, sendCommand, dismissAlert, dismissSmsAlert, pushToast]
   );
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;

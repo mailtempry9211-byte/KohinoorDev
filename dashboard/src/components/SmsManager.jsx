@@ -7,6 +7,8 @@ export default function SmsManager() {
   const [conversations, setConversations] = useState([]);
   const [openThread, setOpenThread] = useState(null);
   const [draft, setDraft] = useState('');
+  // FEATURE B: free-text recipient for starting a new conversation.
+  const [newNumber, setNewNumber] = useState('');
   const [mobileShowThread, setMobileShowThread] = useState(false);
   const bottomRef = useRef(null);
 
@@ -47,7 +49,11 @@ export default function SmsManager() {
     );
   }
 
-  const thread = openThread ? conversations.find((c) => c.address === openThread) : null;
+  const thread = openThread
+    ? conversations.find((c) => c.address === openThread) ||
+      // FEATURE B: fresh number — empty thread so the compose box shows at once.
+      { address: openThread, messages: [], lastDate: Date.now(), lastBody: '', type: 2, unread: 0 }
+    : null;
 
   const handleSend = async (e) => {
     e.preventDefault();
@@ -61,9 +67,14 @@ export default function SmsManager() {
       deviceId: activeDeviceId,
       pending: true
     };
-    setConversations((list) =>
-      list.map((c) => (c.address === openThread ? { ...c, messages: [...c.messages, optimistic], lastBody: optimistic.body, lastDate: optimistic.date } : c))
-    );
+    setConversations((list) => {
+      const exists = list.some((c) => c.address === openThread);
+      if (exists) {
+        return list.map((c) => (c.address === openThread ? { ...c, messages: [...c.messages, optimistic], lastBody: optimistic.body, lastDate: optimistic.date } : c));
+      }
+      // FEATURE B: new number with no history yet — show it immediately.
+      return [...list, { address: openThread, messages: [optimistic], lastDate: optimistic.date, lastBody: optimistic.body, type: 2, unread: 0 }];
+    });
     setDraft('');
     await sendCommand('send-sms', { deviceId: activeDeviceId, recipient: openThread, message: optimistic.body });
   };
@@ -74,6 +85,26 @@ export default function SmsManager() {
         <div className="border-b border-gray-800 px-4 py-3">
           <h2 className="text-sm font-semibold">Conversations</h2>
           <p className="text-xs text-gray-500">{conversations.length} threads</p>
+          {/* FEATURE B: start a new conversation by typing any number. */}
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (!newNumber.trim()) return;
+              setOpenThread(newNumber.trim());
+              setMobileShowThread(true);
+            }}
+            className="mt-2 flex items-center gap-1.5"
+          >
+            <input
+              value={newNumber}
+              onChange={(e) => setNewNumber(e.target.value)}
+              placeholder="New number…"
+              className="min-w-0 flex-1 rounded-lg bg-gray-800 px-3 py-1.5 text-xs outline-none placeholder:text-gray-600 focus:ring-1 focus:ring-indigo-500"
+            />
+            <button type="submit" disabled={!newNumber.trim()} className="shrink-0 rounded-lg bg-indigo-600 px-2.5 py-1.5 text-xs text-white hover:bg-indigo-500 disabled:opacity-40">
+              Chat
+            </button>
+          </form>
         </div>
         <div className="flex-1 overflow-y-auto divide-y divide-gray-800/70 scrollbar-thin">
           {conversations.length === 0 && (

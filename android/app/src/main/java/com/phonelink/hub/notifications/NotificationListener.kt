@@ -30,16 +30,21 @@ class NotificationListener : NotificationListenerService() {
             val payload = NotificationExtractor.extract(context, sbn)
 
             if (payload == null) {
-                Log.v(TAG, "ignored notification from ${sbn.packageName}")
+                Log.d(TAG, "ignored (no text) notification from ${sbn.packageName} key=${sbn.key}")
                 return
             }
             if (NotificationFilter.isIgnored(sbn.packageName, payload)) {
-                Log.v(TAG, "filtered notification from ${sbn.packageName}")
+                Log.d(TAG, "filtered OUT notification from ${sbn.packageName} title=${payload.optString("title")}")
                 return
             }
 
-            val ws = WebSocketHolder.webSocket ?: return
+            val ws = WebSocketHolder.webSocket
+            if (ws == null) {
+                Log.d(TAG, "dropped notification from ${sbn.packageName}: socket not connected yet (listener bound before service)")
+                return
+            }
             ws.send(com.phonelink.hub.data.Events.NOTIFICATION_POSTED, payload)
+            Log.d(TAG, "sent notification from ${sbn.packageName} title=${payload.optString("title")}")
         } catch (e: Exception) {
             Log.e(TAG, "onNotificationPosted failed", e)
         }

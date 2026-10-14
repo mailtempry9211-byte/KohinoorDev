@@ -1,8 +1,8 @@
-import { Smartphone, Battery, BatteryCharging, Wifi, WifiOff } from 'lucide-react';
+import { Smartphone, Battery, BatteryCharging, Wifi, WifiOff, Trash2 } from 'lucide-react';
 import { useStore } from '../store/StoreContext';
 
 export default function Sidebar() {
-  const { devices, activeDeviceId, setActiveDeviceId } = useStore();
+  const { devices, activeDeviceId, setActiveDeviceId, removeDevice } = useStore();
   const deviceList = Object.values(devices);
 
   return (
@@ -28,10 +28,10 @@ export default function Sidebar() {
           const lowBattery = device.battery <= 20;
 
           return (
-            <button
+            <div
               key={device.deviceId}
               onClick={() => setActiveDeviceId(device.deviceId)}
-              className={`w-full rounded-lg p-3 text-left transition-colors ${
+              className={`w-full cursor-pointer rounded-lg p-3 text-left transition-colors ${
                 isActive
                   ? 'bg-indigo-600/20 border border-indigo-500/40'
                   : 'bg-gray-800/50 border border-transparent hover:bg-gray-800'
@@ -49,6 +49,19 @@ export default function Sidebar() {
                 ) : (
                   <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-gray-600" title="Offline" />
                 )}
+                {/* BUG 5: remove stale/duplicate devices. */}
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (window.confirm(`Remove "${device.deviceName}" from the hub? Its synced history will also be deleted.`)) {
+                      removeDevice(device.deviceId);
+                    }
+                  }}
+                  className="shrink-0 rounded p-1 text-gray-600 transition-colors hover:bg-red-600/20 hover:text-red-400"
+                  title="Remove device"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </button>
               </div>
 
               <div className="mt-3 space-y-1.5">
@@ -89,7 +102,7 @@ export default function Sidebar() {
                   )}
                 </div>
               </div>
-            </button>
+            </div>
           );
         })}
       </div>

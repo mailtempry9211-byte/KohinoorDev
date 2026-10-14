@@ -51,6 +51,10 @@ class MainActivity : AppCompatActivity() {
 
         findViewById<Button>(R.id.grantStorageBtn).setOnClickListener { requestStorage() }
         findViewById<Button>(R.id.batteryBtn).setOnClickListener { requestBatteryExemption() }
+        findViewById<Button>(R.id.autostartBtn).setOnClickListener {
+            com.phonelink.hub.util.AutostartHelper.openAutostartSettings(this)
+        }
+        findViewById<Button>(R.id.findPhoneBtn).setOnClickListener { openAccessibilitySettings() }
         findViewById<Button>(R.id.notifyAccessBtn).setOnClickListener { openNotificationAccessSettings() }
         findViewById<Button>(R.id.startBtn).setOnClickListener { startService() }
         findViewById<Button>(R.id.stopBtn).setOnClickListener { stopService() }
@@ -126,6 +130,14 @@ class MainActivity : AppCompatActivity() {
         startActivity(android.content.Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
     }
 
+    /** FEATURE C: Android never allows enabling this silently — user flips the toggle. */
+    private fun openAccessibilitySettings() {
+        try {
+            startActivity(android.content.Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
+        } catch (_: Exception) {
+        }
+    }
+
     private fun refreshNotificationAccess() {
         val enabled = isNotificationListenerEnabled()
         notifyText.text = if (enabled) "Notification access: Enabled (mirroring active)" else "Notification access: Not enabled — tap the button above"
@@ -145,7 +157,10 @@ class MainActivity : AppCompatActivity() {
             Manifest.permission.READ_CALL_LOG,
             Manifest.permission.READ_SMS,
             Manifest.permission.SEND_SMS,
-            Manifest.permission.RECEIVE_SMS
+            Manifest.permission.RECEIVE_SMS,
+            // FEATURE A: view + add contacts.
+            Manifest.permission.READ_CONTACTS,
+            Manifest.permission.WRITE_CONTACTS
         )
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             wanted += Manifest.permission.POST_NOTIFICATIONS

@@ -35,10 +35,14 @@ object FileRepository {
         // here made hasPermission() always return false even after the user
         // granted "All files access".
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            return Environment.isExternalStorageManager()
+            val ok = Environment.isExternalStorageManager()
+            Log.d(TAG, "hasPermission: SDK=${Build.VERSION.SDK_INT} isExternalStorageManager=$ok")
+            return ok
         }
-        return context.checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) ==
+        val granted = context.checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) ==
             android.content.pm.PackageManager.PERMISSION_GRANTED
+        Log.d(TAG, "hasPermission: SDK=${Build.VERSION.SDK_INT} READ_EXTERNAL_STORAGE granted=$granted")
+        return granted
     }
 
     /** Root folder we expose in the dashboard. */
@@ -54,7 +58,9 @@ object FileRepository {
     }
 
     fun list(path: String): JSONObject {
-        if (!hasFullStorageAccess()) {
+        val fullAccess = hasFullStorageAccess()
+        Log.d(TAG, "list: path=$path SDK=${Build.VERSION.SDK_INT} hasFullStorageAccess=$fullAccess")
+        if (!fullAccess) {
             return JSONObject().apply {
                 put("path", "/")
                 put("entries", org.json.JSONArray())
@@ -110,8 +116,10 @@ object FileRepository {
      * never exceeds the socket frame size. [onChunk] receives (base64, isLast).
      */
     fun encodeInChunks(context: Context, path: String, onChunk: (String, Boolean) -> Unit): Boolean {
-        if (!hasPermission(context)) return false
+        val permitted = hasPermission(context)
         val file = resolve(path)
+        Log.d(TAG, "encodeInChunks: path=$path resolved=${file.absolutePath} hasPermission=$permitted isFile=${file.isFile} canRead=${file.canRead()} exists=${file.exists()}")
+        if (!permitted) return false
         if (!file.isFile || !file.canRead()) return false
 
         return try {

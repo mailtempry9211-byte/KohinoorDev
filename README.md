@@ -252,3 +252,14 @@ service from the app if not.
 
 **Map is blank** — Leaflet loads its tiles from OpenStreetMap over the internet.
 The dashboard still needs internet for tiles even though everything else is local.
+
+## Known Limitations
+
+**MIUI/Xiaomi autostart & battery** — on MIUI (Mi 10 and similar), the app must
+ALSO have Autostart enabled (Security app > Permissions > Autostart, or the
+in-app **Enable Autostart** button) and battery saver set to **No restrictions**
+(Settings > Battery > App battery saver). MIUI keeps its own kill list and
+ignores the standard `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS` exemption, so no
+amount of code (foreground service, `START_STICKY`, WorkManager keep-alive) can
+fully prevent the OS from stopping the service until the user flips those two
+toggles manually.

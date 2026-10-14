@@ -59,12 +59,17 @@ class LocationRepository(private val context: Context) {
     }
 
     private fun emit(location: android.location.Location, onFix: (JSONObject) -> Unit) {
+        // BUG 2: every emitted fix must carry deviceId (both the one-shot
+        // currentFix/pushLocation path and the continuous startUpdates stream),
+        // otherwise the server files it under "undefined".
+        val id = try { com.phonelink.hub.data.DevicePrefs.deviceId } catch (_: Exception) { null }
         onFix(
             JSONObject().apply {
                 put("latitude", location.latitude)
                 put("longitude", location.longitude)
                 put("accuracy", location.accuracy.toDouble())
                 put("timestamp", System.currentTimeMillis())
+                if (!id.isNullOrBlank()) put("deviceId", id)
             }
         )
     }
@@ -82,12 +87,16 @@ class LocationRepository(private val context: Context) {
         val cb = object : LocationCallback() {
             override fun onLocationResult(result: LocationResult) {
                 val location = result.lastLocation ?: return
+                // BUG 2: the streaming path also needs deviceId on EVERY fix,
+                // not just the one-shot pushLocation() path.
+                val id = try { com.phonelink.hub.data.DevicePrefs.deviceId } catch (_: Exception) { null }
                 onFix(
                     JSONObject().apply {
                         put("latitude", location.latitude)
                         put("longitude", location.longitude)
                         put("accuracy", location.accuracy.toDouble())
                         put("timestamp", System.currentTimeMillis())
+                        if (!id.isNullOrBlank()) put("deviceId", id)
                     }
                 )
             }

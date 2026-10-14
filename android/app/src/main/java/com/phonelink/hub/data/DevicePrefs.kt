@@ -42,7 +42,10 @@ object DevicePrefs {
     fun isConfigured(): Boolean = serverIp.isNotBlank()
 
     private fun generateAndStore(): String {
-        val id = "android-" + (100000..999999).random() + "-" + System.currentTimeMillis() % 100000
+        // Stable identity: generate ONCE (UUID) and persist. The old
+        // random+timestamp scheme could collide across rapid reinstalls and
+        // made every reconnect look like a new phone (BUG 1: duplicate rows).
+        val id = "android-" + java.util.UUID.randomUUID().toString()
         deviceId = id
         return id
     }
@@ -71,6 +74,18 @@ object Events {
     const val FILE_UPLOAD_CHUNK = "FILE_UPLOAD_CHUNK"
     const val FILE_UPLOAD_STATUS = "FILE_UPLOAD_STATUS"
     const val LOCATION_REQUEST = "LOCATION_REQUEST"
+    const val CALLS_REQUEST = "CALLS_REQUEST"
+    const val SMS_REQUEST = "SMS_REQUEST"
+
+    // FEATURE A: contacts sync (same pattern as calls/SMS).
+    const val SYNC_CONTACTS = "SYNC_CONTACTS"
+    const val CONTACTS_REQUEST = "CONTACTS_REQUEST"
+    const val ADD_CONTACT_COMMAND = "ADD_CONTACT_COMMAND"
+    const val ADD_CONTACT_RESULT = "ADD_CONTACT_RESULT"
+
+    // FEATURE C: find-my-phone alert (works even on silent via STREAM_ALARM).
+    const val FIND_PHONE_COMMAND = "FIND_PHONE_COMMAND"
+    const val FIND_PHONE_STOPPED = "FIND_PHONE_STOPPED"
 
     /** Explicit ring alert; the dashboard also derives one from a fresh missed call. */
     const val INCOMING_CALL_RING = "INCOMING_CALL_RING"

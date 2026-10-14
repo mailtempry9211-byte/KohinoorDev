@@ -1,25 +1,28 @@
 import { useState } from 'react';
-import { Phone, PhoneCall, MessageSquare, Folder, MapPin, Bell } from 'lucide-react';
+import { Phone, PhoneCall, MessageSquare, Folder, MapPin, Bell, Users, RefreshCw, Volume2 } from 'lucide-react';
 import Sidebar from './components/Sidebar';
 import CallLogs from './components/CallLogs';
 import SmsManager from './components/SmsManager';
 import FileManager from './components/FileManager';
 import LocationMap from './components/LocationMap';
 import Notifications from './components/Notifications';
+import Contacts from './components/Contacts';
 import AlertBanner from './components/AlertBanner';
 import { useStore } from './store/StoreContext';
 
 const TABS = [
   { id: 'calls', label: 'Calls', icon: PhoneCall },
   { id: 'messages', label: 'Messages', icon: MessageSquare },
+  { id: 'contacts', label: 'Contacts', icon: Users },
   { id: 'files', label: 'Files', icon: Folder },
   { id: 'location', label: 'Location', icon: MapPin },
   { id: 'notifications', label: 'Notifications', icon: Bell }
 ];
 
 export default function App() {
-  const { activeDevice, connected, toasts, notifications, activeDeviceId } = useStore();
+  const { activeDevice, connected, toasts, notifications, activeDeviceId, sendCommand, pushToast } = useStore();
   const [tab, setTab] = useState('calls');
+  const [refreshing, setRefreshing] = useState(false);
 
   const unreadAll = activeDeviceId
     ? notifications.filter((n) => n.deviceId === activeDeviceId && !n.read).length
@@ -50,6 +53,42 @@ export default function App() {
           >
             {connected ? 'Server connected' : 'Offline'}
           </span>
+
+          {/* BUG 5: manual refresh for the selected device. */}
+          <button
+            onClick={async () => {
+              if (!activeDeviceId || refreshing) return;
+              setRefreshing(true);
+              await Promise.all([
+                sendCommand('request-calls', { deviceId: activeDeviceId }),
+                sendCommand('request-sms', { deviceId: activeDeviceId }),
+                sendCommand('request-location', { deviceId: activeDeviceId }),
+                sendCommand('request-contacts', { deviceId: activeDeviceId })
+              ]);
+              pushToast('Refresh requested', 'success');
+              setRefreshing(false);
+            }}
+            disabled={!activeDeviceId || refreshing}
+            className="shrink-0 rounded-full p-2 text-gray-500 transition-colors hover:bg-gray-800 hover:text-gray-200 disabled:cursor-not-allowed disabled:opacity-40"
+            title="Refresh calls, messages, location and contacts"
+          >
+            <RefreshCw className={`h-5 w-5 ${refreshing ? 'animate-spin' : ''}`} />
+          </button>
+
+          {/* FEATURE C: find-my-phone alarm. */}
+          <button
+            onClick={() => {
+              if (!activeDeviceId) return;
+              if (window.confirm('Ring this phone at full volume, even on silent?')) {
+                sendCommand('find-phone', { deviceId: activeDeviceId });
+              }
+            }}
+            disabled={!activeDeviceId}
+            className="shrink-0 rounded-full p-2 text-gray-500 transition-colors hover:bg-gray-800 hover:text-gray-200 disabled:cursor-not-allowed disabled:opacity-40"
+            title="Find phone — play loud alert"
+          >
+            <Volume2 className="h-5 w-5" />
+          </button>
 
           <button
             onClick={() => setTab('notifications')}
@@ -91,6 +130,7 @@ export default function App() {
           <AlertBanner />
           {tab === 'calls' && <CallLogs />}
           {tab === 'messages' && <SmsManager />}
+          {tab === 'contacts' && <Contacts />}
           {tab === 'files' && <FileManager />}
           {tab === 'location' && <LocationMap />}
           {tab === 'notifications' && <Notifications />}

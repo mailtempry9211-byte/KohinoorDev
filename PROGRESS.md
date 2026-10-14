@@ -18,7 +18,49 @@
 
 ---
 
-## Implemented (2026-10-13)
+## Implemented (2026-10-14) — Bug-fix + feature pass (Mi 10 real-device testing)
+
+**Bugs fixed:**
+- BUG 1: deviceId ab UUID (ek baar generate + SharedPrefs persist); server DEVICE_REGISTER
+  idempotent + startup me same-id duplicate rows ki cleanup.
+- BUG 2: 45s periodic sync loop (calls/SMS/contacts/status, leak-free stop); LocationRepository
+  ke dono paths (one-shot + stream) me har fix par deviceId.
+- BUG 3: NotificationFilter sirf package-based drop (own app + android/systemui +
+  com.android.*/com.miui.*/com.xiaomi.*); ongoing/summary blanket-drop hataya; Log.d har
+  filtered/sent/dropped case me.
+- BUG 4: FileRepository ka R+ check (isExternalStorageManager) verify + Log.d har
+  permission/list/encode path me.
+- BUG 5: server me request-calls/request-sms (+request-contacts/add-contact/find-phone) aur
+  DELETE /api/devices/:id (+history cleanup + DEVICE_REMOVED); dashboard me header refresh
+  button + Sidebar trash icon (confirm ke saath).
+
+**Features added:**
+- FEATURE A (Contacts): Android READ/WRITE_CONTACTS + ContactsRepository (readAll/addContact
+  batch) + SYNC/COMMAND events + pushContacts (syncAll + periodic); server store + REST;
+  dashboard Contacts tab (search + .vcf/.csv export + add form).
+- FEATURE B (SMS send): SmsManager me free-text number field (nayi conversation) + optimistic
+  thread creation; SEND_SMS_RESULT toast pehle se tha.
+- FEATURE C (Find phone): FindPhoneManager (STREAM_ALARM max + loop + 60s timeout + stop
+  notification + volume restore) + minimal accessibility service (no screen read/gestures) +
+  server find-phone + dashboard bell button.
+- FEATURE D (persistence): BootReceiver + RECEIVE_BOOT_COMPLETED + KeepAliveWorker (15 min,
+  work-runtime-ktx) + START_STICKY confirm; MainActivity me Autostart deep-link button
+  (AutostartHelper, kabhi crash nahi) + Find-Phone enable button + MIUI note; README me
+  MIUI Known Limitation.
+
+**Files changed:** DevicePrefs.kt, PhoneLinkService.kt, LocationRepository.kt,
+NotificationFilter.kt, NotificationListener.kt, FileRepository.kt, ContactsRepository.kt
+(new), FindPhoneManager.kt (new), FindPhoneStopReceiver.kt (new),
+FindPhoneAccessibilityService.kt (new), BootReceiver.kt (new), KeepAliveWorker.kt (new),
+AutostartHelper.kt (new), MainActivity.kt, AndroidManifest.xml, app/build.gradle.kts,
+activity_main.xml, accessibility_service_config.xml (new), strings.xml,
+server/src/index.js, dashboard App.jsx, StoreContext.jsx, Sidebar.jsx, SmsManager.jsx,
+Contacts.jsx (new), README.md, TODO.md (new), FIX_AND_FEATURES.md (new).
+
+> NOTE: is machine par Android SDK/Gradle nahi hai — `android/` ko Android Studio me
+> kholkar sync + build + sideload karo. Server syntax read-back se verify ki; shell
+> output capture tootne se `node --check` confirm nahi ho paya, push se pehle
+> `npm run verify --prefix server` chala lena.
 
 **Server** (`/server`) — Express + `ws` on port 5000, lowdb persistence in `server/data/db.json`.
 - Device registry with online/offline tracking, battery, Wi-Fi name, last-seen.

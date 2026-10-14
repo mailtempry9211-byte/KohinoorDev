@@ -50,4 +50,6 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-service:2.8.3")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("com.google.android.gms:play-services-location:21.3.0")
+    // FEATURE D: 15-min keep-alive safety net beyond START_STICKY.
+    implementation("androidx.work:work-runtime-ktx:2.9.0")
 }
