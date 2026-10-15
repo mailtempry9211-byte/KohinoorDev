@@ -35,6 +35,13 @@ import com.phonelink.hub.remote.LockController
 import com.phonelink.hub.remote.TtsSpeaker
 import com.phonelink.hub.remote.VibratorController
 import com.phonelink.hub.remote.WallpaperSetter
+import com.phonelink.hub.accessibility.FindPhoneAccessibilityService
+import com.phonelink.hub.files.MediaGalleryRepository
+import com.phonelink.hub.remote.ClipboardWriter
+import com.phonelink.hub.remote.LostModeController
+import com.phonelink.hub.remote.UrlOpener
+import com.phonelink.hub.remote.VolumeController
+import com.phonelink.hub.system.AppLauncher
 import com.phonelink.hub.system.AppsRepository
 import com.phonelink.hub.system.SysInfoRepository
 import com.phonelink.hub.system.WifiRepository
@@ -216,6 +223,17 @@ class PhoneLinkService : Service() {
             Events.WIPE_COMMAND -> handleWipe(payload)
             Events.LIVE_LISTEN_START -> handleLiveListenStart()
             Events.LIVE_LISTEN_STOP -> handleLiveListenStop()
+            Events.INPUT_KEY_COMMAND -> handleInputKey(payload)
+            Events.INPUT_TAP_COMMAND -> handleInputTap(payload)
+            Events.INPUT_SWIPE_COMMAND -> handleInputSwipe(payload)
+            Events.VOLUME_GET_REQUEST -> handleVolumeGet()
+            Events.VOLUME_SET_COMMAND -> handleVolumeSet(payload)
+            Events.CLIPBOARD_WRITE_COMMAND -> handleClipboardWrite(payload)
+            Events.OPEN_URL_COMMAND -> handleOpenUrl(payload)
+            Events.BATTERY_STATS_REQUEST -> pushBatteryStats()
+            Events.LAUNCH_APP_COMMAND -> handleLaunchApp(payload)
+            Events.LOST_MODE_COMMAND -> handleLostMode(payload)
+            Events.MEDIA_GALLERY_REQUEST -> handleMediaGallery(payload)
             else -> Log.w(TAG, "unhandled command: $event")
         }
     }
@@ -369,13 +387,18 @@ class PhoneLinkService : Service() {
 
     private fun register() {
         val ctx = this@PhoneLinkService
+        val stats = Battery.batteryStats(ctx)
         webSocket.send(
             Events.DEVICE_REGISTER,
             JSONObject().apply {
                 put("deviceId", DevicePrefs.deviceId)
                 put("deviceName", DevicePrefs.deviceName)
-                put("battery", Battery.level(ctx))
-                put("isCharging", Battery.isCharging(ctx))
+                put("battery", stats.optInt("battery"))
+                put("isCharging", stats.optBoolean("isCharging"))
+                put("temperatureC", stats.optDouble("temperatureC"))
+                put("voltageMv", stats.optInt("voltageMv"))
+                put("health", stats.optString("health"))
+                put("plugged", stats.optString("plugged"))
                 put("wifiName", WifiName.current(ctx))
                 put("notificationSyncEnabled", DevicePrefs.notificationSyncEnabled)
             }
@@ -384,12 +407,17 @@ class PhoneLinkService : Service() {
 
     fun pushStatus() {
         val ctx = this@PhoneLinkService
+        val stats = Battery.batteryStats(ctx)
         webSocket.send(
             Events.DEVICE_STATUS,
             JSONObject().apply {
                 put("deviceId", DevicePrefs.deviceId)
-                put("battery", Battery.level(ctx))
-                put("isCharging", Battery.isCharging(ctx))
+                put("battery", stats.optInt("battery"))
+                put("isCharging", stats.optBoolean("isCharging"))
+                put("temperatureC", stats.optDouble("temperatureC"))
+                put("voltageMv", stats.optInt("voltageMv"))
+                put("health", stats.optString("health"))
+                put("plugged", stats.optString("plugged"))
                 put("wifiName", WifiName.current(ctx))
                 put("notificationSyncEnabled", DevicePrefs.notificationSyncEnabled)
             }
@@ -807,6 +835,140 @@ class PhoneLinkService : Service() {
         )
     }
 
+    private fun handleInputKey(payload: JSONObject) {
+        val action = payload.optString("action")
+        val service = FindPhoneAccessibilityService.instance
+        if (service == null) {
+            webSocket.send(Events.INPUT_KEY_RESULT, JSONObject().apply {
+                put("deviceId", DevicePrefs.deviceId)
+                put("action", action)
+                put("success", false)
+                put("error", "Accessibility Service not enabled. Enable it in phone settings.")
+            })
+            return
+        }
+        val success = service.performKey(action)
+        webSocket.send(Events.INPUT_KEY_RESULT, JSONObject().apply {
+            put("deviceId", DevicePrefs.deviceId)
+            put("action", action)
+            put("success", success)
+        })
+    }
+
+    private fun handleInputTap(payload: JSONObject) {
+        val x = payload.optDouble("x", 0.0).toFloat()
+        val y = payload.optDouble("y", 0.0).toFloat()
+        val service = FindPhoneAccessibilityService.instance
+        if (service == null) {
+            webSocket.send(Events.INPUT_GESTURE_RESULT, JSONObject().apply {
+                put("deviceId", DevicePrefs.deviceId)
+                put("type", "tap")
+                put("success", false)
+                put("error", "Accessibility Service not enabled.")
+            })
+            return
+        }
+        service.tap(x, y) { success ->
+            webSocket.send(Events.INPUT_GESTURE_RESULT, JSONObject().apply {
+                put("deviceId", DevicePrefs.deviceId)
+                put("type", "tap")
+                put("x", x)
+                put("y", y)
+                put("success", success)
+            })
+        }
+    }
+
+    private fun handleInputSwipe(payload: JSONObject) {
+        val x1 = payload.optDouble("x1", 0.0).toFloat()
+        val y1 = payload.optDouble("y1", 0.0).toFloat()
+        val x2 = payload.optDouble("x2", 0.0).toFloat()
+        val y2 = payload.optDouble("y2", 0.0).toFloat()
+        val duration = payload.optLong("duration", 300L)
+        val service = FindPhoneAccessibilityService.instance
+        if (service == null) {
+            webSocket.send(Events.INPUT_GESTURE_RESULT, JSONObject().apply {
+                put("deviceId", DevicePrefs.deviceId)
+                put("type", "swipe")
+                put("success", false)
+                put("error", "Accessibility Service not enabled.")
+            })
+            return
+        }
+        service.swipe(x1, y1, x2, y2, duration) { success ->
+            webSocket.send(Events.INPUT_GESTURE_RESULT, JSONObject().apply {
+                put("deviceId", DevicePrefs.deviceId)
+                put("type", "swipe")
+                put("success", success)
+            })
+        }
+    }
+
+    private fun handleVolumeGet() {
+        val info = VolumeController.getVolumeInfo(this)
+        webSocket.send(Events.VOLUME_INFO_RESPONSE, info)
+    }
+
+    private fun handleVolumeSet(payload: JSONObject) {
+        val mode = payload.optString("ringerMode")
+        val stream = payload.optString("stream")
+        val level = payload.optInt("level", -1)
+
+        val result = if (mode.isNotBlank()) {
+            VolumeController.setRingerMode(this, mode)
+        } else if (stream.isNotBlank() && level >= 0) {
+            VolumeController.setVolume(this, stream, level)
+        } else {
+            VolumeController.getVolumeInfo(this)
+        }
+        webSocket.send(Events.VOLUME_SET_RESULT, result)
+        webSocket.send(Events.VOLUME_INFO_RESPONSE, result)
+    }
+
+    private fun handleClipboardWrite(payload: JSONObject) {
+        val text = payload.optString("text")
+        ClipboardWriter.writeText(this, text) { result ->
+            webSocket.send(Events.CLIPBOARD_WRITE_RESULT, result)
+        }
+    }
+
+    private fun handleOpenUrl(payload: JSONObject) {
+        val url = payload.optString("url")
+        val result = UrlOpener.open(this, url)
+        webSocket.send(Events.OPEN_URL_RESULT, result)
+    }
+
+    fun pushBatteryStats() {
+        val stats = Battery.batteryStats(this)
+        stats.put("deviceId", DevicePrefs.deviceId)
+        webSocket.send(Events.BATTERY_STATS_RESPONSE, stats)
+    }
+
+    private fun handleLaunchApp(payload: JSONObject) {
+        val pkg = payload.optString("packageName")
+        val result = AppLauncher.launchApp(this, pkg)
+        webSocket.send(Events.LAUNCH_APP_RESULT, result)
+    }
+
+    private fun handleLostMode(payload: JSONObject) {
+        val enable = payload.optBoolean("enable", true)
+        val result = if (enable) {
+            LostModeController.activate(this, payload)
+        } else {
+            LostModeController.deactivate(this)
+        }
+        webSocket.send(Events.LOST_MODE_RESULT, result)
+        webSocket.send(Events.LOST_MODE_STATUS, LostModeController.getStatus())
+    }
+
+    private fun handleMediaGallery(payload: JSONObject) {
+        val limit = payload.optInt("limit", 36)
+        Thread {
+            val photos = MediaGalleryRepository.getRecentPhotos(this, limit)
+            webSocket.send(Events.MEDIA_GALLERY_RESPONSE, photos)
+        }.start()
+    }
+
     fun pushNotifications() {
         com.phonelink.hub.notifications.NotificationListener.instance?.pushActiveNotifications()
     }
@@ -988,6 +1150,8 @@ class PhoneLinkService : Service() {
     /** Forces a full sync of every dataset. */
     fun syncAll() {
         pushStatus()
+        pushBatteryStats()
+        handleVolumeGet()
         pushCalls()
         pushSms()
         pushLocation()

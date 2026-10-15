@@ -2,6 +2,8 @@ import { useState, useMemo, useEffect, useRef } from 'react';
 import {
   Sliders,
   Volume2,
+  VolumeX,
+  Volume1,
   Square,
   Play,
   Palette,
@@ -32,7 +34,20 @@ import {
   Zap,
   AlertTriangle,
   Upload,
-  Headphones
+  Headphones,
+  Globe,
+  ExternalLink,
+  BatteryCharging,
+  Thermometer,
+  Gauge,
+  CornerDownLeft,
+  Home,
+  Menu,
+  Bell,
+  Settings,
+  Power,
+  MousePointer,
+  Hand
 } from 'lucide-react';
 import { useStore } from '../store/StoreContext';
 
@@ -108,6 +123,24 @@ export default function Controls() {
     latestAudioChunk,
     startLiveListen,
     stopLiveListen,
+    sendInputKey,
+    sendInputTap,
+    sendInputSwipe,
+    volumeInfo,
+    fetchVolumeInfo,
+    setVolumeLevel,
+    setRingerProfile,
+    writeClipboardText,
+    openRemoteUrl,
+    batteryStats,
+    fetchBatteryStats,
+    launchRemoteApp,
+    lostMode,
+    setLostMode,
+    galleryPhotos,
+    galleryLoading,
+    fetchGallery,
+    sendCommand,
     pushToast
   } = useStore();
 
@@ -125,6 +158,33 @@ export default function Controls() {
   // Remote wipe modal state
   const [showWipeModal, setShowWipeModal] = useState(false);
   const [wipeConfirmText, setWipeConfirmText] = useState('');
+
+  // Reverse Clipboard state
+  const [reverseClipText, setReverseClipText] = useState('');
+
+  // Remote URL Opener state
+  const [remoteUrl, setRemoteUrl] = useState('https://www.google.com');
+
+  // Lost Mode state
+  const [lostMessage, setLostMessage] = useState('⚠️ THIS DEVICE IS LOST! Please call the owner immediately.');
+  const [lostPhone, setLostPhone] = useState('');
+  const [lostSoundAlarm, setLostSoundAlarm] = useState(false);
+
+  // Live Screen Touch & Gesture interaction
+  const screenImgRef = useRef(null);
+  const touchStartRef = useRef(null);
+  const [clickIndicator, setClickIndicator] = useState(null);
+
+  // Gallery photo preview modal
+  const [selectedPhoto, setSelectedPhoto] = useState(null);
+
+  // Automatically fetch volume and battery info on load
+  useEffect(() => {
+    if (activeDeviceId) {
+      if (fetchVolumeInfo) fetchVolumeInfo();
+      if (fetchBatteryStats) fetchBatteryStats();
+    }
+  }, [activeDeviceId]);
 
   // Web Audio API playback for Live Listen
   const audioContextRef = useRef(null);
@@ -257,6 +317,50 @@ export default function Controls() {
     return `${(bytes / Math.pow(1024, i)).toFixed(1)} ${units[i]}`;
   };
 
+  const handleScreenPointerDown = (e) => {
+    if (!screenImgRef.current) return;
+    const rect = screenImgRef.current.getBoundingClientRect();
+    touchStartRef.current = {
+      clientX: e.clientX,
+      clientY: e.clientY,
+      time: Date.now(),
+      rect
+    };
+  };
+
+  const handleScreenPointerUp = (e) => {
+    if (!touchStartRef.current || !screenImgRef.current) return;
+    const start = touchStartRef.current;
+    const rect = screenImgRef.current.getBoundingClientRect();
+    const frameW = latestScreenFrame?.width || 1080;
+    const frameH = latestScreenFrame?.height || 2400;
+
+    const dx = e.clientX - start.clientX;
+    const dy = e.clientY - start.clientY;
+    const dist = Math.hypot(dx, dy);
+    const duration = Math.max(100, Math.min(1000, Date.now() - start.time));
+
+    const toPhoneX = (cx) => Math.round(Math.max(0, Math.min(frameW, ((cx - rect.left) / rect.width) * frameW)));
+    const toPhoneY = (cy) => Math.round(Math.max(0, Math.min(frameH, ((cy - rect.top) / rect.height) * frameH)));
+
+    if (dist < 15) {
+      // Tap
+      const px = toPhoneX(e.clientX);
+      const py = toPhoneY(e.clientY);
+      setClickIndicator({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+      setTimeout(() => setClickIndicator(null), 400);
+      sendInputTap(px, py);
+    } else {
+      // Swipe / Drag
+      const px1 = toPhoneX(start.clientX);
+      const py1 = toPhoneY(start.clientY);
+      const px2 = toPhoneX(e.clientX);
+      const py2 = toPhoneY(e.clientY);
+      sendInputSwipe(px1, py1, px2, py2, duration);
+    }
+    touchStartRef.current = null;
+  };
+
   if (!activeDeviceId) {
     return (
       <div className="flex h-full items-center justify-center text-gray-500">
@@ -284,6 +388,213 @@ export default function Controls() {
 
       {/* Grid of Control Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+        {/* SOUND & VOLUME PROFILE MANAGER */}
+        <div className="rounded-xl border border-gray-800 bg-gray-900 p-5 shadow-lg flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between mb-4 border-b border-gray-800 pb-3">
+              <h3 className="font-semibold text-gray-100 flex items-center gap-2 text-sm">
+                <Volume2 className="h-4 w-4 text-teal-400" /> Sound & Volume Profiles
+              </h3>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded border border-gray-700 bg-gray-950 text-teal-400">
+                  {volumeInfo?.ringerMode || 'Normal'}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => fetchVolumeInfo()}
+                  className="p-1 rounded text-gray-400 hover:text-white hover:bg-gray-800"
+                  title="Refresh volumes"
+                >
+                  <RefreshCw className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            </div>
+
+            {/* Ringer Profiles Selector */}
+            <div className="mb-4">
+              <label className="text-xs text-gray-400 block mb-1.5">Ringer Profile</label>
+              <div className="grid grid-cols-3 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setRingerProfile('normal')}
+                  className={`py-1.5 px-2 rounded-lg border text-xs font-medium flex items-center justify-center gap-1.5 transition-all ${
+                    (volumeInfo?.ringerMode === 'normal' || !volumeInfo?.ringerMode)
+                      ? 'border-teal-500 bg-teal-950/50 text-teal-300'
+                      : 'border-gray-800 bg-gray-950 text-gray-400 hover:text-white'
+                  }`}
+                >
+                  <Volume2 className="h-3.5 w-3.5 text-teal-400" /> Normal / Loud
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setRingerProfile('vibrate')}
+                  className={`py-1.5 px-2 rounded-lg border text-xs font-medium flex items-center justify-center gap-1.5 transition-all ${
+                    volumeInfo?.ringerMode === 'vibrate'
+                      ? 'border-amber-500 bg-amber-950/50 text-amber-300'
+                      : 'border-gray-800 bg-gray-950 text-gray-400 hover:text-white'
+                  }`}
+                >
+                  <Radio className="h-3.5 w-3.5 text-amber-400" /> Vibrate
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setRingerProfile('silent')}
+                  className={`py-1.5 px-2 rounded-lg border text-xs font-medium flex items-center justify-center gap-1.5 transition-all ${
+                    volumeInfo?.ringerMode === 'silent'
+                      ? 'border-rose-500 bg-rose-950/50 text-rose-300'
+                      : 'border-gray-800 bg-gray-950 text-gray-400 hover:text-white'
+                  }`}
+                >
+                  <VolumeX className="h-3.5 w-3.5 text-rose-400" /> Silent
+                </button>
+              </div>
+            </div>
+
+            {/* Volume Sliders */}
+            <div className="space-y-3">
+              <div className="bg-gray-950 p-2.5 rounded-lg border border-gray-800">
+                <div className="flex justify-between items-center text-xs mb-1">
+                  <span className="text-gray-300 flex items-center gap-1.5">
+                    <Headphones className="h-3.5 w-3.5 text-teal-400" /> Media & Music
+                  </span>
+                  <span className="font-mono text-teal-400">
+                    {volumeInfo?.mediaVolume ?? 7} / {volumeInfo?.mediaMax ?? 15}
+                  </span>
+                </div>
+                <input
+                  type="range"
+                  min="0"
+                  max={volumeInfo?.mediaMax || 15}
+                  value={volumeInfo?.mediaVolume ?? 7}
+                  onChange={(e) => setVolumeLevel('media', Number(e.target.value))}
+                  className="w-full accent-teal-500 h-1.5 bg-gray-800 rounded-lg cursor-pointer"
+                />
+              </div>
+
+              <div className="bg-gray-950 p-2.5 rounded-lg border border-gray-800">
+                <div className="flex justify-between items-center text-xs mb-1">
+                  <span className="text-gray-300 flex items-center gap-1.5">
+                    <Bell className="h-3.5 w-3.5 text-teal-400" /> Ringtone
+                  </span>
+                  <span className="font-mono text-teal-400">
+                    {volumeInfo?.ringVolume ?? 5} / {volumeInfo?.ringMax ?? 7}
+                  </span>
+                </div>
+                <input
+                  type="range"
+                  min="0"
+                  max={volumeInfo?.ringMax || 7}
+                  value={volumeInfo?.ringVolume ?? 5}
+                  onChange={(e) => setVolumeLevel('ring', Number(e.target.value))}
+                  className="w-full accent-teal-500 h-1.5 bg-gray-800 rounded-lg cursor-pointer"
+                />
+              </div>
+
+              <div className="bg-gray-950 p-2.5 rounded-lg border border-gray-800">
+                <div className="flex justify-between items-center text-xs mb-1">
+                  <span className="text-gray-300 flex items-center gap-1.5">
+                    <Clock className="h-3.5 w-3.5 text-teal-400" /> Alarm
+                  </span>
+                  <span className="font-mono text-teal-400">
+                    {volumeInfo?.alarmVolume ?? 6} / {volumeInfo?.alarmMax ?? 7}
+                  </span>
+                </div>
+                <input
+                  type="range"
+                  min="0"
+                  max={volumeInfo?.alarmMax || 7}
+                  value={volumeInfo?.alarmVolume ?? 6}
+                  onChange={(e) => setVolumeLevel('alarm', Number(e.target.value))}
+                  className="w-full accent-teal-500 h-1.5 bg-gray-800 rounded-lg cursor-pointer"
+                />
+              </div>
+
+              <div className="bg-gray-950 p-2.5 rounded-lg border border-gray-800">
+                <div className="flex justify-between items-center text-xs mb-1">
+                  <span className="text-gray-300 flex items-center gap-1.5">
+                    <Volume1 className="h-3.5 w-3.5 text-teal-400" /> Notifications
+                  </span>
+                  <span className="font-mono text-teal-400">
+                    {volumeInfo?.notificationVolume ?? 5} / {volumeInfo?.notificationMax ?? 7}
+                  </span>
+                </div>
+                <input
+                  type="range"
+                  min="0"
+                  max={volumeInfo?.notificationMax || 7}
+                  value={volumeInfo?.notificationVolume ?? 5}
+                  onChange={(e) => setVolumeLevel('notification', Number(e.target.value))}
+                  className="w-full accent-teal-500 h-1.5 bg-gray-800 rounded-lg cursor-pointer"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* REMOTE URL OPENER */}
+        <div className="rounded-xl border border-gray-800 bg-gray-900 p-5 shadow-lg flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between mb-4 border-b border-gray-800 pb-3">
+              <h3 className="font-semibold text-gray-100 flex items-center gap-2 text-sm">
+                <Globe className="h-4 w-4 text-teal-400" /> Remote Browser URL Opener
+              </h3>
+              <span className="text-xs text-gray-500">Default Browser</span>
+            </div>
+            <p className="text-xs text-gray-400 mb-3">
+              Push and instantly launch any website, YouTube video, or Google Maps directions link in the phone&apos;s browser.
+            </p>
+
+            <div className="space-y-3">
+              <div>
+                <label className="text-xs text-gray-400 block mb-1">Target Web URL</label>
+                <div className="relative">
+                  <Globe className="absolute left-3 top-2.5 h-3.5 w-3.5 text-gray-500" />
+                  <input
+                    type="text"
+                    value={remoteUrl}
+                    onChange={(e) => setRemoteUrl(e.target.value)}
+                    placeholder="https://example.com or youtube.com/..."
+                    className="w-full rounded-lg border border-gray-800 bg-gray-950 pl-9 pr-3 py-2 text-xs text-gray-200 focus:border-teal-500 focus:outline-none font-mono"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <span className="text-[11px] text-gray-500 block mb-1.5">Quick Suggestions:</span>
+                <div className="flex flex-wrap gap-1.5">
+                  {[
+                    { label: 'Google Search', url: 'https://www.google.com' },
+                    { label: 'YouTube', url: 'https://www.youtube.com' },
+                    { label: 'Google Maps', url: 'https://maps.google.com' },
+                    { label: 'Wikipedia', url: 'https://www.wikipedia.org' }
+                  ].map((preset) => (
+                    <button
+                      key={preset.label}
+                      type="button"
+                      onClick={() => setRemoteUrl(preset.url)}
+                      className="px-2 py-1 text-[11px] rounded bg-gray-950 border border-gray-800 text-gray-400 hover:text-teal-300 hover:border-gray-700 transition-colors"
+                    >
+                      {preset.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => {
+              if (remoteUrl.trim()) {
+                openRemoteUrl(remoteUrl);
+              }
+            }}
+            className="mt-4 flex w-full items-center justify-center gap-2 rounded-lg bg-teal-600 px-4 py-2 text-xs font-semibold text-white hover:bg-teal-500 transition-colors shadow"
+          >
+            <ExternalLink className="h-4 w-4" /> Open Link on Phone
+          </button>
+        </div>
 
         {/* 1. VIBRATION CONTROLLER */}
         <div className="rounded-xl border border-gray-800 bg-gray-900 p-5 shadow-lg flex flex-col justify-between">
@@ -893,6 +1204,38 @@ export default function Controls() {
             ))}
           </div>
         )}
+
+        {/* REVERSE CLIPBOARD: Push PC text to Phone Clipboard */}
+        <div className="mt-4 pt-3 border-t border-gray-800">
+          <label className="text-xs text-gray-300 font-medium block mb-1.5 flex items-center justify-between">
+            <span className="flex items-center gap-1.5">
+              <Upload className="h-3.5 w-3.5 text-teal-400" /> Push PC Text to Phone Clipboard
+            </span>
+            <span className="text-[10px] text-gray-500">Injects text directly into Android system clipboard</span>
+          </label>
+          <div className="flex gap-2">
+            <textarea
+              rows={2}
+              value={reverseClipText}
+              onChange={(e) => setReverseClipText(e.target.value)}
+              placeholder="Paste or type text here to inject directly into the phone's system clipboard..."
+              className="flex-1 rounded-lg border border-gray-800 bg-gray-950 p-2 text-xs text-gray-200 focus:border-teal-500 focus:outline-none font-mono"
+            />
+            <button
+              type="button"
+              onClick={() => {
+                if (reverseClipText.trim()) {
+                  writeClipboardText(reverseClipText);
+                  setReverseClipText('');
+                }
+              }}
+              disabled={!reverseClipText.trim()}
+              className="px-4 rounded-lg bg-teal-600 text-white font-medium text-xs hover:bg-teal-500 transition-colors disabled:opacity-40 flex items-center gap-1.5 shrink-0 shadow"
+            >
+              <Copy className="h-3.5 w-3.5" /> Push to Phone
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* 6. SYSTEM TELEMETRY & SPECS */}
@@ -917,7 +1260,7 @@ export default function Controls() {
         {deviceInfo ? (
           <div className="space-y-5">
             {/* Spec chips */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 text-xs">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 text-xs">
               <div className="bg-gray-950 p-3 rounded-lg border border-gray-800">
                 <span className="text-gray-500 block text-[10px]">Model & Brand</span>
                 <span className="font-semibold text-gray-200 truncate block mt-0.5">
@@ -948,6 +1291,28 @@ export default function Controls() {
                   {Math.floor((deviceInfo.uptimeMs || 0) / 3600000)}h {Math.floor(((deviceInfo.uptimeMs || 0) % 3600000) / 60000)}m
                 </span>
                 <span className="text-[10px] text-gray-500 font-mono truncate block">Patch: {deviceInfo.securityPatch || 'N/A'}</span>
+              </div>
+
+              {/* Battery Telemetry Chip */}
+              <div className="bg-gray-950 p-3 rounded-lg border border-gray-800">
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-500 block text-[10px]">Battery & Temp</span>
+                  <span className={`text-[8px] font-semibold px-1.5 py-0.2 rounded border ${
+                    (batteryStats?.temperatureC ?? activeDevice?.temperatureC ?? 28) > 42
+                      ? 'bg-rose-950 border-rose-800 text-rose-400'
+                      : (batteryStats?.temperatureC ?? activeDevice?.temperatureC ?? 28) > 38
+                      ? 'bg-amber-950 border-amber-800 text-amber-400'
+                      : 'bg-emerald-950 border-emerald-800 text-emerald-400'
+                  }`}>
+                    {(batteryStats?.temperatureC ?? activeDevice?.temperatureC ?? 28) > 42 ? 'OVERHEAT' : 'COOL'}
+                  </span>
+                </div>
+                <span className="font-semibold text-gray-200 text-sm block mt-0.5">
+                  {(batteryStats?.temperatureC ?? activeDevice?.temperatureC ?? 28).toFixed(1)}°C · {activeDevice?.battery ?? batteryStats?.battery ?? 100}%
+                </span>
+                <span className="text-[10px] text-teal-400 font-mono truncate block mt-0.5">
+                  {batteryStats?.plugged ?? activeDevice?.plugged ?? (activeDevice?.isCharging ? 'Charging' : 'On Battery')}
+                </span>
               </div>
             </div>
 
@@ -1185,9 +1550,22 @@ export default function Controls() {
                 </div>
                 <div className="flex justify-between items-center text-[10px] text-gray-500 mt-2 pt-2 border-t border-gray-900">
                   <span>v{app.versionName || app.versionCode}</span>
-                  <span className="text-teal-500 group-hover:underline flex items-center gap-1">
-                    <Shield className="h-3 w-3" /> Permissions
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        launchRemoteApp(app.packageName);
+                      }}
+                      className="px-2 py-0.5 rounded bg-teal-950 border border-teal-800 text-teal-300 hover:bg-teal-900 transition-colors flex items-center gap-1 text-[10px]"
+                      title="Launch app on phone"
+                    >
+                      <Play className="h-2.5 w-2.5 fill-current" /> Launch
+                    </button>
+                    <span className="text-teal-500 group-hover:underline flex items-center gap-1">
+                      <Shield className="h-3 w-3" /> Permissions
+                    </span>
+                  </div>
                 </div>
               </div>
             ))}
@@ -1774,12 +2152,90 @@ export default function Controls() {
               </div>
 
               {latestScreenFrame ? (
-                <div className="rounded-lg overflow-hidden border border-gray-800 bg-black flex items-center justify-center max-h-[480px]">
-                  <img
-                    src={`data:image/jpeg;base64,${latestScreenFrame.data}`}
-                    alt="Live Stream Frame"
-                    className="max-h-[480px] w-auto object-contain"
-                  />
+                <div>
+                  <div className="relative rounded-lg overflow-hidden border border-gray-800 bg-black flex items-center justify-center max-h-[500px] select-none cursor-crosshair">
+                    <img
+                      ref={screenImgRef}
+                      src={`data:image/jpeg;base64,${latestScreenFrame.data}`}
+                      alt="Live Stream Frame"
+                      className="max-h-[500px] w-auto object-contain pointer-events-auto"
+                      onPointerDown={handleScreenPointerDown}
+                      onPointerUp={handleScreenPointerUp}
+                      draggable={false}
+                    />
+
+                    {/* Touch Ripple Visual Indicator */}
+                    {clickIndicator && (
+                      <span
+                        className="pointer-events-none absolute h-7 w-7 rounded-full bg-teal-400/80 border-2 border-white -translate-x-1/2 -translate-y-1/2 animate-ping"
+                        style={{ left: `${clickIndicator.x}px`, top: `${clickIndicator.y}px` }}
+                      />
+                    )}
+
+                    <div className="absolute top-2 right-2 px-2 py-0.5 rounded bg-black/60 border border-gray-700 text-[10px] text-teal-300 pointer-events-none flex items-center gap-1">
+                      <MousePointer className="h-3 w-3" /> Click: Tap · Drag: Swipe
+                    </div>
+                  </div>
+
+                  {/* Virtual Navigation Bar & System Keys */}
+                  <div className="mt-3 p-2 rounded-lg bg-gray-900 border border-gray-800 flex flex-wrap items-center justify-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => sendInputKey('back')}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-gray-800 hover:bg-teal-600 hover:text-white text-gray-200 text-xs font-medium transition-colors"
+                      title="Back Key"
+                    >
+                      <CornerDownLeft className="h-3.5 w-3.5" /> Back
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => sendInputKey('home')}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-gray-800 hover:bg-teal-600 hover:text-white text-gray-200 text-xs font-medium transition-colors"
+                      title="Home Screen"
+                    >
+                      <Home className="h-3.5 w-3.5" /> Home
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => sendInputKey('recents')}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-gray-800 hover:bg-teal-600 hover:text-white text-gray-200 text-xs font-medium transition-colors"
+                      title="Recent Applications"
+                    >
+                      <Menu className="h-3.5 w-3.5" /> Recents
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => sendInputKey('notifications')}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-gray-800 hover:bg-teal-600 hover:text-white text-gray-200 text-xs font-medium transition-colors"
+                      title="Pull Down Notification Shade"
+                    >
+                      <Bell className="h-3.5 w-3.5" /> Notifications
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => sendInputKey('quick_settings')}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-gray-800 hover:bg-teal-600 hover:text-white text-gray-200 text-xs font-medium transition-colors"
+                      title="Quick Settings Panel"
+                    >
+                      <Settings className="h-3.5 w-3.5" /> Quick Settings
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => sendInputKey('power_dialog')}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-gray-800 hover:bg-rose-600 hover:text-white text-gray-200 text-xs font-medium transition-colors"
+                      title="Power Off / Restart Dialog"
+                    >
+                      <Power className="h-3.5 w-3.5" /> Power
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => sendInputKey('lock_screen')}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-gray-800 hover:bg-amber-600 hover:text-white text-gray-200 text-xs font-medium transition-colors"
+                      title="Lock Device Screen"
+                    >
+                      <Lock className="h-3.5 w-3.5" /> Lock Screen
+                    </button>
+                  </div>
                 </div>
               ) : (
                 <div className="py-16 text-center text-xs text-gray-400 flex items-center justify-center gap-2 border border-gray-800/80 rounded-lg bg-black">
@@ -1842,12 +2298,236 @@ export default function Controls() {
               )}
             </div>
 
-            <div className="mt-4 pt-3 border-t border-gray-800 flex justify-end">
+            <div className="mt-4 pt-3 border-t border-gray-800 flex items-center justify-between">
+              <button
+                type="button"
+                onClick={() => {
+                  launchRemoteApp(inspectApp.packageName);
+                }}
+                className="rounded-lg bg-teal-600 px-4 py-2 text-xs font-semibold text-white hover:bg-teal-500 transition-colors flex items-center gap-1.5 shadow"
+              >
+                <Play className="h-3.5 w-3.5 fill-current" /> Launch App on Phone
+              </button>
               <button
                 onClick={() => setInspectApp(null)}
                 className="rounded-lg bg-gray-800 px-4 py-2 text-xs font-medium text-gray-200 hover:bg-gray-700"
               >
                 Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 8. LOST MODE EMERGENCY BANNER */}
+      <div className="rounded-xl border border-rose-950/70 bg-gray-900/90 p-5 shadow-lg">
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-4 border-b border-rose-900/40 pb-3">
+          <div className="flex items-center gap-2.5">
+            <div className="p-2 rounded-lg bg-rose-950 border border-rose-800 text-rose-400">
+              <AlertTriangle className="h-4 w-4" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-rose-300 text-sm">Lost Mode Screen Emergency Banner</h3>
+              <p className="text-xs text-rose-300/70">Pin persistent emergency return details & contact dialer on phone lockscreen</p>
+            </div>
+          </div>
+          {lostMode?.active && (
+            <span className="text-[10px] font-semibold text-rose-400 bg-rose-950 border border-rose-800 px-2.5 py-1 rounded-full animate-pulse flex items-center gap-1.5">
+              <span className="h-1.5 w-1.5 rounded-full bg-rose-400" />
+              LOST MODE ACTIVE ON PHONE
+            </span>
+          )}
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+          <div>
+            <label className="text-gray-300 font-medium block mb-1">Emergency Message</label>
+            <textarea
+              rows={2}
+              value={lostMessage}
+              onChange={(e) => setLostMessage(e.target.value)}
+              placeholder="e.g. THIS PHONE IS LOST! Please contact owner for reward."
+              className="w-full rounded-lg border border-gray-800 bg-gray-950 p-2 text-xs text-gray-200 focus:border-rose-500 focus:outline-none"
+            />
+          </div>
+
+          <div className="space-y-3">
+            <div>
+              <label className="text-gray-300 font-medium block mb-1">Owner Contact Phone Number</label>
+              <input
+                type="text"
+                value={lostPhone}
+                onChange={(e) => setLostPhone(e.target.value)}
+                placeholder="e.g. +91 9876543210"
+                className="w-full rounded-lg border border-gray-800 bg-gray-950 px-3 py-2 text-xs text-gray-200 focus:border-rose-500 focus:outline-none font-mono"
+              />
+            </div>
+
+            <label className="flex items-center gap-2 text-xs text-gray-300 cursor-pointer bg-gray-950 p-2 rounded-lg border border-gray-800">
+              <input
+                type="checkbox"
+                checked={lostSoundAlarm}
+                onChange={(e) => setLostSoundAlarm(e.target.checked)}
+                className="rounded border-gray-700 bg-gray-950 text-rose-500 focus:ring-rose-500 h-4 w-4"
+              />
+              <span>Also sound continuous emergency siren alarm</span>
+            </label>
+          </div>
+        </div>
+
+        <div className="mt-4 flex gap-3">
+          {!lostMode?.active ? (
+            <button
+              type="button"
+              onClick={() => setLostMode(true, lostMessage, lostPhone, lostSoundAlarm)}
+              className="flex items-center gap-2 rounded-lg bg-rose-600 px-4 py-2 text-xs font-semibold text-white hover:bg-rose-500 transition-colors shadow"
+            >
+              <AlertTriangle className="h-4 w-4" /> Activate Lost Mode Banner
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setLostMode(false, '', '', false)}
+              className="flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-xs font-semibold text-white hover:bg-emerald-500 transition-colors shadow"
+            >
+              <Check className="h-4 w-4" /> Deactivate Lost Mode
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* 9. MEDIA & PHOTO GALLERY VIEWER */}
+      <div className="rounded-xl border border-gray-800 bg-gray-900 p-5 shadow-lg">
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-4 border-b border-gray-800 pb-3">
+          <div className="flex items-center gap-2.5">
+            <div className="p-2 rounded-lg bg-teal-950/60 border border-teal-800/60 text-teal-400">
+              <ImageIcon className="h-4 w-4" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-gray-100 text-sm">Recent Photos & Camera Gallery</h3>
+              <p className="text-xs text-gray-400">Live visual thumbnail grid of photos captured on phone camera with one-click download</p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => fetchGallery(36)}
+            disabled={galleryLoading}
+            className="flex items-center gap-1.5 rounded-lg bg-gray-950 border border-gray-800 px-3 py-1.5 text-xs text-gray-300 hover:bg-gray-800 hover:text-white transition-colors disabled:opacity-50"
+          >
+            <RefreshCw className={`h-3.5 w-3.5 ${galleryLoading ? 'animate-spin text-teal-400' : ''}`} />
+            {galleryLoading ? 'Loading Photos...' : 'Refresh Gallery'}
+          </button>
+        </div>
+
+        {galleryPhotos.length === 0 ? (
+          <div className="py-10 text-center text-gray-500 text-xs">
+            <ImageIcon className="mx-auto h-8 w-8 opacity-30 mb-2" />
+            <p>No photos loaded yet.</p>
+            <button
+              type="button"
+              onClick={() => fetchGallery(36)}
+              className="mt-3 px-3 py-1.5 rounded-lg bg-teal-600 text-white font-medium text-xs hover:bg-teal-500 transition-colors"
+            >
+              Load Device Photos
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 max-h-[460px] overflow-y-auto scrollbar-thin pr-1">
+            {galleryPhotos.map((photo) => (
+              <div
+                key={photo.id}
+                className="group relative rounded-lg border border-gray-800 bg-gray-950 overflow-hidden flex flex-col justify-between hover:border-teal-500/60 transition-all"
+              >
+                <div
+                  className="aspect-square w-full bg-black flex items-center justify-center overflow-hidden cursor-pointer"
+                  onClick={() => setSelectedPhoto(photo)}
+                >
+                  {photo.thumbnail ? (
+                    <img
+                      src={photo.thumbnail}
+                      alt={photo.name}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                  ) : (
+                    <ImageIcon className="h-8 w-8 text-gray-700" />
+                  )}
+                </div>
+
+                <div className="p-2 text-[10px]">
+                  <p className="truncate text-gray-300 font-medium">{photo.name}</p>
+                  <div className="flex items-center justify-between text-gray-500 mt-1">
+                    <span>{formatBytes(photo.size)}</span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (photo.thumbnail) {
+                          const link = document.createElement('a');
+                          link.href = photo.thumbnail;
+                          link.download = photo.name;
+                          link.click();
+                        } else {
+                          sendCommand('file-download', { deviceId: activeDeviceId, path: photo.path, name: photo.name, mimeType: 'image/jpeg' });
+                        }
+                      }}
+                      className="text-teal-400 hover:text-teal-300 p-0.5 rounded"
+                      title="Download photo"
+                    >
+                      <Download className="h-3 w-3" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Photo Preview Modal */}
+      {selectedPhoto && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-xl rounded-xl border border-gray-800 bg-gray-900 p-5 shadow-2xl flex flex-col max-h-[90vh]">
+            <div className="flex items-center justify-between border-b border-gray-800 pb-3 mb-3">
+              <div>
+                <h4 className="font-semibold text-gray-100 text-sm truncate max-w-sm">{selectedPhoto.name}</h4>
+                <p className="text-[10px] text-gray-400">{formatBytes(selectedPhoto.size)} · {new Date(selectedPhoto.date).toLocaleString()}</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedPhoto(null)}
+                className="p-1 rounded text-gray-400 hover:text-white hover:bg-gray-800"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <div className="flex-1 flex items-center justify-center bg-black rounded-lg overflow-hidden max-h-[60vh] p-2">
+              <img
+                src={selectedPhoto.thumbnail}
+                alt={selectedPhoto.name}
+                className="max-h-full max-w-full object-contain"
+              />
+            </div>
+            <div className="mt-3 flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  const link = document.createElement('a');
+                  link.href = selectedPhoto.thumbnail;
+                  link.download = selectedPhoto.name;
+                  link.click();
+                }}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-teal-600 text-white text-xs font-medium hover:bg-teal-500"
+              >
+                <Download className="h-3.5 w-3.5" /> Download Thumbnail
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  sendCommand('file-download', { deviceId: activeDeviceId, path: selectedPhoto.path, name: selectedPhoto.name, mimeType: 'image/jpeg' });
+                  pushToast('Full resolution download requested from phone', 'info');
+                }}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-800 text-teal-300 text-xs font-medium hover:bg-gray-700 border border-teal-800/60"
+              >
+                <Download className="h-3.5 w-3.5" /> Download Full Res
               </button>
             </div>
           </div>

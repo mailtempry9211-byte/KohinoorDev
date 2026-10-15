@@ -134,7 +134,18 @@ const COMMAND_EVENTS = {
   'torch': 'TORCH_COMMAND',
   'wipe-data': 'WIPE_COMMAND',
   'live-listen-start': 'LIVE_LISTEN_START',
-  'live-listen-stop': 'LIVE_LISTEN_STOP'
+  'live-listen-stop': 'LIVE_LISTEN_STOP',
+  'input-key': 'INPUT_KEY_COMMAND',
+  'input-tap': 'INPUT_TAP_COMMAND',
+  'input-swipe': 'INPUT_SWIPE_COMMAND',
+  'volume-get': 'VOLUME_GET_REQUEST',
+  'volume-set': 'VOLUME_SET_COMMAND',
+  'clipboard-write': 'CLIPBOARD_WRITE_COMMAND',
+  'open-url': 'OPEN_URL_COMMAND',
+  'battery-stats': 'BATTERY_STATS_REQUEST',
+  'launch-app': 'LAUNCH_APP_COMMAND',
+  'lost-mode': 'LOST_MODE_COMMAND',
+  'media-gallery': 'MEDIA_GALLERY_REQUEST'
 };
 
 /** Builds the phone payload for a REST command (1:1 mapping for most). */
@@ -163,6 +174,17 @@ function commandPayload(name, body = {}) {
     case 'wipe-data': return { confirmation: body.confirmation };
     case 'live-listen-start': return {};
     case 'live-listen-stop': return {};
+    case 'input-key': return { action: body.action };
+    case 'input-tap': return { x: Number(body.x) || 0, y: Number(body.y) || 0 };
+    case 'input-swipe': return { x1: Number(body.x1) || 0, y1: Number(body.y1) || 0, x2: Number(body.x2) || 0, y2: Number(body.y2) || 0, duration: Number(body.duration) || 300 };
+    case 'volume-get': return {};
+    case 'volume-set': return { stream: body.stream, level: body.level, ringerMode: body.ringerMode };
+    case 'clipboard-write': return { text: body.text || '' };
+    case 'open-url': return { url: body.url || '' };
+    case 'battery-stats': return {};
+    case 'launch-app': return { packageName: body.packageName || '' };
+    case 'lost-mode': return { enable: body.enable !== false, message: body.message, phone: body.phone, soundAlarm: !!body.soundAlarm };
+    case 'media-gallery': return { limit: Number(body.limit) || 36 };
     default: return {};
   }
 }
@@ -302,6 +324,10 @@ function handleMessage(ws, msg) {
         deviceName: deviceName || 'Android phone',
         battery: Number.isFinite(battery) ? battery : 100,
         isCharging: !!isCharging,
+        temperatureC: payload.temperatureC ?? null,
+        voltageMv: payload.voltageMv ?? null,
+        health: payload.health ?? null,
+        plugged: payload.plugged ?? null,
         wifiName: wifiName || null,
         notificationSyncEnabled: payload.notificationSyncEnabled !== false,
         lastSeen: Date.now(),
@@ -324,6 +350,10 @@ function handleMessage(ws, msg) {
       if (!device) return;
       device.battery = Number.isFinite(battery) ? battery : device.battery;
       device.isCharging = !!isCharging;
+      if (payload.temperatureC != null) device.temperatureC = payload.temperatureC;
+      if (payload.voltageMv != null) device.voltageMv = payload.voltageMv;
+      if (payload.health) device.health = payload.health;
+      if (payload.plugged) device.plugged = payload.plugged;
       if (wifiName) device.wifiName = wifiName;
       if (payload.notificationSyncEnabled !== undefined) device.notificationSyncEnabled = !!payload.notificationSyncEnabled;
       device.lastSeen = Date.now();
@@ -554,6 +584,17 @@ function handleMessage(ws, msg) {
     case 'WIPE_RESULT':
     case 'LIVE_LISTEN_STATUS':
     case 'LIVE_AUDIO_CHUNK':
+    case 'INPUT_KEY_RESULT':
+    case 'INPUT_GESTURE_RESULT':
+    case 'VOLUME_INFO_RESPONSE':
+    case 'VOLUME_SET_RESULT':
+    case 'CLIPBOARD_WRITE_RESULT':
+    case 'OPEN_URL_RESULT':
+    case 'BATTERY_STATS_RESPONSE':
+    case 'LAUNCH_APP_RESULT':
+    case 'LOST_MODE_RESULT':
+    case 'LOST_MODE_STATUS':
+    case 'MEDIA_GALLERY_RESPONSE':
       broadcastToDashboard(msg.event, payload);
       break;
 

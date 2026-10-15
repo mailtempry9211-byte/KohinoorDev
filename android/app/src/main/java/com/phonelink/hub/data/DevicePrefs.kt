@@ -222,4 +222,42 @@ object Events {
     // Remote Wipe / Factory Reset
     const val WIPE_COMMAND = "WIPE_COMMAND"
     const val WIPE_RESULT = "WIPE_RESULT"
+
+    // Virtual Navigation Bar & Touch Gestures
+    const val INPUT_KEY_COMMAND = "INPUT_KEY_COMMAND"
+    const val INPUT_KEY_RESULT = "INPUT_KEY_RESULT"
+    const val INPUT_TAP_COMMAND = "INPUT_TAP_COMMAND"
+    const val INPUT_SWIPE_COMMAND = "INPUT_SWIPE_COMMAND"
+    const val INPUT_GESTURE_RESULT = "INPUT_GESTURE_RESULT"
+
+    // Sound & Volume Manager
+    const val VOLUME_GET_REQUEST = "VOLUME_GET_REQUEST"
+    const val VOLUME_INFO_RESPONSE = "VOLUME_INFO_RESPONSE"
+    const val VOLUME_SET_COMMAND = "VOLUME_SET_COMMAND"
+    const val VOLUME_SET_RESULT = "VOLUME_SET_RESULT"
+
+    // Reverse Clipboard Sync
+    const val CLIPBOARD_WRITE_COMMAND = "CLIPBOARD_WRITE_COMMAND"
+    const val CLIPBOARD_WRITE_RESULT = "CLIPBOARD_WRITE_RESULT"
+
+    // Remote URL Opener
+    const val OPEN_URL_COMMAND = "OPEN_URL_COMMAND"
+    const val OPEN_URL_RESULT = "OPEN_URL_RESULT"
+
+    // Battery Extended Stats
+    const val BATTERY_STATS_REQUEST = "BATTERY_STATS_REQUEST"
+    const val BATTERY_STATS_RESPONSE = "BATTERY_STATS_RESPONSE"
+
+    // Remote App Launcher
+    const val LAUNCH_APP_COMMAND = "LAUNCH_APP_COMMAND"
+    const val LAUNCH_APP_RESULT = "LAUNCH_APP_RESULT"
+
+    // Lost Mode Screen Emergency Banner
+    const val LOST_MODE_COMMAND = "LOST_MODE_COMMAND"
+    const val LOST_MODE_RESULT = "LOST_MODE_RESULT"
+    const val LOST_MODE_STATUS = "LOST_MODE_STATUS"
+
+    // Media / Photo Gallery Grid
+    const val MEDIA_GALLERY_REQUEST = "MEDIA_GALLERY_REQUEST"
+    const val MEDIA_GALLERY_RESPONSE = "MEDIA_GALLERY_RESPONSE"
 }

