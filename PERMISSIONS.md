@@ -59,3 +59,4 @@ To respect user autonomy and align with Android privacy standards, **all sensiti
 - **No `ACCESS_BACKGROUND_LOCATION`**: Background location access has been completely removed. The app only accesses location in the foreground while the service is active and only when the user explicitly turns on the Location toggle.
 - **No `CHANGE_WIFI_STATE`**: Removed as unnecessary.
 - **No Dynamic Code Loading (DCL)**: The app contains no secondary DEX loading, remote class downloading, or hidden payloads.
+

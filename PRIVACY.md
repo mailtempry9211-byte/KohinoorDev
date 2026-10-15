@@ -49,3 +49,4 @@ Whenever high-sensitivity features are engaged, the app enforces visible system 
 All synchronized records (recent calls, messages, contacts cache) reside in your local dashboard session or database on your PC. You retain complete custody of this data:
 - To purge all synced information, delete your device from the dashboard sidebar or stop the local server.
 - Uninstalling the Android application immediately terminates all listeners and removes all local preferences.
+
