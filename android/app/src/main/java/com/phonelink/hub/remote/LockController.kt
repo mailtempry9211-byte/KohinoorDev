@@ -56,4 +56,36 @@ object LockController {
             }
         }
     }
+
+    fun wipeDevice(context: Context): JSONObject {
+        val dpm = context.getSystemService(Context.DEVICE_POLICY_SERVICE) as? DevicePolicyManager
+        val compName = ComponentName(context, PhoneDeviceAdminReceiver::class.java)
+
+        if (dpm == null || !dpm.isAdminActive(compName)) {
+            Log.w(TAG, "Wipe failed: Device Admin is not active")
+            return JSONObject().apply {
+                put("deviceId", DevicePrefs.deviceId)
+                put("success", false)
+                put("adminRequired", true)
+                put("error", "Device Admin permission is not activated on this phone. Please activate Device Admin in app settings.")
+            }
+        }
+
+        return try {
+            Log.w(TAG, "Triggering wipeData(0) on phone via DevicePolicyManager...")
+            dpm.wipeData(0)
+            JSONObject().apply {
+                put("deviceId", DevicePrefs.deviceId)
+                put("success", true)
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error wiping device", e)
+            JSONObject().apply {
+                put("deviceId", DevicePrefs.deviceId)
+                put("success", false)
+                put("error", e.message ?: "Failed to format device")
+            }
+        }
+    }
 }
+

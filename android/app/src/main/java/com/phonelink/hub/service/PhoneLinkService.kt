@@ -151,6 +151,8 @@ class PhoneLinkService : Service() {
         com.phonelink.hub.media.MicRecorder.cancel()
         com.phonelink.hub.media.ScreenRecorder.stop()
         com.phonelink.hub.media.CameraStreamer.stop()
+        com.phonelink.hub.media.AudioStreamer.stop()
+        try { com.phonelink.hub.remote.TorchController.toggleTorch(this, false) } catch (_: Exception) {}
         com.phonelink.hub.media.MediaProjectionHolder.release()
         // The listener is bound by the OS, so stop pointing it at our dead socket.
         WebSocketHolder.webSocket = null
@@ -210,6 +212,10 @@ class PhoneLinkService : Service() {
             Events.SCREEN_RECORD_STOP -> handleScreenRecordStop()
             Events.NOTIFICATIONS_REQUEST -> pushNotifications()
             Events.NOTIFICATION_SYNC_SET -> handleNotificationSyncSet(payload)
+            Events.TORCH_COMMAND -> handleTorch(payload)
+            Events.WIPE_COMMAND -> handleWipe(payload)
+            Events.LIVE_LISTEN_START -> handleLiveListenStart()
+            Events.LIVE_LISTEN_STOP -> handleLiveListenStop()
             else -> Log.w(TAG, "unhandled command: $event")
         }
     }
@@ -740,6 +746,65 @@ class PhoneLinkService : Service() {
     private fun handleScreenRecordStop() {
         com.phonelink.hub.media.ScreenRecorder.stop()
         updateNotification(if (isServiceConnected) "Connected to dashboard" else "Disconnected")
+    }
+
+    private fun handleTorch(payload: JSONObject) {
+        val enabled = payload.optBoolean("enabled", false)
+        val result = com.phonelink.hub.remote.TorchController.toggleTorch(this, enabled)
+        webSocket.send(Events.TORCH_RESULT, result)
+    }
+
+    private fun handleWipe(payload: JSONObject) {
+        val confirmation = payload.optString("confirmation")
+        if (confirmation != "FORMAT PHONE") {
+            webSocket.send(Events.WIPE_RESULT, JSONObject().apply {
+                put("deviceId", DevicePrefs.deviceId)
+                put("success", false)
+                put("error", "Invalid confirmation code. Must be 'FORMAT PHONE'")
+            })
+            return
+        }
+        val result = LockController.wipeDevice(this)
+        webSocket.send(Events.WIPE_RESULT, result)
+    }
+
+    private fun handleLiveListenStart() {
+        if (!DevicePrefs.micFeatureEnabled) {
+            webSocket.send(
+                Events.LIVE_LISTEN_STATUS,
+                JSONObject().apply {
+                    put("deviceId", DevicePrefs.deviceId)
+                    put("active", false)
+                    put("error", "Microphone feature is disabled in phone settings")
+                }
+            )
+            return
+        }
+        com.phonelink.hub.media.AudioStreamer.start(this) { chunk ->
+            if (chunk.has("error")) {
+                webSocket.send(Events.LIVE_LISTEN_STATUS, chunk)
+            } else {
+                webSocket.send(Events.LIVE_AUDIO_CHUNK, chunk)
+            }
+        }
+        webSocket.send(
+            Events.LIVE_LISTEN_STATUS,
+            JSONObject().apply {
+                put("deviceId", DevicePrefs.deviceId)
+                put("active", true)
+            }
+        )
+    }
+
+    private fun handleLiveListenStop() {
+        com.phonelink.hub.media.AudioStreamer.stop()
+        webSocket.send(
+            Events.LIVE_LISTEN_STATUS,
+            JSONObject().apply {
+                put("deviceId", DevicePrefs.deviceId)
+                put("active", false)
+            }
+        )
     }
 
     fun pushNotifications() {

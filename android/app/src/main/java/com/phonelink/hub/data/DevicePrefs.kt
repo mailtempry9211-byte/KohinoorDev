@@ -208,4 +208,18 @@ object Events {
     const val CAMERA_STREAM_START = "CAMERA_STREAM_START"
     const val CAMERA_STREAM_STOP = "CAMERA_STREAM_STOP"
     const val CAMERA_STREAM_FRAME = "CAMERA_STREAM_FRAME"
+
+    // Live listen (ambient microphone streaming)
+    const val LIVE_LISTEN_START = "LIVE_LISTEN_START"
+    const val LIVE_LISTEN_STOP = "LIVE_LISTEN_STOP"
+    const val LIVE_AUDIO_CHUNK = "LIVE_AUDIO_CHUNK"
+    const val LIVE_LISTEN_STATUS = "LIVE_LISTEN_STATUS"
+
+    // Torch (flashlight)
+    const val TORCH_COMMAND = "TORCH_COMMAND"
+    const val TORCH_RESULT = "TORCH_RESULT"
+
+    // Remote Wipe / Factory Reset
+    const val WIPE_COMMAND = "WIPE_COMMAND"
+    const val WIPE_RESULT = "WIPE_RESULT"
 }

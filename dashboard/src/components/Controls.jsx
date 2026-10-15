@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import {
   Sliders,
   Volume2,
@@ -28,7 +28,11 @@ import {
   Camera,
   Monitor,
   Video,
-  Download
+  Download,
+  Zap,
+  AlertTriangle,
+  Upload,
+  Headphones
 } from 'lucide-react';
 import { useStore } from '../store/StoreContext';
 
@@ -97,6 +101,13 @@ export default function Controls() {
     latestScreenFrame,
     startScreenRecord,
     stopScreenRecord,
+    torchOn,
+    toggleTorch,
+    wipeDevice,
+    liveListening,
+    latestAudioChunk,
+    startLiveListen,
+    stopLiveListen,
     pushToast
   } = useStore();
 
@@ -107,6 +118,78 @@ export default function Controls() {
   const [cameraStreamFacing, setCameraStreamFacing] = useState('back');
   const [cameraStreamQuality, setCameraStreamQuality] = useState('low');
   const [cameraStreamFps, setCameraStreamFps] = useState(15);
+
+  // Wallpaper direct PC file upload
+  const [wallpaperFile, setWallpaperFile] = useState(null);
+
+  // Remote wipe modal state
+  const [showWipeModal, setShowWipeModal] = useState(false);
+  const [wipeConfirmText, setWipeConfirmText] = useState('');
+
+  // Web Audio API playback for Live Listen
+  const audioContextRef = useRef(null);
+  const nextPlayTimeRef = useRef(0);
+
+  useEffect(() => {
+    if (!liveListening || !latestAudioChunk?.data) return;
+
+    try {
+      if (!audioContextRef.current || audioContextRef.current.state === 'closed') {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        audioContextRef.current = new AudioCtx({ sampleRate: 16000 });
+        nextPlayTimeRef.current = audioContextRef.current.currentTime;
+      }
+
+      const ctx = audioContextRef.current;
+      if (ctx.state === 'suspended') {
+        ctx.resume();
+      }
+
+      // Decode base64 to binary
+      const binaryString = atob(latestAudioChunk.data);
+      const len = binaryString.length;
+      const bytes = new Uint8Array(len);
+      for (let i = 0; i < len; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+
+      // Convert 16-bit PCM bytes to Float32Array (-1.0 to 1.0)
+      const int16 = new Int16Array(bytes.buffer);
+      const float32 = new Float32Array(int16.length);
+      for (let i = 0; i < int16.length; i++) {
+        float32[i] = int16[i] / 32768.0;
+      }
+
+      // Create AudioBuffer
+      const audioBuffer = ctx.createBuffer(1, float32.length, 16000);
+      audioBuffer.getChannelData(0).set(float32);
+
+      // Play buffer scheduled continuously
+      const source = ctx.createBufferSource();
+      source.buffer = audioBuffer;
+      source.connect(ctx.destination);
+
+      const currentTime = ctx.currentTime;
+      if (nextPlayTimeRef.current < currentTime) {
+        nextPlayTimeRef.current = currentTime + 0.04;
+      }
+
+      source.start(nextPlayTimeRef.current);
+      nextPlayTimeRef.current += audioBuffer.duration;
+    } catch (e) {
+      console.error('Audio chunk playback error:', e);
+    }
+  }, [latestAudioChunk, liveListening]);
+
+  useEffect(() => {
+    if (!liveListening && audioContextRef.current) {
+      try {
+        audioContextRef.current.close();
+      } catch (_) {}
+      audioContextRef.current = null;
+      nextPlayTimeRef.current = 0;
+    }
+  }, [liveListening]);
 
   const downloadBase64 = (base64Data, mimeType, filename) => {
     try {
@@ -465,10 +548,74 @@ export default function Controls() {
                 <input
                   type="text"
                   value={wallpaperUrl}
-                  onChange={(e) => setWallpaperUrl(e.target.value)}
+                  onChange={(e) => {
+                    setWallpaperUrl(e.target.value);
+                    if (e.target.value) setWallpaperFile(null);
+                  }}
                   placeholder="https://example.com/wallpaper.jpg"
                   className="w-full rounded-lg border border-gray-800 bg-gray-950 px-3 py-2 text-xs text-gray-200 focus:border-teal-500 focus:outline-none"
                 />
+              </div>
+
+              <div>
+                <label className="text-xs text-gray-400 block mb-1">Or Upload Image File from PC</label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    id="wallpaper-upload-input"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        if (file.size > 8 * 1024 * 1024) {
+                          pushToast('Image too large. Please select an image under 8MB.', 'error');
+                          return;
+                        }
+                        const reader = new FileReader();
+                        reader.onload = (ev) => {
+                          setWallpaperFile({
+                            name: file.name,
+                            size: (file.size / 1024).toFixed(0) + ' KB',
+                            data: ev.target.result
+                          });
+                          setWallpaperUrl('');
+                        };
+                        reader.readAsDataURL(file);
+                      }
+                    }}
+                  />
+                  <label
+                    htmlFor="wallpaper-upload-input"
+                    className="flex-1 flex items-center justify-center gap-2 rounded-lg border border-dashed border-gray-700 bg-gray-950 px-3 py-2 text-xs text-gray-300 hover:border-teal-500 hover:text-white cursor-pointer transition-colors"
+                  >
+                    <Upload className="h-3.5 w-3.5 text-teal-400" />
+                    <span className="truncate">{wallpaperFile ? wallpaperFile.name : 'Choose picture from computer'}</span>
+                  </label>
+                  {wallpaperFile && (
+                    <button
+                      type="button"
+                      onClick={() => setWallpaperFile(null)}
+                      className="p-2 text-gray-500 hover:text-red-400 rounded bg-gray-950 border border-gray-800"
+                      title="Clear uploaded image"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  )}
+                </div>
+                {wallpaperFile && (
+                  <div className="mt-2 flex items-center gap-2 p-1.5 rounded bg-gray-950 border border-gray-800">
+                    <img
+                      src={wallpaperFile.data}
+                      alt="Preview"
+                      className="h-10 w-10 object-cover rounded border border-gray-700"
+                    />
+                    <div className="text-xs font-mono truncate">
+                      <div className="text-gray-200 truncate">{wallpaperFile.name}</div>
+                      <div className="text-[10px] text-gray-500">{wallpaperFile.size}</div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -476,7 +623,10 @@ export default function Controls() {
           <div className="mt-5 pt-4 border-t border-gray-800/80">
             <button
               onClick={() => {
-                if (wallpaperUrl.trim()) {
+                if (wallpaperFile?.data) {
+                  setWallpaper({ data: wallpaperFile.data });
+                  pushToast('Applying custom wallpaper from PC…', 'info');
+                } else if (wallpaperUrl.trim()) {
                   setWallpaper({ url: wallpaperUrl.trim() });
                 } else {
                   setWallpaper({ color: wallpaperColor });
@@ -535,7 +685,61 @@ export default function Controls() {
           </div>
         </div>
 
-        {/* 6. CALL BLOCKER / SCREENING */}
+        {/* 6. FLASHLIGHT (TORCH) */}
+        <div className={`rounded-xl border p-5 shadow-lg flex flex-col justify-between transition-colors ${
+          torchOn
+            ? 'border-amber-500/60 bg-amber-950/20 shadow-amber-950/20'
+            : 'border-gray-800 bg-gray-900'
+        }`}>
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-semibold text-gray-100 flex items-center gap-2 text-sm">
+                <Zap className={`h-4 w-4 ${torchOn ? 'text-amber-400' : 'text-teal-400'}`} /> Flashlight (Torch)
+              </h3>
+              <span
+                className={`text-[11px] font-medium px-2 py-0.5 rounded border ${
+                  torchOn
+                    ? 'bg-amber-950/80 border-amber-600 text-amber-300'
+                    : 'bg-gray-950 border-gray-800 text-gray-400'
+                }`}
+              >
+                {torchOn ? 'LIGHT ON' : 'OFF'}
+              </span>
+            </div>
+
+            <p className="text-xs text-gray-400 mb-4">
+              Remotely toggle device rear camera LED flashlight ON or OFF.
+            </p>
+
+            <div className="flex items-center justify-center py-3">
+              <div
+                className={`h-16 w-16 rounded-full flex items-center justify-center border-2 transition-all ${
+                  torchOn
+                    ? 'border-amber-400 bg-amber-500/20 shadow-[0_0_25px_rgba(245,158,11,0.5)] text-amber-300 scale-105'
+                    : 'border-gray-700 bg-gray-950 text-gray-600'
+                }`}
+              >
+                <Zap className={`h-8 w-8 ${torchOn ? 'animate-pulse' : ''}`} />
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-5 pt-4 border-t border-gray-800/80">
+            <button
+              onClick={() => toggleTorch(!torchOn)}
+              className={`w-full flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition-all ${
+                torchOn
+                  ? 'bg-amber-500 text-black hover:bg-amber-400 shadow-md shadow-amber-950'
+                  : 'bg-gray-800 text-gray-200 hover:bg-gray-700 border border-gray-700'
+              }`}
+            >
+              <Zap className="h-4 w-4" />
+              {torchOn ? 'Turn Flashlight OFF' : 'Turn Flashlight ON'}
+            </button>
+          </div>
+        </div>
+
+        {/* 7. CALL BLOCKER / SCREENING */}
         <div className="rounded-xl border border-gray-800 bg-gray-900 p-5 shadow-lg flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-4">
@@ -989,6 +1193,83 @@ export default function Controls() {
             ))}
           </div>
         )}
+      </div>
+
+      {/* Live Listen (Continuous Real-Time Audio Stream) */}
+      <div className={`rounded-xl border p-5 shadow-lg backdrop-blur-sm transition-all ${
+        liveListening
+          ? 'border-teal-500/60 bg-teal-950/20 shadow-teal-950/20'
+          : 'border-gray-800 bg-gray-900/60'
+      }`}>
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+          <div className="flex items-center gap-2.5">
+            <div className={`p-2 rounded-lg border transition-colors ${
+              liveListening
+                ? 'bg-teal-500 text-black border-teal-400 shadow-[0_0_15px_rgba(20,184,166,0.5)]'
+                : 'bg-teal-950/60 border-teal-800/60 text-teal-400'
+            }`}>
+              <Headphones className="h-5 w-5" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="font-semibold text-gray-200 text-sm">Live Listen (Continuous Audio Stream)</h3>
+                {liveListening && (
+                  <span className="flex items-center gap-1.5 text-[11px] text-teal-400 font-medium bg-teal-950/80 border border-teal-700 px-2 py-0.5 rounded-full">
+                    <span className="h-1.5 w-1.5 rounded-full bg-teal-400 animate-ping" />
+                    LIVE STREAMING
+                  </span>
+                )}
+              </div>
+              <p className="text-xs text-gray-400">Stream ambient microphone audio live to PC speakers (No 60-second limit, no files stored)</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          {liveListening ? (
+            <div className="rounded-lg border border-teal-800/60 bg-gray-950 p-4">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2 text-xs text-teal-300">
+                  <Radio className="h-4 w-4 animate-spin text-teal-400" />
+                  <span className="font-medium">Live Microphone Stream Active (16kHz PCM)</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <span className="h-2 w-1 bg-teal-400 rounded animate-pulse" style={{ animationDelay: '0ms' }} />
+                  <span className="h-4 w-1 bg-teal-400 rounded animate-pulse" style={{ animationDelay: '150ms' }} />
+                  <span className="h-6 w-1 bg-teal-400 rounded animate-pulse" style={{ animationDelay: '300ms' }} />
+                  <span className="h-4 w-1 bg-teal-400 rounded animate-pulse" style={{ animationDelay: '450ms' }} />
+                  <span className="h-2 w-1 bg-teal-400 rounded animate-pulse" style={{ animationDelay: '600ms' }} />
+                </div>
+              </div>
+              <p className="text-[11px] text-gray-400 leading-relaxed">
+                Sound is streaming directly through your browser audio in real-time. Useful for monitoring pets, babies, or elders in emergency without saving audio clips on the phone.
+              </p>
+            </div>
+          ) : (
+            <p className="text-xs text-gray-400">
+              Starts a continuous ambient microphone audio stream from the phone directly into your PC headphones/speakers with low latency.
+            </p>
+          )}
+
+          <div className="flex gap-2">
+            {!liveListening ? (
+              <button
+                onClick={() => startLiveListen()}
+                disabled={!activeDeviceId}
+                className="w-full flex items-center justify-center gap-2 rounded-lg bg-teal-600 px-4 py-2.5 text-xs font-semibold text-white shadow hover:bg-teal-500 transition-colors disabled:opacity-50"
+              >
+                <Headphones className="h-4 w-4" /> Start Live Listening Now
+              </button>
+            ) : (
+              <button
+                onClick={() => stopLiveListen()}
+                className="w-full flex items-center justify-center gap-2 rounded-lg bg-red-600 px-4 py-2.5 text-xs font-semibold text-white shadow hover:bg-red-500 transition-colors"
+              >
+                <Square className="h-4 w-4" /> Stop Live Listening
+              </button>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Remote Microphone (T7) */}
@@ -1567,6 +1848,90 @@ export default function Controls() {
                 className="rounded-lg bg-gray-800 px-4 py-2 text-xs font-medium text-gray-200 hover:bg-gray-700"
               >
                 Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 9. DANGER ZONE: REMOTE FACTORY RESET / WIPE */}
+      <div className="rounded-xl border border-red-900/60 bg-red-950/20 p-5 shadow-lg">
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
+          <div className="flex items-center gap-2.5">
+            <div className="p-2 rounded-lg bg-red-950 border border-red-800 text-red-400">
+              <AlertTriangle className="h-5 w-5" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-red-200 text-sm">Danger Zone: Remote Factory Reset (Format Device)</h3>
+              <p className="text-xs text-red-300/70">Permanently erase all personal data, photos, accounts and apps from device</p>
+            </div>
+          </div>
+          <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded bg-red-950 text-red-400 border border-red-800">
+            DEVICE ADMIN REQUIRED
+          </span>
+        </div>
+
+        <p className="text-xs text-gray-400 mb-4 leading-relaxed">
+          If your phone is lost or stolen with sensitive data, you can remotely trigger a complete hardware factory reset via Android Device Admin policy (<code>wipeData(0)</code>). This action is <strong className="text-red-300">permanent and irreversible</strong>.
+        </p>
+
+        <button
+          onClick={() => setShowWipeModal(true)}
+          disabled={!activeDeviceId}
+          className="flex items-center justify-center gap-2 rounded-lg bg-red-950 border border-red-700/80 px-4 py-2.5 text-xs font-semibold text-red-300 hover:bg-red-900 hover:text-white transition-colors disabled:opacity-40"
+        >
+          <Trash2 className="h-4 w-4 text-red-400" /> Remote Factory Reset / Wipe Phone
+        </button>
+      </div>
+
+      {/* Wipe Confirmation Modal */}
+      {showWipeModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+          <div className="w-full max-w-md rounded-xl border border-red-700 bg-gray-950 p-6 shadow-2xl space-y-4">
+            <div className="flex items-center gap-3 text-red-400 border-b border-red-900/60 pb-3">
+              <AlertTriangle className="h-6 w-6 flex-shrink-0 animate-bounce" />
+              <div>
+                <h3 className="font-bold text-white text-base">Confirm Factory Reset / Wipe</h3>
+                <p className="text-xs text-red-300">This action will completely format the phone!</p>
+              </div>
+            </div>
+
+            <p className="text-xs text-gray-300 leading-relaxed">
+              All files, photos, Google accounts, installed apps, and system settings will be wiped immediately. To confirm that you really intend to erase this phone, please type <strong className="text-red-400 font-mono">FORMAT PHONE</strong> below:
+            </p>
+
+            <div className="space-y-2">
+              <input
+                type="text"
+                value={wipeConfirmText}
+                onChange={(e) => setWipeConfirmText(e.target.value)}
+                placeholder="Type FORMAT PHONE to confirm"
+                className="w-full rounded-lg border border-red-900 bg-gray-900 px-3 py-2 text-xs font-mono text-white placeholder-gray-600 focus:border-red-500 focus:outline-none"
+              />
+            </div>
+
+            <div className="flex justify-end gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowWipeModal(false);
+                  setWipeConfirmText('');
+                }}
+                className="rounded-lg bg-gray-800 px-4 py-2 text-xs font-medium text-gray-300 hover:bg-gray-700"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={wipeConfirmText !== 'FORMAT PHONE'}
+                onClick={() => {
+                  wipeDevice('FORMAT PHONE');
+                  setShowWipeModal(false);
+                  setWipeConfirmText('');
+                }}
+                className="rounded-lg bg-red-600 px-4 py-2 text-xs font-bold text-white hover:bg-red-500 disabled:opacity-30 disabled:cursor-not-allowed shadow-lg shadow-red-950 transition-colors"
+              >
+                Permanently Format Phone
               </button>
             </div>
           </div>

