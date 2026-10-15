@@ -193,6 +193,8 @@ object ScreenRecorder {
                                 put("mimeType", "image/jpeg")
                                 put("width", targetWidth as Int)
                                 put("height", targetHeight as Int)
+                                put("screenWidth", screenWidth as Int)
+                                put("screenHeight", screenHeight as Int)
                                 put("fps", fps as Int)
                                 put("sizeBytes", bytes.size as Int)
                                 put("timestamp", System.currentTimeMillis() as Long)

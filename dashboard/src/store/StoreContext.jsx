@@ -705,8 +705,18 @@ function titleOrApp(appName, title, text) {
       stopLiveListen: () => sendCommand('live-listen-stop', { deviceId: activeDeviceId }),
       // Virtual Navigation & Gestures
       sendInputKey: (action) => sendCommand('input-key', { deviceId: activeDeviceId, action }),
-      sendInputTap: (x, y) => sendCommand('input-tap', { deviceId: activeDeviceId, x, y }),
-      sendInputSwipe: (x1, y1, x2, y2, duration = 300) => sendCommand('input-swipe', { deviceId: activeDeviceId, x1, y1, x2, y2, duration }),
+      sendInputTap: (x, y, duration = 50) => {
+        if (typeof x === 'object' && x !== null) {
+          return sendCommand('input-tap', { deviceId: activeDeviceId, ...x });
+        }
+        return sendCommand('input-tap', { deviceId: activeDeviceId, x, y, duration });
+      },
+      sendInputSwipe: (x1, y1, x2, y2, duration = 300) => {
+        if (typeof x1 === 'object' && x1 !== null) {
+          return sendCommand('input-swipe', { deviceId: activeDeviceId, ...x1 });
+        }
+        return sendCommand('input-swipe', { deviceId: activeDeviceId, x1, y1, x2, y2, duration });
+      },
       // Volume & Sound Manager
       volumeInfo: activeDeviceId ? volumeInfo[activeDeviceId] : null,
       fetchVolumeInfo: () => sendCommand('volume-get', { deviceId: activeDeviceId }),

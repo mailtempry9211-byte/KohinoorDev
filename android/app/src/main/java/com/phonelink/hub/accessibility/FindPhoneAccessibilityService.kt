@@ -42,7 +42,7 @@ class FindPhoneAccessibilityService : AccessibilityService() {
         }
     }
 
-    fun tap(x: Float, y: Float, onComplete: ((Boolean) -> Unit)? = null) {
+    fun tap(x: Float, y: Float, durationMs: Long = 50L, onComplete: ((Boolean) -> Unit)? = null) {
         if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.N) {
             onComplete?.invoke(false)
             return
@@ -51,7 +51,7 @@ class FindPhoneAccessibilityService : AccessibilityService() {
             val path = android.graphics.Path().apply {
                 moveTo(x, y)
             }
-            val stroke = android.accessibilityservice.GestureDescription.StrokeDescription(path, 0, 50)
+            val stroke = android.accessibilityservice.GestureDescription.StrokeDescription(path, 0, durationMs.coerceIn(20L, 1200L))
             val gesture = android.accessibilityservice.GestureDescription.Builder().addStroke(stroke).build()
             dispatchGesture(gesture, object : GestureResultCallback() {
                 override fun onCompleted(gestureDescription: android.accessibilityservice.GestureDescription?) {

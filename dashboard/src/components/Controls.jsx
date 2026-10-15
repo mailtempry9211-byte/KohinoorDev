@@ -332,31 +332,65 @@ export default function Controls() {
     if (!touchStartRef.current || !screenImgRef.current) return;
     const start = touchStartRef.current;
     const rect = screenImgRef.current.getBoundingClientRect();
-    const frameW = latestScreenFrame?.width || 1080;
-    const frameH = latestScreenFrame?.height || 2400;
+    if (rect.width <= 0 || rect.height <= 0) return;
 
     const dx = e.clientX - start.clientX;
     const dy = e.clientY - start.clientY;
     const dist = Math.hypot(dx, dy);
-    const duration = Math.max(100, Math.min(1000, Date.now() - start.time));
+    const holdDuration = Math.max(50, Math.min(1500, Date.now() - start.time));
 
-    const toPhoneX = (cx) => Math.round(Math.max(0, Math.min(frameW, ((cx - rect.left) / rect.width) * frameW)));
-    const toPhoneY = (cy) => Math.round(Math.max(0, Math.min(frameH, ((cy - rect.top) / rect.height) * frameH)));
+    // Calculate normalized coordinate ratios (0.0 to 1.0)
+    const getRatioX = (cx) => Math.max(0, Math.min(1, (cx - rect.left) / rect.width));
+    const getRatioY = (cy) => Math.max(0, Math.min(1, (cy - rect.top) / rect.height));
+
+    const xRatio = getRatioX(e.clientX);
+    const yRatio = getRatioY(e.clientY);
+
+    // Physical dimensions fallback if screenWidth is provided
+    const phoneW = latestScreenFrame?.screenWidth || latestScreenFrame?.width || 1080;
+    const phoneH = latestScreenFrame?.screenHeight || latestScreenFrame?.height || 2400;
+    const px = Math.round(xRatio * phoneW);
+    const py = Math.round(yRatio * phoneH);
 
     if (dist < 15) {
-      // Tap
-      const px = toPhoneX(e.clientX);
-      const py = toPhoneY(e.clientY);
-      setClickIndicator({ x: e.clientX - rect.left, y: e.clientY - rect.top });
-      setTimeout(() => setClickIndicator(null), 400);
-      sendInputTap(px, py);
+      // Tap (Quick or Long-Press)
+      const rippleX = Math.round(e.clientX - rect.left);
+      const rippleY = Math.round(e.clientY - rect.top);
+      setClickIndicator({ id: Date.now(), x: rippleX, y: rippleY });
+      setTimeout(() => setClickIndicator(null), 500);
+
+      // Duration for tap: if held > 400ms, treat as long-press
+      const tapDuration = holdDuration > 400 ? 800 : 50;
+      sendInputTap({
+        x: px,
+        y: py,
+        xRatio,
+        yRatio,
+        duration: tapDuration
+      });
     } else {
       // Swipe / Drag
-      const px1 = toPhoneX(start.clientX);
-      const py1 = toPhoneY(start.clientY);
-      const px2 = toPhoneX(e.clientX);
-      const py2 = toPhoneY(e.clientY);
-      sendInputSwipe(px1, py1, px2, py2, duration);
+      const x1Ratio = getRatioX(start.clientX);
+      const y1Ratio = getRatioY(start.clientY);
+      const x2Ratio = xRatio;
+      const y2Ratio = yRatio;
+      const px1 = Math.round(x1Ratio * phoneW);
+      const py1 = Math.round(y1Ratio * phoneH);
+      const px2 = Math.round(x2Ratio * phoneW);
+      const py2 = Math.round(y2Ratio * phoneH);
+      const swipeDuration = Math.max(100, Math.min(1200, holdDuration));
+
+      sendInputSwipe({
+        x1: px1,
+        y1: py1,
+        x2: px2,
+        y2: py2,
+        x1Ratio,
+        y1Ratio,
+        x2Ratio,
+        y2Ratio,
+        duration: swipeDuration
+      });
     }
     touchStartRef.current = null;
   };
@@ -2153,24 +2187,27 @@ export default function Controls() {
 
               {latestScreenFrame ? (
                 <div>
-                  <div className="relative rounded-lg overflow-hidden border border-gray-800 bg-black flex items-center justify-center max-h-[500px] select-none cursor-crosshair">
-                    <img
-                      ref={screenImgRef}
-                      src={`data:image/jpeg;base64,${latestScreenFrame.data}`}
-                      alt="Live Stream Frame"
-                      className="max-h-[500px] w-auto object-contain pointer-events-auto"
-                      onPointerDown={handleScreenPointerDown}
-                      onPointerUp={handleScreenPointerUp}
-                      draggable={false}
-                    />
-
-                    {/* Touch Ripple Visual Indicator */}
-                    {clickIndicator && (
-                      <span
-                        className="pointer-events-none absolute h-7 w-7 rounded-full bg-teal-400/80 border-2 border-white -translate-x-1/2 -translate-y-1/2 animate-ping"
-                        style={{ left: `${clickIndicator.x}px`, top: `${clickIndicator.y}px` }}
+                  <div className="rounded-lg overflow-hidden border border-gray-800 bg-black flex items-center justify-center select-none relative">
+                    <div className="relative inline-block overflow-hidden cursor-crosshair leading-none">
+                      <img
+                        ref={screenImgRef}
+                        src={`data:image/jpeg;base64,${latestScreenFrame.data}`}
+                        alt="Live Stream Frame"
+                        className="max-h-[500px] w-auto block pointer-events-auto select-none"
+                        onPointerDown={handleScreenPointerDown}
+                        onPointerUp={handleScreenPointerUp}
+                        draggable={false}
                       />
-                    )}
+
+                      {/* Touch Ripple Visual Indicator positioned exactly on the image coordinates */}
+                      {clickIndicator && (
+                        <span
+                          key={clickIndicator.id}
+                          className="pointer-events-none absolute h-7 w-7 rounded-full bg-teal-400/80 border-2 border-white -translate-x-1/2 -translate-y-1/2 animate-ping"
+                          style={{ left: `${clickIndicator.x}px`, top: `${clickIndicator.y}px` }}
+                        />
+                      )}
+                    </div>
 
                     <div className="absolute top-2 right-2 px-2 py-0.5 rounded bg-black/60 border border-gray-700 text-[10px] text-teal-300 pointer-events-none flex items-center gap-1">
                       <MousePointer className="h-3 w-3" /> Click: Tap · Drag: Swipe

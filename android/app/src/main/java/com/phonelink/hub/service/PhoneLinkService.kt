@@ -855,9 +855,39 @@ class PhoneLinkService : Service() {
         })
     }
 
+    private fun getRealScreenSize(): Pair<Int, Int> {
+        val wm = getSystemService(Context.WINDOW_SERVICE) as? android.view.WindowManager
+        if (wm != null) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                val bounds = wm.maximumWindowMetrics.bounds
+                return Pair(bounds.width(), bounds.height())
+            } else {
+                val dm = android.util.DisplayMetrics()
+                @Suppress("DEPRECATION")
+                wm.defaultDisplay.getRealMetrics(dm)
+                if (dm.widthPixels > 0 && dm.heightPixels > 0) {
+                    return Pair(dm.widthPixels, dm.heightPixels)
+                }
+            }
+        }
+        val dm = resources.displayMetrics
+        return Pair(dm.widthPixels, dm.heightPixels)
+    }
+
     private fun handleInputTap(payload: JSONObject) {
-        val x = payload.optDouble("x", 0.0).toFloat()
-        val y = payload.optDouble("y", 0.0).toFloat()
+        val (screenWidth, screenHeight) = getRealScreenSize()
+        val realX = if (payload.has("xRatio") && !payload.isNull("xRatio")) {
+            (payload.getDouble("xRatio") * screenWidth).toFloat().coerceIn(0f, screenWidth.toFloat())
+        } else {
+            payload.optDouble("x", 0.0).toFloat()
+        }
+        val realY = if (payload.has("yRatio") && !payload.isNull("yRatio")) {
+            (payload.getDouble("yRatio") * screenHeight).toFloat().coerceIn(0f, screenHeight.toFloat())
+        } else {
+            payload.optDouble("y", 0.0).toFloat()
+        }
+        val duration = payload.optLong("duration", 50L)
+
         val service = FindPhoneAccessibilityService.instance
         if (service == null) {
             webSocket.send(Events.INPUT_GESTURE_RESULT, JSONObject().apply {
@@ -868,23 +898,41 @@ class PhoneLinkService : Service() {
             })
             return
         }
-        service.tap(x, y) { success ->
+        service.tap(realX, realY, duration) { success ->
             webSocket.send(Events.INPUT_GESTURE_RESULT, JSONObject().apply {
                 put("deviceId", DevicePrefs.deviceId)
                 put("type", "tap")
-                put("x", x)
-                put("y", y)
+                put("x", realX)
+                put("y", realY)
                 put("success", success)
             })
         }
     }
 
     private fun handleInputSwipe(payload: JSONObject) {
-        val x1 = payload.optDouble("x1", 0.0).toFloat()
-        val y1 = payload.optDouble("y1", 0.0).toFloat()
-        val x2 = payload.optDouble("x2", 0.0).toFloat()
-        val y2 = payload.optDouble("y2", 0.0).toFloat()
+        val (screenWidth, screenHeight) = getRealScreenSize()
+        val realX1 = if (payload.has("x1Ratio") && !payload.isNull("x1Ratio")) {
+            (payload.getDouble("x1Ratio") * screenWidth).toFloat().coerceIn(0f, screenWidth.toFloat())
+        } else {
+            payload.optDouble("x1", 0.0).toFloat()
+        }
+        val realY1 = if (payload.has("y1Ratio") && !payload.isNull("y1Ratio")) {
+            (payload.getDouble("y1Ratio") * screenHeight).toFloat().coerceIn(0f, screenHeight.toFloat())
+        } else {
+            payload.optDouble("y1", 0.0).toFloat()
+        }
+        val realX2 = if (payload.has("x2Ratio") && !payload.isNull("x2Ratio")) {
+            (payload.getDouble("x2Ratio") * screenWidth).toFloat().coerceIn(0f, screenWidth.toFloat())
+        } else {
+            payload.optDouble("x2", 0.0).toFloat()
+        }
+        val realY2 = if (payload.has("y2Ratio") && !payload.isNull("y2Ratio")) {
+            (payload.getDouble("y2Ratio") * screenHeight).toFloat().coerceIn(0f, screenHeight.toFloat())
+        } else {
+            payload.optDouble("y2", 0.0).toFloat()
+        }
         val duration = payload.optLong("duration", 300L)
+
         val service = FindPhoneAccessibilityService.instance
         if (service == null) {
             webSocket.send(Events.INPUT_GESTURE_RESULT, JSONObject().apply {
@@ -895,7 +943,7 @@ class PhoneLinkService : Service() {
             })
             return
         }
-        service.swipe(x1, y1, x2, y2, duration) { success ->
+        service.swipe(realX1, realY1, realX2, realY2, duration) { success ->
             webSocket.send(Events.INPUT_GESTURE_RESULT, JSONObject().apply {
                 put("deviceId", DevicePrefs.deviceId)
                 put("type", "swipe")

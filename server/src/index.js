@@ -175,8 +175,24 @@ function commandPayload(name, body = {}) {
     case 'live-listen-start': return {};
     case 'live-listen-stop': return {};
     case 'input-key': return { action: body.action };
-    case 'input-tap': return { x: Number(body.x) || 0, y: Number(body.y) || 0 };
-    case 'input-swipe': return { x1: Number(body.x1) || 0, y1: Number(body.y1) || 0, x2: Number(body.x2) || 0, y2: Number(body.y2) || 0, duration: Number(body.duration) || 300 };
+    case 'input-tap': return {
+      x: Number(body.x) || 0,
+      y: Number(body.y) || 0,
+      xRatio: body.xRatio !== undefined && body.xRatio !== null ? Number(body.xRatio) : null,
+      yRatio: body.yRatio !== undefined && body.yRatio !== null ? Number(body.yRatio) : null,
+      duration: Number(body.duration) || 50
+    };
+    case 'input-swipe': return {
+      x1: Number(body.x1) || 0,
+      y1: Number(body.y1) || 0,
+      x2: Number(body.x2) || 0,
+      y2: Number(body.y2) || 0,
+      x1Ratio: body.x1Ratio !== undefined && body.x1Ratio !== null ? Number(body.x1Ratio) : null,
+      y1Ratio: body.y1Ratio !== undefined && body.y1Ratio !== null ? Number(body.y1Ratio) : null,
+      x2Ratio: body.x2Ratio !== undefined && body.x2Ratio !== null ? Number(body.x2Ratio) : null,
+      y2Ratio: body.y2Ratio !== undefined && body.y2Ratio !== null ? Number(body.y2Ratio) : null,
+      duration: Number(body.duration) || 300
+    };
     case 'volume-get': return {};
     case 'volume-set': return { stream: body.stream, level: body.level, ringerMode: body.ringerMode };
     case 'clipboard-write': return { text: body.text || '' };
