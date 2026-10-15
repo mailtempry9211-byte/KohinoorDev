@@ -15,9 +15,61 @@ import {
   ChevronDown,
   ChevronUp,
   Activity,
-  Gauge
+  Gauge,
+  Locate,
+  Compass,
+  Car,
+  CheckCircle2,
+  Building2
 } from 'lucide-react';
 import { useStore } from '../store/StoreContext';
+
+// In-memory geocoding cache to avoid duplicate API requests
+const addressCache = new Map();
+
+async function fetchAddressForCoord(lat, lng) {
+  if (lat == null || lng == null) return null;
+  const key = `${Number(lat).toFixed(4)},${Number(lng).toFixed(4)}`;
+  if (addressCache.has(key)) return addressCache.get(key);
+
+  try {
+    const res = await fetch(
+      `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=en`
+    );
+    if (res.ok) {
+      const d = await res.json();
+      const parts = [
+        d.locality || d.city,
+        d.principalSubdivision,
+        d.countryName
+      ].filter(Boolean);
+      const name = parts.join(', ');
+      if (name) {
+        addressCache.set(key, name);
+        return name;
+      }
+    }
+  } catch (_) {}
+
+  try {
+    const res = await fetch(
+      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`,
+      { headers: { 'Accept-Language': 'en' } }
+    );
+    if (res.ok) {
+      const d = await res.json();
+      const road = d.address?.road || d.address?.suburb || d.address?.neighbourhood;
+      const city = d.address?.city || d.address?.town || d.address?.county;
+      const name = [road, city].filter(Boolean).join(', ') || d.display_name?.split(',').slice(0, 3).join(',');
+      if (name) {
+        addressCache.set(key, name);
+        return name;
+      }
+    }
+  } catch (_) {}
+
+  return null;
+}
 
 // Custom device marker (teal teardrop)
 const deviceIcon = L.divIcon({
@@ -69,6 +121,16 @@ function Recenter({ position, zoom }) {
   return null;
 }
 
+function FlyToFocus({ focus }) {
+  const map = useMap();
+  useEffect(() => {
+    if (focus && focus.position && Number.isFinite(focus.position[0]) && Number.isFinite(focus.position[1])) {
+      map.flyTo(focus.position, focus.zoom || 17, { duration: 1.0 });
+    }
+  }, [focus, map]);
+  return null;
+}
+
 // Haversine formula to compute distance in meters between two lat/lng points
 function haversineDistanceMeters(lat1, lon1, lat2, lon2) {
   const R = 6371e3;
@@ -97,9 +159,28 @@ export default function LocationMap() {
   const prevInsideStateRef = useRef(null);
 
   // --- Route Mapping / Breadcrumbs state ---
-  const [routeTrackingEnabled, setRouteTrackingEnabled] = useState(true);
+  // Default to FALSE (OFF) unless user explicitly turned it ON in localStorage
+  const [routeTrackingEnabled, setRouteTrackingEnabled] = useState(() => {
+    try {
+      return localStorage.getItem('phonelink_route_tracking') === 'true';
+    } catch (_) {
+      return false;
+    }
+  });
   const [routePoints, setRoutePoints] = useState([]);
-  const [showRouteTimeline, setShowRouteTimeline] = useState(false);
+  const [showRouteTimeline, setShowRouteTimeline] = useState(true);
+  const [timelineViewMode, setTimelineViewMode] = useState('grouped'); // 'grouped' (Stops & Trips) or 'raw'
+  const [addressMap, setAddressMap] = useState({});
+  const [currentAddress, setCurrentAddress] = useState(null);
+  const [mapFocus, setMapFocus] = useState(null);
+
+  const handleToggleRouteTracking = (checked) => {
+    setRouteTrackingEnabled(checked);
+    try {
+      localStorage.setItem('phonelink_route_tracking', checked ? 'true' : 'false');
+    } catch (_) {}
+    pushToast(checked ? 'Breadcrumb route recording enabled' : 'Breadcrumb recording paused', 'info');
+  };
 
   const location = activeDeviceId ? locations[activeDeviceId] : null;
 
@@ -257,6 +338,103 @@ export default function LocationMap() {
     dlAnchorElem.setAttribute('download', `route_${activeDeviceId || 'device'}_${Date.now()}.json`);
     dlAnchorElem.click();
   };
+
+  // 1. Reverse geocode current location fix
+  useEffect(() => {
+    if (!location || location.latitude == null || location.longitude == null) return;
+    fetchAddressForCoord(location.latitude, location.longitude).then((addr) => {
+      if (addr) {
+        setCurrentAddress(addr);
+        const key = `${Number(location.latitude).toFixed(4)},${Number(location.longitude).toFixed(4)}`;
+        setAddressMap((prev) => ({ ...prev, [key]: addr }));
+      }
+    });
+  }, [location?.latitude, location?.longitude]);
+
+  // 2. Reverse geocode route points in background
+  useEffect(() => {
+    if (!routePoints || routePoints.length === 0) return;
+    const uniqueCoords = [];
+    const seen = new Set();
+    routePoints.slice().reverse().slice(0, 35).forEach((p) => {
+      const key = `${Number(p.lat).toFixed(4)},${Number(p.lng).toFixed(4)}`;
+      if (!seen.has(key)) {
+        seen.add(key);
+        uniqueCoords.push({ lat: p.lat, lng: p.lng, key });
+      }
+    });
+
+    uniqueCoords.forEach(({ lat, lng, key }) => {
+      if (!addressMap[key]) {
+        fetchAddressForCoord(lat, lng).then((addr) => {
+          if (addr) {
+            setAddressMap((prev) => ({ ...prev, [key]: addr }));
+          }
+        });
+      }
+    });
+  }, [routePoints]);
+
+  // 3. Compute smart grouped Stops & Trips
+  const timelineSegments = useMemo(() => {
+    if (!routePoints || routePoints.length === 0) return [];
+
+    const segments = [];
+    let currentSegment = null;
+
+    for (let i = 0; i < routePoints.length; i++) {
+      const p = routePoints[i];
+      const speedKmH = p.speed != null ? p.speed * 3.6 : 0;
+      const key = `${Number(p.lat).toFixed(4)},${Number(p.lng).toFixed(4)}`;
+      const addr = addressMap[key] || `${p.lat.toFixed(4)}, ${p.lng.toFixed(4)}`;
+      const isMoving = speedKmH >= 3;
+
+      if (!currentSegment) {
+        currentSegment = {
+          type: isMoving ? 'moving' : 'stay',
+          startTime: p.timestamp,
+          endTime: p.timestamp,
+          lat: p.lat,
+          lng: p.lng,
+          address: addr,
+          key,
+          speed: speedKmH,
+          maxSpeed: speedKmH,
+          accuracy: p.accuracy || 15,
+          pointCount: 1
+        };
+      } else {
+        const dist = haversineDistanceMeters(currentSegment.lat, currentSegment.lng, p.lat, p.lng);
+        const staySameSpot = dist < 30 && !isMoving && currentSegment.type === 'stay';
+
+        if (staySameSpot) {
+          currentSegment.endTime = p.timestamp;
+          currentSegment.pointCount += 1;
+          if (addr && !currentSegment.address.includes(',')) currentSegment.address = addr;
+        } else {
+          segments.push(currentSegment);
+          currentSegment = {
+            type: isMoving ? 'moving' : 'stay',
+            startTime: p.timestamp,
+            endTime: p.timestamp,
+            lat: p.lat,
+            lng: p.lng,
+            address: addr,
+            key,
+            speed: speedKmH,
+            maxSpeed: speedKmH,
+            accuracy: p.accuracy || 15,
+            pointCount: 1
+          };
+        }
+      }
+    }
+    if (currentSegment) {
+      segments.push(currentSegment);
+    }
+
+    return segments.reverse(); // Newest first
+  }, [routePoints, addressMap]);
 
   if (!activeDeviceId) {
     return (
@@ -462,14 +640,16 @@ export default function LocationMap() {
           </div>
 
           <div className="mt-2 flex items-center justify-between text-[11px] text-gray-400">
-            <label className="flex items-center gap-1.5 cursor-pointer">
+            <label className="flex items-center gap-1.5 cursor-pointer select-none">
               <input
                 type="checkbox"
                 checked={routeTrackingEnabled}
-                onChange={(e) => setRouteTrackingEnabled(e.target.checked)}
-                className="h-3 w-3 rounded border-gray-600 bg-gray-800 accent-blue-500"
+                onChange={(e) => handleToggleRouteTracking(e.target.checked)}
+                className="h-3.5 w-3.5 rounded border-gray-600 bg-gray-800 accent-blue-500 cursor-pointer"
               />
-              Record breadcrumb path
+              <span className={routeTrackingEnabled ? 'text-blue-300 font-medium' : 'text-gray-400'}>
+                Record breadcrumb path
+              </span>
             </label>
             <button
               onClick={() => setShowRouteTimeline(!showRouteTimeline)}
@@ -483,6 +663,30 @@ export default function LocationMap() {
 
       {hasFix ? (
         <>
+          {/* Resolved Address Banner */}
+          <div className="flex flex-wrap items-center justify-between bg-teal-950/40 border border-teal-800/60 rounded-lg p-3 gap-3 shadow-md">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="p-2 rounded-lg bg-teal-900/60 text-teal-300 shrink-0">
+                <MapPin className="h-4 w-4" />
+              </div>
+              <div className="min-w-0">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-teal-400 block">
+                  Current Landmark / Address
+                </span>
+                <p className="text-xs sm:text-sm font-semibold text-white truncate">
+                  {currentAddress || `${location.latitude.toFixed(5)}, ${location.longitude.toFixed(5)}`}
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setMapFocus({ position: [location.latitude, location.longitude], zoom: 17, timestamp: Date.now() })}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-teal-600 hover:bg-teal-500 text-white font-medium text-xs transition-colors shrink-0 shadow cursor-pointer"
+            >
+              <Locate className="h-3.5 w-3.5" /> Center on Map
+            </button>
+          </div>
+
           {/* Telemetry Stats */}
           <div className="grid gap-2 grid-cols-2 sm:grid-cols-4">
             <Stat label="Coordinates" value={`${location.latitude.toFixed(5)}, ${location.longitude.toFixed(5)}`} />
@@ -512,6 +716,7 @@ export default function LocationMap() {
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               />
               {autoCenter && <Recenter position={[location.latitude, location.longitude]} zoom={16} />}
+              <FlyToFocus focus={mapFocus} />
 
               {/* 1. Safe Zone Geofence Circle on Map */}
               {geofenceEnabled && safeZoneCenter && (
@@ -579,30 +784,165 @@ export default function LocationMap() {
             </MapContainer>
           </div>
 
-          {/* Collapsible Route Timeline */}
+          {/* Rich Visual Route Timeline & Location Reports */}
           {showRouteTimeline && routePoints.length > 0 && (
-            <div className="rounded-lg border border-gray-800 bg-gray-900/70 p-3 max-h-60 overflow-y-auto">
-              <h3 className="text-xs font-semibold text-gray-300 mb-2 flex items-center justify-between">
-                <span>Breadcrumb History Timeline ({routePoints.length} points)</span>
-                <span className="text-[10px] text-gray-500">Most recent first</span>
-              </h3>
-              <div className="space-y-1.5 text-xs">
-                {routePoints
-                  .slice()
-                  .reverse()
-                  .slice(0, 50)
-                  .map((p, idx) => (
-                    <div
-                      key={p.timestamp + '-' + idx}
-                      className="flex items-center justify-between py-1 px-2 rounded bg-gray-800/40 text-[11px] text-gray-300 font-mono"
-                    >
-                      <span>{new Date(p.timestamp).toLocaleTimeString()}</span>
-                      <span>{p.lat.toFixed(5)}, {p.lng.toFixed(5)}</span>
-                      <span className="text-gray-500">±{Math.round(p.accuracy || 0)}m</span>
-                      <span className="text-teal-400">{p.speed ? `${(p.speed * 3.6).toFixed(0)} km/h` : '0 km/h'}</span>
-                    </div>
-                  ))}
+            <div className="rounded-xl border border-gray-800 bg-gray-900/80 p-4 shadow-xl">
+              <div className="flex flex-wrap items-center justify-between gap-3 mb-3 border-b border-gray-800 pb-3">
+                <div className="flex items-center gap-2">
+                  <Route className="h-4 w-4 text-blue-400" />
+                  <h3 className="text-sm font-bold text-gray-100">
+                    Route Timeline & Location Report
+                  </h3>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-blue-950/80 border border-blue-800 text-blue-300">
+                    {timelineSegments.length} Stops · {routePoints.length} Points
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => setTimelineViewMode('grouped')}
+                    className={`px-2.5 py-1 text-xs rounded font-medium transition-colors cursor-pointer ${
+                      timelineViewMode === 'grouped'
+                        ? 'bg-blue-600 text-white shadow'
+                        : 'bg-gray-800 text-gray-400 hover:text-white'
+                    }`}
+                  >
+                    📍 Stops & Stays (Clean View)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setTimelineViewMode('raw')}
+                    className={`px-2.5 py-1 text-xs rounded font-medium transition-colors cursor-pointer ${
+                      timelineViewMode === 'raw'
+                        ? 'bg-blue-600 text-white shadow'
+                        : 'bg-gray-800 text-gray-400 hover:text-white'
+                    }`}
+                  >
+                    📋 All GPS Points
+                  </button>
+                </div>
               </div>
+
+              {/* Grouped Stops View */}
+              {timelineViewMode === 'grouped' ? (
+                <div className="space-y-2.5 max-h-72 overflow-y-auto pr-1">
+                  {timelineSegments.map((seg, idx) => {
+                    const isStay = seg.type === 'stay';
+                    const startStr = new Date(seg.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                    const endStr = new Date(seg.endTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                    const durationMins = Math.max(1, Math.round((seg.endTime - seg.startTime) / 60000));
+
+                    return (
+                      <div
+                        key={seg.startTime + '-' + idx}
+                        className={`flex flex-wrap items-center justify-between p-3 rounded-lg border transition-all ${
+                          isStay
+                            ? 'bg-gray-950/70 border-emerald-900/40 hover:border-emerald-700/60'
+                            : 'bg-gray-950/70 border-blue-900/40 hover:border-blue-700/60'
+                        }`}
+                      >
+                        <div className="flex items-start gap-3 min-w-0">
+                          <div className={`p-2 rounded-full mt-0.5 shrink-0 ${
+                            isStay
+                              ? 'bg-emerald-950 border border-emerald-700/80 text-emerald-400'
+                              : 'bg-blue-950 border border-blue-700/80 text-blue-400 animate-pulse'
+                          }`}>
+                            {isStay ? <MapPin className="h-4 w-4" /> : <Car className="h-4 w-4" />}
+                          </div>
+
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className={`text-[11px] font-bold uppercase tracking-wider ${
+                                isStay ? 'text-emerald-400' : 'text-blue-400'
+                              }`}>
+                                {isStay ? 'Stationary Stay' : 'In Transit / Moving'}
+                              </span>
+                              <span className="text-[11px] text-gray-500 font-mono">
+                                {startStr}{startStr !== endStr ? ` → ${endStr} (${durationMins}m)` : ''}
+                              </span>
+                              <span className="text-[10px] text-gray-500">
+                                ({seg.pointCount} fixes)
+                              </span>
+                            </div>
+
+                            <p className="text-xs sm:text-sm font-semibold text-white mt-0.5 truncate">
+                              {seg.address}
+                            </p>
+
+                            <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-gray-900 text-gray-400 border border-gray-800">
+                                {seg.lat.toFixed(5)}, {seg.lng.toFixed(5)}
+                              </span>
+                              <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded border ${
+                                isStay
+                                  ? 'bg-emerald-950/60 text-emerald-300 border-emerald-800'
+                                  : 'bg-blue-950/60 text-blue-300 border-blue-800'
+                              }`}>
+                                {isStay ? 'Stationary (0 km/h)' : `Speed: ${seg.speed.toFixed(1)} km/h`}
+                              </span>
+                              <span className="text-[10px] text-gray-500 font-mono">
+                                ±{Math.round(seg.accuracy)}m accuracy
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => setMapFocus({ position: [seg.lat, seg.lng], zoom: 17, timestamp: Date.now() })}
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-teal-300 hover:text-teal-200 text-xs font-medium border border-gray-700 transition-colors shrink-0 shadow mt-2 sm:mt-0 cursor-pointer"
+                        >
+                          <Locate className="h-3.5 w-3.5" /> Locate
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                /* Raw Points View */
+                <div className="space-y-1.5 max-h-72 overflow-y-auto pr-1">
+                  {routePoints
+                    .slice()
+                    .reverse()
+                    .slice(0, 60)
+                    .map((p, idx) => {
+                      const key = `${Number(p.lat).toFixed(4)},${Number(p.lng).toFixed(4)}`;
+                      const resolvedName = addressMap[key] || `${p.lat.toFixed(5)}, ${p.lng.toFixed(5)}`;
+
+                      return (
+                        <div
+                          key={p.timestamp + '-' + idx}
+                          className="flex flex-wrap items-center justify-between py-1.5 px-3 rounded-lg bg-gray-950/60 border border-gray-800/80 text-xs text-gray-300 gap-2 hover:bg-gray-900/80 transition-colors"
+                        >
+                          <div className="flex items-center gap-2 min-w-0">
+                            <span className="font-mono text-[11px] text-teal-400 shrink-0">
+                              {new Date(p.timestamp).toLocaleTimeString()}
+                            </span>
+                            <span className="text-white font-medium truncate text-xs">
+                              {resolvedName}
+                            </span>
+                          </div>
+
+                          <div className="flex items-center gap-2 shrink-0">
+                            <span className="text-gray-500 font-mono text-[11px]">±{Math.round(p.accuracy || 0)}m</span>
+                            <span className="text-teal-300 font-mono text-[11px]">
+                              {p.speed ? `${(p.speed * 3.6).toFixed(0)} km/h` : '0 km/h'}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => setMapFocus({ position: [p.lat, p.lng], zoom: 17, timestamp: Date.now() })}
+                              className="p-1 rounded bg-gray-800 text-gray-400 hover:text-white"
+                              title="Locate on map"
+                            >
+                              <Locate className="h-3 w-3" />
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                </div>
+              )}
             </div>
           )}
         </>
