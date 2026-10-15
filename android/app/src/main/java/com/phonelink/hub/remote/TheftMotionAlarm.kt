@@ -152,3 +152,4 @@ object TheftMotionAlarm : SensorEventListener {
         WebSocketHolder.get()?.send(Events.MOTION_ALARM_STATUS, payload)
     }
 }
+

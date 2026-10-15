@@ -132,14 +132,14 @@ object WalkieTalkieIntercom {
 
     private fun isEncodedAudio(bytes: ByteArray): Boolean {
         if (bytes.size < 4) return false
-        // "RIFF" for WAV
-        if (bytes[0] == 'R'.code.toByte() && bytes[1] == 'I'.code.toByte() &&
-            bytes[2] == 'F'.code.toByte() && bytes[3] == 'F'.code.toByte()) return true
-        // "OggS" for OGG
-        if (bytes[0] == 'O'.code.toByte() && bytes[1] == 'g'.code.toByte() &&
-            bytes[2] == 'g'.code.toByte() && bytes[3] == 'S'.code.toByte()) return true
-        // WebM header 0x1A 0x45 0xDF 0xA3
-        if (bytes[0] == 0x1A.toByte() && bytes[1] == 0x45.toByte()) return true
+        // "RIFF" for WAV (0x52, 0x49, 0x46, 0x46)
+        if (bytes[0].toInt() == 0x52 && bytes[1].toInt() == 0x49 &&
+            bytes[2].toInt() == 0x46 && bytes[3].toInt() == 0x46) return true
+        // "OggS" for OGG (0x4F, 0x67, 0x67, 0x53)
+        if (bytes[0].toInt() == 0x4F && bytes[1].toInt() == 0x67 &&
+            bytes[2].toInt() == 0x67 && bytes[3].toInt() == 0x53) return true
+        // WebM header 0x1A 0x45
+        if (bytes[0].toInt() == 0x1A && bytes[1].toInt() == 0x45) return true
         return false
     }
 
@@ -175,3 +175,4 @@ object WalkieTalkieIntercom {
         WebSocketHolder.get()?.send(Events.WALKIE_TALKIE_STATUS, payload)
     }
 }
+

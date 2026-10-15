@@ -24,7 +24,7 @@ class PhoneDeviceAdminReceiver : DeviceAdminReceiver() {
     override fun onPasswordFailed(context: Context, intent: Intent) {
         super.onPasswordFailed(context, intent)
         val dpm = context.getSystemService(Context.DEVICE_POLICY_SERVICE) as? DevicePolicyManager
-        val attempts = dpm?.getCurrentFailedPasswordAttempts() ?: 1
+        val attempts = dpm?.currentFailedPasswordAttempts ?: 1
         Log.w(TAG, "INTRUDER ALERT: Failed lockscreen PIN/pattern attempt #$attempts")
 
         try {
