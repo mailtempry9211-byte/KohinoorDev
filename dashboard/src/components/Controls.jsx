@@ -42,7 +42,9 @@ const PRESET_PATTERNS = [
 const PRESET_SOUNDS = [
   { label: 'Notification Ding', url: 'https://actions.google.com/sounds/v1/alarms/beep_short.ogg' },
   { label: 'Warning Siren', url: 'https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg' },
-  { label: 'Bell Chime', url: 'https://actions.google.com/sounds/v1/household/doorbell.ogg' }
+  { label: 'Clock Ring', url: 'https://actions.google.com/sounds/v1/alarms/mechanical_clock_ring.ogg' },
+  { label: 'Digital Alarm', url: 'https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg' },
+  { label: 'Bugle Alert', url: 'https://actions.google.com/sounds/v1/alarms/bugle_tune.ogg' }
 ];
 
 const PRESET_COLORS = [
@@ -129,7 +131,7 @@ export default function Controls() {
   const [ttsPitch, setTtsPitch] = useState(1.0);
 
   // Audio state
-  const [audioUrl, setAudioUrl] = useState('');
+  const [audioUrl, setAudioUrl] = useState('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
   const [audioLoop, setAudioLoop] = useState(false);
 
   // Wallpaper state

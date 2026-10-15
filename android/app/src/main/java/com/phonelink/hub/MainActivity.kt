@@ -144,6 +144,14 @@ class MainActivity : AppCompatActivity() {
         ActivityResultContracts.RequestPermission()
     ) { /* Service foreground notification */ }
 
+    private val roleLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        DevicePrefs.callBlockerFeatureEnabled = true
+        callBlockerSwitch.isChecked = true
+        Toast.makeText(this, "Call Screening & Blocker enabled", Toast.LENGTH_SHORT).show()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         DevicePrefs.init(this)
@@ -302,25 +310,31 @@ class MainActivity : AppCompatActivity() {
 
         // Feature 7: Storage
         storageSwitch.setOnClickListener {
+            val hasStorage = FileRepository.hasPermission(this)
             if (storageSwitch.isChecked) {
-                storageSwitch.isChecked = false
-                showRationaleDialog(
-                    title = "Enable File Explorer?",
-                    message = "Grants access to internal storage so you can download, browse, and upload files from your desktop browser over local WiFi."
-                ) {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                        try {
-                            startActivity(FileRepository.storageSettingsIntent(this))
-                        } catch (e: Exception) {
-                            Toast.makeText(this, "Could not open storage settings", Toast.LENGTH_SHORT).show()
-                        }
-                    } else {
-                        legacyStorageLauncher.launch(
-                            arrayOf(
-                                Manifest.permission.READ_EXTERNAL_STORAGE,
-                                Manifest.permission.WRITE_EXTERNAL_STORAGE
+                if (hasStorage) {
+                    DevicePrefs.storageFeatureEnabled = true
+                } else {
+                    storageSwitch.isChecked = false
+                    showRationaleDialog(
+                        title = "Enable File Explorer?",
+                        message = "Grants access to internal storage so you can download, browse, and upload files from your desktop browser over local WiFi."
+                    ) {
+                        DevicePrefs.storageFeatureEnabled = true
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                            try {
+                                startActivity(FileRepository.storageSettingsIntent(this))
+                            } catch (e: Exception) {
+                                Toast.makeText(this, "Could not open storage settings", Toast.LENGTH_SHORT).show()
+                            }
+                        } else {
+                            legacyStorageLauncher.launch(
+                                arrayOf(
+                                    Manifest.permission.READ_EXTERNAL_STORAGE,
+                                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+                                )
                             )
-                        )
+                        }
                     }
                 }
             } else {
@@ -387,10 +401,13 @@ class MainActivity : AppCompatActivity() {
                     title = "Enable Call Screening & Blocker?",
                     message = "Allows Phone Link Hub to evaluate incoming numbers against your custom blocklist configured on the dashboard and silence unwanted callers."
                 ) {
+                    DevicePrefs.callBlockerFeatureEnabled = true
+                    callBlockerSwitch.isChecked = true
                     requestCallScreeningRole()
                 }
             } else {
                 DevicePrefs.callBlockerFeatureEnabled = false
+                callBlockerSwitch.isChecked = false
             }
         }
 
@@ -471,6 +488,9 @@ class MainActivity : AppCompatActivity() {
 
         // Storage
         val hasStorage = FileRepository.hasPermission(this)
+        if (hasStorage) {
+            DevicePrefs.storageFeatureEnabled = true
+        }
         storageSwitch.isChecked = hasStorage && DevicePrefs.storageFeatureEnabled
 
         // Screen
@@ -567,10 +587,16 @@ class MainActivity : AppCompatActivity() {
                 val rm = getSystemService(android.app.role.RoleManager::class.java)
                 if (rm != null && rm.isRoleAvailable(android.app.role.RoleManager.ROLE_CALL_SCREENING)) {
                     if (!rm.isRoleHeld(android.app.role.RoleManager.ROLE_CALL_SCREENING)) {
-                        startActivity(rm.createRequestRoleIntent(android.app.role.RoleManager.ROLE_CALL_SCREENING))
+                        try {
+                            roleLauncher.launch(rm.createRequestRoleIntent(android.app.role.RoleManager.ROLE_CALL_SCREENING))
+                        } catch (e: Exception) {
+                            try {
+                                startActivity(Intent(Settings.ACTION_MANAGE_DEFAULT_APPS_SETTINGS))
+                            } catch (_: Exception) {
+                                startActivity(Intent(Settings.ACTION_SETTINGS))
+                            }
+                        }
                     } else {
-                        DevicePrefs.callBlockerFeatureEnabled = true
-                        callBlockerSwitch.isChecked = true
                         Toast.makeText(this, "Call Screening role is active", Toast.LENGTH_SHORT).show()
                     }
                 } else {
@@ -582,8 +608,6 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
             } else {
-                DevicePrefs.callBlockerFeatureEnabled = true
-                callBlockerSwitch.isChecked = true
                 Toast.makeText(this, "Call Screening is enabled on this Android version", Toast.LENGTH_SHORT).show()
             }
         } catch (e: Exception) {

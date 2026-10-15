@@ -17,7 +17,7 @@ import java.io.File
 object FileRepository {
 
     private const val TAG = "FileRepository"
-    private const val CHUNK_BYTES = 32 * 1024
+    private const val CHUNK_BYTES = 64 * 1024
 
     fun hasFullStorageAccess(): Boolean =
         Build.VERSION.SDK_INT < Build.VERSION_CODES.R || Environment.isExternalStorageManager()
@@ -130,14 +130,18 @@ object FileRepository {
                 var remaining = file.length()
                 var chunksSent = 0
                 while (remaining > 0) {
+                    // Backpressure flow control: wait if OkHttp socket buffer exceeds 256KB
+                    while ((com.phonelink.hub.service.PhoneLinkService.instance?.webSocketQueueSize ?: 0L) > 256 * 1024L) {
+                        try { Thread.sleep(15) } catch (_: InterruptedException) {}
+                    }
                     val read = stream.read(buffer)
                     if (read <= 0) break
                     remaining -= read
                     val payload = Base64.encodeToString(buffer.copyOf(read), Base64.NO_WRAP)
                     onChunk(payload, remaining <= 0)
                     chunksSent++
-                    if (chunksSent % 8 == 0) {
-                        try { Thread.sleep(5) } catch (_: InterruptedException) {}
+                    if (chunksSent % 4 == 0) {
+                        try { Thread.sleep(2) } catch (_: InterruptedException) {}
                     }
                 }
             }

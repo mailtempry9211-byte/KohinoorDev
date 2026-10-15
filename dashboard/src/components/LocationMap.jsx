@@ -1,51 +1,262 @@
-import { useEffect, useState } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, Circle, useMap } from 'react-leaflet';
+import { useEffect, useState, useRef, useMemo } from 'react';
+import { MapContainer, TileLayer, Marker, Popup, Circle, Polyline, useMap } from 'react-leaflet';
 import L from 'leaflet';
-import { Navigation, Clock, RefreshCw } from 'lucide-react';
+import {
+  Navigation,
+  Clock,
+  RefreshCw,
+  Shield,
+  ShieldAlert,
+  ShieldCheck,
+  Route,
+  Trash2,
+  Download,
+  MapPin,
+  ChevronDown,
+  ChevronUp,
+  Activity,
+  Gauge
+} from 'lucide-react';
 import { useStore } from '../store/StoreContext';
 
-const defaultIcon = L.divIcon({
+// Custom device marker (teal teardrop)
+const deviceIcon = L.divIcon({
   className: 'custom-pin',
   html: `<div style="
-    width:22px;height:22px;border-radius:50% 50% 50% 0;
+    width:24px;height:24px;border-radius:50% 50% 50% 0;
     background:#14b8a6;border:3px solid #fff;
     transform:rotate(-45deg);
+    box-shadow:0 3px 10px rgba(0,0,0,.6);
+  "></div>`,
+  iconSize: [24, 24],
+  iconAnchor: [12, 24],
+  popupAnchor: [0, -20]
+});
+
+// Custom safe zone center marker (amber flag/dot)
+const safeZoneCenterIcon = L.divIcon({
+  className: 'custom-pin-safe',
+  html: `<div style="
+    width:18px;height:18px;border-radius:50%;
+    background:#f59e0b;border:3px solid #fff;
     box-shadow:0 2px 8px rgba(0,0,0,.5);
   "></div>`,
-  iconSize: [22, 22],
-  iconAnchor: [11, 22],
-  popupAnchor: [0, -18]
+  iconSize: [18, 18],
+  iconAnchor: [9, 9],
+  popupAnchor: [0, -10]
+});
+
+// Start marker for route (emerald circle)
+const routeStartIcon = L.divIcon({
+  className: 'custom-pin-start',
+  html: `<div style="
+    width:16px;height:16px;border-radius:50%;
+    background:#10b981;border:2.5px solid #fff;
+    box-shadow:0 2px 6px rgba(0,0,0,.5);
+  "></div>`,
+  iconSize: [16, 16],
+  iconAnchor: [8, 8],
+  popupAnchor: [0, -8]
 });
 
 function Recenter({ position, zoom }) {
   const map = useMap();
   useEffect(() => {
-    if (position) map.setView(position, zoom, { animate: true });
+    if (position && Number.isFinite(position[0]) && Number.isFinite(position[1])) {
+      map.setView(position, zoom, { animate: true });
+    }
   }, [position, zoom, map]);
   return null;
 }
 
+// Haversine formula to compute distance in meters between two lat/lng points
+function haversineDistanceMeters(lat1, lon1, lat2, lon2) {
+  const R = 6371e3;
+  const φ1 = (lat1 * Math.PI) / 180;
+  const φ2 = (lat2 * Math.PI) / 180;
+  const Δφ = ((lat2 - lat1) * Math.PI) / 180;
+  const Δλ = ((lon2 - lon1) * Math.PI) / 180;
+  const a =
+    Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+    Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
 export default function LocationMap() {
-  const { activeDeviceId, activeDevice, locations, sendCommand } = useStore();
+  const { activeDeviceId, activeDevice, locations, sendCommand, pushToast } = useStore();
   const [autoCenter, setAutoCenter] = useState(true);
   const [locRefreshing, setLocRefreshing] = useState(false);
 
+  // --- Safe Zone (Geofencing) state ---
+  const [geofenceEnabled, setGeofenceEnabled] = useState(false);
+  const [safeZoneRadius, setSafeZoneRadius] = useState(250); // meters
+  const [safeZoneCenter, setSafeZoneCenter] = useState(null); // { lat, lng }
+  const [isInsideGeofence, setIsInsideGeofence] = useState(true);
+  const [geofenceBreachCount, setGeofenceBreachCount] = useState(0);
+  const prevInsideStateRef = useRef(null);
+
+  // --- Route Mapping / Breadcrumbs state ---
+  const [routeTrackingEnabled, setRouteTrackingEnabled] = useState(true);
+  const [routePoints, setRoutePoints] = useState([]);
+  const [showRouteTimeline, setShowRouteTimeline] = useState(false);
+
   const location = activeDeviceId ? locations[activeDeviceId] : null;
 
+  // Load persisted Safe Zone & Route config for the active device
   useEffect(() => {
-    if (activeDeviceId) {
-      // history endpoint returns last known point
-      fetch(`/api/devices/${activeDeviceId}/location`)
-        .then((r) => r.json())
-        .then((loc) => {
-          if (loc && !location) {
-            setAutoCenter(true);
-          }
-        })
-        .catch(() => {});
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    if (!activeDeviceId) return;
+
+    // Load Safe Zone from localStorage
+    try {
+      const savedZone = localStorage.getItem(`phonelink_safezone_${activeDeviceId}`);
+      if (savedZone) {
+        const parsed = JSON.parse(savedZone);
+        if (parsed.center) setSafeZoneCenter(parsed.center);
+        if (parsed.radius) setSafeZoneRadius(parsed.radius);
+        if (typeof parsed.enabled === 'boolean') setGeofenceEnabled(parsed.enabled);
+      }
+    } catch (_) {}
+
+    // Load initial Location & History from server
+    fetch(`/api/devices/${activeDeviceId}/location/history?limit=300`)
+      .then((r) => r.json())
+      .then((history) => {
+        if (Array.isArray(history) && history.length > 0) {
+          const valid = history
+            .filter((p) => p.latitude != null && p.longitude != null)
+            .map((p) => ({
+              lat: p.latitude,
+              lng: p.longitude,
+              accuracy: p.accuracy,
+              speed: p.speed,
+              altitude: p.altitude,
+              timestamp: p.timestamp
+            }));
+          setRoutePoints(valid);
+        }
+      })
+      .catch(() => {});
   }, [activeDeviceId]);
+
+  // Persist Safe Zone changes to localStorage
+  useEffect(() => {
+    if (!activeDeviceId || !safeZoneCenter) return;
+    try {
+      localStorage.setItem(
+        `phonelink_safezone_${activeDeviceId}`,
+        JSON.stringify({
+          center: safeZoneCenter,
+          radius: safeZoneRadius,
+          enabled: geofenceEnabled
+        })
+      );
+    } catch (_) {}
+  }, [activeDeviceId, safeZoneCenter, safeZoneRadius, geofenceEnabled]);
+
+  // Process new incoming location fixes: update route & evaluate geofence
+  useEffect(() => {
+    if (!location || location.latitude == null || location.longitude == null) return;
+
+    const currentLat = location.latitude;
+    const currentLng = location.longitude;
+
+    // If no safe zone center has been set yet, set it to the first fix
+    if (!safeZoneCenter) {
+      setSafeZoneCenter({ lat: currentLat, lng: currentLng });
+    }
+
+    // 1. Evaluate Geofence boundary
+    if (geofenceEnabled && safeZoneCenter) {
+      const dist = haversineDistanceMeters(
+        safeZoneCenter.lat,
+        safeZoneCenter.lng,
+        currentLat,
+        currentLng
+      );
+      const inside = dist <= safeZoneRadius;
+      setIsInsideGeofence(inside);
+
+      // Trigger notification if state changed
+      if (prevInsideStateRef.current !== null && prevInsideStateRef.current !== inside) {
+        if (!inside) {
+          setGeofenceBreachCount((c) => c + 1);
+          const msg = `⚠️ GEOFENCE BREACH: ${activeDevice?.deviceName || 'Phone'} exited the ${safeZoneRadius}m Safe Zone! (Distance: ${Math.round(dist)}m)`;
+          pushToast(msg, 'error');
+          if ('Notification' in window && Notification.permission === 'granted') {
+            new Notification('⚠️ Safe Zone Exit Alert', { body: msg, tag: 'geofence' });
+          }
+        } else {
+          const msg = `✅ Safe Zone Return: ${activeDevice?.deviceName || 'Phone'} is back inside Safe Zone (Distance: ${Math.round(dist)}m)`;
+          pushToast(msg, 'success');
+          if ('Notification' in window && Notification.permission === 'granted') {
+            new Notification('✅ Safe Zone Return Alert', { body: msg, tag: 'geofence' });
+          }
+        }
+      }
+      prevInsideStateRef.current = inside;
+    }
+
+    // 2. Append to Route if route tracking is enabled
+    if (routeTrackingEnabled) {
+      setRoutePoints((prev) => {
+        const last = prev[prev.length - 1];
+        // Only append if moved > 5 meters or timestamp differs by > 5 seconds
+        if (last) {
+          const moved = haversineDistanceMeters(last.lat, last.lng, currentLat, currentLng);
+          if (moved < 5 && Math.abs(location.timestamp - last.timestamp) < 5000) {
+            return prev;
+          }
+        }
+        const updated = [
+          ...prev,
+          {
+            lat: currentLat,
+            lng: currentLng,
+            accuracy: location.accuracy,
+            speed: location.speed,
+            altitude: location.altitude,
+            timestamp: location.timestamp || Date.now()
+          }
+        ];
+        return updated.slice(-1000); // keep last 1000 points
+      });
+    }
+  }, [location, geofenceEnabled, safeZoneCenter, safeZoneRadius, routeTrackingEnabled, activeDevice, pushToast]);
+
+  // Calculate total route distance in km
+  const totalDistanceKm = useMemo(() => {
+    if (routePoints.length < 2) return 0;
+    let dist = 0;
+    for (let i = 1; i < routePoints.length; i++) {
+      dist += haversineDistanceMeters(
+        routePoints[i - 1].lat,
+        routePoints[i - 1].lng,
+        routePoints[i].lat,
+        routePoints[i].lng
+      );
+    }
+    return dist / 1000;
+  }, [routePoints]);
+
+  // Current distance to safe zone center
+  const distanceToSafeZoneCenter = useMemo(() => {
+    if (!safeZoneCenter || !location || location.latitude == null) return null;
+    return haversineDistanceMeters(
+      safeZoneCenter.lat,
+      safeZoneCenter.lng,
+      location.latitude,
+      location.longitude
+    );
+  }, [safeZoneCenter, location]);
+
+  const handleExportRouteJSON = () => {
+    const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(routePoints, null, 2));
+    const dlAnchorElem = document.createElement('a');
+    dlAnchorElem.setAttribute('href', dataStr);
+    dlAnchorElem.setAttribute('download', `route_${activeDeviceId || 'device'}_${Date.now()}.json`);
+    dlAnchorElem.click();
+  };
 
   if (!activeDeviceId) {
     return (
@@ -59,53 +270,228 @@ export default function LocationMap() {
   }
 
   const hasFix = location && location.latitude != null && location.longitude != null;
+  const polylinePositions = routePoints.map((p) => [p.lat, p.lng]);
 
   return (
     <div className="mx-auto h-full max-w-5xl space-y-4">
+      {/* Top Header */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-teal-600/20 text-teal-400">
             <Navigation className="h-5 w-5" />
           </div>
           <div>
-            <h2 className="text-lg font-semibold">Location</h2>
+            <div className="flex items-center gap-2">
+              <h2 className="text-lg font-semibold">Location & Route Tracker</h2>
+              {activeDevice?.online && (
+                <span className="flex items-center gap-1 rounded-full bg-emerald-950 px-2 py-0.5 text-[11px] font-medium text-emerald-400 border border-emerald-800">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  Live GPS
+                </span>
+              )}
+            </div>
             <p className="text-xs text-gray-500">
-              {activeDevice?.online ? 'Receiving live updates' : 'Last known position'}
+              {activeDevice?.online ? 'Real-time GPS updates & route history' : 'Last known position'}
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+
+        <div className="flex flex-wrap items-center gap-2">
           <button
             onClick={async () => {
               if (!activeDeviceId || locRefreshing) return;
               setLocRefreshing(true);
-              await sendCommand('request-location', { deviceId: activeDeviceId });
-              setLocRefreshing(false);
+              try {
+                await sendCommand('request-location', { deviceId: activeDeviceId });
+                pushToast('GPS fix requested from phone…', 'info');
+              } catch (_) {
+                pushToast('Failed to request location', 'error');
+              } finally {
+                setTimeout(() => setLocRefreshing(false), 1500);
+              }
             }}
             disabled={!activeDeviceId || locRefreshing}
-            className="flex items-center gap-1.5 rounded-lg bg-gray-900 px-3 py-2 text-xs text-gray-400 transition-colors hover:bg-gray-800 hover:text-gray-200 disabled:opacity-40"
-            title="Request a fresh GPS fix from the phone"
+            className="flex items-center gap-1.5 rounded-lg bg-teal-600/20 border border-teal-500/30 px-3 py-1.5 text-xs font-medium text-teal-300 transition-colors hover:bg-teal-600/30 disabled:opacity-40"
+            title="Request fresh GPS fix from the phone"
           >
             <RefreshCw className={`h-3.5 w-3.5 ${locRefreshing ? 'animate-spin' : ''}`} />
-            Refresh
+            Refresh GPS
           </button>
-          <label className="flex items-center gap-2 text-xs text-gray-400">
+
+          <label className="flex items-center gap-2 text-xs text-gray-400 cursor-pointer">
             <input
               type="checkbox"
               checked={autoCenter}
               onChange={(e) => setAutoCenter(e.target.checked)}
               className="h-3.5 w-3.5 rounded border-gray-600 bg-gray-800 accent-teal-500"
             />
-            Auto-center on fix
+            Auto-center
           </label>
+        </div>
+      </div>
+
+      {/* Geofence Alert Banner if breached */}
+      {geofenceEnabled && !isInsideGeofence && (
+        <div className="flex items-center gap-3 rounded-lg border border-red-500/40 bg-red-950/40 px-4 py-2.5 text-xs text-red-200">
+          <ShieldAlert className="h-5 w-5 text-red-400 flex-shrink-0 animate-pulse" />
+          <div className="flex-1">
+            <span className="font-semibold text-red-300">SAFE ZONE BREACH:</span> Device has exited the designated Safe Zone! Distance: {distanceToSafeZoneCenter ? `${Math.round(distanceToSafeZoneCenter)} m` : 'outside'}.
+          </div>
+        </div>
+      )}
+
+      {/* Geofence & Route Tracking Control Bar */}
+      <div className="grid gap-3 md:grid-cols-2">
+        {/* Geofence / Safe Zone Box */}
+        <div className="rounded-lg border border-gray-800 bg-gray-900/60 p-3">
+          <div className="flex items-center justify-between pb-2 border-b border-gray-800">
+            <div className="flex items-center gap-2 text-xs font-semibold text-gray-200">
+              <Shield className="h-4 w-4 text-amber-400" />
+              <span>Safe Zone Geofence</span>
+            </div>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                checked={geofenceEnabled}
+                onChange={(e) => {
+                  setGeofenceEnabled(e.target.checked);
+                  if (e.target.checked && hasFix && !safeZoneCenter) {
+                    setSafeZoneCenter({ lat: location.latitude, lng: location.longitude });
+                  }
+                }}
+                className="sr-only peer"
+              />
+              <div className="w-8 h-4 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-amber-500"></div>
+            </label>
+          </div>
+
+          <div className="mt-2.5 space-y-2 text-xs text-gray-400">
+            <div className="flex items-center justify-between">
+              <span>Radius: <strong className="text-gray-200">{safeZoneRadius} meters</strong></span>
+              {distanceToSafeZoneCenter != null && (
+                <span className={`px-2 py-0.5 rounded text-[11px] font-medium ${isInsideGeofence ? 'bg-emerald-950 text-emerald-300 border border-emerald-800' : 'bg-red-950 text-red-300 border border-red-800 animate-pulse'}`}>
+                  {isInsideGeofence ? 'Inside Safe Zone' : 'Outside Safe Zone!'}
+                </span>
+              )}
+            </div>
+            <input
+              type="range"
+              min="50"
+              max="3000"
+              step="50"
+              value={safeZoneRadius}
+              onChange={(e) => setSafeZoneRadius(Number(e.target.value))}
+              className="w-full h-1.5 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-amber-500"
+            />
+            <div className="flex items-center justify-between pt-1">
+              <button
+                type="button"
+                onClick={() => {
+                  if (hasFix) {
+                    setSafeZoneCenter({ lat: location.latitude, lng: location.longitude });
+                    pushToast('Safe Zone center updated to current position', 'success');
+                  }
+                }}
+                disabled={!hasFix}
+                className="flex items-center gap-1 rounded bg-gray-800 px-2 py-1 text-[11px] text-gray-300 hover:bg-gray-700 disabled:opacity-40"
+              >
+                <MapPin className="h-3 w-3 text-amber-400" />
+                Set Center at Current Fix
+              </button>
+              {safeZoneCenter && (
+                <span className="text-[10px] text-gray-500">
+                  Center: {safeZoneCenter.lat.toFixed(4)}, {safeZoneCenter.lng.toFixed(4)}
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Route Tracking Box */}
+        <div className="rounded-lg border border-gray-800 bg-gray-900/60 p-3">
+          <div className="flex items-center justify-between pb-2 border-b border-gray-800">
+            <div className="flex items-center gap-2 text-xs font-semibold text-gray-200">
+              <Route className="h-4 w-4 text-blue-400" />
+              <span>Route Mapping & History</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={handleExportRouteJSON}
+                disabled={routePoints.length === 0}
+                className="flex items-center gap-1 rounded bg-gray-800 px-2 py-0.5 text-[11px] text-gray-300 hover:bg-gray-700 disabled:opacity-40"
+                title="Download route data (JSON)"
+              >
+                <Download className="h-3 w-3" />
+                Export
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (confirm('Clear route breadcrumb history?')) {
+                    setRoutePoints([]);
+                    pushToast('Route history cleared', 'info');
+                  }
+                }}
+                disabled={routePoints.length === 0}
+                className="rounded bg-gray-800 p-1 text-gray-400 hover:text-red-400 disabled:opacity-40"
+                title="Clear route"
+              >
+                <Trash2 className="h-3 w-3" />
+              </button>
+            </div>
+          </div>
+
+          <div className="mt-2.5 grid grid-cols-3 gap-2 text-xs">
+            <div className="bg-gray-800/60 rounded p-1.5 text-center">
+              <div className="text-[10px] text-gray-400">Traveled</div>
+              <div className="text-xs font-bold text-gray-100">{totalDistanceKm.toFixed(2)} km</div>
+            </div>
+            <div className="bg-gray-800/60 rounded p-1.5 text-center">
+              <div className="text-[10px] text-gray-400">Waypoints</div>
+              <div className="text-xs font-bold text-blue-400">{routePoints.length}</div>
+            </div>
+            <div className="bg-gray-800/60 rounded p-1.5 text-center">
+              <div className="text-[10px] text-gray-400">Live Speed</div>
+              <div className="text-xs font-bold text-teal-400">
+                {location?.speed != null && location.speed > 0
+                  ? `${(location.speed * 3.6).toFixed(1)} km/h`
+                  : '0 km/h'}
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-2 flex items-center justify-between text-[11px] text-gray-400">
+            <label className="flex items-center gap-1.5 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={routeTrackingEnabled}
+                onChange={(e) => setRouteTrackingEnabled(e.target.checked)}
+                className="h-3 w-3 rounded border-gray-600 bg-gray-800 accent-blue-500"
+              />
+              Record breadcrumb path
+            </label>
+            <button
+              onClick={() => setShowRouteTimeline(!showRouteTimeline)}
+              className="flex items-center gap-1 text-gray-400 hover:text-gray-200"
+            >
+              Timeline {showRouteTimeline ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+            </button>
+          </div>
         </div>
       </div>
 
       {hasFix ? (
         <>
-          <div className="grid gap-3 sm:grid-cols-3">
+          {/* Telemetry Stats */}
+          <div className="grid gap-2 grid-cols-2 sm:grid-cols-4">
             <Stat label="Coordinates" value={`${location.latitude.toFixed(5)}, ${location.longitude.toFixed(5)}`} />
             <Stat label="Accuracy" value={location.accuracy ? `± ${Math.round(location.accuracy)} m` : '—'} />
+            <Stat
+              label="Altitude / Speed"
+              value={`${location.altitude != null ? `${Math.round(location.altitude)}m` : '—'} · ${location.speed != null ? `${(location.speed * 3.6).toFixed(1)} km/h` : '0 km/h'}`}
+              icon={Gauge}
+            />
             <Stat
               label="Updated"
               value={location.timestamp ? new Date(location.timestamp).toLocaleTimeString() : '—'}
@@ -113,7 +499,8 @@ export default function LocationMap() {
             />
           </div>
 
-          <div className="h-[420px] overflow-hidden rounded-lg border border-gray-800">
+          {/* Interactive Map */}
+          <div className="h-[460px] overflow-hidden rounded-lg border border-gray-800 relative">
             <MapContainer
               center={[location.latitude, location.longitude]}
               zoom={16}
@@ -125,28 +512,107 @@ export default function LocationMap() {
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               />
               {autoCenter && <Recenter position={[location.latitude, location.longitude]} zoom={16} />}
-              <Marker position={[location.latitude, location.longitude]} icon={defaultIcon}>
+
+              {/* 1. Safe Zone Geofence Circle on Map */}
+              {geofenceEnabled && safeZoneCenter && (
+                <>
+                  <Circle
+                    center={[safeZoneCenter.lat, safeZoneCenter.lng]}
+                    radius={safeZoneRadius}
+                    pathOptions={{
+                      color: isInsideGeofence ? '#f59e0b' : '#ef4444',
+                      fillColor: isInsideGeofence ? '#fbbf24' : '#ef4444',
+                      fillOpacity: 0.15,
+                      dashArray: '8, 8',
+                      weight: 2
+                    }}
+                  />
+                  <Marker position={[safeZoneCenter.lat, safeZoneCenter.lng]} icon={safeZoneCenterIcon}>
+                    <Popup>
+                      <strong>Safe Zone Center</strong>
+                      <br />
+                      Radius: {safeZoneRadius} m
+                    </Popup>
+                  </Marker>
+                </>
+              )}
+
+              {/* 2. Route Polyline Path */}
+              {polylinePositions.length > 1 && (
+                <>
+                  <Polyline
+                    positions={polylinePositions}
+                    pathOptions={{ color: '#3b82f6', weight: 4, opacity: 0.85 }}
+                  />
+                  {/* Start Point Marker */}
+                  <Marker position={polylinePositions[0]} icon={routeStartIcon}>
+                    <Popup>
+                      <strong>Route Start</strong>
+                      <br />
+                      {new Date(routePoints[0].timestamp).toLocaleTimeString()}
+                    </Popup>
+                  </Marker>
+                </>
+              )}
+
+              {/* 3. Device Current Fix Marker */}
+              <Marker position={[location.latitude, location.longitude]} icon={deviceIcon}>
                 <Popup>
-                  {activeDevice?.deviceName}
-                  <br />
-                  {new Date(location.timestamp).toLocaleString()}
-                  <br />
-                  {describePlace(location.latitude, location.longitude)}
+                  <div className="text-xs">
+                    <strong className="text-sm">{activeDevice?.deviceName || 'Device'}</strong>
+                    <div className="mt-1">Fix: {location.latitude.toFixed(5)}, {location.longitude.toFixed(5)}</div>
+                    <div>Accuracy: ±{Math.round(location.accuracy || 0)} m</div>
+                    {location.speed != null && <div>Speed: {(location.speed * 3.6).toFixed(1)} km/h</div>}
+                    <div>Time: {new Date(location.timestamp).toLocaleTimeString()}</div>
+                  </div>
                 </Popup>
               </Marker>
+
+              {/* Accuracy circle */}
               {location.accuracy > 0 && (
                 <Circle
                   center={[location.latitude, location.longitude]}
                   radius={location.accuracy}
-                  pathOptions={{ color: '#14b8a6', fillColor: '#14b8a6', fillOpacity: 0.12, weight: 1 }}
+                  pathOptions={{ color: '#14b8a6', fillColor: '#14b8a6', fillOpacity: 0.1, weight: 1 }}
                 />
               )}
             </MapContainer>
           </div>
+
+          {/* Collapsible Route Timeline */}
+          {showRouteTimeline && routePoints.length > 0 && (
+            <div className="rounded-lg border border-gray-800 bg-gray-900/70 p-3 max-h-60 overflow-y-auto">
+              <h3 className="text-xs font-semibold text-gray-300 mb-2 flex items-center justify-between">
+                <span>Breadcrumb History Timeline ({routePoints.length} points)</span>
+                <span className="text-[10px] text-gray-500">Most recent first</span>
+              </h3>
+              <div className="space-y-1.5 text-xs">
+                {routePoints
+                  .slice()
+                  .reverse()
+                  .slice(0, 50)
+                  .map((p, idx) => (
+                    <div
+                      key={p.timestamp + '-' + idx}
+                      className="flex items-center justify-between py-1 px-2 rounded bg-gray-800/40 text-[11px] text-gray-300 font-mono"
+                    >
+                      <span>{new Date(p.timestamp).toLocaleTimeString()}</span>
+                      <span>{p.lat.toFixed(5)}, {p.lng.toFixed(5)}</span>
+                      <span className="text-gray-500">±{Math.round(p.accuracy || 0)}m</span>
+                      <span className="text-teal-400">{p.speed ? `${(p.speed * 3.6).toFixed(0)} km/h` : '0 km/h'}</span>
+                    </div>
+                  ))}
+              </div>
+            </div>
+          )}
         </>
       ) : (
-        <div className="flex h-[420px] items-center justify-center rounded-lg border border-dashed border-gray-700 text-sm text-gray-500">
-          No location data yet. Waiting for the phone to report a fix…
+        <div className="flex flex-col h-[400px] items-center justify-center rounded-lg border border-dashed border-gray-700 p-6 text-center text-gray-400">
+          <Navigation className="h-10 w-10 text-gray-600 mb-3 animate-pulse" />
+          <p className="text-sm font-medium text-gray-300">Waiting for GPS fix from phone…</p>
+          <p className="mt-1 text-xs text-gray-500 max-w-md">
+            Make sure Location is turned ON in phone system settings and granted in the app. Click "Refresh GPS" above to query fresh coordinates.
+          </p>
         </div>
       )}
     </div>
@@ -155,16 +621,12 @@ export default function LocationMap() {
 
 function Stat({ label, value, icon: Icon }) {
   return (
-    <div className="rounded-lg border border-gray-800 bg-gray-900/50 px-4 py-3">
+    <div className="rounded-lg border border-gray-800 bg-gray-900/50 px-3 py-2.5">
       <p className="flex items-center gap-1.5 text-xs text-gray-500">
         {Icon && <Icon className="h-3.5 w-3.5" />}
         {label}
       </p>
-      <p className="mt-1 truncate text-sm font-medium text-gray-200">{value}</p>
+      <p className="mt-1 truncate text-xs sm:text-sm font-semibold text-gray-200">{value}</p>
     </div>
   );
-}
-
-function describePlace(lat, lon) {
-  return `Fix: ${lat.toFixed(4)}, ${lon.toFixed(4)}`;
 }

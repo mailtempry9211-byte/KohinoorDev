@@ -33,16 +33,13 @@ class LocationRepository(private val context: Context) {
                 if (location != null) {
                     emit(location, onFix)
                 } else {
-                    // No cached fix yet (fresh boot, or nothing else has
-                    // requested location recently) — lastLocation silently
-                    // returns null in that case, so force a fresh GPS read
-                    // instead of giving up.
                     requestFreshFix(onFix)
                 }
             }.addOnFailureListener {
                 requestFreshFix(onFix)
             }
         } catch (_: SecurityException) {
+            fallbackNativeLocation(onFix)
         }
     }
 
@@ -52,23 +49,56 @@ class LocationRepository(private val context: Context) {
             val cancellationToken = CancellationTokenSource()
             fused.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, cancellationToken.token)
                 .addOnSuccessListener { location ->
-                    if (location != null) emit(location, onFix)
+                    if (location != null) {
+                        emit(location, onFix)
+                    } else {
+                        fallbackNativeLocation(onFix)
+                    }
                 }
-        } catch (_: SecurityException) {
+                .addOnFailureListener {
+                    fallbackNativeLocation(onFix)
+                }
+        } catch (_: Exception) {
+            fallbackNativeLocation(onFix)
+        }
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun fallbackNativeLocation(onFix: (JSONObject) -> Unit) {
+        try {
+            val lm = context.getSystemService(Context.LOCATION_SERVICE) as? android.location.LocationManager ?: return
+            val gps = lm.getLastKnownLocation(android.location.LocationManager.GPS_PROVIDER)
+            val net = lm.getLastKnownLocation(android.location.LocationManager.NETWORK_PROVIDER)
+            val pass = lm.getLastKnownLocation(android.location.LocationManager.PASSIVE_PROVIDER)
+            val best = listOfNotNull(gps, net, pass).maxByOrNull { it.time }
+            if (best != null) {
+                emit(best, onFix)
+            } else {
+                val provider = when {
+                    lm.isProviderEnabled(android.location.LocationManager.GPS_PROVIDER) -> android.location.LocationManager.GPS_PROVIDER
+                    lm.isProviderEnabled(android.location.LocationManager.NETWORK_PROVIDER) -> android.location.LocationManager.NETWORK_PROVIDER
+                    else -> null
+                }
+                if (provider != null) {
+                    lm.requestSingleUpdate(provider, { loc -> emit(loc, onFix) }, Looper.getMainLooper())
+                }
+            }
+        } catch (e: Exception) {
+            Log.w(TAG, "Native location fallback failed", e)
         }
     }
 
     private fun emit(location: android.location.Location, onFix: (JSONObject) -> Unit) {
-        // BUG 2: every emitted fix must carry deviceId (both the one-shot
-        // currentFix/pushLocation path and the continuous startUpdates stream),
-        // otherwise the server files it under "undefined".
         val id = try { com.phonelink.hub.data.DevicePrefs.deviceId } catch (_: Exception) { null }
         onFix(
             JSONObject().apply {
                 put("latitude", location.latitude)
                 put("longitude", location.longitude)
                 put("accuracy", location.accuracy.toDouble())
-                put("timestamp", System.currentTimeMillis())
+                put("speed", location.speed.toDouble())
+                put("altitude", location.altitude)
+                put("bearing", location.bearing.toDouble())
+                put("timestamp", if (location.time > 0) location.time else System.currentTimeMillis())
                 if (!id.isNullOrBlank()) put("deviceId", id)
             }
         )
@@ -87,18 +117,7 @@ class LocationRepository(private val context: Context) {
         val cb = object : LocationCallback() {
             override fun onLocationResult(result: LocationResult) {
                 val location = result.lastLocation ?: return
-                // BUG 2: the streaming path also needs deviceId on EVERY fix,
-                // not just the one-shot pushLocation() path.
-                val id = try { com.phonelink.hub.data.DevicePrefs.deviceId } catch (_: Exception) { null }
-                onFix(
-                    JSONObject().apply {
-                        put("latitude", location.latitude)
-                        put("longitude", location.longitude)
-                        put("accuracy", location.accuracy.toDouble())
-                        put("timestamp", System.currentTimeMillis())
-                        if (!id.isNullOrBlank()) put("deviceId", id)
-                    }
-                )
+                emit(location, onFix)
             }
         }
         callback = cb

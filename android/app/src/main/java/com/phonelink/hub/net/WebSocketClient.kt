@@ -54,6 +54,9 @@ class WebSocketClient(
     val isOpen: Boolean
         get() = connected && socket != null
 
+    val queueSize: Long
+        get() = socket?.queueSize() ?: 0L
+
     private fun openSocket() {
         if (closedByUser) return
         // A live socket or a queued reconnect means we are already connecting.

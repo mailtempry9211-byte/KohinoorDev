@@ -1,19 +1,38 @@
 {
   "devices": [
     {
-      "id": "android-67d3dd84-5fec-4c51-a7e4-497a676b471c",
-      "deviceId": "android-67d3dd84-5fec-4c51-a7e4-497a676b471c",
+      "id": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
+      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
       "deviceName": "Xiaomi Mi 10",
-      "battery": 92,
+      "battery": 89,
       "isCharging": false,
-      "wifiName": "POCO C75 5G",
-      "lastSeen": 1791987594150,
-      "last_seen": 1791987594150,
+      "wifiName": "Xiaomi 11i",
+      "notificationSyncEnabled": true,
+      "lastSeen": 1792049118789,
+      "last_seen": 1792049118789,
       "online": true,
-      "wsClientId": "c059f776-d086-4fa8-9304-e5be87d59c4d"
+      "wsClientId": "b61bf39e-08ff-4889-92cf-7966c848993c"
     }
   ],
   "calls": [
+    {
+      "id": "call-14",
+      "number": "9211",
+      "name": null,
+      "type": "outgoing",
+      "duration": 0,
+      "timestamp": 1792048702901,
+      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be"
+    },
+    {
+      "id": "call-13",
+      "number": "8888",
+      "name": null,
+      "type": "outgoing",
+      "duration": 0,
+      "timestamp": 1792048698268,
+      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be"
+    },
     {
       "id": "call-12",
       "number": "8081",
@@ -21,7 +40,7 @@
       "type": "outgoing",
       "duration": 0,
       "timestamp": 1791981740153,
-      "deviceId": "android-67d3dd84-5fec-4c51-a7e4-497a676b471c"
+      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be"
     },
     {
       "id": "call-11",
@@ -30,7 +49,7 @@
       "type": "outgoing",
       "duration": 0,
       "timestamp": 1791981736087,
-      "deviceId": "android-67d3dd84-5fec-4c51-a7e4-497a676b471c"
+      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be"
     },
     {
       "id": "call-10",
@@ -39,7 +58,7 @@
       "type": "outgoing",
       "duration": 0,
       "timestamp": 1791981729067,
-      "deviceId": "android-67d3dd84-5fec-4c51-a7e4-497a676b471c"
+      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be"
     },
     {
       "id": "call-9",
@@ -48,7 +67,7 @@
       "type": "outgoing",
       "duration": 0,
       "timestamp": 1791966430650,
-      "deviceId": "android-67d3dd84-5fec-4c51-a7e4-497a676b471c"
+      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be"
     },
     {
       "id": "call-8",
@@ -57,7 +76,7 @@
       "type": "outgoing",
       "duration": 0,
       "timestamp": 1791966425881,
-      "deviceId": "android-67d3dd84-5fec-4c51-a7e4-497a676b471c"
+      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be"
     },
     {
       "id": "call-7",
@@ -66,7 +85,7 @@
       "type": "outgoing",
       "duration": 0,
       "timestamp": 1791965507094,
-      "deviceId": "android-67d3dd84-5fec-4c51-a7e4-497a676b471c"
+      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be"
     },
     {
       "id": "call-6",
@@ -75,7 +94,7 @@
       "type": "outgoing",
       "duration": 0,
       "timestamp": 1791965502711,
-      "deviceId": "android-67d3dd84-5fec-4c51-a7e4-497a676b471c"
+      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be"
     },
     {
       "id": "call-5",
@@ -84,7 +103,7 @@
       "type": "outgoing",
       "duration": 0,
       "timestamp": 1791961551904,
-      "deviceId": "android-67d3dd84-5fec-4c51-a7e4-497a676b471c"
+      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be"
     },
     {
       "id": "call-4",
@@ -93,7 +112,7 @@
       "type": "outgoing",
       "duration": 0,
       "timestamp": 1791961547040,
-      "deviceId": "android-67d3dd84-5fec-4c51-a7e4-497a676b471c"
+      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be"
     },
     {
       "id": "call-3",
@@ -102,7 +121,7 @@
       "type": "outgoing",
       "duration": 0,
       "timestamp": 1791961543729,
-      "deviceId": "android-67d3dd84-5fec-4c51-a7e4-497a676b471c"
+      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be"
     },
     {
       "id": "call-2",
@@ -111,7 +130,7 @@
       "type": "outgoing",
       "duration": 0,
       "timestamp": 1791890023961,
-      "deviceId": "android-67d3dd84-5fec-4c51-a7e4-497a676b471c"
+      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be"
     },
     {
       "id": "call-1",
@@ -120,7 +139,7 @@
       "type": "outgoing",
       "duration": 0,
       "timestamp": 1791890010847,
-      "deviceId": "android-67d3dd84-5fec-4c51-a7e4-497a676b471c"
+      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be"
     }
   ],
   "messages": [],
@@ -1505,204 +1524,432 @@
       "timestamp": 1791962457862
     },
     {
-      "id": "fbc9ce53-8113-4085-be13-a385189f36f7",
-      "deviceId": "android-67d3dd84-5fec-4c51-a7e4-497a676b471c",
-      "latitude": 27.5719029,
-      "longitude": 80.6748716,
+      "id": "a778f2c4-4631-48a4-abae-ee9ea939b42a",
+      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
+      "latitude": 27.572048,
+      "longitude": 80.6748513,
       "accuracy": 100,
-      "timestamp": 1791985891554
+      "timestamp": 1792042833644
     },
     {
-      "id": "123e2af3-7b6d-4e40-b1f4-e76229d2d363",
-      "deviceId": "android-67d3dd84-5fec-4c51-a7e4-497a676b471c",
-      "latitude": 27.5719029,
-      "longitude": 80.6748716,
+      "id": "48cb6e95-0809-439f-aa3e-d531a4640256",
+      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
+      "latitude": 27.572048,
+      "longitude": 80.6748513,
       "accuracy": 100,
-      "timestamp": 1791985891567
+      "timestamp": 1792042836011
     },
     {
-      "id": "af4bda91-2d33-4703-9560-792fb99130a5",
-      "deviceId": "android-67d3dd84-5fec-4c51-a7e4-497a676b471c",
-      "latitude": 27.5719029,
-      "longitude": 80.6748716,
+      "id": "b4d07e11-a131-4c70-b64f-4475e01b52a7",
+      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
+      "latitude": 27.572048,
+      "longitude": 80.6748513,
       "accuracy": 100,
-      "timestamp": 1791985921571
+      "timestamp": 1792042863658
     },
     {
-      "id": "03b12ce7-ef8e-4c2b-a01f-b8e2c2766326",
-      "deviceId": "android-67d3dd84-5fec-4c51-a7e4-497a676b471c",
-      "latitude": 27.5719029,
-      "longitude": 80.6748716,
+      "id": "e80d6233-038d-4960-9039-11e1953a8c4a",
+      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
+      "latitude": 27.572048,
+      "longitude": 80.6748513,
       "accuracy": 100,
-      "timestamp": 1791985951577
+      "timestamp": 1792042893669
     },
     {
-      "id": "871854f4-af88-42a4-92f5-ed03976e5dd1",
-      "deviceId": "android-67d3dd84-5fec-4c51-a7e4-497a676b471c",
-      "latitude": 27.5719029,
-      "longitude": 80.6748716,
+      "id": "d9ea3bb3-a614-4be1-890b-e5e9fae3b636",
+      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
+      "latitude": 27.572048,
+      "longitude": 80.6748513,
       "accuracy": 100,
-      "timestamp": 1791985981581
+      "timestamp": 1792042923686
     },
     {
-      "id": "f3e4647d-26cd-4887-bf0e-7d82d748768b",
-      "deviceId": "android-67d3dd84-5fec-4c51-a7e4-497a676b471c",
-      "latitude": 27.5719029,
-      "longitude": 80.6748716,
+      "id": "7ea427ad-6535-431c-afbb-deb422384858",
+      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
+      "latitude": 27.572048,
+      "longitude": 80.6748513,
       "accuracy": 100,
-      "timestamp": 1791986078164
+      "timestamp": 1792042953692
     },
     {
-      "id": "5e60e6a7-3170-4bd9-af1b-1f665a1025f2",
-      "deviceId": "android-67d3dd84-5fec-4c51-a7e4-497a676b471c",
-      "latitude": 27.5719029,
-      "longitude": 80.6748716,
+      "id": "4f306416-6172-4b78-9899-42e20b8a8847",
+      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
+      "latitude": 27.572048,
+      "longitude": 80.6748513,
       "accuracy": 100,
-      "timestamp": 1791986085105
+      "timestamp": 1792042983693
     },
     {
-      "id": "a96a8a46-3721-41cc-bcf8-8b0020d7fdb4",
-      "deviceId": "android-67d3dd84-5fec-4c51-a7e4-497a676b471c",
-      "latitude": 27.5719029,
-      "longitude": 80.6748716,
+      "id": "49a1336f-4c99-4ed0-988d-21e646c40604",
+      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
+      "latitude": 27.572048,
+      "longitude": 80.6748513,
       "accuracy": 100,
-      "timestamp": 1791986108166
+      "timestamp": 1792043013711
     },
     {
-      "id": "21c52b98-6e4a-41e7-8723-a4cdafea9dea",
-      "deviceId": "android-67d3dd84-5fec-4c51-a7e4-497a676b471c",
-      "latitude": 27.5719029,
-      "longitude": 80.6748716,
+      "id": "862c2b76-55c2-4eda-a025-28d941e466be",
+      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
+      "latitude": 27.572048,
+      "longitude": 80.6748513,
       "accuracy": 100,
-      "timestamp": 1791986138186
+      "timestamp": 1792043043817
     },
     {
-      "id": "489f95f8-9580-4c16-a27f-cdbce7e52434",
-      "deviceId": "android-67d3dd84-5fec-4c51-a7e4-497a676b471c",
-      "latitude": 27.5719029,
-      "longitude": 80.6748716,
+      "id": "071a50f9-dca6-4183-a56e-b4b9df605cef",
+      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
+      "latitude": 27.572048,
+      "longitude": 80.6748513,
       "accuracy": 100,
-      "timestamp": 1791986168192
+      "timestamp": 1792043073921
     },
     {
-      "id": "36725ca8-9786-4111-834b-fe0f1945178f",
-      "deviceId": "android-67d3dd84-5fec-4c51-a7e4-497a676b471c",
-      "latitude": 27.5719029,
-      "longitude": 80.6748716,
+      "id": "58c901dc-3e0b-4bb6-a49b-2cece517a7f9",
+      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
+      "latitude": 27.572048,
+      "longitude": 80.6748513,
       "accuracy": 100,
-      "timestamp": 1791986198293
+      "timestamp": 1792043104028
     },
     {
-      "id": "257d088b-9992-42a7-b714-571a9d306b86",
-      "deviceId": "android-67d3dd84-5fec-4c51-a7e4-497a676b471c",
-      "latitude": 27.5719029,
-      "longitude": 80.6748716,
-      "accuracy": 100,
-      "timestamp": 1791986378210
+      "id": "da6c083f-5a0b-4611-bc7b-a0fbdc42e052",
+      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
+      "latitude": 27.5718362,
+      "longitude": 80.6746922,
+      "accuracy": 30,
+      "timestamp": 1792047558269
     },
     {
-      "id": "0db0251b-e23a-4b97-adc0-d50c819bf766",
-      "deviceId": "android-67d3dd84-5fec-4c51-a7e4-497a676b471c",
-      "latitude": 27.5719029,
-      "longitude": 80.6748716,
-      "accuracy": 100,
-      "timestamp": 1791986423910
+      "id": "a44c23e9-a0f7-471b-854b-602bf4f73dc0",
+      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
+      "latitude": 27.5718362,
+      "longitude": 80.6746922,
+      "accuracy": 30,
+      "timestamp": 1792047558295
     },
     {
-      "id": "e906eb8d-cee7-4c19-8e22-45571e079f60",
-      "deviceId": "android-67d3dd84-5fec-4c51-a7e4-497a676b471c",
-      "latitude": 27.5719029,
-      "longitude": 80.6748716,
-      "accuracy": 100,
-      "timestamp": 1791986498654
+      "id": "f9823250-b6bb-4ab1-b840-0b767e750772",
+      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
+      "latitude": 27.5718186,
+      "longitude": 80.6746714,
+      "accuracy": 36.900001525878906,
+      "timestamp": 1792048296639
     },
     {
-      "id": "7290b890-9cd5-4a4e-8ddf-a938a002df82",
-      "deviceId": "android-67d3dd84-5fec-4c51-a7e4-497a676b471c",
-      "latitude": 27.5719029,
-      "longitude": 80.6748716,
-      "accuracy": 100,
-      "timestamp": 1791986517211
+      "id": "8a3db8b0-1d7a-414f-8052-1e7f020ab1fa",
+      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
+      "latitude": 27.5718313,
+      "longitude": 80.6746856,
+      "accuracy": 30,
+      "timestamp": 1792048299588
     },
     {
-      "id": "d43a5f8e-c2a4-4fc9-ad5d-cab5934a8698",
-      "deviceId": "android-67d3dd84-5fec-4c51-a7e4-497a676b471c",
-      "latitude": 27.5719029,
-      "longitude": 80.6748716,
-      "accuracy": 100,
-      "timestamp": 1791986547460
+      "id": "688641fb-6ba3-4147-b513-d454371a9100",
+      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
+      "latitude": 27.5718186,
+      "longitude": 80.6746728,
+      "accuracy": 22.5,
+      "timestamp": 1792048319812
     },
     {
-      "id": "f5600730-b207-428c-8623-4d9c7be9f4ab",
-      "deviceId": "android-67d3dd84-5fec-4c51-a7e4-497a676b471c",
-      "latitude": 27.5719029,
-      "longitude": 80.6748716,
-      "accuracy": 100,
-      "timestamp": 1791986606406
+      "id": "53cdf304-7a0a-4e76-8267-0c71a2733008",
+      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
+      "latitude": 27.5718189,
+      "longitude": 80.6746728,
+      "accuracy": 24.899999618530273,
+      "timestamp": 1792048340050
     },
     {
-      "id": "7eb76877-34fa-47c0-a823-f92a1a1bb7a8",
-      "deviceId": "android-67d3dd84-5fec-4c51-a7e4-497a676b471c",
-      "latitude": 27.5719029,
-      "longitude": 80.6748716,
-      "accuracy": 100,
-      "timestamp": 1791986724632
+      "id": "cb1279eb-e9dd-47ea-9964-48a557396f0a",
+      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
+      "latitude": 27.5718244,
+      "longitude": 80.6746779,
+      "accuracy": 26.399999618530273,
+      "timestamp": 1792048360281
     },
     {
-      "id": "943f05af-8805-4176-aa70-5635d76190ad",
-      "deviceId": "android-67d3dd84-5fec-4c51-a7e4-497a676b471c",
-      "latitude": 27.5719029,
-      "longitude": 80.6748716,
-      "accuracy": 100,
-      "timestamp": 1791987096626
+      "id": "891e8d79-69d8-4e5d-9991-c610b3f6ab1d",
+      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
+      "latitude": 27.5718244,
+      "longitude": 80.6746779,
+      "accuracy": 68.54840087890625,
+      "timestamp": 1792048390312
     },
     {
-      "id": "5cf8c739-31aa-4568-9624-c72dcab5c179",
-      "deviceId": "android-67d3dd84-5fec-4c51-a7e4-497a676b471c",
-      "latitude": 27.5719029,
-      "longitude": 80.6748716,
+      "id": "c65bf0d3-2915-4e19-8d3a-44f28acaaca5",
+      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
+      "latitude": 27.5718244,
+      "longitude": 80.6746779,
       "accuracy": 100,
-      "timestamp": 1791987316620
+      "timestamp": 1792048420420
     },
     {
-      "id": "040acb15-ac26-47a5-a833-5453d10ab8c7",
-      "deviceId": "android-67d3dd84-5fec-4c51-a7e4-497a676b471c",
-      "latitude": 27.5719029,
-      "longitude": 80.6748716,
+      "id": "c8af7879-fb3f-4ff0-a847-23bc58257e21",
+      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
+      "latitude": 27.5718244,
+      "longitude": 80.6746779,
       "accuracy": 100,
-      "timestamp": 1791987548626
+      "timestamp": 1792048450526
     },
     {
-      "id": "3f733e86-194c-41b7-9358-028c7da5af97",
-      "deviceId": "android-67d3dd84-5fec-4c51-a7e4-497a676b471c",
-      "latitude": 27.5719029,
-      "longitude": 80.6748716,
+      "id": "ddf3b327-a48d-4b05-8d52-6b9730983ee2",
+      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
+      "latitude": 27.5718244,
+      "longitude": 80.6746779,
       "accuracy": 100,
-      "timestamp": 1791987705631
+      "timestamp": 1792048480559
     },
     {
-      "id": "289f788f-dd1a-4ac4-8faf-b5aea9ba17e6",
-      "deviceId": "android-67d3dd84-5fec-4c51-a7e4-497a676b471c",
-      "latitude": 27.5719029,
-      "longitude": 80.6748716,
+      "id": "fbbb0d05-4712-4368-811a-6f535148c2d8",
+      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
+      "latitude": 27.5718244,
+      "longitude": 80.6746779,
       "accuracy": 100,
-      "timestamp": 1791987851950
+      "timestamp": 1792048510660
+    },
+    {
+      "id": "8e48e938-e0d0-42a4-b42a-7003b745d393",
+      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
+      "latitude": 27.5718244,
+      "longitude": 80.6746779,
+      "accuracy": 100,
+      "timestamp": 1792048540765
+    },
+    {
+      "id": "00387714-6f8b-4063-941b-5953f85d9d1e",
+      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
+      "latitude": 27.5718244,
+      "longitude": 80.6746779,
+      "accuracy": 100,
+      "timestamp": 1792048570871
+    },
+    {
+      "id": "368f2846-2870-4289-8d82-48c36c43972e",
+      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
+      "latitude": 27.5718244,
+      "longitude": 80.6746779,
+      "accuracy": 100,
+      "timestamp": 1792048600978
+    },
+    {
+      "id": "622a02a8-0f89-4bba-ad7b-bb20ebdd0bed",
+      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
+      "latitude": 27.5718244,
+      "longitude": 80.6746779,
+      "accuracy": 100,
+      "timestamp": 1792048627396
+    },
+    {
+      "id": "e5dc5bd0-48eb-4520-a9dd-395f2fff8f3d",
+      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
+      "latitude": 27.5718244,
+      "longitude": 80.6746779,
+      "accuracy": 100,
+      "timestamp": 1792048628009
+    },
+    {
+      "id": "524b2777-5453-4e42-8e10-0be144902c2c",
+      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
+      "latitude": 27.5718244,
+      "longitude": 80.6746779,
+      "accuracy": 100,
+      "timestamp": 1792048628091
+    },
+    {
+      "id": "9a7de2f9-32d1-4d07-b9c5-175b675cd57f",
+      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
+      "latitude": 27.5718244,
+      "longitude": 80.6746779,
+      "accuracy": 100,
+      "timestamp": 1792048628286
+    },
+    {
+      "id": "3bec67e2-6ed7-4baf-8a13-7cbb30f49f75",
+      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
+      "latitude": 27.5718244,
+      "longitude": 80.6746779,
+      "accuracy": 100,
+      "timestamp": 1792048631084
+    },
+    {
+      "id": "10d6a56e-8d02-44a8-8aea-f9d669c974de",
+      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
+      "latitude": 27.5718244,
+      "longitude": 80.6746779,
+      "accuracy": 100,
+      "timestamp": 1792048661192
+    },
+    {
+      "id": "4c2a0f1f-994b-48a3-a8e9-d1d88753b076",
+      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
+      "latitude": 27.5718244,
+      "longitude": 80.6746779,
+      "accuracy": 100,
+      "timestamp": 1792048691192
+    },
+    {
+      "id": "49e0da8b-a646-4ca5-bf63-23c698e630b5",
+      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
+      "latitude": 27.5718244,
+      "longitude": 80.6746779,
+      "accuracy": 100,
+      "timestamp": 1792048721299
+    },
+    {
+      "id": "4b95daeb-37ed-4fec-9c5b-8f09bf33b4d3",
+      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
+      "latitude": 27.5718244,
+      "longitude": 80.6746779,
+      "accuracy": 100,
+      "timestamp": 1792048751406
+    },
+    {
+      "id": "d9947d5b-dcf0-4632-92f1-926c25786fd8",
+      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
+      "latitude": 27.5718244,
+      "longitude": 80.6746779,
+      "accuracy": 100,
+      "timestamp": 1792048781514
+    },
+    {
+      "id": "18b6654d-355d-4b3e-8539-b1e4e06ad8a0",
+      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
+      "latitude": 27.5718244,
+      "longitude": 80.6746779,
+      "accuracy": 100,
+      "timestamp": 1792048811621
+    },
+    {
+      "id": "b7104f19-8f64-4150-b70e-5d0049441ace",
+      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
+      "latitude": 27.5718244,
+      "longitude": 80.6746779,
+      "accuracy": 100,
+      "timestamp": 1792048841730
+    },
+    {
+      "id": "7bca992c-ef8f-4bf2-9872-ec771b5b532f",
+      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
+      "latitude": 27.5718244,
+      "longitude": 80.6746779,
+      "accuracy": 100,
+      "timestamp": 1792048856862
+    },
+    {
+      "id": "10fffcac-1518-4c7f-b4fa-93f409f3ca22",
+      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
+      "latitude": 27.5718244,
+      "longitude": 80.6746779,
+      "accuracy": 100,
+      "timestamp": 1792048871834
+    },
+    {
+      "id": "011db1d6-584b-4c8e-8fe5-287ce1c5bb20",
+      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
+      "latitude": 27.5718244,
+      "longitude": 80.6746779,
+      "accuracy": 100,
+      "timestamp": 1792048901880
+    },
+    {
+      "id": "deb5720e-001b-4a65-8fca-43f9778887c7",
+      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
+      "latitude": 27.5718244,
+      "longitude": 80.6746779,
+      "accuracy": 100,
+      "timestamp": 1792048931974
+    },
+    {
+      "id": "9eb05861-fcb8-4434-9be9-bac39017912e",
+      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
+      "latitude": 27.5718244,
+      "longitude": 80.6746779,
+      "accuracy": 100,
+      "timestamp": 1792048962080
+    },
+    {
+      "id": "7793df86-8824-4cab-83f3-85ba9d4d5b3f",
+      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
+      "latitude": 27.5718244,
+      "longitude": 80.6746779,
+      "accuracy": 100,
+      "timestamp": 1792048992188
+    },
+    {
+      "id": "b6d29a99-6c3b-455d-abe2-4f5397333ede",
+      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
+      "latitude": 27.5718244,
+      "longitude": 80.6746779,
+      "accuracy": 100,
+      "timestamp": 1792049022210
+    },
+    {
+      "id": "eb072541-7050-4f12-936a-f0f092dd5152",
+      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
+      "latitude": 27.5718244,
+      "longitude": 80.6746779,
+      "accuracy": 100,
+      "timestamp": 1792049052315
+    },
+    {
+      "id": "3280a4bd-8f77-45a9-ae2a-def7d6cc75c0",
+      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
+      "latitude": 27.5718244,
+      "longitude": 80.6746779,
+      "accuracy": 100,
+      "timestamp": 1792049082422
+    },
+    {
+      "id": "5aa596e7-86b8-4b19-b159-474e74547f7d",
+      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
+      "latitude": 27.5718244,
+      "longitude": 80.6746779,
+      "accuracy": 100,
+      "timestamp": 1792049112528
+    },
+    {
+      "id": "e282fba3-57d0-4720-beed-80bdaf755a6d",
+      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
+      "latitude": 27.5718244,
+      "longitude": 80.6746779,
+      "accuracy": 100,
+      "timestamp": 1792049142635
     }
   ],
   "notifications": [
     {
       "key": "0|com.milink.service|110|null|10129",
-      "deviceId": "android-67d3dd84-5fec-4c51-a7e4-497a676b471c",
+      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
       "packageName": "com.milink.service",
       "appName": "Cast",
       "title": "全场景音乐服务",
       "text": "全场景音乐服务运行中",
-      "postTime": 1791980417895,
+      "postTime": 1792047556208,
       "ongoing": true,
+      "cleared": false
+    },
+    {
+      "key": "0|com.google.android.googlequicksearchbox|0|2054347708::a:snotification:[0x394,wx.f,NOTIFICATION]|10216",
+      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
+      "packageName": "com.google.android.googlequicksearchbox",
+      "appName": "Google",
+      "title": "31° in Sitapur",
+      "text": "Partly sunny · See full forecast",
+      "postTime": 1792048243243,
+      "ongoing": false,
       "cleared": false
     }
   ],
   "contacts": [
+    {
+      "id": "contact-4",
+      "name": "SHANWAZ",
+      "numbers": [
+        "8081408020"
+      ],
+      "photoAvailable": false,
+      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be"
+    },
     {
       "id": "contact-1",
       "name": "raju",
@@ -1710,7 +1957,7 @@
         "97675 484"
       ],
       "photoAvailable": false,
-      "deviceId": "android-67d3dd84-5fec-4c51-a7e4-497a676b471c"
+      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be"
     },
     {
       "id": "contact-2",
@@ -1719,7 +1966,7 @@
         "8418944572"
       ],
       "photoAvailable": false,
-      "deviceId": "android-67d3dd84-5fec-4c51-a7e4-497a676b471c"
+      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be"
     },
     {
       "id": "contact-3",
@@ -1728,14 +1975,21 @@
         "123"
       ],
       "photoAvailable": false,
-      "deviceId": "android-67d3dd84-5fec-4c51-a7e4-497a676b471c"
+      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be"
     }
   ],
-  "clipboardHistory": [],
+  "clipboardHistory": [
+    {
+      "id": "ca19aa04-a7af-40f8-b07f-6fc9fec302de",
+      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
+      "text": "http://talented-wolf-primarily.ngrok-free.app",
+      "timestamp": 1792042895435
+    }
+  ],
   "commandQueue": [],
   "deviceInfo": {
-    "android-67d3dd84-5fec-4c51-a7e4-497a676b471c": {
-      "deviceId": "android-67d3dd84-5fec-4c51-a7e4-497a676b471c",
+    "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be": {
+      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
       "deviceName": "Xiaomi Mi 10",
       "manufacturer": "Xiaomi",
       "brand": "Redmi",
@@ -1748,20 +2002,20 @@
       "securityPatch": "2022-04-01",
       "bootloader": "unknown",
       "fingerprint": "Redmi/begonia/begonia:11/RP1A.200720.011/V12.5.6.0.RGGIDXM:user/release-keys",
-      "batteryLevel": 93,
+      "batteryLevel": 89,
       "isCharging": false,
-      "uptimeMs": 6151059,
-      "adminActive": true,
+      "uptimeMs": 3944277,
+      "adminActive": false,
       "ram": {
         "totalMem": 5909716992,
-        "availMem": 2881622016,
+        "availMem": 3189182464,
         "lowMemory": false,
         "threshold": 1313656832
       },
       "storage": {
         "totalBytes": 117694369792,
-        "availableBytes": 93753675776,
-        "usedBytes": 23940694016
+        "availableBytes": 93858316288,
+        "usedBytes": 23836053504
       },
       "display": {
         "widthPixels": 1080,
@@ -1773,23 +2027,37 @@
   },
   "installedApps": {},
   "wifi": {
-    "android-67d3dd84-5fec-4c51-a7e4-497a676b471c": {
-      "deviceId": "android-67d3dd84-5fec-4c51-a7e4-497a676b471c",
+    "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be": {
+      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
       "enabled": true,
       "connected": true,
-      "ssid": "POCO C75 5G",
-      "bssid": "7e:26:8f:ee:65:41",
-      "rssi": -52,
+      "ssid": "Xiaomi 11i",
+      "bssid": "ca:01:3a:e8:35:47",
+      "rssi": -42,
       "linkSpeedMbps": 96,
-      "frequencyMHz": 2462,
-      "ipAddress": "10.139.174.109",
+      "frequencyMHz": 2412,
+      "ipAddress": "10.87.107.109",
       "scanResults": [
         {
-          "ssid": "POCO C75 5G",
-          "bssid": "7e:26:8f:ee:65:41",
-          "level": -41,
-          "frequency": 2462,
+          "ssid": "Xiaomi 11i",
+          "bssid": "ca:01:3a:e8:35:47",
+          "level": -33,
+          "frequency": 2412,
           "capabilities": "[WPA2-PSK-CCMP][RSN-PSK-CCMP][ESS]"
+        },
+        {
+          "ssid": "No Internet-2.5G",
+          "bssid": "64:fb:92:71:f0:de",
+          "level": -69,
+          "frequency": 2457,
+          "capabilities": "[WPA-PSK-TKIP+CCMP][WPA2-PSK-TKIP+CCMP][RSN-PSK-TKIP+CCMP][ESS]"
+        },
+        {
+          "ssid": "www.excitel.com",
+          "bssid": "64:fb:92:71:f0:df",
+          "level": -70,
+          "frequency": 2457,
+          "capabilities": "[WPA-PSK-TKIP+CCMP][WPA2-PSK-TKIP+CCMP][RSN-PSK-TKIP+CCMP][ESS]"
         },
         {
           "ssid": "iBall-Baton",
@@ -1799,54 +2067,21 @@
           "capabilities": "[WPA-PSK-CCMP][WPA2-PSK-CCMP][RSN-PSK-CCMP][ESS][WPS]"
         },
         {
-          "ssid": "FTTH-916",
-          "bssid": "14:a7:2b:38:3d:17",
-          "level": -80,
-          "frequency": 2432,
-          "capabilities": "[WPA-PSK-TKIP][WPA2-PSK-CCMP][RSN-PSK-CCMP][ESS][WPS]"
-        },
-        {
-          "ssid": "Newstar 4g",
-          "bssid": "c0:8f:20:3a:d9:d2",
-          "level": -81,
-          "frequency": 2457,
-          "capabilities": "[WPA2-PSK-CCMP][RSN-PSK-CCMP][ESS]"
-        },
-        {
-          "ssid": "Jio_2",
-          "bssid": "c2:8f:20:2a:d9:d2",
-          "level": -81,
-          "frequency": 2457,
-          "capabilities": "[WPA2-PSK-CCMP][RSN-PSK-CCMP][ESS]"
-        },
-        {
-          "ssid": "Airtel_kuld_4686",
-          "bssid": "6c:4f:89:95:45:ae",
-          "level": -85,
+          "ssid": "vivo X300 FE",
+          "bssid": "32:ee:ba:a8:59:1d",
+          "level": -88,
           "frequency": 2437,
-          "capabilities": "[WPA2-PSK-CCMP][RSN-PSK-CCMP][ESS]"
-        },
-        {
-          "ssid": "Galaxy J658BE",
-          "bssid": "fa:75:40:e0:30:50",
-          "level": -86,
-          "frequency": 2437,
-          "capabilities": "[WPA2-PSK-CCMP][RSN-PSK-CCMP][ESS]"
-        },
-        {
-          "ssid": "Abhi4g",
-          "bssid": "9a:ca:e7:b5:18:27",
-          "level": -90,
-          "frequency": 2412,
           "capabilities": "[WPA2-PSK-CCMP][RSN-PSK-CCMP][ESS]"
         }
       ]
     }
   },
   "callBlocklist": {
-    "android-67d3dd84-5fec-4c51-a7e4-497a676b471c": {
+    "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be": {
       "enabled": false,
-      "numbers": []
+      "numbers": [
+        "000000000000"
+      ]
     }
   }
 }

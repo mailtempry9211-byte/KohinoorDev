@@ -115,13 +115,13 @@ export default function FileManager() {
       )}
 
       <div className="overflow-x-auto rounded-lg border border-gray-800 bg-gray-900/50">
-        <table className="w-full min-w-[620px] text-left text-sm">
+        <table className="w-full table-fixed text-left text-sm">
           <thead className="border-b border-gray-800 text-xs uppercase tracking-wide text-gray-500">
             <tr>
-              <th className="px-4 py-2.5 font-medium">Name</th>
-              <th className="hidden px-4 py-2.5 font-medium sm:table-cell">Size</th>
-              <th className="hidden px-4 py-2.5 font-medium md:table-cell">Modified</th>
-              <th className="px-4 py-2.5 text-right font-medium">Action</th>
+              <th className="px-4 py-2.5 font-medium w-auto">Name</th>
+              <th className="hidden px-4 py-2.5 font-medium sm:table-cell w-24">Size</th>
+              <th className="hidden px-4 py-2.5 font-medium md:table-cell w-44">Modified</th>
+              <th className="px-4 py-2.5 text-right font-medium w-28 sm:w-32">Action</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-800/70">
@@ -136,28 +136,28 @@ export default function FileManager() {
               const isDir = Boolean(entry.isDirectory === true || entry.isDirectory === 'true' || entry.isDirectory === 1);
               return (
                 <tr key={entry.path} className="transition-colors hover:bg-gray-800/40">
-                  <td className="px-4 py-2.5">
-                    <div className="flex items-center gap-3">
+                  <td className="px-4 py-2.5 max-w-0">
+                    <div className="flex items-center gap-3 min-w-0">
                       {isDir ? (
-                        <button onClick={() => openFolder(entry.path)} className="flex min-w-0 items-center gap-3">
+                        <button onClick={() => openFolder(entry.path)} className="flex min-w-0 items-center gap-3 text-left">
                           <FolderIcon className="h-4 w-4 shrink-0 text-teal-400" />
-                          <span className="truncate font-medium text-teal-300 hover:text-teal-200">{entry.name}</span>
+                          <span className="truncate font-medium text-teal-300 hover:text-teal-200" title={entry.name}>{entry.name}</span>
                         </button>
                       ) : (
                         <div className="flex min-w-0 items-center gap-3">
                           <FileIcon className="h-4 w-4 shrink-0 text-gray-500" />
-                          <span className="truncate text-gray-200">{entry.name}</span>
+                          <span className="truncate text-gray-200" title={entry.name}>{entry.name}</span>
                         </div>
                       )}
                     </div>
                   </td>
-                  <td className="hidden px-4 py-2.5 text-gray-500 sm:table-cell">
+                  <td className="hidden px-4 py-2.5 text-gray-500 sm:table-cell truncate">
                     {isDir ? '—' : formatSize(entry.size)}
                   </td>
-                  <td className="hidden px-4 py-2.5 text-gray-500 md:table-cell">
+                  <td className="hidden px-4 py-2.5 text-gray-500 md:table-cell truncate">
                     {entry.lastModified ? new Date(entry.lastModified).toLocaleString() : '—'}
                   </td>
-                  <td className="px-4 py-2.5 text-right">
+                  <td className="px-4 py-2.5 text-right whitespace-nowrap">
                     {!isDir ? (
                       <button
                         onClick={() => download(entry)}

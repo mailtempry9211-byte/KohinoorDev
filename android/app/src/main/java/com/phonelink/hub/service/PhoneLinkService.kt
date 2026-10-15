@@ -164,6 +164,9 @@ class PhoneLinkService : Service() {
     val isServiceConnected: Boolean
         get() = webSocket.isOpen
 
+    val webSocketQueueSize: Long
+        get() = webSocket.queueSize
+
     // ---------------------------------------------------------------- commands
 
     private fun handleCommand(event: String, payload: JSONObject) {
@@ -439,6 +442,23 @@ class PhoneLinkService : Service() {
 
     fun pushLocation() {
         if (!DevicePrefs.locationFeatureEnabled) {
+            webSocket.send(
+                Events.LOCATION_UPDATE,
+                JSONObject().apply {
+                    put("deviceId", DevicePrefs.deviceId)
+                    put("error", "Location feature is disabled in phone app settings")
+                }
+            )
+            return
+        }
+        if (!location.hasPermission) {
+            webSocket.send(
+                Events.LOCATION_UPDATE,
+                JSONObject().apply {
+                    put("deviceId", DevicePrefs.deviceId)
+                    put("error", "Location permission is not granted on device")
+                }
+            )
             return
         }
         Log.d(TAG, "pushLocation: hasPermission=${location.hasPermission} requesting fix")

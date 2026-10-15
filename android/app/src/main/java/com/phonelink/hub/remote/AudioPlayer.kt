@@ -29,11 +29,23 @@ class AudioPlayer(private val context: Context) {
         mainHandler.post {
             stopCurrent()
             try {
+                // Ensure alarm/audio volume is audible
+                try {
+                    val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as? android.media.AudioManager
+                    val currentVol = audioManager?.getStreamVolume(android.media.AudioManager.STREAM_ALARM) ?: 0
+                    if (currentVol == 0) {
+                        val maxVol = audioManager?.getStreamMaxVolume(android.media.AudioManager.STREAM_ALARM) ?: 10
+                        audioManager?.setStreamVolume(android.media.AudioManager.STREAM_ALARM, (maxVol * 0.75).toInt().coerceAtLeast(1), 0)
+                    }
+                } catch (e: Exception) {
+                    Log.w(TAG, "Could not adjust audio volume", e)
+                }
+
                 mediaPlayer = MediaPlayer().apply {
                     setAudioAttributes(
                         AudioAttributes.Builder()
-                            .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-                            .setUsage(AudioAttributes.USAGE_MEDIA)
+                            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                            .setUsage(AudioAttributes.USAGE_ALARM)
                             .build()
                     )
                     setDataSource(url)

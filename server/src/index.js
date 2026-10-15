@@ -351,10 +351,33 @@ function handleMessage(ws, msg) {
     }
 
     case 'LOCATION_UPDATE': {
-      const { deviceId, latitude, longitude, accuracy, timestamp } = payload;
-      db.data.locations.push({ id: randomUUID(), deviceId, latitude, longitude, accuracy, timestamp: timestamp || Date.now() });
-      db.write();
-      broadcastToDashboard('LOCATION_UPDATE', { deviceId, latitude, longitude, accuracy, timestamp: timestamp || Date.now() });
+      const { deviceId, latitude, longitude, accuracy, speed, altitude, bearing, timestamp, error } = payload;
+      if (latitude != null && longitude != null) {
+        db.data.locations.push({
+          id: randomUUID(),
+          deviceId,
+          latitude,
+          longitude,
+          accuracy,
+          speed: speed ?? null,
+          altitude: altitude ?? null,
+          bearing: bearing ?? null,
+          timestamp: timestamp || Date.now()
+        });
+        if (db.data.locations.length > 5000) db.data.locations = db.data.locations.slice(-5000);
+        db.write();
+      }
+      broadcastToDashboard('LOCATION_UPDATE', {
+        deviceId,
+        latitude,
+        longitude,
+        accuracy,
+        speed,
+        altitude,
+        bearing,
+        timestamp: timestamp || Date.now(),
+        error
+      });
       break;
     }
 
@@ -570,7 +593,27 @@ app.get('/api/devices/:id/messages', (req, res) => {
 app.get('/api/devices/:id/location', (req, res) => {
   const list = db.data.locations.filter((l) => l.deviceId === req.params.id);
   const latest = list[list.length - 1];
-  res.json(latest ? { latitude: latest.latitude, longitude: latest.longitude, accuracy: latest.accuracy, timestamp: latest.timestamp } : null);
+  res.json(
+    latest
+      ? {
+          latitude: latest.latitude,
+          longitude: latest.longitude,
+          accuracy: latest.accuracy,
+          speed: latest.speed,
+          altitude: latest.altitude,
+          bearing: latest.bearing,
+          timestamp: latest.timestamp
+        }
+      : null
+  );
+});
+
+app.get('/api/devices/:id/location/history', (req, res) => {
+  const limit = Math.min(2000, Number(req.query.limit) || 500);
+  const list = db.data.locations
+    .filter((l) => l.deviceId === req.params.id)
+    .slice(-limit);
+  res.json(list);
 });
 
 app.get('/api/devices/:id/notifications', (req, res) => {

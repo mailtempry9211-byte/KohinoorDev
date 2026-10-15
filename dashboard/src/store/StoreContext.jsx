@@ -151,9 +151,21 @@ export function StoreProvider({ children }) {
         }
 
         case 'LOCATION_UPDATE': {
+          if (p.error) {
+            pushToast(`Location: ${p.error}`, 'error');
+            break;
+          }
           setLocations((l) => ({
             ...l,
-            [p.deviceId]: { latitude: p.latitude, longitude: p.longitude, accuracy: p.accuracy, timestamp: p.timestamp }
+            [p.deviceId]: {
+              latitude: p.latitude,
+              longitude: p.longitude,
+              accuracy: p.accuracy,
+              speed: p.speed,
+              altitude: p.altitude,
+              bearing: p.bearing,
+              timestamp: p.timestamp
+            }
           }));
           break;
         }

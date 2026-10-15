@@ -8,7 +8,7 @@ android {
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.phonelink.hub"
+        applicationId = "com.phonelink.localhub"
         minSdk = 26
         targetSdk = 34
         versionCode = 1
