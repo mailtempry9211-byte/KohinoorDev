@@ -1,34 +1,21 @@
 {
   "devices": [
     {
-      "id": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
-      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
-      "deviceName": "Xiaomi Mi 10",
-      "battery": 89,
-      "isCharging": false,
-      "wifiName": "Xiaomi 11i",
-      "notificationSyncEnabled": true,
-      "lastSeen": 1792049118789,
-      "last_seen": 1792049118789,
-      "online": true,
-      "wsClientId": "b61bf39e-08ff-4889-92cf-7966c848993c"
-    },
-    {
       "id": "android-e24d536b-c22b-488c-a560-761285560b04",
       "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
       "deviceName": "Xiaomi Mi 10",
-      "battery": 86,
+      "battery": 85,
       "isCharging": false,
-      "temperatureC": 32.5,
-      "voltageMv": 4098,
+      "temperatureC": 30.7,
+      "voltageMv": 4111,
       "health": "Good",
       "plugged": "On Battery",
       "wifiName": "Xiaomi 11i",
       "notificationSyncEnabled": true,
-      "lastSeen": 1792054266489,
-      "last_seen": 1792054266489,
-      "online": false,
-      "wsClientId": null
+      "lastSeen": 1792058007895,
+      "last_seen": 1792058007895,
+      "online": true,
+      "wsClientId": "d4fe3e7a-c334-4daf-a33e-cf527237460a"
     }
   ],
   "calls": [
@@ -1541,399 +1528,7 @@
       "timestamp": 1791962457862
     },
     {
-      "id": "a778f2c4-4631-48a4-abae-ee9ea939b42a",
-      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
-      "latitude": 27.572048,
-      "longitude": 80.6748513,
-      "accuracy": 100,
-      "timestamp": 1792042833644
-    },
-    {
-      "id": "48cb6e95-0809-439f-aa3e-d531a4640256",
-      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
-      "latitude": 27.572048,
-      "longitude": 80.6748513,
-      "accuracy": 100,
-      "timestamp": 1792042836011
-    },
-    {
-      "id": "b4d07e11-a131-4c70-b64f-4475e01b52a7",
-      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
-      "latitude": 27.572048,
-      "longitude": 80.6748513,
-      "accuracy": 100,
-      "timestamp": 1792042863658
-    },
-    {
-      "id": "e80d6233-038d-4960-9039-11e1953a8c4a",
-      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
-      "latitude": 27.572048,
-      "longitude": 80.6748513,
-      "accuracy": 100,
-      "timestamp": 1792042893669
-    },
-    {
-      "id": "d9ea3bb3-a614-4be1-890b-e5e9fae3b636",
-      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
-      "latitude": 27.572048,
-      "longitude": 80.6748513,
-      "accuracy": 100,
-      "timestamp": 1792042923686
-    },
-    {
-      "id": "7ea427ad-6535-431c-afbb-deb422384858",
-      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
-      "latitude": 27.572048,
-      "longitude": 80.6748513,
-      "accuracy": 100,
-      "timestamp": 1792042953692
-    },
-    {
-      "id": "4f306416-6172-4b78-9899-42e20b8a8847",
-      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
-      "latitude": 27.572048,
-      "longitude": 80.6748513,
-      "accuracy": 100,
-      "timestamp": 1792042983693
-    },
-    {
-      "id": "49a1336f-4c99-4ed0-988d-21e646c40604",
-      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
-      "latitude": 27.572048,
-      "longitude": 80.6748513,
-      "accuracy": 100,
-      "timestamp": 1792043013711
-    },
-    {
-      "id": "862c2b76-55c2-4eda-a025-28d941e466be",
-      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
-      "latitude": 27.572048,
-      "longitude": 80.6748513,
-      "accuracy": 100,
-      "timestamp": 1792043043817
-    },
-    {
-      "id": "071a50f9-dca6-4183-a56e-b4b9df605cef",
-      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
-      "latitude": 27.572048,
-      "longitude": 80.6748513,
-      "accuracy": 100,
-      "timestamp": 1792043073921
-    },
-    {
-      "id": "58c901dc-3e0b-4bb6-a49b-2cece517a7f9",
-      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
-      "latitude": 27.572048,
-      "longitude": 80.6748513,
-      "accuracy": 100,
-      "timestamp": 1792043104028
-    },
-    {
-      "id": "da6c083f-5a0b-4611-bc7b-a0fbdc42e052",
-      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
-      "latitude": 27.5718362,
-      "longitude": 80.6746922,
-      "accuracy": 30,
-      "timestamp": 1792047558269
-    },
-    {
-      "id": "a44c23e9-a0f7-471b-854b-602bf4f73dc0",
-      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
-      "latitude": 27.5718362,
-      "longitude": 80.6746922,
-      "accuracy": 30,
-      "timestamp": 1792047558295
-    },
-    {
-      "id": "f9823250-b6bb-4ab1-b840-0b767e750772",
-      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
-      "latitude": 27.5718186,
-      "longitude": 80.6746714,
-      "accuracy": 36.900001525878906,
-      "timestamp": 1792048296639
-    },
-    {
-      "id": "8a3db8b0-1d7a-414f-8052-1e7f020ab1fa",
-      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
-      "latitude": 27.5718313,
-      "longitude": 80.6746856,
-      "accuracy": 30,
-      "timestamp": 1792048299588
-    },
-    {
-      "id": "688641fb-6ba3-4147-b513-d454371a9100",
-      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
-      "latitude": 27.5718186,
-      "longitude": 80.6746728,
-      "accuracy": 22.5,
-      "timestamp": 1792048319812
-    },
-    {
-      "id": "53cdf304-7a0a-4e76-8267-0c71a2733008",
-      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
-      "latitude": 27.5718189,
-      "longitude": 80.6746728,
-      "accuracy": 24.899999618530273,
-      "timestamp": 1792048340050
-    },
-    {
-      "id": "cb1279eb-e9dd-47ea-9964-48a557396f0a",
-      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
-      "latitude": 27.5718244,
-      "longitude": 80.6746779,
-      "accuracy": 26.399999618530273,
-      "timestamp": 1792048360281
-    },
-    {
-      "id": "891e8d79-69d8-4e5d-9991-c610b3f6ab1d",
-      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
-      "latitude": 27.5718244,
-      "longitude": 80.6746779,
-      "accuracy": 68.54840087890625,
-      "timestamp": 1792048390312
-    },
-    {
-      "id": "c65bf0d3-2915-4e19-8d3a-44f28acaaca5",
-      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
-      "latitude": 27.5718244,
-      "longitude": 80.6746779,
-      "accuracy": 100,
-      "timestamp": 1792048420420
-    },
-    {
-      "id": "c8af7879-fb3f-4ff0-a847-23bc58257e21",
-      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
-      "latitude": 27.5718244,
-      "longitude": 80.6746779,
-      "accuracy": 100,
-      "timestamp": 1792048450526
-    },
-    {
-      "id": "ddf3b327-a48d-4b05-8d52-6b9730983ee2",
-      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
-      "latitude": 27.5718244,
-      "longitude": 80.6746779,
-      "accuracy": 100,
-      "timestamp": 1792048480559
-    },
-    {
-      "id": "fbbb0d05-4712-4368-811a-6f535148c2d8",
-      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
-      "latitude": 27.5718244,
-      "longitude": 80.6746779,
-      "accuracy": 100,
-      "timestamp": 1792048510660
-    },
-    {
-      "id": "8e48e938-e0d0-42a4-b42a-7003b745d393",
-      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
-      "latitude": 27.5718244,
-      "longitude": 80.6746779,
-      "accuracy": 100,
-      "timestamp": 1792048540765
-    },
-    {
-      "id": "00387714-6f8b-4063-941b-5953f85d9d1e",
-      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
-      "latitude": 27.5718244,
-      "longitude": 80.6746779,
-      "accuracy": 100,
-      "timestamp": 1792048570871
-    },
-    {
-      "id": "368f2846-2870-4289-8d82-48c36c43972e",
-      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
-      "latitude": 27.5718244,
-      "longitude": 80.6746779,
-      "accuracy": 100,
-      "timestamp": 1792048600978
-    },
-    {
-      "id": "622a02a8-0f89-4bba-ad7b-bb20ebdd0bed",
-      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
-      "latitude": 27.5718244,
-      "longitude": 80.6746779,
-      "accuracy": 100,
-      "timestamp": 1792048627396
-    },
-    {
-      "id": "e5dc5bd0-48eb-4520-a9dd-395f2fff8f3d",
-      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
-      "latitude": 27.5718244,
-      "longitude": 80.6746779,
-      "accuracy": 100,
-      "timestamp": 1792048628009
-    },
-    {
-      "id": "524b2777-5453-4e42-8e10-0be144902c2c",
-      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
-      "latitude": 27.5718244,
-      "longitude": 80.6746779,
-      "accuracy": 100,
-      "timestamp": 1792048628091
-    },
-    {
-      "id": "9a7de2f9-32d1-4d07-b9c5-175b675cd57f",
-      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
-      "latitude": 27.5718244,
-      "longitude": 80.6746779,
-      "accuracy": 100,
-      "timestamp": 1792048628286
-    },
-    {
-      "id": "3bec67e2-6ed7-4baf-8a13-7cbb30f49f75",
-      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
-      "latitude": 27.5718244,
-      "longitude": 80.6746779,
-      "accuracy": 100,
-      "timestamp": 1792048631084
-    },
-    {
-      "id": "10d6a56e-8d02-44a8-8aea-f9d669c974de",
-      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
-      "latitude": 27.5718244,
-      "longitude": 80.6746779,
-      "accuracy": 100,
-      "timestamp": 1792048661192
-    },
-    {
-      "id": "4c2a0f1f-994b-48a3-a8e9-d1d88753b076",
-      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
-      "latitude": 27.5718244,
-      "longitude": 80.6746779,
-      "accuracy": 100,
-      "timestamp": 1792048691192
-    },
-    {
-      "id": "49e0da8b-a646-4ca5-bf63-23c698e630b5",
-      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
-      "latitude": 27.5718244,
-      "longitude": 80.6746779,
-      "accuracy": 100,
-      "timestamp": 1792048721299
-    },
-    {
-      "id": "4b95daeb-37ed-4fec-9c5b-8f09bf33b4d3",
-      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
-      "latitude": 27.5718244,
-      "longitude": 80.6746779,
-      "accuracy": 100,
-      "timestamp": 1792048751406
-    },
-    {
-      "id": "d9947d5b-dcf0-4632-92f1-926c25786fd8",
-      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
-      "latitude": 27.5718244,
-      "longitude": 80.6746779,
-      "accuracy": 100,
-      "timestamp": 1792048781514
-    },
-    {
-      "id": "18b6654d-355d-4b3e-8539-b1e4e06ad8a0",
-      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
-      "latitude": 27.5718244,
-      "longitude": 80.6746779,
-      "accuracy": 100,
-      "timestamp": 1792048811621
-    },
-    {
-      "id": "b7104f19-8f64-4150-b70e-5d0049441ace",
-      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
-      "latitude": 27.5718244,
-      "longitude": 80.6746779,
-      "accuracy": 100,
-      "timestamp": 1792048841730
-    },
-    {
-      "id": "7bca992c-ef8f-4bf2-9872-ec771b5b532f",
-      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
-      "latitude": 27.5718244,
-      "longitude": 80.6746779,
-      "accuracy": 100,
-      "timestamp": 1792048856862
-    },
-    {
-      "id": "10fffcac-1518-4c7f-b4fa-93f409f3ca22",
-      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
-      "latitude": 27.5718244,
-      "longitude": 80.6746779,
-      "accuracy": 100,
-      "timestamp": 1792048871834
-    },
-    {
-      "id": "011db1d6-584b-4c8e-8fe5-287ce1c5bb20",
-      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
-      "latitude": 27.5718244,
-      "longitude": 80.6746779,
-      "accuracy": 100,
-      "timestamp": 1792048901880
-    },
-    {
-      "id": "deb5720e-001b-4a65-8fca-43f9778887c7",
-      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
-      "latitude": 27.5718244,
-      "longitude": 80.6746779,
-      "accuracy": 100,
-      "timestamp": 1792048931974
-    },
-    {
-      "id": "9eb05861-fcb8-4434-9be9-bac39017912e",
-      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
-      "latitude": 27.5718244,
-      "longitude": 80.6746779,
-      "accuracy": 100,
-      "timestamp": 1792048962080
-    },
-    {
-      "id": "7793df86-8824-4cab-83f3-85ba9d4d5b3f",
-      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
-      "latitude": 27.5718244,
-      "longitude": 80.6746779,
-      "accuracy": 100,
-      "timestamp": 1792048992188
-    },
-    {
-      "id": "b6d29a99-6c3b-455d-abe2-4f5397333ede",
-      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
-      "latitude": 27.5718244,
-      "longitude": 80.6746779,
-      "accuracy": 100,
-      "timestamp": 1792049022210
-    },
-    {
-      "id": "eb072541-7050-4f12-936a-f0f092dd5152",
-      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
-      "latitude": 27.5718244,
-      "longitude": 80.6746779,
-      "accuracy": 100,
-      "timestamp": 1792049052315
-    },
-    {
-      "id": "3280a4bd-8f77-45a9-ae2a-def7d6cc75c0",
-      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
-      "latitude": 27.5718244,
-      "longitude": 80.6746779,
-      "accuracy": 100,
-      "timestamp": 1792049082422
-    },
-    {
-      "id": "5aa596e7-86b8-4b19-b159-474e74547f7d",
-      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
-      "latitude": 27.5718244,
-      "longitude": 80.6746779,
-      "accuracy": 100,
-      "timestamp": 1792049112528
-    },
-    {
-      "id": "e282fba3-57d0-4720-beed-80bdaf755a6d",
-      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
-      "latitude": 27.5718244,
-      "longitude": 80.6746779,
-      "accuracy": 100,
-      "timestamp": 1792049142635
-    },
-    {
-      "id": "f92cc92f-db1a-4a3c-80b6-7ed461b83c49",
+      "id": "b716e82b-b2b7-4ea3-bd58-0dfea152890f",
       "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
       "latitude": 27.5718193,
       "longitude": 80.6746724,
@@ -1941,10 +1536,10 @@
       "speed": 0,
       "altitude": 80.69999694824219,
       "bearing": 0,
-      "timestamp": 1792054251508
+      "timestamp": 1792054656644
     },
     {
-      "id": "59c87b5e-7b28-43f8-ab7b-aac19cbb5e0d",
+      "id": "14e85317-c614-4dc7-968d-ae4c4fa022cd",
       "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
       "latitude": 27.5718193,
       "longitude": 80.6746724,
@@ -1952,10 +1547,10 @@
       "speed": 0,
       "altitude": 80.69999694824219,
       "bearing": 0,
-      "timestamp": 1792054281521
+      "timestamp": 1792054656644
     },
     {
-      "id": "1d36778d-212e-4d17-a53e-50fc0903852a",
+      "id": "ba9c219f-803f-42bd-afff-42236e0dedf7",
       "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
       "latitude": 27.5718193,
       "longitude": 80.6746724,
@@ -1963,21 +1558,1319 @@
       "speed": 0,
       "altitude": 80.69999694824219,
       "bearing": 0,
-      "timestamp": 1792054317535
+      "timestamp": 1792054686654
+    },
+    {
+      "id": "3f4b3d19-0085-4d8b-96ee-755b6246ebc2",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718193,
+      "longitude": 80.6746724,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792054716659
+    },
+    {
+      "id": "b4c171f6-f99c-477a-aac6-7d344c147314",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718193,
+      "longitude": 80.6746724,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792054746670
+    },
+    {
+      "id": "bc71316d-5769-4dc4-9cc6-5cd3d7884213",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718193,
+      "longitude": 80.6746724,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792054813034
+    },
+    {
+      "id": "883edad3-1007-4f2c-9301-0194ff9b00b6",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718193,
+      "longitude": 80.6746724,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792054843037
+    },
+    {
+      "id": "0b031665-de71-4667-8816-2ea514809098",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718193,
+      "longitude": 80.6746724,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792054873047
+    },
+    {
+      "id": "7b2a9847-6167-4a1e-94a4-d975d83210a0",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718193,
+      "longitude": 80.6746724,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792054903058
+    },
+    {
+      "id": "176e5f03-827c-43c8-b01a-afbd77ca8462",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718193,
+      "longitude": 80.6746724,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792054933162
+    },
+    {
+      "id": "6ee3e319-a4bf-4630-a628-fc2095ba288e",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718193,
+      "longitude": 80.6746724,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792054963268
+    },
+    {
+      "id": "3bb337ce-1cd2-4885-bf6e-02c7565771bc",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718193,
+      "longitude": 80.6746724,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792054993374
+    },
+    {
+      "id": "7bd0e43d-a9c5-4bfb-a50d-d65969e78f07",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718193,
+      "longitude": 80.6746724,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792055023381
+    },
+    {
+      "id": "c481f679-088f-42da-b52b-fcd0578cdd51",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718193,
+      "longitude": 80.6746724,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792055053392
+    },
+    {
+      "id": "793a754b-60c5-44c2-91fa-3f67937e87f3",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718193,
+      "longitude": 80.6746724,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792055083398
+    },
+    {
+      "id": "a91a2449-cdb6-4175-a603-55a93166e1f5",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718193,
+      "longitude": 80.6746724,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792055113505
+    },
+    {
+      "id": "68f7a228-2526-467f-94e8-0a32d8f0979d",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718193,
+      "longitude": 80.6746724,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792055143610
+    },
+    {
+      "id": "41a53600-8274-4b2d-9757-8570c838a9cb",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718193,
+      "longitude": 80.6746724,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792055173716
+    },
+    {
+      "id": "3c9805a5-28ca-43cf-98df-4625c76937be",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718193,
+      "longitude": 80.6746724,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792055203821
+    },
+    {
+      "id": "24f183e4-d00f-4b36-8fd8-e1452c5ef7c8",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718193,
+      "longitude": 80.6746724,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792055233841
+    },
+    {
+      "id": "ab643a76-29ad-4a23-af5a-d62cd5a2b391",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718193,
+      "longitude": 80.6746724,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792055263947
+    },
+    {
+      "id": "cccd6641-cb11-4723-992a-27c0620c4df4",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718193,
+      "longitude": 80.6746724,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792055294051
+    },
+    {
+      "id": "d0454322-918c-4ebe-bf67-38528a5a5135",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718193,
+      "longitude": 80.6746724,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792055324157
+    },
+    {
+      "id": "eff16f64-618f-437f-9ec5-c952d233d7fb",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718193,
+      "longitude": 80.6746724,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792055354175
+    },
+    {
+      "id": "f5959f5b-2025-4da1-887c-e6ef10821d53",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718214,
+      "longitude": 80.6746766,
+      "accuracy": 20.899999618530273,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792055380890
+    },
+    {
+      "id": "b0336921-a6bb-48a3-b3dc-91ac4361141f",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718214,
+      "longitude": 80.6746766,
+      "accuracy": 63.0469970703125,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792055410996
+    },
+    {
+      "id": "b9e278a7-63ec-4d05-bb0d-9ffeadfbf726",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718182,
+      "longitude": 80.6746702,
+      "accuracy": 42.5,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792055423439
+    },
+    {
+      "id": "ba14e4c8-06a8-4cba-97cd-5ee7e86963a6",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718182,
+      "longitude": 80.6746702,
+      "accuracy": 84.64559936523438,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792055453544
+    },
+    {
+      "id": "1c3a970f-5f9c-4519-8fd8-c802df597ae0",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718182,
+      "longitude": 80.6746702,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792055483648
+    },
+    {
+      "id": "0bbd62f1-1eec-4df0-a016-affcf0651205",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718182,
+      "longitude": 80.6746702,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792055513753
+    },
+    {
+      "id": "20f8dea8-03f7-4d8f-a1e7-2871d256f975",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718182,
+      "longitude": 80.6746702,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792055513753
+    },
+    {
+      "id": "e819af07-15a0-4532-b769-bfb227528c25",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718182,
+      "longitude": 80.6746702,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792055543858
+    },
+    {
+      "id": "3438b2e9-34e7-46c6-90c3-6eca17db0a11",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718182,
+      "longitude": 80.6746702,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792055573887
+    },
+    {
+      "id": "c6dfda06-5457-4a77-9554-a1be1ca5b03e",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718182,
+      "longitude": 80.6746702,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792055603992
+    },
+    {
+      "id": "63cfb828-50ac-4e10-aedc-a7aa39876846",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718182,
+      "longitude": 80.6746702,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792055634097
+    },
+    {
+      "id": "b782dd87-a078-44f1-b0e8-0b88e9d712b4",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718182,
+      "longitude": 80.6746702,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792055664200
+    },
+    {
+      "id": "48e867d2-1c95-4a04-99d1-e4182174d88e",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718182,
+      "longitude": 80.6746702,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792055694222
+    },
+    {
+      "id": "2b9563f8-31dc-4f8e-a8a2-f592f3278178",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718182,
+      "longitude": 80.6746702,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792055724328
+    },
+    {
+      "id": "90e5e264-9ff3-423c-b925-befe90713168",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718182,
+      "longitude": 80.6746702,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792055724328
+    },
+    {
+      "id": "82fcc2b4-eaf1-4fce-8c79-6c8f086d81ce",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718182,
+      "longitude": 80.6746702,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792055754433
+    },
+    {
+      "id": "6dcdf4b7-c50d-4202-ac14-7962d3943a85",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718182,
+      "longitude": 80.6746702,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792055784537
+    },
+    {
+      "id": "52f3ab12-757b-4a6b-84b0-9511628a0333",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718182,
+      "longitude": 80.6746702,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792055814643
+    },
+    {
+      "id": "2f7978fd-a4e9-4646-859e-864cf9944c6d",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718182,
+      "longitude": 80.6746702,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792055844748
+    },
+    {
+      "id": "6493d50e-7c66-4d9d-9f87-e4fdf9940bf5",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718182,
+      "longitude": 80.6746702,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792055874853
+    },
+    {
+      "id": "3101921a-9a84-45bc-80fe-f32328fdac81",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718182,
+      "longitude": 80.6746702,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792055904959
+    },
+    {
+      "id": "4336bd9a-cddf-4770-bf10-56d7ecc97970",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718182,
+      "longitude": 80.6746702,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792055935065
+    },
+    {
+      "id": "f394de92-5a4e-4d21-ab93-c3fef37bcf36",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718182,
+      "longitude": 80.6746702,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792055965171
+    },
+    {
+      "id": "2bdee957-9225-4d6d-bd34-6a5a0ff8aae0",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718182,
+      "longitude": 80.6746702,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792055995275
+    },
+    {
+      "id": "e35b7ab2-2cce-4c81-a345-f559eaf57fd1",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718182,
+      "longitude": 80.6746702,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792056025380
+    },
+    {
+      "id": "fb607e14-18a5-4155-b2a9-d9ccb688c3ef",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718182,
+      "longitude": 80.6746702,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792056055484
+    },
+    {
+      "id": "76098ab7-acfc-4ee0-9264-2b40a885acbb",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718182,
+      "longitude": 80.6746702,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792056085590
+    },
+    {
+      "id": "9ab8fe95-b571-4d50-862d-17c5e2d09ad6",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718182,
+      "longitude": 80.6746702,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792056115695
+    },
+    {
+      "id": "c5821d95-1f2b-42db-8bfd-9bd80a96ea66",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718182,
+      "longitude": 80.6746702,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792056145801
+    },
+    {
+      "id": "7c83d38f-c78a-478f-864f-1da7264c7911",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718182,
+      "longitude": 80.6746702,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792056175905
+    },
+    {
+      "id": "babc8d72-ae00-4e7c-9c54-97380490103c",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718182,
+      "longitude": 80.6746702,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792056206010
+    },
+    {
+      "id": "2b268a5d-7137-4b7f-90ae-8ce10608c0fb",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718182,
+      "longitude": 80.6746702,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792056236114
+    },
+    {
+      "id": "b053bae1-57e2-4f1c-9b95-7f04eeff21f4",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718182,
+      "longitude": 80.6746702,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792056266220
+    },
+    {
+      "id": "1b6591b5-740f-4d46-a84f-d16d2bc90400",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718182,
+      "longitude": 80.6746702,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792056296324
+    },
+    {
+      "id": "09ad3122-59e9-4eb4-a14d-b56abcdaabde",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718182,
+      "longitude": 80.6746702,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792056296324
+    },
+    {
+      "id": "26fd2ee1-33d4-454d-b57b-b8663cb7c3ff",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718182,
+      "longitude": 80.6746702,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792056326429
+    },
+    {
+      "id": "653e6acf-6354-43d8-bdcb-e418a9ab4bc5",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718182,
+      "longitude": 80.6746702,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792056326429
+    },
+    {
+      "id": "f46d9492-f711-4d06-8b5c-7b382dfdd737",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718182,
+      "longitude": 80.6746702,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792056356535
+    },
+    {
+      "id": "e201249f-67ba-4ebb-85ac-c28927af5a00",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718182,
+      "longitude": 80.6746702,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792056356535
+    },
+    {
+      "id": "4e4ecaad-6325-427f-acd0-8fb423cb822a",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718182,
+      "longitude": 80.6746702,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792056356535
+    },
+    {
+      "id": "833da671-e257-4963-b3aa-71774be2690d",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718182,
+      "longitude": 80.6746702,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792056386641
+    },
+    {
+      "id": "97825f92-d22f-4656-a3c2-009d1cfc0d57",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718182,
+      "longitude": 80.6746702,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792056416745
+    },
+    {
+      "id": "987c68f0-e230-403a-be17-547bfbfd21a9",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718182,
+      "longitude": 80.6746702,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792056446850
+    },
+    {
+      "id": "8b5a919a-6245-44b6-8656-ec2cf1a968b8",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718182,
+      "longitude": 80.6746702,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792056446850
+    },
+    {
+      "id": "43404eb8-a5a3-4275-9a44-c74f217f4a1b",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718182,
+      "longitude": 80.6746702,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792056476956
+    },
+    {
+      "id": "c9ba7819-1d33-4354-b1c4-3f38e870a4ca",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718182,
+      "longitude": 80.6746702,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792056507062
+    },
+    {
+      "id": "eadc39cf-6f26-4b5e-849e-283883fb5d93",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718182,
+      "longitude": 80.6746702,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792056537168
+    },
+    {
+      "id": "a8f839f4-adfe-4eb4-86a5-f206db7ae970",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718182,
+      "longitude": 80.6746702,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792056567274
+    },
+    {
+      "id": "27b84397-2ad9-4a98-9090-b5c6f4432645",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718182,
+      "longitude": 80.6746702,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792056597380
+    },
+    {
+      "id": "3a5bba07-d0ca-40b6-995c-81ff9e2de8d0",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718182,
+      "longitude": 80.6746702,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792056627485
+    },
+    {
+      "id": "8ec4323b-d753-4b5c-9b08-35467000c61c",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718182,
+      "longitude": 80.6746702,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792056657591
+    },
+    {
+      "id": "61d48e06-ba11-4226-abb0-44bbfda49510",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718182,
+      "longitude": 80.6746702,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792056687695
+    },
+    {
+      "id": "a3faac2b-9612-4ba0-8574-36726cd53790",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718182,
+      "longitude": 80.6746702,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792056717799
+    },
+    {
+      "id": "0a16e3ac-ee3f-46a3-bfb5-d65e2aaf72a5",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718182,
+      "longitude": 80.6746702,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792056747905
+    },
+    {
+      "id": "c5bb2af8-b633-486c-b831-bbdb324fa1d2",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718182,
+      "longitude": 80.6746702,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792056778010
+    },
+    {
+      "id": "2d2dc727-1262-4b8d-82d9-1067cb3cd12f",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718182,
+      "longitude": 80.6746702,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792056808117
+    },
+    {
+      "id": "8570640e-c139-4af1-a6e5-f588f8296338",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718182,
+      "longitude": 80.6746702,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792056838221
+    },
+    {
+      "id": "6906b910-01a5-432b-8b3c-5bac649d697d",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718182,
+      "longitude": 80.6746702,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792056868326
+    },
+    {
+      "id": "2d1a75d8-255a-4311-bb4a-ae59564ff212",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718182,
+      "longitude": 80.6746702,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792056898432
+    },
+    {
+      "id": "5d08b451-46dc-4bd3-a94d-fefb475e3175",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718182,
+      "longitude": 80.6746702,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792056928536
+    },
+    {
+      "id": "35cf961c-c493-462c-8699-c62b97dc8da5",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718182,
+      "longitude": 80.6746702,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792056958642
+    },
+    {
+      "id": "e2e535cc-2bee-41f9-84ca-3d6a4b805bce",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718182,
+      "longitude": 80.6746702,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792056988748
+    },
+    {
+      "id": "fcc5c4ae-7628-40b8-a666-2d2d072dde15",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718182,
+      "longitude": 80.6746702,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792057018853
+    },
+    {
+      "id": "56ab41cf-5f44-47a1-8e8d-982d56cd3037",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718182,
+      "longitude": 80.6746702,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792057048959
+    },
+    {
+      "id": "ceeece6c-5ac6-4a2f-93a1-2fc6ce10859e",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718182,
+      "longitude": 80.6746702,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792057079063
+    },
+    {
+      "id": "f2b61c63-7734-4207-9861-d22b6bc283c7",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718182,
+      "longitude": 80.6746702,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792057109169
+    },
+    {
+      "id": "ca54dca0-9205-4411-8426-d9872ba56cda",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718182,
+      "longitude": 80.6746702,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792057139273
+    },
+    {
+      "id": "ff390f5b-a2db-4f31-ad87-9f937234a562",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718182,
+      "longitude": 80.6746702,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792057169379
+    },
+    {
+      "id": "abc337d7-8b5e-474e-a9af-3470ad56fb0a",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718182,
+      "longitude": 80.6746702,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792057199485
+    },
+    {
+      "id": "399cf1ab-5d39-4e7d-b11a-0a6a4d6de660",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718182,
+      "longitude": 80.6746702,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792057229589
+    },
+    {
+      "id": "14692a00-2432-46fc-a5e8-0ecfa7a856a1",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718182,
+      "longitude": 80.6746702,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792057259695
+    },
+    {
+      "id": "9e8d5b40-8e9a-4b5c-9dba-6118de29b46e",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718182,
+      "longitude": 80.6746702,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792057289801
+    },
+    {
+      "id": "0ade0f8b-9b65-4da5-bc5d-bfd2555359ad",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718182,
+      "longitude": 80.6746702,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792057319904
+    },
+    {
+      "id": "5ddc073d-ca75-4168-94d0-e2d41c8f7990",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718182,
+      "longitude": 80.6746702,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792057350009
+    },
+    {
+      "id": "15ef4e6a-3298-46ec-8a05-24714b89ee03",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718182,
+      "longitude": 80.6746702,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792057380113
+    },
+    {
+      "id": "6ccfeb22-8940-45fa-8333-06054cbf8b6f",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718182,
+      "longitude": 80.6746702,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792057410218
+    },
+    {
+      "id": "a792959c-7b73-4f7b-a2c0-cbc411ad7885",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718182,
+      "longitude": 80.6746702,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792057440323
+    },
+    {
+      "id": "a8f8c85e-1e95-492e-a105-4a4b18a06f43",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718182,
+      "longitude": 80.6746702,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792057470428
+    },
+    {
+      "id": "b203fdb6-7b26-4016-82be-894649a38f3e",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718182,
+      "longitude": 80.6746702,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792057500534
+    },
+    {
+      "id": "4c310320-d6c5-4e98-b0be-e1348c43b694",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718182,
+      "longitude": 80.6746702,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792057530639
+    },
+    {
+      "id": "3df6f2ed-cfa9-43a6-a1d8-dee6133d506e",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718182,
+      "longitude": 80.6746702,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792057560743
+    },
+    {
+      "id": "a7322528-f98b-4695-93a1-ea82c58f099d",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718182,
+      "longitude": 80.6746702,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792057590849
+    },
+    {
+      "id": "b553a6b7-21b9-43c2-b1e6-466ec19b06ea",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718182,
+      "longitude": 80.6746702,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792057620955
+    },
+    {
+      "id": "5bcd0086-f9d2-44e8-9ec8-bf364eaf96c4",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718182,
+      "longitude": 80.6746702,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792057651061
+    },
+    {
+      "id": "1296cd68-7fda-4099-a85f-641acb8ff78e",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718182,
+      "longitude": 80.6746702,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792057681167
+    },
+    {
+      "id": "d14dc0c7-8385-4720-81b0-46604e137e65",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718182,
+      "longitude": 80.6746702,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792057711272
+    },
+    {
+      "id": "766af45c-54eb-46a6-8c9a-b181079eeba6",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718182,
+      "longitude": 80.6746702,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792057741378
+    },
+    {
+      "id": "0f6a94c7-77d9-4d34-900d-e7fbdefbb044",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718182,
+      "longitude": 80.6746702,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792057771483
+    },
+    {
+      "id": "8632525c-40ba-47de-aafb-bf66db4cc5c7",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718182,
+      "longitude": 80.6746702,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792057801588
+    },
+    {
+      "id": "122306d3-449b-401f-9adb-64c4b5020263",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718182,
+      "longitude": 80.6746702,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792057801588
+    },
+    {
+      "id": "a306ef4e-6453-4b26-8b0e-5a956a52f04c",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718182,
+      "longitude": 80.6746702,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792057831692
+    },
+    {
+      "id": "67a13cb6-67b1-4900-b86d-6142775b56d7",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718182,
+      "longitude": 80.6746702,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792057861797
+    },
+    {
+      "id": "3f2e76f7-6312-4349-9136-82f14ce2db97",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718182,
+      "longitude": 80.6746702,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792057891903
+    },
+    {
+      "id": "62ee88fb-e35f-4357-90a1-d606efd67a7e",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718182,
+      "longitude": 80.6746702,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792057922006
+    },
+    {
+      "id": "5dcccae9-4c24-452e-b49f-4b829236402d",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718182,
+      "longitude": 80.6746702,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792057952112
+    },
+    {
+      "id": "e2dcfbdd-7335-4b5f-a102-95de04467397",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718182,
+      "longitude": 80.6746702,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792057982218
+    },
+    {
+      "id": "0d839b41-e4e4-4893-8d16-19791afdc603",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718182,
+      "longitude": 80.6746702,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792058012324
+    },
+    {
+      "id": "5c27553f-2654-4f44-8793-484e9bea7013",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718182,
+      "longitude": 80.6746702,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792058042430
     }
   ],
   "notifications": [
-    {
-      "key": "0|com.google.android.googlequicksearchbox|0|2054347708::a:snotification:[0x394,wx.f,NOTIFICATION]|10216",
-      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
-      "packageName": "com.google.android.googlequicksearchbox",
-      "appName": "Google",
-      "title": "31° in Sitapur",
-      "text": "Partly sunny · See full forecast",
-      "postTime": 1792048243243,
-      "ongoing": false,
-      "cleared": false
-    },
     {
       "key": "0|com.milink.service|110|null|10129",
       "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
@@ -1995,49 +2888,13 @@
       "packageName": "com.phonelink.localhub",
       "appName": "Phone Link Hub",
       "title": "Xiaomi Mi 10",
-      "text": "Connecting to dashboard…",
-      "postTime": 1792054277067,
+      "text": "Connection reset",
+      "postTime": 1792057807112,
       "ongoing": true,
       "cleared": false
     }
   ],
   "contacts": [
-    {
-      "id": "contact-4",
-      "name": "SHANWAZ",
-      "numbers": [
-        "8081408020"
-      ],
-      "photoAvailable": false,
-      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be"
-    },
-    {
-      "id": "contact-1",
-      "name": "raju",
-      "numbers": [
-        "97675 484"
-      ],
-      "photoAvailable": false,
-      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be"
-    },
-    {
-      "id": "contact-2",
-      "name": "suaib",
-      "numbers": [
-        "8418944572"
-      ],
-      "photoAvailable": false,
-      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be"
-    },
-    {
-      "id": "contact-3",
-      "name": "test",
-      "numbers": [
-        "123"
-      ],
-      "photoAvailable": false,
-      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be"
-    },
     {
       "id": "contact-4",
       "name": "SHANWAZ",
@@ -2077,50 +2934,14 @@
   ],
   "clipboardHistory": [
     {
-      "id": "ca19aa04-a7af-40f8-b07f-6fc9fec302de",
-      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
-      "text": "http://talented-wolf-primarily.ngrok-free.app",
-      "timestamp": 1792042895435
+      "id": "f61913d5-0d55-41d9-8bb8-a947e0d8e66c",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "text": "talented-wolf-primarily.ngrok-free.app",
+      "timestamp": 1792055404409
     }
   ],
   "commandQueue": [],
   "deviceInfo": {
-    "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be": {
-      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
-      "deviceName": "Xiaomi Mi 10",
-      "manufacturer": "Xiaomi",
-      "brand": "Redmi",
-      "model": "Mi 10",
-      "product": "begonia",
-      "board": "begonia",
-      "hardware": "mt6785",
-      "androidVersion": "11",
-      "sdkInt": 30,
-      "securityPatch": "2022-04-01",
-      "bootloader": "unknown",
-      "fingerprint": "Redmi/begonia/begonia:11/RP1A.200720.011/V12.5.6.0.RGGIDXM:user/release-keys",
-      "batteryLevel": 89,
-      "isCharging": false,
-      "uptimeMs": 3944277,
-      "adminActive": false,
-      "ram": {
-        "totalMem": 5909716992,
-        "availMem": 3189182464,
-        "lowMemory": false,
-        "threshold": 1313656832
-      },
-      "storage": {
-        "totalBytes": 117694369792,
-        "availableBytes": 93858316288,
-        "usedBytes": 23836053504
-      },
-      "display": {
-        "widthPixels": 1080,
-        "heightPixels": 2220,
-        "density": 2.75,
-        "densityDpi": 440
-      }
-    },
     "android-e24d536b-c22b-488c-a560-761285560b04": {
       "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
       "deviceName": "Xiaomi Mi 10",
@@ -2135,20 +2956,20 @@
       "securityPatch": "2022-04-01",
       "bootloader": "unknown",
       "fingerprint": "Redmi/begonia/begonia:11/RP1A.200720.011/V12.5.6.0.RGGIDXM:user/release-keys",
-      "batteryLevel": 86,
+      "batteryLevel": 85,
       "isCharging": false,
-      "uptimeMs": 9339589,
+      "uptimeMs": 12895695,
       "adminActive": false,
       "ram": {
         "totalMem": 5909716992,
-        "availMem": 2989244416,
+        "availMem": 3069632512,
         "lowMemory": false,
         "threshold": 1313656832
       },
       "storage": {
         "totalBytes": 117694369792,
-        "availableBytes": 93840244736,
-        "usedBytes": 23854125056
+        "availableBytes": 93958598656,
+        "usedBytes": 23735771136
       },
       "display": {
         "widthPixels": 1080,
@@ -2158,15 +2979,2169 @@
       }
     }
   },
-  "installedApps": {},
+  "installedApps": {
+    "android-e24d536b-c22b-488c-a560-761285560b04": [
+      {
+        "packageName": "idm.internet.download.manager.plus",
+        "name": "1DM+",
+        "versionName": "18.1",
+        "versionCode": 30248,
+        "isSystem": false,
+        "firstInstallTime": 1791897032659,
+        "lastUpdateTime": 1791897032659
+      },
+      {
+        "packageName": "com.htetznaing.adbotg",
+        "name": "ADB⚡OTG",
+        "versionName": "1.0.1",
+        "versionCode": 2,
+        "isSystem": false,
+        "firstInstallTime": 1791895275265,
+        "lastUpdateTime": 1791895275265
+      },
+      {
+        "packageName": "com.google.android.verifier",
+        "name": "Android Developer Verifier",
+        "versionName": "1.0.991779013",
+        "versionCode": 77989,
+        "isSystem": false,
+        "firstInstallTime": 1791885168335,
+        "lastUpdateTime": 1791885168335
+      },
+      {
+        "packageName": "com.miui.cleaner",
+        "name": "Cleaner",
+        "versionName": "811.1.250408.release",
+        "versionCode": 100811,
+        "isSystem": false,
+        "firstInstallTime": 1791798359000,
+        "lastUpdateTime": 1791815194038
+      },
+      {
+        "packageName": "com.softwarebakery.drivedroid",
+        "name": "DriveDroid",
+        "versionName": "0.10.50",
+        "versionCode": 105000,
+        "isSystem": false,
+        "firstInstallTime": 1791895284795,
+        "lastUpdateTime": 1791895284795
+      },
+      {
+        "packageName": "com.looker.droidify",
+        "name": "Droid-ify",
+        "versionName": "0.7.8",
+        "versionCode": 780,
+        "isSystem": false,
+        "firstInstallTime": 1791816738354,
+        "lastUpdateTime": 1791816738354
+      },
+      {
+        "packageName": "eu.depau.etchdroid",
+        "name": "EtchDroid",
+        "versionName": "2.1",
+        "versionCode": 26,
+        "isSystem": false,
+        "firstInstallTime": 1791896985567,
+        "lastUpdateTime": 1791896985567
+      },
+      {
+        "packageName": "com.google.android.apps.bard",
+        "name": "Gemini",
+        "versionName": "1.0.971139365",
+        "versionCode": 341,
+        "isSystem": false,
+        "firstInstallTime": 1791948927558,
+        "lastUpdateTime": 1791948927558
+      },
+      {
+        "packageName": "com.xiaomi.mipicks",
+        "name": "GetApps",
+        "versionName": "602-16.6.1.0",
+        "versionCode": 6021661,
+        "isSystem": false,
+        "firstInstallTime": 1791815031970,
+        "lastUpdateTime": 1791815031970
+      },
+      {
+        "packageName": "com.google.android.googlequicksearchbox",
+        "name": "Google",
+        "versionName": "17.64.15.ve.arm64",
+        "versionCode": 301817218,
+        "isSystem": false,
+        "firstInstallTime": 1791948955497,
+        "lastUpdateTime": 1791948955497
+      },
+      {
+        "packageName": "com.google.android.apps.maps",
+        "name": "Maps",
+        "versionName": "26.40.00.989295350",
+        "versionCode": 1068809342,
+        "isSystem": false,
+        "firstInstallTime": 1791959415061,
+        "lastUpdateTime": 1791973351444
+      },
+      {
+        "packageName": "material.hunter",
+        "name": "MaterialHunter",
+        "versionName": "21.05",
+        "versionCode": 202105,
+        "isSystem": false,
+        "firstInstallTime": 1791948872075,
+        "lastUpdateTime": 1791948872075
+      },
+      {
+        "packageName": "com.duokan.phone.remotecontroller",
+        "name": "Mi Remote",
+        "versionName": "7.1.3G",
+        "versionCode": 6383,
+        "isSystem": false,
+        "firstInstallTime": 1791798360000,
+        "lastUpdateTime": 1791813150271
+      },
+      {
+        "packageName": "com.miui.video",
+        "name": "Mi Video",
+        "versionName": "v2025080590(MiVideo-ROM)",
+        "versionCode": 2025080590,
+        "isSystem": false,
+        "firstInstallTime": 1791806821036,
+        "lastUpdateTime": 1791806821036
+      },
+      {
+        "packageName": "app.revanced.android.gms",
+        "name": "MicroG RE",
+        "versionName": "7.2.2-dev.1",
+        "versionCode": 255070221,
+        "isSystem": false,
+        "firstInstallTime": 1791895292764,
+        "lastUpdateTime": 1791896833742
+      },
+      {
+        "packageName": "bin.mt.plus",
+        "name": "MT Manager",
+        "versionName": "2.26.10",
+        "versionCode": 26100997,
+        "isSystem": false,
+        "firstInstallTime": 1791816779288,
+        "lastUpdateTime": 1791816779288
+      },
+      {
+        "packageName": "com.offsec.nhterm",
+        "name": "NetHunter Terminal",
+        "versionName": "2025.4",
+        "versionCode": 2026010400,
+        "isSystem": false,
+        "firstInstallTime": 1791963434280,
+        "lastUpdateTime": 1791963434280
+      },
+      {
+        "packageName": "com.payne.okux",
+        "name": "Ocrustar",
+        "versionName": "7.3.6",
+        "versionCode": 111,
+        "isSystem": false,
+        "firstInstallTime": 1791813161075,
+        "lastUpdateTime": 1791813161075
+      },
+      {
+        "packageName": "com.phonelink.localhub",
+        "name": "Phone Link Hub",
+        "versionName": "1.0",
+        "versionCode": 1,
+        "isSystem": false,
+        "firstInstallTime": 1792053839273,
+        "lastUpdateTime": 1792053839273
+      },
+      {
+        "packageName": "org.frap129.spectrum",
+        "name": "Spectrum",
+        "versionName": "1.5",
+        "versionCode": 5,
+        "isSystem": false,
+        "firstInstallTime": 1791798360000,
+        "lastUpdateTime": 1791798360000
+      },
+      {
+        "packageName": "com.zarz.spotiflac",
+        "name": "SpotiFLAC Mobile",
+        "versionName": "5.1.0",
+        "versionCode": 2160,
+        "isSystem": false,
+        "firstInstallTime": 1791817327826,
+        "lastUpdateTime": 1791817327826
+      },
+      {
+        "packageName": "w.nbx",
+        "name": "SuManger",
+        "versionName": "1.0",
+        "versionCode": 1,
+        "isSystem": false,
+        "firstInstallTime": 1791799737485,
+        "lastUpdateTime": 1791799737485
+      },
+      {
+        "packageName": "org.telegram.messenger.web",
+        "name": "Telegram",
+        "versionName": "12.4.1",
+        "versionCode": 65109,
+        "isSystem": false,
+        "firstInstallTime": 1791897113411,
+        "lastUpdateTime": 1791897113411
+      },
+      {
+        "packageName": "com.termux",
+        "name": "Termux",
+        "versionName": "0.118.3",
+        "versionCode": 1002,
+        "isSystem": false,
+        "firstInstallTime": 1791897548009,
+        "lastUpdateTime": 1791897548009
+      },
+      {
+        "packageName": "us.ultrasurf.mobile.ultrasurf",
+        "name": "Ultrasurf VPN",
+        "versionName": "3.1.7",
+        "versionCode": 317,
+        "isSystem": false,
+        "firstInstallTime": 1791897081401,
+        "lastUpdateTime": 1791897081401
+      },
+      {
+        "packageName": "com.pittvandewitt.viperfx",
+        "name": "ViPER4Android FX",
+        "versionName": "2.7.2.1",
+        "versionCode": 2721,
+        "isSystem": false,
+        "firstInstallTime": 1791798359000,
+        "lastUpdateTime": 1791798359000
+      },
+      {
+        "packageName": "org.videolan.vlc",
+        "name": "VLC",
+        "versionName": "3.7.1",
+        "versionCode": 13070109,
+        "isSystem": false,
+        "firstInstallTime": 1791813451892,
+        "lastUpdateTime": 1791813451892
+      },
+      {
+        "packageName": "as.wps.wpatester",
+        "name": "Wps Wpa Tester Premium",
+        "versionName": "5.0.3.13-GMS",
+        "versionCode": 1049,
+        "isSystem": false,
+        "firstInstallTime": 1791816804033,
+        "lastUpdateTime": 1791816804033
+      },
+      {
+        "packageName": "com.themausoft.wpsapppro",
+        "name": "WPSApp Pro",
+        "versionName": "1.6.55",
+        "versionCode": 69,
+        "isSystem": false,
+        "firstInstallTime": 1791816706719,
+        "lastUpdateTime": 1791816706719
+      },
+      {
+        "packageName": "com.lonelycatgames.Xplore",
+        "name": "X-plore",
+        "versionName": "4.32.00",
+        "versionCode": 43200,
+        "isSystem": false,
+        "firstInstallTime": 1791894487190,
+        "lastUpdateTime": 1791894487190
+      },
+      {
+        "packageName": "app.morphe.android.youtube",
+        "name": "YouTube Morphe",
+        "versionName": "21.16.256",
+        "versionCode": 1561068412,
+        "isSystem": false,
+        "firstInstallTime": 1791895352704,
+        "lastUpdateTime": 1791895352704
+      },
+      {
+        "packageName": "app.morphe.android.apps.youtube.music",
+        "name": "YT Music Morphe",
+        "versionName": "9.20.53",
+        "versionCode": 92053240,
+        "isSystem": false,
+        "firstInstallTime": 1791895323002,
+        "lastUpdateTime": 1791895323002
+      },
+      {
+        "packageName": "com.miui.aod",
+        "name": "Always-on display",
+        "versionName": "RELEASE-2.10.838-04241040",
+        "versionCode": 21000838,
+        "isSystem": true,
+        "firstInstallTime": 1652442275000,
+        "lastUpdateTime": 1652442275000
+      },
+      {
+        "packageName": "com.miui.analytics",
+        "name": "Analytics",
+        "versionName": "6.31.0",
+        "versionCode": 2026082100,
+        "isSystem": true,
+        "firstInstallTime": 1661190280000,
+        "lastUpdateTime": 1791956926058
+      },
+      {
+        "packageName": "com.google.android.marvin.talkback",
+        "name": "Android Accessibility Suite",
+        "versionName": "9.1.0.358315219",
+        "versionCode": 60111898,
+        "isSystem": true,
+        "firstInstallTime": 1661190315000,
+        "lastUpdateTime": 1661190315000
+      },
+      {
+        "packageName": "com.google.android.projection.gearhead",
+        "name": "Android Auto",
+        "versionName": "1.1.801650-stub",
+        "versionCode": 11801650,
+        "isSystem": true,
+        "firstInstallTime": 1661190316000,
+        "lastUpdateTime": 1661190316000
+      },
+      {
+        "packageName": "com.android.egg",
+        "name": "Android R Easter Egg",
+        "versionName": "1.0",
+        "versionCode": 1,
+        "isSystem": true,
+        "firstInstallTime": 1661190280000,
+        "lastUpdateTime": 1661190280000
+      },
+      {
+        "packageName": "com.google.android.ext.services",
+        "name": "Android Services Library",
+        "versionName": "aml_ext_301800100",
+        "versionCode": 301800100,
+        "isSystem": true,
+        "firstInstallTime": 1661190276000,
+        "lastUpdateTime": 1661190276000
+      },
+      {
+        "packageName": "com.google.android.setupwizard",
+        "name": "Android Setup",
+        "versionName": "230.358105869",
+        "versionCode": 10045,
+        "isSystem": true,
+        "firstInstallTime": 1661190327000,
+        "lastUpdateTime": 1661190327000
+      },
+      {
+        "packageName": "com.google.android.apps.restore",
+        "name": "Android Setup",
+        "versionName": "1.0.334154002",
+        "versionCode": 9568,
+        "isSystem": true,
+        "firstInstallTime": 1661190318000,
+        "lastUpdateTime": 1661190318000
+      },
+      {
+        "packageName": "android",
+        "name": "Android System",
+        "versionName": "11",
+        "versionCode": 30,
+        "isSystem": true,
+        "firstInstallTime": 1662913545000,
+        "lastUpdateTime": 1662913545000
+      },
+      {
+        "packageName": "android.aosp.overlay",
+        "name": "android.aosp.overlay",
+        "versionName": "11",
+        "versionCode": 30,
+        "isSystem": true,
+        "firstInstallTime": 1661190167000,
+        "lastUpdateTime": 1661190167000
+      },
+      {
+        "packageName": "android.miui.overlay",
+        "name": "android.miui.overlay",
+        "versionName": "11",
+        "versionCode": 30,
+        "isSystem": true,
+        "firstInstallTime": 1661190167000,
+        "lastUpdateTime": 1661190167000
+      },
+      {
+        "packageName": "com.miui.personalassistant",
+        "name": "App vault",
+        "versionName": "5.5.0",
+        "versionCode": 50500,
+        "isSystem": true,
+        "firstInstallTime": 1662527878000,
+        "lastUpdateTime": 1662527878000
+      },
+      {
+        "packageName": "com.mi.android.globalminusscreen",
+        "name": "App vault",
+        "versionName": "1.0.2",
+        "versionCode": 1,
+        "isSystem": true,
+        "firstInstallTime": 1661190302000,
+        "lastUpdateTime": 1661190302000
+      },
+      {
+        "packageName": "com.mediatek.atci.service",
+        "name": "Atci_service",
+        "versionName": "1.0",
+        "versionCode": 1,
+        "isSystem": true,
+        "firstInstallTime": 1661190301000,
+        "lastUpdateTime": 1661190301000
+      },
+      {
+        "packageName": "com.miui.backup",
+        "name": "Backup",
+        "versionName": "6.4.0.3",
+        "versionCode": 6403,
+        "isSystem": true,
+        "firstInstallTime": 1661190301000,
+        "lastUpdateTime": 1661190301000
+      },
+      {
+        "packageName": "com.miui.powerkeeper",
+        "name": "Battery and performance",
+        "versionName": "4.2.00",
+        "versionCode": 40200,
+        "isSystem": true,
+        "firstInstallTime": 1661190282000,
+        "lastUpdateTime": 1661190282000
+      },
+      {
+        "packageName": "com.android.providers.blockednumber",
+        "name": "Blocked Numbers Storage",
+        "versionName": "11",
+        "versionCode": 30,
+        "isSystem": true,
+        "firstInstallTime": 1661190301000,
+        "lastUpdateTime": 1661190301000
+      },
+      {
+        "packageName": "com.android.bluetooth",
+        "name": "Bluetooth",
+        "versionName": "11",
+        "versionCode": 30,
+        "isSystem": true,
+        "firstInstallTime": 1661190282000,
+        "lastUpdateTime": 1661190282000
+      },
+      {
+        "packageName": "com.android.bluetoothmidiservice",
+        "name": "Bluetooth MIDI Service",
+        "versionName": "11",
+        "versionCode": 30,
+        "isSystem": true,
+        "firstInstallTime": 1661190280000,
+        "lastUpdateTime": 1661190280000
+      },
+      {
+        "packageName": "com.miui.extraphoto",
+        "name": "Bokeh",
+        "versionName": "1.0.0",
+        "versionCode": 1,
+        "isSystem": true,
+        "firstInstallTime": 1661190304000,
+        "lastUpdateTime": 1661190304000
+      },
+      {
+        "packageName": "com.android.calendar",
+        "name": "Calendar",
+        "versionName": "12.24.0.3",
+        "versionCode": 12240003,
+        "isSystem": true,
+        "firstInstallTime": 1653714285000,
+        "lastUpdateTime": 1653714285000
+      },
+      {
+        "packageName": "com.android.providers.calendar",
+        "name": "Calendar storage",
+        "versionName": "10.0.5.0",
+        "versionCode": 10000500,
+        "isSystem": true,
+        "firstInstallTime": 1661190301000,
+        "lastUpdateTime": 1661190301000
+      },
+      {
+        "packageName": "com.android.calllogbackup",
+        "name": "Call Log Backup/Restore",
+        "versionName": "11",
+        "versionCode": 30,
+        "isSystem": true,
+        "firstInstallTime": 1661190301000,
+        "lastUpdateTime": 1661190301000
+      },
+      {
+        "packageName": "com.android.server.telecom",
+        "name": "Call Management",
+        "versionName": "11",
+        "versionCode": 30,
+        "isSystem": true,
+        "firstInstallTime": 1661190307000,
+        "lastUpdateTime": 1661190307000
+      },
+      {
+        "packageName": "com.mediatek.callrecorder",
+        "name": "Call Recorder",
+        "versionName": "11",
+        "versionCode": 30,
+        "isSystem": true,
+        "firstInstallTime": 1661190301000,
+        "lastUpdateTime": 1661190301000
+      },
+      {
+        "packageName": "com.android.camera",
+        "name": "Camera",
+        "versionName": "4.3.000662.0",
+        "versionCode": 430006620,
+        "isSystem": true,
+        "firstInstallTime": 1662910675000,
+        "lastUpdateTime": 1662910675000
+      },
+      {
+        "packageName": "com.xiaomi.cameratools",
+        "name": "CameraTools",
+        "versionName": "1.0",
+        "versionCode": 1,
+        "isSystem": true,
+        "firstInstallTime": 1661190280000,
+        "lastUpdateTime": 1661190280000
+      },
+      {
+        "packageName": "com.milink.service",
+        "name": "Cast",
+        "versionName": "13.1.0.8",
+        "versionCode": 13100008,
+        "isSystem": true,
+        "firstInstallTime": 1662008415000,
+        "lastUpdateTime": 1662008415000
+      },
+      {
+        "packageName": "com.xiaomi.miplay_client",
+        "name": "Casting",
+        "versionName": "0.4.32",
+        "versionCode": 132,
+        "isSystem": true,
+        "firstInstallTime": 1661190281000,
+        "lastUpdateTime": 1661190281000
+      },
+      {
+        "packageName": "com.android.cellbroadcastservice",
+        "name": "Cell Broadcast Service",
+        "versionName": "11",
+        "versionCode": 30,
+        "isSystem": true,
+        "firstInstallTime": 1661190301000,
+        "lastUpdateTime": 1661190301000
+      },
+      {
+        "packageName": "com.android.certinstaller",
+        "name": "Certificate Installer",
+        "versionName": "11",
+        "versionCode": 30,
+        "isSystem": true,
+        "firstInstallTime": 1661190280000,
+        "lastUpdateTime": 1661190280000
+      },
+      {
+        "packageName": "com.android.chrome",
+        "name": "Chrome",
+        "versionName": "154.0.8037.126",
+        "versionCode": 803712604,
+        "isSystem": true,
+        "firstInstallTime": 1661190309000,
+        "lastUpdateTime": 1791817098010
+      },
+      {
+        "packageName": "com.android.theme.icon_pack.circular.themepicker",
+        "name": "Circular",
+        "versionName": "1.0",
+        "versionCode": 1,
+        "isSystem": true,
+        "firstInstallTime": 1661190316000,
+        "lastUpdateTime": 1661190316000
+      },
+      {
+        "packageName": "com.miui.cit",
+        "name": "CIT",
+        "versionName": "1.2.1127.220606.3675b40e",
+        "versionCode": 1021127,
+        "isSystem": true,
+        "firstInstallTime": 1661190280000,
+        "lastUpdateTime": 1661190280000
+      },
+      {
+        "packageName": "com.android.deskclock",
+        "name": "Clock",
+        "versionName": "13.19.1",
+        "versionCode": 130201901,
+        "isSystem": true,
+        "firstInstallTime": 1661190280000,
+        "lastUpdateTime": 1791816469142
+      },
+      {
+        "packageName": "com.miui.cloudbackup",
+        "name": "Cloud backup",
+        "versionName": "1.12.1.6.2",
+        "versionCode": 112010602,
+        "isSystem": true,
+        "firstInstallTime": 1661190301000,
+        "lastUpdateTime": 1791815227896
+      },
+      {
+        "packageName": "com.miui.cloudservice.sysbase",
+        "name": "CloudServiceSysbase",
+        "versionName": "11",
+        "versionCode": 30,
+        "isSystem": true,
+        "firstInstallTime": 1661190301000,
+        "lastUpdateTime": 1661190301000
+      },
+      {
+        "packageName": "com.android.backupconfirm",
+        "name": "com.android.backupconfirm",
+        "versionName": "11",
+        "versionCode": 30,
+        "isSystem": true,
+        "firstInstallTime": 1661190301000,
+        "lastUpdateTime": 1661190301000
+      },
+      {
+        "packageName": "com.android.carrierconfig",
+        "name": "com.android.carrierconfig",
+        "versionName": "1.0.0",
+        "versionCode": 1,
+        "isSystem": true,
+        "firstInstallTime": 1661190325000,
+        "lastUpdateTime": 1661190325000
+      },
+      {
+        "packageName": "com.android.localtransport",
+        "name": "com.android.localtransport",
+        "versionName": "11",
+        "versionCode": 30,
+        "isSystem": true,
+        "firstInstallTime": 1661190302000,
+        "lastUpdateTime": 1661190302000
+      },
+      {
+        "packageName": "com.android.ons",
+        "name": "com.android.ons",
+        "versionName": "11",
+        "versionCode": 30,
+        "isSystem": true,
+        "firstInstallTime": 1661190307000,
+        "lastUpdateTime": 1661190307000
+      },
+      {
+        "packageName": "com.android.overlay.gmstelecomm",
+        "name": "com.android.overlay.gmstelecomm",
+        "versionName": "1.0",
+        "versionCode": 1,
+        "isSystem": true,
+        "firstInstallTime": 1661190316000,
+        "lastUpdateTime": 1661190316000
+      },
+      {
+        "packageName": "com.android.overlay.gmstelephony",
+        "name": "com.android.overlay.gmstelephony",
+        "versionName": "1.0",
+        "versionCode": 1,
+        "isSystem": true,
+        "firstInstallTime": 1661190316000,
+        "lastUpdateTime": 1661190316000
+      },
+      {
+        "packageName": "com.android.providers.media",
+        "name": "com.android.providers.media",
+        "versionName": "11",
+        "versionCode": 1024,
+        "isSystem": true,
+        "firstInstallTime": 1661190302000,
+        "lastUpdateTime": 1661190302000
+      },
+      {
+        "packageName": "com.google.android.networkstack.permissionconfig",
+        "name": "com.android.server.NetworkPermissionConfig",
+        "versionName": "r_aml_301500700",
+        "versionCode": 301500700,
+        "isSystem": true,
+        "firstInstallTime": 1661190307000,
+        "lastUpdateTime": 1661190307000
+      },
+      {
+        "packageName": "com.android.server.telecom.overlay.miui",
+        "name": "com.android.server.telecom.overlay.miui",
+        "versionName": "11",
+        "versionCode": 30,
+        "isSystem": true,
+        "firstInstallTime": 1661190311000,
+        "lastUpdateTime": 1661190311000
+      },
+      {
+        "packageName": "com.android.settings.overlay.miui",
+        "name": "com.android.settings.overlay.miui",
+        "versionName": "11",
+        "versionCode": 30,
+        "isSystem": true,
+        "firstInstallTime": 1661190167000,
+        "lastUpdateTime": 1661190167000
+      },
+      {
+        "packageName": "com.android.sharedstoragebackup",
+        "name": "com.android.sharedstoragebackup",
+        "versionName": "11",
+        "versionCode": 30,
+        "isSystem": true,
+        "firstInstallTime": 1661190308000,
+        "lastUpdateTime": 1661190308000
+      },
+      {
+        "packageName": "com.android.systemui.gesture.line.overlay",
+        "name": "com.android.systemui.gesture.line.overlay",
+        "versionName": "1.0",
+        "versionCode": 1,
+        "isSystem": true,
+        "firstInstallTime": 1661190167000,
+        "lastUpdateTime": 1661190167000
+      },
+      {
+        "packageName": "com.android.systemui.icon.overlay",
+        "name": "com.android.systemui.icon.overlay",
+        "versionName": "1.0",
+        "versionCode": 1,
+        "isSystem": true,
+        "firstInstallTime": 1661190149000,
+        "lastUpdateTime": 1661190149000
+      },
+      {
+        "packageName": "com.android.systemui.miui.optimization.overlay",
+        "name": "com.android.systemui.miui.optimization.overlay",
+        "versionName": "1.0",
+        "versionCode": 1,
+        "isSystem": true,
+        "firstInstallTime": 1661190167000,
+        "lastUpdateTime": 1661190167000
+      },
+      {
+        "packageName": "com.android.systemui.navigation.bar.overlay",
+        "name": "com.android.systemui.navigation.bar.overlay",
+        "versionName": "1.0",
+        "versionCode": 1,
+        "isSystem": true,
+        "firstInstallTime": 1661190167000,
+        "lastUpdateTime": 1661190167000
+      },
+      {
+        "packageName": "com.android.systemui.notch.overlay",
+        "name": "com.android.systemui.notch.overlay",
+        "versionName": "1.0",
+        "versionCode": 1,
+        "isSystem": true,
+        "firstInstallTime": 1661190149000,
+        "lastUpdateTime": 1661190149000
+      },
+      {
+        "packageName": "com.android.systemui.overlay.miui",
+        "name": "com.android.systemui.overlay.miui",
+        "versionName": "11",
+        "versionCode": 30,
+        "isSystem": true,
+        "firstInstallTime": 1661190167000,
+        "lastUpdateTime": 1661190167000
+      },
+      {
+        "packageName": "com.android.wallpaperbackup",
+        "name": "com.android.wallpaperbackup",
+        "versionName": "11",
+        "versionCode": 30,
+        "isSystem": true,
+        "firstInstallTime": 1661190283000,
+        "lastUpdateTime": 1661190283000
+      },
+      {
+        "packageName": "com.android.wallpapercropper",
+        "name": "com.android.wallpapercropper",
+        "versionName": "11",
+        "versionCode": 30,
+        "isSystem": true,
+        "firstInstallTime": 1661190327000,
+        "lastUpdateTime": 1661190327000
+      },
+      {
+        "packageName": "com.android.wifi.resources.overlay",
+        "name": "com.android.wifi.resources.overlay",
+        "versionName": "1.0",
+        "versionCode": 1,
+        "isSystem": true,
+        "firstInstallTime": 1661190167000,
+        "lastUpdateTime": 1661190167000
+      },
+      {
+        "packageName": "com.android.wifi.resources.xiaomi",
+        "name": "com.android.wifi.resources.xiaomi",
+        "versionName": "1.0",
+        "versionCode": 1,
+        "isSystem": true,
+        "firstInstallTime": 1661190167000,
+        "lastUpdateTime": 1661190167000
+      },
+      {
+        "packageName": "com.google.android.cellbroadcastreceiver.overlay.miui",
+        "name": "com.google.android.cellbroadcastreceiver.overlay.miui",
+        "versionName": "11",
+        "versionCode": 30,
+        "isSystem": true,
+        "firstInstallTime": 1661190316000,
+        "lastUpdateTime": 1661190316000
+      },
+      {
+        "packageName": "com.google.android.cellbroadcastservice.overlay.miui",
+        "name": "com.google.android.cellbroadcastservice.overlay.miui",
+        "versionName": "11",
+        "versionCode": 30,
+        "isSystem": true,
+        "firstInstallTime": 1661190316000,
+        "lastUpdateTime": 1661190316000
+      },
+      {
+        "packageName": "com.google.android.overlay.modules.ext.services",
+        "name": "com.google.android.overlay.modules.ext.services",
+        "versionName": "1.0",
+        "versionCode": 1,
+        "isSystem": true,
+        "firstInstallTime": 1661190316000,
+        "lastUpdateTime": 1661190316000
+      },
+      {
+        "packageName": "com.google.android.overlay.modules.modulemetadata.forframework",
+        "name": "com.google.android.overlay.modules.modulemetadata.forframework",
+        "versionName": "1.0",
+        "versionCode": 1,
+        "isSystem": true,
+        "firstInstallTime": 1661190316000,
+        "lastUpdateTime": 1661190316000
+      },
+      {
+        "packageName": "com.google.android.overlay.modules.permissioncontroller.forframework",
+        "name": "com.google.android.overlay.modules.permissioncontroller.forframework",
+        "versionName": "1.0",
+        "versionCode": 1,
+        "isSystem": true,
+        "firstInstallTime": 1661190316000,
+        "lastUpdateTime": 1661190316000
+      },
+      {
+        "packageName": "com.mediatek",
+        "name": "com.mediatek",
+        "versionName": "11",
+        "versionCode": 30,
+        "isSystem": true,
+        "firstInstallTime": 1661190290000,
+        "lastUpdateTime": 1661190290000
+      },
+      {
+        "packageName": "com.mediatek.frameworkresoverlay",
+        "name": "com.mediatek.frameworkresoverlay",
+        "versionName": "11",
+        "versionCode": 30,
+        "isSystem": true,
+        "firstInstallTime": 1661190167000,
+        "lastUpdateTime": 1661190167000
+      },
+      {
+        "packageName": "com.mediatek.ims",
+        "name": "com.mediatek.ims.ImsApp",
+        "versionName": "11",
+        "versionCode": 30,
+        "isSystem": true,
+        "firstInstallTime": 1661190302000,
+        "lastUpdateTime": 1661190302000
+      },
+      {
+        "packageName": "com.mediatek.SettingsProviderResOverlay",
+        "name": "com.mediatek.SettingsProviderResOverlay",
+        "versionName": "11",
+        "versionCode": 30,
+        "isSystem": true,
+        "firstInstallTime": 1661190167000,
+        "lastUpdateTime": 1661190167000
+      },
+      {
+        "packageName": "com.mediatek.systemuiresoverlay",
+        "name": "com.mediatek.systemuiresoverlay",
+        "versionName": "11",
+        "versionCode": 30,
+        "isSystem": true,
+        "firstInstallTime": 1661190167000,
+        "lastUpdateTime": 1661190167000
+      },
+      {
+        "packageName": "com.mediatek.voiceunlock",
+        "name": "com.mediatek.voiceunlock",
+        "versionName": "11",
+        "versionCode": 30,
+        "isSystem": true,
+        "firstInstallTime": 1661190308000,
+        "lastUpdateTime": 1661190308000
+      },
+      {
+        "packageName": "com.miui.face.overlay.miui",
+        "name": "com.miui.face.overlay.miui",
+        "versionName": "11",
+        "versionCode": 30,
+        "isSystem": true,
+        "firstInstallTime": 1661190167000,
+        "lastUpdateTime": 1661190167000
+      },
+      {
+        "packageName": "com.miui.system",
+        "name": "com.miui.internal.app.SystemApplication",
+        "versionName": "1.14.0.0",
+        "versionCode": 1140000,
+        "isSystem": true,
+        "firstInstallTime": 1661190284000,
+        "lastUpdateTime": 1661190284000
+      },
+      {
+        "packageName": "com.miui.rom",
+        "name": "com.miui.rom",
+        "versionName": "1.11.0.0",
+        "versionCode": 1110000,
+        "isSystem": true,
+        "firstInstallTime": 1661190289000,
+        "lastUpdateTime": 1661190289000
+      },
+      {
+        "packageName": "com.miui.systemui.carriers.overlay",
+        "name": "com.miui.systemui.carriers.overlay",
+        "versionName": "1.0",
+        "versionCode": 1,
+        "isSystem": true,
+        "firstInstallTime": 1661190167000,
+        "lastUpdateTime": 1661190167000
+      },
+      {
+        "packageName": "com.miui.systemui.devices.overlay",
+        "name": "com.miui.systemui.devices.overlay",
+        "versionName": "1.0",
+        "versionCode": 1,
+        "isSystem": true,
+        "firstInstallTime": 1661190167000,
+        "lastUpdateTime": 1661190167000
+      },
+      {
+        "packageName": "com.miui.systemui.overlay.devices.android",
+        "name": "com.miui.systemui.overlay.devices.android",
+        "versionName": "1.0",
+        "versionCode": 1,
+        "isSystem": true,
+        "firstInstallTime": 1661190167000,
+        "lastUpdateTime": 1661190167000
+      },
+      {
+        "packageName": "com.modemdebug",
+        "name": "com.modemdebug",
+        "versionName": "3.0",
+        "versionCode": 3,
+        "isSystem": true,
+        "firstInstallTime": 1661190284000,
+        "lastUpdateTime": 1661190284000
+      },
+      {
+        "packageName": "com.xiaomi.bluetooth.overlay",
+        "name": "com.xiaomi.bluetooth.overlay",
+        "versionName": "11",
+        "versionCode": 30,
+        "isSystem": true,
+        "firstInstallTime": 1661190167000,
+        "lastUpdateTime": 1661190167000
+      },
+      {
+        "packageName": "com.xiaomi.micloud.sdk",
+        "name": "com.xiaomi.micloudsdk.SdkApplication",
+        "versionName": "2.0.0.0",
+        "versionCode": 20,
+        "isSystem": true,
+        "firstInstallTime": 1661190307000,
+        "lastUpdateTime": 1661190307000
+      },
+      {
+        "packageName": "com.android.companiondevicemanager",
+        "name": "Companion Device Manager",
+        "versionName": "11",
+        "versionCode": 30,
+        "isSystem": true,
+        "firstInstallTime": 1661190280000,
+        "lastUpdateTime": 1661190280000
+      },
+      {
+        "packageName": "com.android.contacts",
+        "name": "Contacts and dialer",
+        "versionName": "12.2.3.0",
+        "versionCode": 330,
+        "isSystem": true,
+        "firstInstallTime": 1662925647000,
+        "lastUpdateTime": 1662925647000
+      },
+      {
+        "packageName": "com.android.providers.contacts",
+        "name": "Contacts Storage",
+        "versionName": "11",
+        "versionCode": 30,
+        "isSystem": true,
+        "firstInstallTime": 1661190302000,
+        "lastUpdateTime": 1661190302000
+      },
+      {
+        "packageName": "com.debug.loggerui",
+        "name": "DebugLoggerUI",
+        "versionName": "6.0.0",
+        "versionCode": 60000,
+        "isSystem": true,
+        "firstInstallTime": 1661190280000,
+        "lastUpdateTime": 1661190280000
+      },
+      {
+        "packageName": "com.dolby.ds1appUI",
+        "name": "Dolby",
+        "versionName": "1.0",
+        "versionCode": 1,
+        "isSystem": true,
+        "firstInstallTime": 1604328308000,
+        "lastUpdateTime": 1604328308000
+      },
+      {
+        "packageName": "com.dolby",
+        "name": "Dolby",
+        "versionName": "4.4.2-1",
+        "versionCode": 19,
+        "isSystem": true,
+        "firstInstallTime": 1204252426000,
+        "lastUpdateTime": 1204252426000
+      },
+      {
+        "packageName": "com.android.providers.downloads",
+        "name": "Downloads",
+        "versionName": "21.09.30.101",
+        "versionCode": 210930101,
+        "isSystem": true,
+        "firstInstallTime": 1661190302000,
+        "lastUpdateTime": 1661190302000
+      },
+      {
+        "packageName": "com.android.providers.downloads.ui",
+        "name": "Downloads",
+        "versionName": "21.09.30.101",
+        "versionCode": 210930101,
+        "isSystem": true,
+        "firstInstallTime": 1661190302000,
+        "lastUpdateTime": 1661190302000
+      },
+      {
+        "packageName": "com.android.dynsystem",
+        "name": "Dynamic System Updates",
+        "versionName": "11",
+        "versionCode": 30,
+        "isSystem": true,
+        "firstInstallTime": 1661190302000,
+        "lastUpdateTime": 1661190302000
+      },
+      {
+        "packageName": "com.miui.misound",
+        "name": "Earphones",
+        "versionName": "1.0",
+        "versionCode": 210305,
+        "isSystem": true,
+        "firstInstallTime": 1661190281000,
+        "lastUpdateTime": 1661190281000
+      },
+      {
+        "packageName": "com.mediatek.emcamera",
+        "name": "EmCamera",
+        "versionName": "2.0",
+        "versionCode": 2,
+        "isSystem": true,
+        "firstInstallTime": 1661190149000,
+        "lastUpdateTime": 1661190149000
+      },
+      {
+        "packageName": "com.android.emergency",
+        "name": "Emergency information",
+        "versionName": "11",
+        "versionCode": 30,
+        "isSystem": true,
+        "firstInstallTime": 1661190324000,
+        "lastUpdateTime": 1661190324000
+      },
+      {
+        "packageName": "com.mediatek.engineermode",
+        "name": "EngineerMode",
+        "versionName": "1.0",
+        "versionCode": 2,
+        "isSystem": true,
+        "firstInstallTime": 1661190302000,
+        "lastUpdateTime": 1661190302000
+      },
+      {
+        "packageName": "com.android.externalstorage",
+        "name": "External Storage",
+        "versionName": "11",
+        "versionCode": 30,
+        "isSystem": true,
+        "firstInstallTime": 1661190302000,
+        "lastUpdateTime": 1661190302000
+      },
+      {
+        "packageName": "com.fido.asm",
+        "name": "FIDO UAF1.0 ASM",
+        "versionName": "3.2.1.3",
+        "versionCode": 10,
+        "isSystem": true,
+        "firstInstallTime": 1661190280000,
+        "lastUpdateTime": 1661190280000
+      },
+      {
+        "packageName": "com.fido.xiaomi.uafclient",
+        "name": "FIDO UAF1.0 Client",
+        "versionName": "3.6.0",
+        "versionCode": 6,
+        "isSystem": true,
+        "firstInstallTime": 1661190280000,
+        "lastUpdateTime": 1661190280000
+      },
+      {
+        "packageName": "com.android.fileexplorer",
+        "name": "File Manager",
+        "versionName": "4.3.5.4",
+        "versionCode": 4354,
+        "isSystem": true,
+        "firstInstallTime": 1661965533000,
+        "lastUpdateTime": 1661965533000
+      },
+      {
+        "packageName": "com.google.android.documentsui",
+        "name": "Files",
+        "versionName": "aml_doc_301800100",
+        "versionCode": 301800100,
+        "isSystem": true,
+        "firstInstallTime": 1661190302000,
+        "lastUpdateTime": 1661190302000
+      },
+      {
+        "packageName": "com.android.theme.icon_pack.filled.themepicker",
+        "name": "Filled",
+        "versionName": "1.0",
+        "versionCode": 1,
+        "isSystem": true,
+        "firstInstallTime": 1661190316000,
+        "lastUpdateTime": 1661190316000
+      },
+      {
+        "packageName": "com.xiaomi.finddevice",
+        "name": "Find device",
+        "versionName": "11",
+        "versionCode": 30,
+        "isSystem": true,
+        "firstInstallTime": 1661190302000,
+        "lastUpdateTime": 1661190302000
+      },
+      {
+        "packageName": "com.goodix.gftest",
+        "name": "Fingerpirnt test",
+        "versionName": "1.1.01",
+        "versionCode": 11,
+        "isSystem": true,
+        "firstInstallTime": 1661190280000,
+        "lastUpdateTime": 1661190280000
+      },
+      {
+        "packageName": "com.fingerprints.extension.service",
+        "name": "FingerprintExtensionService",
+        "versionName": "1.92",
+        "versionCode": 192,
+        "isSystem": true,
+        "firstInstallTime": 1661190280000,
+        "lastUpdateTime": 1661190280000
+      },
+      {
+        "packageName": "com.miui.freeform",
+        "name": "Floating windows",
+        "versionName": "11",
+        "versionCode": 30,
+        "isSystem": true,
+        "firstInstallTime": 1661190304000,
+        "lastUpdateTime": 1661190304000
+      },
+      {
+        "packageName": "com.miui.fm",
+        "name": "FM Radio",
+        "versionName": "2.15.01.051211i",
+        "versionCode": 1093,
+        "isSystem": true,
+        "firstInstallTime": 1661190281000,
+        "lastUpdateTime": 1791815235829
+      },
+      {
+        "packageName": "com.miui.fmservice",
+        "name": "FM Radio Service",
+        "versionName": "11",
+        "versionCode": 30,
+        "isSystem": true,
+        "firstInstallTime": 1661190322000,
+        "lastUpdateTime": 1661190322000
+      },
+      {
+        "packageName": "com.miui.phrase",
+        "name": "Frequent phrases",
+        "versionName": "3.0.7",
+        "versionCode": 10007,
+        "isSystem": true,
+        "firstInstallTime": 1661190282000,
+        "lastUpdateTime": 1661190282000
+      },
+      {
+        "packageName": "com.android.location.fused",
+        "name": "Fused Location",
+        "versionName": "11",
+        "versionCode": 30,
+        "isSystem": true,
+        "firstInstallTime": 1661190302000,
+        "lastUpdateTime": 1661190302000
+      },
+      {
+        "packageName": "com.miui.gallery",
+        "name": "Gallery",
+        "versionName": "3.5.7.24-global",
+        "versionCode": 403704,
+        "isSystem": true,
+        "firstInstallTime": 1661900621000,
+        "lastUpdateTime": 1791815220914
+      },
+      {
+        "packageName": "com.google.android.inputmethod.latin",
+        "name": "Gboard",
+        "versionName": "18.4.1.985164140-release-arm64-v8a",
+        "versionCode": 176027078,
+        "isSystem": true,
+        "firstInstallTime": 1661190310000,
+        "lastUpdateTime": 1791813166969
+      },
+      {
+        "packageName": "com.goodix.fingerprint",
+        "name": "GFManager",
+        "versionName": "1.0.04",
+        "versionCode": 4,
+        "isSystem": true,
+        "firstInstallTime": 1661190280000,
+        "lastUpdateTime": 1661190280000
+      },
+      {
+        "packageName": "com.google.android.gms",
+        "name": "Google Play services",
+        "versionName": "26.37.37 (150400-994713346)",
+        "versionCode": 263737022,
+        "isSystem": true,
+        "firstInstallTime": 1661190318000,
+        "lastUpdateTime": 1791800066710
+      },
+      {
+        "packageName": "com.android.vending",
+        "name": "Google Play Store",
+        "versionName": "53.5.48-29 [0] [PR] 995634172",
+        "versionCode": 85354820,
+        "isSystem": true,
+        "firstInstallTime": 1661190318000,
+        "lastUpdateTime": 1791958214718
+      },
+      {
+        "packageName": "com.google.android.gsf",
+        "name": "Google Services Framework",
+        "versionName": "11-6684105",
+        "versionCode": 30,
+        "isSystem": true,
+        "firstInstallTime": 1661190325000,
+        "lastUpdateTime": 1661190325000
+      },
+      {
+        "packageName": "com.google.android.tts",
+        "name": "Google Text-to-speech engine",
+        "versionName": "25.2.1.361632836",
+        "versionCode": 210316595,
+        "isSystem": true,
+        "firstInstallTime": 1661190310000,
+        "lastUpdateTime": 1661190310000
+      },
+      {
+        "packageName": "com.google.android.networkstack.overlay",
+        "name": "GoogleNetworkStackResOverlay",
+        "versionName": "11",
+        "versionCode": 30,
+        "isSystem": true,
+        "firstInstallTime": 1661190149000,
+        "lastUpdateTime": 1661190149000
+      },
+      {
+        "packageName": "com.xiaomi.bsp.gps.nps",
+        "name": "GPS location",
+        "versionName": "11",
+        "versionCode": 30,
+        "isSystem": true,
+        "firstInstallTime": 1661190280000,
+        "lastUpdateTime": 1661190280000
+      },
+      {
+        "packageName": "com.mi.globallayout",
+        "name": "HomeLayout",
+        "versionName": "2.0.6.1",
+        "versionCode": 2000601,
+        "isSystem": true,
+        "firstInstallTime": 1661190280000,
+        "lastUpdateTime": 1661190280000
+      },
+      {
+        "packageName": "org.ifaa.aidl.manager",
+        "name": "IFAAService",
+        "versionName": "11",
+        "versionCode": 30,
+        "isSystem": true,
+        "firstInstallTime": 1661190281000,
+        "lastUpdateTime": 1661190281000
+      },
+      {
+        "packageName": "com.android.inputdevices",
+        "name": "Input Devices",
+        "versionName": "11",
+        "versionCode": 30,
+        "isSystem": true,
+        "firstInstallTime": 1661190302000,
+        "lastUpdateTime": 1661190302000
+      },
+      {
+        "packageName": "com.xiaomi.joyose",
+        "name": "Joyose",
+        "versionName": "2.1.81",
+        "versionCode": 181,
+        "isSystem": true,
+        "firstInstallTime": 1661190281000,
+        "lastUpdateTime": 1661190281000
+      },
+      {
+        "packageName": "com.miui.audiomonitor",
+        "name": "karaoke",
+        "versionName": "11",
+        "versionCode": 20200610,
+        "isSystem": true,
+        "firstInstallTime": 1661190281000,
+        "lastUpdateTime": 1661190281000
+      },
+      {
+        "packageName": "com.android.keychain",
+        "name": "Key Chain",
+        "versionName": "11",
+        "versionCode": 30,
+        "isSystem": true,
+        "firstInstallTime": 1661190281000,
+        "lastUpdateTime": 1661190281000
+      },
+      {
+        "packageName": "com.android.wallpaper.livepicker",
+        "name": "Live Wallpaper Picker",
+        "versionName": "11",
+        "versionCode": 30,
+        "isSystem": true,
+        "firstInstallTime": 1661190281000,
+        "lastUpdateTime": 1661190281000
+      },
+      {
+        "packageName": "com.mediatek.lbs.em2.ui",
+        "name": "LocationEM2",
+        "versionName": "1.0",
+        "versionCode": 1,
+        "isSystem": true,
+        "firstInstallTime": 1661190281000,
+        "lastUpdateTime": 1661190281000
+      },
+      {
+        "packageName": "com.bsp.catchlog",
+        "name": "Log generator",
+        "versionName": "11",
+        "versionCode": 30,
+        "isSystem": true,
+        "firstInstallTime": 1661190280000,
+        "lastUpdateTime": 1661190280000
+      },
+      {
+        "packageName": "com.mediatek.location.lppe.main",
+        "name": "LPPe Service",
+        "versionName": "1.0",
+        "versionCode": 1,
+        "isSystem": true,
+        "firstInstallTime": 1661190302000,
+        "lastUpdateTime": 1661190302000
+      },
+      {
+        "packageName": "com.android.providers.media.module",
+        "name": "Media Storage",
+        "versionName": "11",
+        "versionCode": 30,
+        "isSystem": true,
+        "firstInstallTime": 1661190277000,
+        "lastUpdateTime": 1661190277000
+      },
+      {
+        "packageName": "com.android.mms",
+        "name": "Messaging",
+        "versionName": "11.0.7.4",
+        "versionCode": 11000704,
+        "isSystem": true,
+        "firstInstallTime": 1661190306000,
+        "lastUpdateTime": 1661190306000
+      },
+      {
+        "packageName": "com.xiaomi.aiasst.service",
+        "name": "Mi AI Call Assistant",
+        "versionName": "5.0.21",
+        "versionCode": 1388,
+        "isSystem": true,
+        "firstInstallTime": 1662927551000,
+        "lastUpdateTime": 1662927551000
+      },
+      {
+        "packageName": "com.xiaomi.mi_connect_service",
+        "name": "Mi Connect",
+        "versionName": "2.2.137",
+        "versionCode": 20,
+        "isSystem": true,
+        "firstInstallTime": 1661190284000,
+        "lastUpdateTime": 1661190284000
+      },
+      {
+        "packageName": "com.miui.micloudsync",
+        "name": "MiCloudSync",
+        "versionName": "11",
+        "versionCode": 30,
+        "isSystem": true,
+        "firstInstallTime": 1661190281000,
+        "lastUpdateTime": 1661190281000
+      },
+      {
+        "packageName": "com.xiaomi.bluetooth",
+        "name": "MIUI Bluetooth",
+        "versionName": "11",
+        "versionCode": 30,
+        "isSystem": true,
+        "firstInstallTime": 1661190281000,
+        "lastUpdateTime": 1661190281000
+      },
+      {
+        "packageName": "com.miui.core",
+        "name": "MIUI SDK",
+        "versionName": "1.20.0.0",
+        "versionCode": 1200099,
+        "isSystem": true,
+        "firstInstallTime": 1661190284000,
+        "lastUpdateTime": 1661190284000
+      },
+      {
+        "packageName": "com.miui.guardprovider",
+        "name": "MIUI security components",
+        "versionName": "1.0.8",
+        "versionCode": 108,
+        "isSystem": true,
+        "firstInstallTime": 1661190280000,
+        "lastUpdateTime": 1661190280000
+      },
+      {
+        "packageName": "com.android.thememanager.module",
+        "name": "miui.external.Application",
+        "versionName": "1.0",
+        "versionCode": 1,
+        "isSystem": true,
+        "firstInstallTime": 1661190283000,
+        "lastUpdateTime": 1661190283000
+      },
+      {
+        "packageName": "com.miui.face",
+        "name": "MiuiBiometric",
+        "versionName": "1.0.0",
+        "versionCode": 1,
+        "isSystem": true,
+        "firstInstallTime": 1661190281000,
+        "lastUpdateTime": 1661190281000
+      },
+      {
+        "packageName": "com.miui.daemon",
+        "name": "MiuiDaemon",
+        "versionName": "2.0",
+        "versionCode": 30,
+        "isSystem": true,
+        "firstInstallTime": 1661190282000,
+        "lastUpdateTime": 1661190282000
+      },
+      {
+        "packageName": "com.android.mms.service",
+        "name": "MmsService",
+        "versionName": "11",
+        "versionCode": 30,
+        "isSystem": true,
+        "firstInstallTime": 1661190306000,
+        "lastUpdateTime": 1661190306000
+      },
+      {
+        "packageName": "com.android.mtp",
+        "name": "MTP Host",
+        "versionName": "11",
+        "versionCode": 30,
+        "isSystem": true,
+        "firstInstallTime": 1661190307000,
+        "lastUpdateTime": 1661190307000
+      },
+      {
+        "packageName": "com.google.android.networkstack",
+        "name": "Network manager",
+        "versionName": "aml_net_301800200",
+        "versionCode": 301800200,
+        "isSystem": true,
+        "firstInstallTime": 1661190307000,
+        "lastUpdateTime": 1661190307000
+      },
+      {
+        "packageName": "com.android.networkstack.inprocess.overlay",
+        "name": "NetworkStackInProcessResOverlay",
+        "versionName": "11",
+        "versionCode": 30,
+        "isSystem": true,
+        "firstInstallTime": 1661190149000,
+        "lastUpdateTime": 1661190149000
+      },
+      {
+        "packageName": "com.android.networkstack.overlay",
+        "name": "NetworkStackOverlay",
+        "versionName": "11",
+        "versionCode": 30,
+        "isSystem": true,
+        "firstInstallTime": 1661190167000,
+        "lastUpdateTime": 1661190167000
+      },
+      {
+        "packageName": "com.android.nfc",
+        "name": "Nfc Service",
+        "versionName": "11",
+        "versionCode": 30,
+        "isSystem": true,
+        "firstInstallTime": 1661190282000,
+        "lastUpdateTime": 1661190282000
+      },
+      {
+        "packageName": "com.miui.notification",
+        "name": "Notifications",
+        "versionName": "1.1.4.39",
+        "versionCode": 1010439,
+        "isSystem": true,
+        "firstInstallTime": 1661190282000,
+        "lastUpdateTime": 1661190282000
+      },
+      {
+        "packageName": "com.mediatek.omacp",
+        "name": "Omacp",
+        "versionName": "11",
+        "versionCode": 30,
+        "isSystem": true,
+        "firstInstallTime": 1661190325000,
+        "lastUpdateTime": 1661190325000
+      },
+      {
+        "packageName": "com.mediatek.op01.telecom",
+        "name": "OP01Telecom",
+        "versionName": "1.0",
+        "versionCode": 1,
+        "isSystem": true,
+        "firstInstallTime": 1661190282000,
+        "lastUpdateTime": 1661190282000
+      },
+      {
+        "packageName": "com.mediatek.op09clib.telecom",
+        "name": "OP09ClibTelecom",
+        "versionName": "1.0",
+        "versionCode": 1,
+        "isSystem": true,
+        "firstInstallTime": 1661190282000,
+        "lastUpdateTime": 1661190282000
+      },
+      {
+        "packageName": "com.mediatek.op01.phone.plugin",
+        "name": "OperatorPlugin",
+        "versionName": "1.0",
+        "versionCode": 1,
+        "isSystem": true,
+        "firstInstallTime": 1661190282000,
+        "lastUpdateTime": 1661190282000
+      },
+      {
+        "packageName": "com.miui.global.packageinstaller",
+        "name": "Package installer",
+        "versionName": "3.9.4",
+        "versionCode": 394,
+        "isSystem": true,
+        "firstInstallTime": 1661190280000,
+        "lastUpdateTime": 1791956390284
+      },
+      {
+        "packageName": "com.google.android.packageinstaller",
+        "name": "Package installer",
+        "versionName": "11-7276604",
+        "versionCode": 30,
+        "isSystem": true,
+        "firstInstallTime": 1661190302000,
+        "lastUpdateTime": 1661190302000
+      },
+      {
+        "packageName": "com.android.pacprocessor",
+        "name": "PacProcessor",
+        "versionName": "11",
+        "versionCode": 30,
+        "isSystem": true,
+        "firstInstallTime": 1661190282000,
+        "lastUpdateTime": 1661190282000
+      },
+      {
+        "packageName": "android.autoinstalls.config.Xiaomi.begonia",
+        "name": "PAI",
+        "versionName": "1",
+        "versionCode": 1,
+        "isSystem": true,
+        "firstInstallTime": 1661190282000,
+        "lastUpdateTime": 1661190282000
+      },
+      {
+        "packageName": "com.google.android.permissioncontroller",
+        "name": "Permission controller",
+        "versionName": "aml_per_301800100",
+        "versionCode": 301800100,
+        "isSystem": true,
+        "firstInstallTime": 1661190277000,
+        "lastUpdateTime": 1661190277000
+      },
+      {
+        "packageName": "com.lbe.security.miui",
+        "name": "Permissions",
+        "versionName": "1.8.0",
+        "versionCode": 180,
+        "isSystem": true,
+        "firstInstallTime": 1663095439000,
+        "lastUpdateTime": 1663095439000
+      },
+      {
+        "packageName": "com.android.providers.telephony",
+        "name": "Phone and Messaging Storage",
+        "versionName": "11",
+        "versionCode": 30,
+        "isSystem": true,
+        "firstInstallTime": 1661190308000,
+        "lastUpdateTime": 1661190308000
+      },
+      {
+        "packageName": "com.android.phone",
+        "name": "Phone Services",
+        "versionName": "11",
+        "versionCode": 30,
+        "isSystem": true,
+        "firstInstallTime": 1661190307000,
+        "lastUpdateTime": 1661190307000
+      },
+      {
+        "packageName": "com.android.dreams.phototable",
+        "name": "Photo Screensavers",
+        "versionName": "11",
+        "versionCode": 30,
+        "isSystem": true,
+        "firstInstallTime": 1661190311000,
+        "lastUpdateTime": 1661190311000
+      },
+      {
+        "packageName": "com.xiaomi.powerchecker",
+        "name": "Power Detector",
+        "versionName": "2.0.00",
+        "versionCode": 20000,
+        "isSystem": true,
+        "firstInstallTime": 1661190282000,
+        "lastUpdateTime": 1661190282000
+      },
+      {
+        "packageName": "com.android.provision",
+        "name": "Provision",
+        "versionName": "11",
+        "versionCode": 30,
+        "isSystem": true,
+        "firstInstallTime": 1661190307000,
+        "lastUpdateTime": 1661190307000
+      },
+      {
+        "packageName": "com.android.proxyhandler",
+        "name": "ProxyHandler",
+        "versionName": "11",
+        "versionCode": 30,
+        "isSystem": true,
+        "firstInstallTime": 1661190307000,
+        "lastUpdateTime": 1661190307000
+      },
+      {
+        "packageName": "com.miui.hybrid",
+        "name": "Quick apps Service Framework",
+        "versionName": "1.6.9.1",
+        "versionCode": 10690171,
+        "isSystem": true,
+        "firstInstallTime": 1661190281000,
+        "lastUpdateTime": 1661190281000
+      },
+      {
+        "packageName": "com.miui.touchassistant",
+        "name": "Quick ball",
+        "versionName": "9.0.1.9",
+        "versionCode": 9000109,
+        "isSystem": true,
+        "firstInstallTime": 1661190283000,
+        "lastUpdateTime": 1661190283000
+      },
+      {
+        "packageName": "com.android.soundrecorder",
+        "name": "Recorder",
+        "versionName": "1.9.80.9",
+        "versionCode": 109809,
+        "isSystem": true,
+        "firstInstallTime": 1662137445000,
+        "lastUpdateTime": 1662137445000
+      },
+      {
+        "packageName": "com.mediatek.capctrl.service",
+        "name": "RilCap",
+        "versionName": "11",
+        "versionCode": 30,
+        "isSystem": true,
+        "firstInstallTime": 1661190306000,
+        "lastUpdateTime": 1661190306000
+      },
+      {
+        "packageName": "com.android.theme.icon_pack.rounded.themepicker",
+        "name": "Rounded",
+        "versionName": "1.0",
+        "versionCode": 1,
+        "isSystem": true,
+        "firstInstallTime": 1661190316000,
+        "lastUpdateTime": 1661190316000
+      },
+      {
+        "packageName": "com.miui.screenrecorder",
+        "name": "Screen Recorder",
+        "versionName": "3.12.5.7.1",
+        "versionCode": 31205071,
+        "isSystem": true,
+        "firstInstallTime": 1662137443000,
+        "lastUpdateTime": 1662137443000
+      },
+      {
+        "packageName": "com.miui.screenshot",
+        "name": "Screenshot",
+        "versionName": "RELEASE-1.2.117-08111448",
+        "versionCode": 10200117,
+        "isSystem": true,
+        "firstInstallTime": 1661190282000,
+        "lastUpdateTime": 1661190282000
+      },
+      {
+        "packageName": "com.android.se",
+        "name": "SecureElementApplication",
+        "versionName": "11",
+        "versionCode": 30,
+        "isSystem": true,
+        "firstInstallTime": 1661190282000,
+        "lastUpdateTime": 1661190282000
+      },
+      {
+        "packageName": "com.miui.securitycenter",
+        "name": "Security",
+        "versionName": "11.1.6-251213.1.1",
+        "versionCode": 40001116,
+        "isSystem": true,
+        "firstInstallTime": 1661110638000,
+        "lastUpdateTime": 1791969762323
+      },
+      {
+        "packageName": "com.miui.securitycore",
+        "name": "Security Core Component",
+        "versionName": "25",
+        "versionCode": 25,
+        "isSystem": true,
+        "firstInstallTime": 1661190282000,
+        "lastUpdateTime": 1661190282000
+      },
+      {
+        "packageName": "com.fingerprints.sensortesttool",
+        "name": "Sensor Test Tool",
+        "versionName": "3.54",
+        "versionCode": 354,
+        "isSystem": true,
+        "firstInstallTime": 1661190282000,
+        "lastUpdateTime": 1661190282000
+      },
+      {
+        "packageName": "com.xiaomi.misettings",
+        "name": "Settings",
+        "versionName": "2.9.5.5",
+        "versionCode": 211011010,
+        "isSystem": true,
+        "firstInstallTime": 1661190303000,
+        "lastUpdateTime": 1661190303000
+      },
+      {
+        "packageName": "com.android.settings",
+        "name": "Settings",
+        "versionName": "11",
+        "versionCode": 30,
+        "isSystem": true,
+        "firstInstallTime": 1663504477000,
+        "lastUpdateTime": 1663504477000
+      },
+      {
+        "packageName": "com.android.providers.settings",
+        "name": "Settings Storage",
+        "versionName": "11",
+        "versionCode": 30,
+        "isSystem": true,
+        "firstInstallTime": 1661190308000,
+        "lastUpdateTime": 1661190308000
+      },
+      {
+        "packageName": "com.android.shell",
+        "name": "Shell",
+        "versionName": "11",
+        "versionCode": 30,
+        "isSystem": true,
+        "firstInstallTime": 1661190308000,
+        "lastUpdateTime": 1661190308000
+      },
+      {
+        "packageName": "com.android.simappdialog",
+        "name": "Sim app dialogue",
+        "versionName": "11",
+        "versionCode": 30,
+        "isSystem": true,
+        "firstInstallTime": 1661190282000,
+        "lastUpdateTime": 1661190282000
+      },
+      {
+        "packageName": "com.android.stk",
+        "name": "SIM Tool Kit",
+        "versionName": "11",
+        "versionCode": 30,
+        "isSystem": true,
+        "firstInstallTime": 1661190308000,
+        "lastUpdateTime": 1661190308000
+      },
+      {
+        "packageName": "com.miui.hybrid.accessory",
+        "name": "Smart Scenes",
+        "versionName": "1.4.3",
+        "versionCode": 1040301,
+        "isSystem": true,
+        "firstInstallTime": 1661190281000,
+        "lastUpdateTime": 1661190281000
+      },
+      {
+        "packageName": "com.tencent.soter.soterserver",
+        "name": "SoterService",
+        "versionName": "11",
+        "versionCode": 30,
+        "isSystem": true,
+        "firstInstallTime": 1661190282000,
+        "lastUpdateTime": 1661190282000
+      },
+      {
+        "packageName": "com.android.soundpicker",
+        "name": "Sounds",
+        "versionName": "11",
+        "versionCode": 30,
+        "isSystem": true,
+        "firstInstallTime": 1661190308000,
+        "lastUpdateTime": 1661190308000
+      },
+      {
+        "packageName": "com.xiaomi.discover",
+        "name": "System apps updater",
+        "versionName": "26.06.24.878",
+        "versionCode": 2000878,
+        "isSystem": true,
+        "firstInstallTime": 1661190282000,
+        "lastUpdateTime": 1791956397560
+      },
+      {
+        "packageName": "com.miui.home",
+        "name": "System launcher",
+        "versionName": "ALPHA-4.39.0.5500-07271657",
+        "versionCode": 439005500,
+        "isSystem": true,
+        "firstInstallTime": 1660447238000,
+        "lastUpdateTime": 1660447238000
+      },
+      {
+        "packageName": "com.miui.securityadd",
+        "name": "System service plugin",
+        "versionName": "9.11.96-251014.1.1",
+        "versionCode": 91196,
+        "isSystem": true,
+        "firstInstallTime": 1662004960000,
+        "lastUpdateTime": 1791816453523
+      },
+      {
+        "packageName": "com.android.traceur",
+        "name": "System Tracing",
+        "versionName": "1.0",
+        "versionCode": 2,
+        "isSystem": true,
+        "firstInstallTime": 1661190283000,
+        "lastUpdateTime": 1661190283000
+      },
+      {
+        "packageName": "com.android.systemui",
+        "name": "System UI",
+        "versionName": "20201109.0",
+        "versionCode": 202011090,
+        "isSystem": true,
+        "firstInstallTime": 1663298614000,
+        "lastUpdateTime": 1663298614000
+      },
+      {
+        "packageName": "miui.systemui.plugin",
+        "name": "System UI Plug-in",
+        "versionName": "13.1.0.63.0",
+        "versionCode": 131006300,
+        "isSystem": true,
+        "firstInstallTime": 1661967112000,
+        "lastUpdateTime": 1661967112000
+      },
+      {
+        "packageName": "com.mediatek.telephony",
+        "name": "Telephony Assist",
+        "versionName": "11",
+        "versionCode": 30,
+        "isSystem": true,
+        "firstInstallTime": 1661190307000,
+        "lastUpdateTime": 1661190307000
+      },
+      {
+        "packageName": "com.android.networkstack.tethering.inprocess",
+        "name": "Tethering",
+        "versionName": "11",
+        "versionCode": 30,
+        "isSystem": true,
+        "firstInstallTime": 1661190277000,
+        "lastUpdateTime": 1661190277000
+      },
+      {
+        "packageName": "com.android.networkstack.tethering.overlay",
+        "name": "TetheringResOverlay",
+        "versionName": "11",
+        "versionCode": 30,
+        "isSystem": true,
+        "firstInstallTime": 1661190149000,
+        "lastUpdateTime": 1661190149000
+      },
+      {
+        "packageName": "com.android.networkstack.tethering.inprocess.overlay",
+        "name": "TetheringResOverlay",
+        "versionName": "11",
+        "versionCode": 30,
+        "isSystem": true,
+        "firstInstallTime": 1661190149000,
+        "lastUpdateTime": 1661190149000
+      },
+      {
+        "packageName": "com.google.android.networkstack.tethering.overlay",
+        "name": "TetheringResOverlay",
+        "versionName": "11",
+        "versionCode": 30,
+        "isSystem": true,
+        "firstInstallTime": 1661190149000,
+        "lastUpdateTime": 1661190149000
+      },
+      {
+        "packageName": "com.android.thememanager",
+        "name": "Themes",
+        "versionName": "2.15.8.5-global",
+        "versionCode": 2150805,
+        "isSystem": true,
+        "firstInstallTime": 1662137445000,
+        "lastUpdateTime": 1791815150145
+      },
+      {
+        "packageName": "com.android.updater",
+        "name": "Updater",
+        "versionName": "7.8.4",
+        "versionCode": 784,
+        "isSystem": true,
+        "firstInstallTime": 1662573200000,
+        "lastUpdateTime": 1662573200000
+      },
+      {
+        "packageName": "com.xiaomi.upnp",
+        "name": "UpnpService",
+        "versionName": "1.0.0",
+        "versionCode": 1,
+        "isSystem": true,
+        "firstInstallTime": 1661190283000,
+        "lastUpdateTime": 1661190283000
+      },
+      {
+        "packageName": "com.android.providers.userdictionary",
+        "name": "User Dictionary",
+        "versionName": "11",
+        "versionCode": 30,
+        "isSystem": true,
+        "firstInstallTime": 1661190308000,
+        "lastUpdateTime": 1661190308000
+      },
+      {
+        "packageName": "com.mediatek.voicecommand",
+        "name": "VoiceCommand",
+        "versionName": "1.0",
+        "versionCode": 1,
+        "isSystem": true,
+        "firstInstallTime": 1661190308000,
+        "lastUpdateTime": 1661190308000
+      },
+      {
+        "packageName": "com.android.vpndialogs",
+        "name": "VpnDialogs",
+        "versionName": "11",
+        "versionCode": 30,
+        "isSystem": true,
+        "firstInstallTime": 1661190308000,
+        "lastUpdateTime": 1661190308000
+      },
+      {
+        "packageName": "com.miui.miwallpaper",
+        "name": "WallPaper",
+        "versionName": "ALPHA-2.6.556-05131746-ogl",
+        "versionCode": 206000556,
+        "isSystem": true,
+        "firstInstallTime": 1661901715000,
+        "lastUpdateTime": 1791815225656
+      },
+      {
+        "packageName": "com.wapi.wapicertmanager",
+        "name": "WAPI certificate",
+        "versionName": "11",
+        "versionCode": 30,
+        "isSystem": true,
+        "firstInstallTime": 1661190308000,
+        "lastUpdateTime": 1661190308000
+      },
+      {
+        "packageName": "com.miui.weather2",
+        "name": "Weather",
+        "versionName": "G-2.0",
+        "versionCode": 2,
+        "isSystem": true,
+        "firstInstallTime": 1661190283000,
+        "lastUpdateTime": 1661190283000
+      },
+      {
+        "packageName": "com.android.cellbroadcastreceiver",
+        "name": "Wireless emergency alerts",
+        "versionName": "11",
+        "versionCode": 30,
+        "isSystem": true,
+        "firstInstallTime": 1661190324000,
+        "lastUpdateTime": 1661190324000
+      },
+      {
+        "packageName": "com.miui.wmsvc",
+        "name": "WMService",
+        "versionName": "1.0.11",
+        "versionCode": 1001102,
+        "isSystem": true,
+        "firstInstallTime": 1661190283000,
+        "lastUpdateTime": 1661190283000
+      },
+      {
+        "packageName": "com.android.managedprovisioning",
+        "name": "Work Setup",
+        "versionName": "11",
+        "versionCode": 30,
+        "isSystem": true,
+        "firstInstallTime": 1661190302000,
+        "lastUpdateTime": 1661190302000
+      },
+      {
+        "packageName": "com.xiaomi.account",
+        "name": "Xiaomi Account",
+        "versionName": "R-23.03.01.02",
+        "versionCode": 323030102,
+        "isSystem": true,
+        "firstInstallTime": 1661190284000,
+        "lastUpdateTime": 1791815214200
+      },
+      {
+        "packageName": "com.miui.cloudservice",
+        "name": "Xiaomi Cloud",
+        "versionName": "1.12.0.2.50",
+        "versionCode": 112000250,
+        "isSystem": true,
+        "firstInstallTime": 1661190280000,
+        "lastUpdateTime": 1791815233552
+      },
+      {
+        "packageName": "com.xiaomi.xmsf",
+        "name": "Xiaomi service framework",
+        "versionName": "6.2.67-G",
+        "versionCode": 60002067,
+        "isSystem": true,
+        "firstInstallTime": 1661190284000,
+        "lastUpdateTime": 1791815229512
+      },
+      {
+        "packageName": "com.xiaomi.xmsfkeeper",
+        "name": "Xiaomi Service Framework Keeper",
+        "versionName": "1.0.1",
+        "versionCode": 10001,
+        "isSystem": true,
+        "firstInstallTime": 1661190283000,
+        "lastUpdateTime": 1661190283000
+      },
+      {
+        "packageName": "com.xiaomi.simactivate.service",
+        "name": "Xiaomi SIM Activation Service",
+        "versionName": "R-23.02.14",
+        "versionCode": 1230214,
+        "isSystem": true,
+        "firstInstallTime": 1661190284000,
+        "lastUpdateTime": 1791815231234
+      },
+      {
+        "packageName": "com.mediatek.ygps",
+        "name": "YGPS",
+        "versionName": "1.1",
+        "versionCode": 2,
+        "isSystem": true,
+        "firstInstallTime": 1661190284000,
+        "lastUpdateTime": 1661190284000
+      }
+    ]
+  },
   "wifi": {
-    "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be": {
-      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
+    "android-e24d536b-c22b-488c-a560-761285560b04": {
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
       "enabled": true,
       "connected": true,
       "ssid": "Xiaomi 11i",
       "bssid": "ca:01:3a:e8:35:47",
-      "rssi": -42,
+      "rssi": -29,
       "linkSpeedMbps": 96,
       "frequencyMHz": 2412,
       "ipAddress": "10.87.107.109",
@@ -2174,71 +5149,33 @@
         {
           "ssid": "Xiaomi 11i",
           "bssid": "ca:01:3a:e8:35:47",
-          "level": -33,
+          "level": -23,
           "frequency": 2412,
           "capabilities": "[WPA2-PSK-CCMP][RSN-PSK-CCMP][ESS]"
         },
         {
           "ssid": "No Internet-2.5G",
           "bssid": "64:fb:92:71:f0:de",
-          "level": -69,
+          "level": -67,
           "frequency": 2457,
           "capabilities": "[WPA-PSK-TKIP+CCMP][WPA2-PSK-TKIP+CCMP][RSN-PSK-TKIP+CCMP][ESS]"
         },
         {
           "ssid": "www.excitel.com",
           "bssid": "64:fb:92:71:f0:df",
-          "level": -70,
+          "level": -67,
           "frequency": 2457,
           "capabilities": "[WPA-PSK-TKIP+CCMP][WPA2-PSK-TKIP+CCMP][RSN-PSK-TKIP+CCMP][ESS]"
-        },
-        {
-          "ssid": "iBall-Baton",
-          "bssid": "a0:47:d7:17:f6:08",
-          "level": -74,
-          "frequency": 2437,
-          "capabilities": "[WPA-PSK-CCMP][WPA2-PSK-CCMP][RSN-PSK-CCMP][ESS][WPS]"
-        },
-        {
-          "ssid": "vivo X300 FE",
-          "bssid": "32:ee:ba:a8:59:1d",
-          "level": -88,
-          "frequency": 2437,
-          "capabilities": "[WPA2-PSK-CCMP][RSN-PSK-CCMP][ESS]"
-        }
-      ]
-    },
-    "android-e24d536b-c22b-488c-a560-761285560b04": {
-      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
-      "enabled": true,
-      "connected": true,
-      "ssid": "Xiaomi 11i",
-      "bssid": "ca:01:3a:e8:35:47",
-      "rssi": -31,
-      "linkSpeedMbps": 96,
-      "frequencyMHz": 2412,
-      "ipAddress": "10.87.107.109",
-      "scanResults": [
-        {
-          "ssid": "Xiaomi 11i",
-          "bssid": "ca:01:3a:e8:35:47",
-          "level": -37,
-          "frequency": 2412,
-          "capabilities": "[WPA2-PSK-CCMP][RSN-PSK-CCMP][ESS]"
         }
       ]
     }
   },
   "callBlocklist": {
-    "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be": {
-      "enabled": false,
-      "numbers": [
-        "000000000000"
-      ]
-    },
     "android-e24d536b-c22b-488c-a560-761285560b04": {
       "enabled": false,
       "numbers": []
     }
-  }
+  },
+  "cellular": {},
+  "dnd": {}
 }

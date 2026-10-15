@@ -234,6 +234,15 @@ class PhoneLinkService : Service() {
             Events.LAUNCH_APP_COMMAND -> handleLaunchApp(payload)
             Events.LOST_MODE_COMMAND -> handleLostMode(payload)
             Events.MEDIA_GALLERY_REQUEST -> handleMediaGallery(payload)
+            Events.INPUT_TEXT_COMMAND -> handleInputText(payload)
+            Events.SCREEN_WAKE_COMMAND -> handleScreenWake()
+            Events.CALL_ACTION_COMMAND -> handleCallAction(payload)
+            Events.CELLULAR_INFO_REQUEST -> pushCellularInfo()
+            Events.TORCH_STROBE_COMMAND -> handleTorchStrobe(payload)
+            Events.JUNK_SCAN_REQUEST -> handleJunkScan()
+            Events.JUNK_CLEAN_COMMAND -> handleJunkClean(payload)
+            Events.DND_GET_REQUEST -> pushDndStatus()
+            Events.DND_SET_COMMAND -> handleDndSet(payload)
             else -> Log.w(TAG, "unhandled command: $event")
         }
     }
@@ -1206,10 +1215,95 @@ class PhoneLinkService : Service() {
         pushContacts()
         pushDeviceInfo()
         pushWifiInfo()
+        pushCellularInfo()
+        pushDndStatus()
         pushBlocklistStatus()
         pushNotificationSyncStatus()
         if (DevicePrefs.notificationSyncEnabled) {
             pushNotifications()
         }
+    }
+
+    private fun handleInputText(payload: JSONObject) {
+        val text = payload.optString("text", "")
+        val service = FindPhoneAccessibilityService.instance
+        if (service == null) {
+            webSocket.send(Events.INPUT_TEXT_RESULT, JSONObject().apply {
+                put("deviceId", DevicePrefs.deviceId)
+                put("success", false)
+                put("error", "Accessibility Service not enabled")
+            })
+            return
+        }
+        val success = service.inputText(text)
+        webSocket.send(Events.INPUT_TEXT_RESULT, JSONObject().apply {
+            put("deviceId", DevicePrefs.deviceId)
+            put("text", text)
+            put("success", success)
+            if (!success) put("error", "No active focused text field found on screen")
+        })
+    }
+
+    private fun handleScreenWake() {
+        val result = com.phonelink.hub.remote.ScreenWakeController.wakeScreen(this)
+        webSocket.send(Events.SCREEN_WAKE_RESULT, result)
+    }
+
+    private fun handleCallAction(payload: JSONObject) {
+        val action = payload.optString("action", "answer")
+        val speaker = payload.optBoolean("speaker", true)
+        val result = if (action.equals("decline", ignoreCase = true)) {
+            com.phonelink.hub.calls.CallActionController.endCall(this)
+        } else {
+            com.phonelink.hub.calls.CallActionController.answerCall(this, speaker)
+        }
+        webSocket.send(Events.CALL_ACTION_RESULT, result)
+    }
+
+    fun pushCellularInfo() {
+        val info = com.phonelink.hub.system.CellularRepository.getCellularInfo(this)
+        webSocket.send(Events.CELLULAR_INFO_RESPONSE, info)
+    }
+
+    private fun handleTorchStrobe(payload: JSONObject) {
+        val enabled = payload.optBoolean("enabled", false)
+        val speedMs = payload.optLong("speedMs", 150L)
+        val durationSec = payload.optInt("durationSec", 30)
+        val result = com.phonelink.hub.remote.TorchController.toggleStrobe(this, enabled, speedMs, durationSec)
+        webSocket.send(Events.TORCH_STROBE_RESULT, result)
+    }
+
+    private fun handleJunkScan() {
+        Thread {
+            val result = com.phonelink.hub.files.JunkCleanerRepository.scan(this)
+            webSocket.send(Events.JUNK_SCAN_RESPONSE, result)
+        }.start()
+    }
+
+    private fun handleJunkClean(payload: JSONObject) {
+        val catId = payload.optString("categoryId", "")
+        val pathsArray = payload.optJSONArray("paths")
+        val paths = mutableListOf<String>()
+        if (pathsArray != null) {
+            for (i in 0 until pathsArray.length()) {
+                val p = pathsArray.optString(i)
+                if (p.isNotBlank()) paths.add(p)
+            }
+        }
+        Thread {
+            val result = com.phonelink.hub.files.JunkCleanerRepository.clean(this, catId, if (paths.isEmpty()) null else paths)
+            webSocket.send(Events.JUNK_CLEAN_RESULT, result)
+        }.start()
+    }
+
+    fun pushDndStatus() {
+        val status = com.phonelink.hub.remote.DndController.getDndStatus(this)
+        webSocket.send(Events.DND_STATUS_RESPONSE, status)
+    }
+
+    private fun handleDndSet(payload: JSONObject) {
+        val mode = payload.optString("mode", "OFF")
+        val result = com.phonelink.hub.remote.DndController.setDndMode(this, mode)
+        webSocket.send(Events.DND_SET_RESULT, result)
     }
 }

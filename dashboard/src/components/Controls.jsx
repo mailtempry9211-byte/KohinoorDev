@@ -47,7 +47,21 @@ import {
   Settings,
   Power,
   MousePointer,
-  Hand
+  Hand,
+  Sun,
+  Keyboard,
+  Send,
+  Signal,
+  Activity,
+  Sparkles,
+  FolderArchive,
+  BellOff,
+  Eye,
+  Maximize2,
+  Minimize2,
+  MicOff,
+  VideoOff,
+  PhoneCall
 } from 'lucide-react';
 import { useStore } from '../store/StoreContext';
 
@@ -140,6 +154,19 @@ export default function Controls() {
     galleryPhotos,
     galleryLoading,
     fetchGallery,
+    sendInputText,
+    wakeScreen,
+    cellularInfo,
+    fetchCellularInfo,
+    strobeActive,
+    toggleTorchStrobe,
+    junkScanData,
+    isScanningJunk,
+    scanJunk,
+    cleanJunk,
+    dndStatus,
+    fetchDndStatus,
+    setDndMode,
     sendCommand,
     pushToast
   } = useStore();
@@ -151,6 +178,13 @@ export default function Controls() {
   const [cameraStreamFacing, setCameraStreamFacing] = useState('back');
   const [cameraStreamQuality, setCameraStreamQuality] = useState('low');
   const [cameraStreamFps, setCameraStreamFps] = useState(15);
+
+  // Quick typing injection on screen
+  const [quickTypeText, setQuickTypeText] = useState('');
+
+  // Unified Surveillance Hub modes
+  const [surveillanceMode, setSurveillanceMode] = useState('cam_mic');
+  const [isFullScreenCCTV, setIsFullScreenCCTV] = useState(false);
 
   // Wallpaper direct PC file upload
   const [wallpaperFile, setWallpaperFile] = useState(null);
@@ -178,11 +212,13 @@ export default function Controls() {
   // Gallery photo preview modal
   const [selectedPhoto, setSelectedPhoto] = useState(null);
 
-  // Automatically fetch volume and battery info on load
+  // Automatically fetch volume, battery, cellular, and DND on load
   useEffect(() => {
     if (activeDeviceId) {
       if (fetchVolumeInfo) fetchVolumeInfo();
       if (fetchBatteryStats) fetchBatteryStats();
+      if (fetchCellularInfo) fetchCellularInfo();
+      if (fetchDndStatus) fetchDndStatus();
     }
   }, [activeDeviceId]);
 
@@ -561,6 +597,60 @@ export default function Controls() {
                   onChange={(e) => setVolumeLevel('notification', Number(e.target.value))}
                   className="w-full accent-teal-500 h-1.5 bg-gray-800 rounded-lg cursor-pointer"
                 />
+              </div>
+            </div>
+
+            {/* DND Emergency Override */}
+            <div className="mt-4 pt-3 border-t border-gray-800">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs text-gray-300 flex items-center gap-1.5 font-medium">
+                  <BellOff className="h-3.5 w-3.5 text-amber-400" /> Do Not Disturb (DND)
+                </span>
+                <span className={`text-[10px] font-mono px-2 py-0.5 rounded border uppercase ${
+                  dndStatus?.isDndActive
+                    ? 'border-rose-700 bg-rose-950/60 text-rose-300'
+                    : 'border-emerald-700 bg-emerald-950/60 text-emerald-300'
+                }`}>
+                  {dndStatus?.mode || 'OFF'}
+                </span>
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setDndMode('OFF')}
+                  className={`py-1 px-2 rounded border text-[11px] font-medium transition-all ${
+                    !dndStatus?.isDndActive
+                      ? 'border-emerald-500 bg-emerald-950/50 text-emerald-300'
+                      : 'border-gray-800 bg-gray-950 text-gray-400 hover:text-white'
+                  }`}
+                  title="Turn DND OFF - all alerts and calls ring"
+                >
+                  DND OFF
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setDndMode('PRIORITY')}
+                  className={`py-1 px-2 rounded border text-[11px] font-medium transition-all ${
+                    dndStatus?.mode === 'PRIORITY'
+                      ? 'border-amber-500 bg-amber-950/50 text-amber-300'
+                      : 'border-gray-800 bg-gray-950 text-gray-400 hover:text-white'
+                  }`}
+                  title="Priority only"
+                >
+                  Priority
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setDndMode('TOTAL_SILENCE')}
+                  className={`py-1 px-2 rounded border text-[11px] font-medium transition-all ${
+                    dndStatus?.mode === 'TOTAL_SILENCE'
+                      ? 'border-rose-500 bg-rose-950/50 text-rose-300'
+                      : 'border-gray-800 bg-gray-950 text-gray-400 hover:text-white'
+                  }`}
+                  title="Total Silence"
+                >
+                  Silence
+                </button>
               </div>
             </div>
           </div>
@@ -1069,10 +1159,10 @@ export default function Controls() {
             </div>
           </div>
 
-          <div className="mt-5 pt-4 border-t border-gray-800/80">
+          <div className="mt-5 pt-4 border-t border-gray-800/80 space-y-2">
             <button
               onClick={() => toggleTorch(!torchOn)}
-              className={`w-full flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition-all ${
+              className={`w-full flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-xs font-semibold transition-all cursor-pointer ${
                 torchOn
                   ? 'bg-amber-500 text-black hover:bg-amber-400 shadow-md shadow-amber-950'
                   : 'bg-gray-800 text-gray-200 hover:bg-gray-700 border border-gray-700'
@@ -1080,6 +1170,17 @@ export default function Controls() {
             >
               <Zap className="h-4 w-4" />
               {torchOn ? 'Turn Flashlight OFF' : 'Turn Flashlight ON'}
+            </button>
+            <button
+              onClick={() => toggleTorchStrobe(!strobeActive, 150, 30)}
+              className={`w-full flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-xs font-semibold transition-all cursor-pointer ${
+                strobeActive
+                  ? 'bg-rose-600 text-white hover:bg-rose-500 shadow-lg shadow-rose-950 animate-pulse'
+                  : 'bg-gray-950 text-amber-300 hover:bg-amber-950/40 border border-amber-800/60'
+              }`}
+            >
+              <Activity className="h-4 w-4" />
+              {strobeActive ? '⚡ Stop SOS Strobe' : '⚡ Start SOS Strobe Beacon (30s Rapid Flash)'}
             </button>
           </div>
         </div>
@@ -1871,164 +1972,344 @@ export default function Controls() {
         </div>
       </div>
 
-      {/* Live Camera Stream (Pet & Security Monitor) */}
-      <div className="rounded-xl border border-gray-800 bg-gray-900/60 p-5 backdrop-blur-sm">
-        <div className="flex items-center justify-between mb-4">
+      {/* UNIFIED INDOOR SECURITY CAMERA & SURVEILLANCE HUB (LIVE VIDEO + MIC AUDIO) */}
+      <div className={`rounded-xl border p-5 backdrop-blur-sm transition-all ${
+        (cameraStreaming || liveListening)
+          ? 'border-rose-900/60 bg-gray-900/90 shadow-xl shadow-rose-950/20'
+          : 'border-gray-800 bg-gray-900/60'
+      }`}>
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-lg bg-teal-950/60 border border-teal-800/60 text-teal-400">
-              <Video className="h-4 w-4" />
+            <div className={`p-2 rounded-lg border ${
+              (cameraStreaming || liveListening)
+                ? 'bg-rose-950/70 border-rose-800/80 text-rose-400 animate-pulse'
+                : 'bg-teal-950/60 border-teal-800/60 text-teal-400'
+            }`}>
+              <Eye className="h-4 w-4" />
             </div>
             <div>
-              <h3 className="font-semibold text-gray-200 text-sm">Live Camera Stream (Pet & Room Monitor)</h3>
-              <p className="text-xs text-gray-400">Stream continuous live video from phone cameras with quality & FPS settings</p>
+              <h3 className="font-semibold text-gray-200 text-sm flex items-center gap-2">
+                Indoor Security Camera &amp; Live Surveillance Hub
+                {(cameraStreaming || liveListening) && (
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
+                  </span>
+                )}
+              </h3>
+              <p className="text-xs text-gray-400">
+                Live CCTV video &amp; ambient audio surveillance for pet monitoring, home security &amp; video check-in
+              </p>
             </div>
           </div>
-          {cameraStreaming && (
-            <span className="flex items-center gap-1.5 text-xs text-rose-400 font-semibold bg-rose-950/60 border border-rose-800/60 px-2.5 py-1 rounded-full animate-pulse">
-              <span className="h-2 w-2 rounded-full bg-rose-500 animate-ping" />
-              LIVE CAMERA ({cameraStreamFacing.toUpperCase()} · {cameraStreamQuality.toUpperCase()} · {cameraStreamFps} FPS)
-            </span>
-          )}
+
+          <div className="flex items-center gap-2">
+            {cameraStreaming && (
+              <span className="flex items-center gap-1.5 text-xs text-rose-400 font-semibold bg-rose-950/80 border border-rose-800/80 px-2.5 py-1 rounded-full">
+                <span className="h-2 w-2 rounded-full bg-rose-500 animate-ping" />
+                CAM: {cameraStreamFacing.toUpperCase()} · {cameraStreamFps} FPS
+              </span>
+            )}
+            {liveListening && (
+              <span className="flex items-center gap-1.5 text-xs text-emerald-400 font-semibold bg-emerald-950/80 border border-emerald-800/80 px-2.5 py-1 rounded-full animate-pulse">
+                <Headphones className="h-3 w-3" />
+                MIC LIVE
+              </span>
+            )}
+          </div>
         </div>
 
         <div className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-            {/* Camera facing */}
-            <div>
-              <label className="text-xs text-gray-400 block mb-1.5">Camera Lens</label>
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  type="button"
-                  onClick={() => setCameraStreamFacing('back')}
-                  disabled={cameraStreaming}
-                  className={`py-1.5 px-2 rounded-lg border text-xs font-medium transition-all ${
-                    cameraStreamFacing === 'back'
-                      ? 'border-teal-500 bg-teal-950/40 text-teal-300'
-                      : 'border-gray-800 bg-gray-950 text-gray-400 hover:text-white'
-                  }`}
-                >
-                  Back (Main)
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setCameraStreamFacing('front')}
-                  disabled={cameraStreaming}
-                  className={`py-1.5 px-2 rounded-lg border text-xs font-medium transition-all ${
-                    cameraStreamFacing === 'front'
-                      ? 'border-teal-500 bg-teal-950/40 text-teal-300'
-                      : 'border-gray-800 bg-gray-950 text-gray-400 hover:text-white'
-                  }`}
-                >
-                  Front (Selfie)
-                </button>
-              </div>
-            </div>
-
-            {/* Quality option */}
-            <div>
-              <label className="text-xs text-gray-400 block mb-1.5">Stream Quality</label>
-              <div className="grid grid-cols-3 gap-1.5">
-                {[
-                  { id: 'low', label: 'Low (480p)' },
-                  { id: 'medium', label: 'Med (720p)' },
-                  { id: 'high', label: 'High (1080p)' }
-                ].map((q) => (
-                  <button
-                    key={q.id}
-                    type="button"
-                    onClick={() => setCameraStreamQuality(q.id)}
-                    disabled={cameraStreaming}
-                    className={`py-1.5 px-1 rounded-lg border text-[11px] font-medium text-center transition-all ${
-                      cameraStreamQuality === q.id
-                        ? 'border-teal-500 bg-teal-950/40 text-teal-300'
-                        : 'border-gray-800 bg-gray-950 text-gray-400 hover:text-white'
-                    }`}
-                  >
-                    {q.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* FPS option */}
-            <div>
-              <label className="text-xs text-gray-400 block mb-1.5">Frame Rate</label>
-              <div className="grid grid-cols-4 gap-1.5">
-                {[5, 10, 15, 30].map((f) => (
-                  <button
-                    key={f}
-                    type="button"
-                    onClick={() => setCameraStreamFps(f)}
-                    disabled={cameraStreaming}
-                    className={`py-1.5 px-1 rounded-lg border text-[11px] font-medium text-center transition-all ${
-                      cameraStreamFps === f
-                        ? 'border-teal-500 bg-teal-950/40 text-teal-300'
-                        : 'border-gray-800 bg-gray-950 text-gray-400 hover:text-white'
-                    }`}
-                  >
-                    {f} FPS
-                  </button>
-                ))}
-              </div>
+          {/* Mode Selector */}
+          <div>
+            <label className="text-xs text-gray-400 block mb-1.5 font-medium">Surveillance Mode</label>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              <button
+                type="button"
+                onClick={() => setSurveillanceMode('cam_mic')}
+                disabled={cameraStreaming || liveListening}
+                className={`p-2.5 rounded-lg border text-xs font-semibold flex items-center justify-center gap-2 transition-all ${
+                  surveillanceMode === 'cam_mic'
+                    ? 'border-teal-500 bg-teal-950/60 text-teal-300 shadow'
+                    : 'border-gray-800 bg-gray-950 text-gray-400 hover:text-white'
+                }`}
+              >
+                <Video className="h-4 w-4 text-teal-400" />
+                <span>🎥 Video + Audio (CCTV / Call)</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setSurveillanceMode('cam_only')}
+                disabled={cameraStreaming || liveListening}
+                className={`p-2.5 rounded-lg border text-xs font-semibold flex items-center justify-center gap-2 transition-all ${
+                  surveillanceMode === 'cam_only'
+                    ? 'border-teal-500 bg-teal-950/60 text-teal-300 shadow'
+                    : 'border-gray-800 bg-gray-950 text-gray-400 hover:text-white'
+                }`}
+              >
+                <Camera className="h-4 w-4 text-teal-400" />
+                <span>📷 Camera Only (Silent)</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setSurveillanceMode('mic_only')}
+                disabled={cameraStreaming || liveListening}
+                className={`p-2.5 rounded-lg border text-xs font-semibold flex items-center justify-center gap-2 transition-all ${
+                  surveillanceMode === 'mic_only'
+                    ? 'border-teal-500 bg-teal-950/60 text-teal-300 shadow'
+                    : 'border-gray-800 bg-gray-950 text-gray-400 hover:text-white'
+                }`}
+              >
+                <Mic className="h-4 w-4 text-teal-400" />
+                <span>🎙️ Mic Only (Audio Stream)</span>
+              </button>
             </div>
           </div>
 
+          {/* Camera Settings (Facing, Quality, FPS) */}
+          {surveillanceMode !== 'mic_only' && (
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {/* Lens Selection */}
+              <div>
+                <label className="text-xs text-gray-400 block mb-1.5">Camera Lens</label>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setCameraStreamFacing('back');
+                      if (cameraStreaming) {
+                        startCameraStream('back', cameraStreamQuality, cameraStreamFps);
+                      }
+                    }}
+                    className={`py-1.5 px-2 rounded-lg border text-xs font-medium transition-all ${
+                      cameraStreamFacing === 'back'
+                        ? 'border-teal-500 bg-teal-950/40 text-teal-300'
+                        : 'border-gray-800 bg-gray-950 text-gray-400 hover:text-white'
+                    }`}
+                  >
+                    Back Lens
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setCameraStreamFacing('front');
+                      if (cameraStreaming) {
+                        startCameraStream('front', cameraStreamQuality, cameraStreamFps);
+                      }
+                    }}
+                    className={`py-1.5 px-2 rounded-lg border text-xs font-medium transition-all ${
+                      cameraStreamFacing === 'front'
+                        ? 'border-teal-500 bg-teal-950/40 text-teal-300'
+                        : 'border-gray-800 bg-gray-950 text-gray-400 hover:text-white'
+                    }`}
+                  >
+                    Front Lens
+                  </button>
+                </div>
+              </div>
+
+              {/* Quality */}
+              <div>
+                <label className="text-xs text-gray-400 block mb-1.5">Stream Quality</label>
+                <div className="grid grid-cols-3 gap-1.5">
+                  {[
+                    { id: 'low', label: '480p' },
+                    { id: 'medium', label: '720p HD' },
+                    { id: 'high', label: '1080p' }
+                  ].map((q) => (
+                    <button
+                      key={q.id}
+                      type="button"
+                      onClick={() => setCameraStreamQuality(q.id)}
+                      disabled={cameraStreaming}
+                      className={`py-1.5 px-1 rounded-lg border text-[11px] font-medium text-center transition-all ${
+                        cameraStreamQuality === q.id
+                          ? 'border-teal-500 bg-teal-950/40 text-teal-300'
+                          : 'border-gray-800 bg-gray-950 text-gray-400 hover:text-white'
+                      }`}
+                    >
+                      {q.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* FPS */}
+              <div>
+                <label className="text-xs text-gray-400 block mb-1.5">Frame Rate</label>
+                <div className="grid grid-cols-4 gap-1.5">
+                  {[5, 10, 15, 25].map((f) => (
+                    <button
+                      key={f}
+                      type="button"
+                      onClick={() => setCameraStreamFps(f)}
+                      disabled={cameraStreaming}
+                      className={`py-1.5 px-1 rounded-lg border text-[11px] font-medium text-center transition-all ${
+                        cameraStreamFps === f
+                          ? 'border-teal-500 bg-teal-950/40 text-teal-300'
+                          : 'border-gray-800 bg-gray-950 text-gray-400 hover:text-white'
+                      }`}
+                    >
+                      {f} FPS
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Master Start / Stop Action Buttons */}
           <div className="flex gap-2">
-            {!cameraStreaming ? (
+            {!(cameraStreaming || liveListening) ? (
               <button
-                onClick={() => startCameraStream(cameraStreamFacing, cameraStreamQuality, cameraStreamFps)}
+                type="button"
+                onClick={() => {
+                  if (surveillanceMode === 'cam_mic') {
+                    startCameraStream(cameraStreamFacing, cameraStreamQuality, cameraStreamFps);
+                    startLiveListen();
+                  } else if (surveillanceMode === 'cam_only') {
+                    startCameraStream(cameraStreamFacing, cameraStreamQuality, cameraStreamFps);
+                  } else if (surveillanceMode === 'mic_only') {
+                    startLiveListen();
+                  }
+                }}
                 disabled={!activeDeviceId}
-                className="w-full flex items-center justify-center gap-2 rounded-lg bg-teal-600 px-4 py-2.5 text-xs font-semibold text-white shadow hover:bg-teal-500 transition-colors disabled:opacity-50"
+                className="w-full flex items-center justify-center gap-2 rounded-lg bg-teal-600 hover:bg-teal-500 px-4 py-2.5 text-xs font-bold text-white shadow transition-colors disabled:opacity-50 cursor-pointer"
               >
-                <Video className="h-4 w-4" /> Start Live Camera Stream
+                <Eye className="h-4 w-4" /> Start Live Surveillance ({surveillanceMode === 'cam_mic' ? 'Camera + Audio' : surveillanceMode === 'cam_only' ? 'Camera Only' : 'Audio Only'})
               </button>
             ) : (
               <button
-                onClick={() => stopCameraStream()}
-                className="w-full flex items-center justify-center gap-2 rounded-lg bg-rose-600 px-4 py-2.5 text-xs font-semibold text-white shadow hover:bg-rose-500 transition-colors"
+                type="button"
+                onClick={() => {
+                  if (cameraStreaming) stopCameraStream();
+                  if (liveListening) stopLiveListen();
+                }}
+                className="w-full flex items-center justify-center gap-2 rounded-lg bg-rose-600 hover:bg-rose-500 px-4 py-2.5 text-xs font-bold text-white shadow transition-colors cursor-pointer"
               >
-                <Square className="h-4 w-4 fill-current" /> Stop Camera Stream
+                <Square className="h-4 w-4 fill-current" /> Stop Surveillance Monitor
               </button>
             )}
           </div>
 
-          {/* Live Camera Feed */}
-          {cameraStreaming && (
-            <div className="rounded-lg border border-teal-900/60 bg-gray-950 p-4 mt-2">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-semibold text-rose-400 flex items-center gap-2">
-                  <span className="h-2 w-2 rounded-full bg-rose-500 animate-pulse" />
-                  Live Camera Feed ({cameraStreamFacing} camera)
-                </span>
-                {latestCameraFrame && (
-                  <span className="text-[10px] text-gray-400 font-mono">
-                    {latestCameraFrame.width}x{latestCameraFrame.height} · {((latestCameraFrame.sizeBytes || 0) / 1024).toFixed(1)} KB/frame · {latestCameraFrame.fps} FPS
+          {/* Live Viewport (Video Stream & Audio Controls) */}
+          {(cameraStreaming || liveListening) && (
+            <div className={`rounded-xl border border-teal-900/60 bg-black p-4 mt-2 ${isFullScreenCCTV ? 'fixed inset-0 z-50 p-6 flex flex-col justify-between' : ''}`}>
+              <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+                <div className="flex items-center gap-2">
+                  <span className="h-2.5 w-2.5 rounded-full bg-rose-500 animate-pulse" />
+                  <span className="text-xs font-bold text-gray-200">
+                    Live Security Monitor {cameraStreaming ? `(${cameraStreamFacing.toUpperCase()} Lens)` : '(Audio Only)'}
                   </span>
-                )}
+                  {cameraStreaming && latestCameraFrame && (
+                    <span className="text-[10px] text-gray-400 font-mono">
+                      {latestCameraFrame.width}x{latestCameraFrame.height} · {((latestCameraFrame.sizeBytes || 0) / 1024).toFixed(1)} KB/frame
+                    </span>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-2">
+                  {/* Quick Audio Mute/Unmute toggle */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (liveListening) stopLiveListen();
+                      else startLiveListen();
+                    }}
+                    className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium border transition-colors cursor-pointer ${
+                      liveListening
+                        ? 'border-emerald-600 bg-emerald-950/70 text-emerald-300'
+                        : 'border-gray-800 bg-gray-900 text-gray-400 hover:text-white'
+                    }`}
+                    title={liveListening ? 'Mute ambient microphone audio' : 'Unmute & listen live'}
+                  >
+                    {liveListening ? <Headphones className="h-3.5 w-3.5 text-emerald-400 animate-pulse" /> : <MicOff className="h-3.5 w-3.5" />}
+                    <span>{liveListening ? 'Audio: ON (Listening)' : 'Audio: MUTED'}</span>
+                  </button>
+
+                  {/* Quick Lens Switcher */}
+                  {cameraStreaming && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const nextFacing = cameraStreamFacing === 'back' ? 'front' : 'back';
+                        setCameraStreamFacing(nextFacing);
+                        startCameraStream(nextFacing, cameraStreamQuality, cameraStreamFps);
+                      }}
+                      className="flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium border border-gray-800 bg-gray-900 text-gray-300 hover:text-teal-300 hover:border-teal-700 transition-colors cursor-pointer"
+                      title="Switch between front and back camera"
+                    >
+                      <RefreshCw className="h-3.5 w-3.5 text-teal-400" />
+                      <span>Switch to {cameraStreamFacing === 'back' ? 'Front' : 'Back'}</span>
+                    </button>
+                  )}
+
+                  {/* Fullscreen CCTV Button */}
+                  <button
+                    type="button"
+                    onClick={() => setIsFullScreenCCTV(!isFullScreenCCTV)}
+                    className="p-1.5 rounded-md border border-gray-800 bg-gray-900 text-gray-300 hover:text-white"
+                    title={isFullScreenCCTV ? 'Exit Fullscreen' : 'Expand to Fullscreen Monitor'}
+                  >
+                    {isFullScreenCCTV ? <Minimize2 className="h-3.5 w-3.5" /> : <Maximize2 className="h-3.5 w-3.5" />}
+                  </button>
+                </div>
               </div>
 
-              {latestCameraFrame ? (
-                <div className="rounded-lg overflow-hidden border border-gray-800 bg-black flex items-center justify-center max-h-[480px]">
-                  <img
-                    src={`data:image/jpeg;base64,${latestCameraFrame.data}`}
-                    alt="Live Camera Frame"
-                    className="max-h-[480px] w-auto object-contain"
-                  />
-                </div>
-              ) : (
-                <div className="py-16 text-center text-xs text-gray-400 flex items-center justify-center gap-2 border border-gray-800/80 rounded-lg bg-black">
-                  <RefreshCw className="h-4 w-4 animate-spin text-teal-400" />
-                  Starting live camera stream from phone...
+              {/* Video Feed */}
+              {cameraStreaming && (
+                <div className={`relative rounded-lg overflow-hidden border border-gray-800 bg-black flex items-center justify-center ${isFullScreenCCTV ? 'flex-1 max-h-[85vh]' : 'max-h-[500px]'}`}>
+                  {latestCameraFrame ? (
+                    <img
+                      src={`data:image/jpeg;base64,${latestCameraFrame.data}`}
+                      alt="Live Security Camera Frame"
+                      className="max-h-full w-auto object-contain"
+                    />
+                  ) : (
+                    <div className="py-20 text-center text-xs text-gray-400 flex items-center justify-center gap-2">
+                      <RefreshCw className="h-4 w-4 animate-spin text-teal-400" />
+                      Initializing live camera feed from device...
+                    </div>
+                  )}
+
+                  {/* Watermark Overlay */}
+                  <div className="absolute top-2 left-2 px-2 py-0.5 rounded bg-black/60 border border-gray-700 text-[10px] text-rose-400 font-mono pointer-events-none flex items-center gap-1.5">
+                    <span className="h-1.5 w-1.5 rounded-full bg-rose-500 animate-ping" />
+                    SECURITY MONITOR · {new Date().toLocaleTimeString()}
+                  </div>
                 </div>
               )}
 
-              {latestCameraFrame && (
+              {/* Audio-only Waveform View when camera is paused */}
+              {liveListening && !cameraStreaming && (
+                <div className="p-8 text-center rounded-lg border border-gray-800 bg-gray-950/80">
+                  <div className="flex items-center justify-center gap-1.5 mb-3">
+                    <span className="h-6 w-1 bg-teal-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                    <span className="h-10 w-1 bg-emerald-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                    <span className="h-4 w-1 bg-teal-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                    <span className="h-8 w-1 bg-teal-300 rounded-full animate-bounce" style={{ animationDelay: '100ms' }} />
+                    <span className="h-5 w-1 bg-emerald-500 rounded-full animate-bounce" style={{ animationDelay: '200ms' }} />
+                  </div>
+                  <p className="text-xs font-semibold text-emerald-300">Live Ambient Microphone Streaming to PC</p>
+                  <p className="text-[11px] text-gray-400 mt-1">Listening in real-time through Web Audio API (16kHz PCM audio stream)</p>
+                  <button
+                    type="button"
+                    onClick={() => startCameraStream(cameraStreamFacing, cameraStreamQuality, cameraStreamFps)}
+                    className="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-teal-600 hover:bg-teal-500 text-xs font-semibold text-white shadow transition-colors cursor-pointer"
+                  >
+                    <Video className="h-3.5 w-3.5" /> Turn Camera ON
+                  </button>
+                </div>
+              )}
+
+              {/* Save Snapshot frame button */}
+              {latestCameraFrame && cameraStreaming && (
                 <div className="flex justify-end mt-2">
                   <button
-                    onClick={() => downloadBase64(latestCameraFrame.data, 'image/jpeg', `camera_stream_${Date.now()}.jpg`)}
-                    className="flex items-center gap-1.5 text-xs text-teal-400 hover:text-teal-300 font-medium px-2 py-1 rounded hover:bg-gray-900 transition-colors"
+                    onClick={() => downloadBase64(latestCameraFrame.data, 'image/jpeg', `security_cam_${Date.now()}.jpg`)}
+                    className="flex items-center gap-1.5 text-xs text-teal-400 hover:text-teal-300 font-medium px-2 py-1 rounded hover:bg-gray-900 transition-colors cursor-pointer"
                   >
-                    <Download className="h-3.5 w-3.5" /> Save Current Frame
+                    <Download className="h-3.5 w-3.5" /> Save CCTV Snapshot
                   </button>
                 </div>
               )}
@@ -2272,6 +2553,49 @@ export default function Controls() {
                     >
                       <Lock className="h-3.5 w-3.5" /> Lock Screen
                     </button>
+                    <button
+                      type="button"
+                      onClick={() => wakeScreen()}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-gray-800 hover:bg-emerald-600 hover:text-white text-gray-200 text-xs font-medium transition-colors cursor-pointer"
+                      title="Wake Up Dark Phone Screen via WakeLock"
+                    >
+                      <Sun className="h-3.5 w-3.5 text-amber-400" /> Wake Screen
+                    </button>
+                  </div>
+
+                  {/* Remote Keyboard Quick Typing Injection */}
+                  <div className="mt-3 p-3 rounded-lg bg-gray-900 border border-gray-800">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xs font-semibold text-teal-300 flex items-center gap-1.5">
+                        <Keyboard className="h-4 w-4 text-teal-400" /> Remote Typing Injection (PC Keyboard → Phone Screen)
+                      </span>
+                      <span className="text-[10px] text-gray-400">Injects into active text field</span>
+                    </div>
+                    <form
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        if (quickTypeText.trim()) {
+                          sendInputText(quickTypeText);
+                          setQuickTypeText('');
+                        }
+                      }}
+                      className="flex gap-2"
+                    >
+                      <input
+                        type="text"
+                        value={quickTypeText}
+                        onChange={(e) => setQuickTypeText(e.target.value)}
+                        placeholder="Type text from PC to enter on phone screen (WhatsApp, search, login)..."
+                        className="flex-1 rounded-lg border border-gray-800 bg-gray-950 px-3 py-2 text-xs text-gray-200 focus:border-teal-500 focus:outline-none"
+                      />
+                      <button
+                        type="submit"
+                        disabled={!quickTypeText.trim()}
+                        className="flex items-center gap-1.5 rounded-lg bg-teal-600 hover:bg-teal-500 disabled:opacity-50 px-4 py-2 text-xs font-semibold text-white shadow transition-colors cursor-pointer"
+                      >
+                        <Send className="h-3.5 w-3.5" /> Type on Phone
+                      </button>
+                    </form>
                   </div>
                 </div>
               ) : (
@@ -2570,6 +2894,212 @@ export default function Controls() {
           </div>
         </div>
       )}
+
+      {/* CELLULAR & DUAL-SIM TELEMETRY */}
+      <div className="rounded-xl border border-gray-800 bg-gray-900 p-5 shadow-lg">
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-4 border-b border-gray-800 pb-3">
+          <div className="flex items-center gap-2">
+            <Signal className="h-4 w-4 text-teal-400" />
+            <h3 className="font-semibold text-gray-100 text-sm">Cellular & Dual-SIM Network Telemetry</h3>
+          </div>
+          <button
+            type="button"
+            onClick={fetchCellularInfo}
+            className="flex items-center gap-1.5 px-3 py-1 text-xs rounded bg-gray-800 border border-gray-700 text-gray-300 hover:text-white hover:bg-gray-700 transition-colors"
+          >
+            <RefreshCw className="h-3 w-3" /> Refresh Telemetry
+          </button>
+        </div>
+
+        <p className="text-xs text-gray-400 mb-4">
+          Real-time cellular signal strength bars, 5G/4G network generation, roaming status, and active Dual-SIM carrier profiles.
+        </p>
+
+        {cellularInfo ? (
+          <div className="space-y-4">
+            {/* Primary Signal & Network Badge */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div className="bg-gray-950 p-3 rounded-lg border border-gray-800">
+                <span className="text-[11px] text-gray-400 block mb-1">Signal Strength</span>
+                <div className="flex items-center gap-2">
+                  <div className="flex items-end gap-0.5 h-4">
+                    {[1, 2, 3, 4].map((bar) => (
+                      <span
+                        key={bar}
+                        className={`w-1 rounded-sm ${
+                          (cellularInfo.signalLevel ?? 0) >= bar
+                            ? 'bg-emerald-400'
+                            : 'bg-gray-700'
+                        }`}
+                        style={{ height: `${bar * 25}%` }}
+                      />
+                    ))}
+                  </div>
+                  <span className="text-xs font-mono font-semibold text-white">
+                    {cellularInfo.signalLevel != null ? `${cellularInfo.signalLevel}/4 Bars` : 'Active'}
+                  </span>
+                </div>
+              </div>
+
+              <div className="bg-gray-950 p-3 rounded-lg border border-gray-800">
+                <span className="text-[11px] text-gray-400 block mb-1">Network Gen</span>
+                <span className="text-xs font-mono font-bold text-teal-300 px-2 py-0.5 rounded bg-teal-950/60 border border-teal-800/80 inline-block">
+                  {cellularInfo.networkGen || 'Cellular'}
+                </span>
+                <span className="text-[10px] text-gray-400 block mt-0.5 truncate">
+                  {cellularInfo.networkTypeName || 'Active'}
+                </span>
+              </div>
+
+              <div className="bg-gray-950 p-3 rounded-lg border border-gray-800">
+                <span className="text-[11px] text-gray-400 block mb-1">Data State</span>
+                <span className={`text-xs font-mono font-semibold uppercase ${
+                  cellularInfo.dataState === 'CONNECTED' ? 'text-emerald-400' : 'text-gray-400'
+                }`}>
+                  {cellularInfo.dataState || 'UNKNOWN'}
+                </span>
+              </div>
+
+              <div className="bg-gray-950 p-3 rounded-lg border border-gray-800">
+                <span className="text-[11px] text-gray-400 block mb-1">Roaming</span>
+                <span className={`text-xs font-mono font-semibold ${
+                  cellularInfo.isNetworkRoaming ? 'text-amber-400' : 'text-gray-400'
+                }`}>
+                  {cellularInfo.isNetworkRoaming ? 'Roaming ON' : 'Domestic / Home'}
+                </span>
+              </div>
+            </div>
+
+            {/* SIM Cards List */}
+            {Array.isArray(cellularInfo.sims) && cellularInfo.sims.length > 0 ? (
+              <div>
+                <span className="text-xs font-medium text-gray-300 block mb-2">Active SIM Cards:</span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {cellularInfo.sims.map((sim, idx) => (
+                    <div key={idx} className="bg-gray-950 p-3 rounded-lg border border-gray-800 flex items-center justify-between">
+                      <div className="flex items-center gap-2.5">
+                        <div className="p-2 rounded bg-teal-950/50 border border-teal-800/60 text-teal-400">
+                          <Smartphone className="h-4 w-4" />
+                        </div>
+                        <div>
+                          <p className="text-xs font-bold text-white">{sim.carrierName || sim.displayName || 'SIM ' + (idx + 1)}</p>
+                          <p className="text-[11px] text-gray-400 font-mono">{sim.simSlot} • {sim.countryIso ? sim.countryIso.toUpperCase() : 'IN'}</p>
+                        </div>
+                      </div>
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-950/60 text-emerald-300 border border-emerald-800">
+                        ACTIVE
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div className="bg-gray-950 p-3 rounded-lg border border-gray-800 text-xs text-gray-400 flex items-center justify-between">
+                <span>Carrier: <strong className="text-white">{cellularInfo.networkOperatorName || cellularInfo.simOperatorName || 'Cellular Service'}</strong></span>
+                <span className="font-mono text-gray-500">{cellularInfo.phoneType || 'GSM'}</span>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="text-center py-6 border border-dashed border-gray-800 rounded-lg">
+            <Signal className="h-6 w-6 text-gray-600 mx-auto mb-2" />
+            <p className="text-xs text-gray-500">No cellular telemetry received yet.</p>
+            <button
+              type="button"
+              onClick={fetchCellularInfo}
+              className="mt-2 text-xs text-teal-400 hover:text-teal-300 underline"
+            >
+              Fetch SIM & Cellular Status
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* STORAGE & JUNK CLEANER */}
+      <div className="rounded-xl border border-gray-800 bg-gray-900 p-5 shadow-lg">
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-4 border-b border-gray-800 pb-3">
+          <div className="flex items-center gap-2">
+            <Sparkles className="h-4 w-4 text-teal-400" />
+            <h3 className="font-semibold text-gray-100 text-sm">Storage & WhatsApp Junk Cleaner</h3>
+          </div>
+          <button
+            type="button"
+            disabled={isScanningJunk}
+            onClick={scanJunk}
+            className="flex items-center gap-1.5 px-3 py-1 text-xs rounded bg-teal-600 hover:bg-teal-500 text-white font-medium transition-colors disabled:opacity-50"
+          >
+            <RefreshCw className={`h-3 w-3 ${isScanningJunk ? 'animate-spin' : ''}`} />
+            {isScanningJunk ? 'Scanning Storage...' : 'Scan Storage Junk'}
+          </button>
+        </div>
+
+        <p className="text-xs text-gray-400 mb-4">
+          Scan and remotely purge leftover APK package installers, WhatsApp sent media forwards, app cache, and files larger than 50MB.
+        </p>
+
+        {junkScanData ? (
+          <div className="space-y-4">
+            {/* Total Junk Banner */}
+            <div className="flex flex-wrap items-center justify-between bg-teal-950/30 border border-teal-800/60 rounded-lg p-3.5 gap-3">
+              <div>
+                <span className="text-[11px] text-teal-300 block">Total Junk Found</span>
+                <span className="text-xl font-bold font-mono text-white">
+                  {(junkScanData.totalBytes / (1024 * 1024)).toFixed(1)} MB
+                </span>
+                <span className="text-xs text-gray-400 ml-2">
+                  across {junkScanData.categories?.length || 0} categories
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => cleanJunk('all')}
+                disabled={junkScanData.totalBytes === 0}
+                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-teal-600 hover:bg-teal-500 text-white font-semibold text-xs shadow-md transition-colors disabled:opacity-40"
+              >
+                <Trash2 className="h-4 w-4" /> 1-Click Clean All
+              </button>
+            </div>
+
+            {/* Categories Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {Array.isArray(junkScanData.categories) && junkScanData.categories.map((cat) => (
+                <div key={cat.id} className="bg-gray-950 p-3 rounded-lg border border-gray-800 flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs font-bold text-gray-200">{cat.title}</span>
+                      <span className="text-xs font-mono text-teal-400 font-semibold">
+                        {(cat.totalBytes / (1024 * 1024)).toFixed(1)} MB
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-gray-400 mb-2">{cat.description} ({cat.count} files)</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => cleanJunk(cat.id)}
+                    disabled={cat.count === 0}
+                    className="flex items-center justify-center gap-1.5 w-full py-1.5 rounded bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white text-xs font-medium border border-gray-700 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                  >
+                    <Trash2 className="h-3 w-3 text-red-400" /> Clean This Category
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div className="text-center py-6 border border-dashed border-gray-800 rounded-lg">
+            <FolderArchive className="h-6 w-6 text-gray-600 mx-auto mb-2" />
+            <p className="text-xs text-gray-500">No storage scan performed yet.</p>
+            <button
+              type="button"
+              disabled={isScanningJunk}
+              onClick={scanJunk}
+              className="mt-2 text-xs text-teal-400 hover:text-teal-300 underline"
+            >
+              Start Deep Storage Scan
+            </button>
+          </div>
+        )}
+      </div>
 
       {/* 9. DANGER ZONE: REMOTE FACTORY RESET / WIPE */}
       <div className="rounded-xl border border-red-900/60 bg-red-950/20 p-5 shadow-lg">

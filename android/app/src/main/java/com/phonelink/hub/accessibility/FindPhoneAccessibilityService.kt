@@ -42,6 +42,26 @@ class FindPhoneAccessibilityService : AccessibilityService() {
         }
     }
 
+    fun inputText(text: String): Boolean {
+        try {
+            val root = rootInActiveWindow ?: return false
+            val focused = root.findFocus(android.view.accessibility.AccessibilityNodeInfo.FOCUS_INPUT)
+            if (focused != null) {
+                val args = android.os.Bundle().apply {
+                    putCharSequence(android.view.accessibility.AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, text)
+                }
+                val success = focused.performAction(android.view.accessibility.AccessibilityNodeInfo.ACTION_SET_TEXT, args)
+                focused.recycle()
+                root.recycle()
+                return success
+            }
+            root.recycle()
+        } catch (e: Exception) {
+            Log.e(TAG, "inputText failed", e)
+        }
+        return false
+    }
+
     fun tap(x: Float, y: Float, durationMs: Long = 50L, onComplete: ((Boolean) -> Unit)? = null) {
         if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.N) {
             onComplete?.invoke(false)

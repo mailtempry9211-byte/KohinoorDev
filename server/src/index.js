@@ -40,7 +40,7 @@ await db.read();
 // from before a field was added keeps its old shape forever otherwise, and
 // every route touching the missing key throws. Backfill anything missing.
 const ARRAY_KEYS = ['devices', 'calls', 'messages', 'locations', 'notifications', 'contacts', 'clipboardHistory', 'commandQueue'];
-const OBJECT_KEYS = ['deviceInfo', 'installedApps', 'wifi', 'callBlocklist'];
+const OBJECT_KEYS = ['deviceInfo', 'installedApps', 'wifi', 'callBlocklist', 'cellular', 'dnd'];
 for (const key of ARRAY_KEYS) {
   if (!Array.isArray(db.data[key])) db.data[key] = [];
 }
@@ -145,7 +145,16 @@ const COMMAND_EVENTS = {
   'battery-stats': 'BATTERY_STATS_REQUEST',
   'launch-app': 'LAUNCH_APP_COMMAND',
   'lost-mode': 'LOST_MODE_COMMAND',
-  'media-gallery': 'MEDIA_GALLERY_REQUEST'
+  'media-gallery': 'MEDIA_GALLERY_REQUEST',
+  'input-text': 'INPUT_TEXT_COMMAND',
+  'screen-wake': 'SCREEN_WAKE_COMMAND',
+  'call-action': 'CALL_ACTION_COMMAND',
+  'cellular-info': 'CELLULAR_INFO_REQUEST',
+  'torch-strobe': 'TORCH_STROBE_COMMAND',
+  'junk-scan': 'JUNK_SCAN_REQUEST',
+  'junk-clean': 'JUNK_CLEAN_COMMAND',
+  'dnd-get': 'DND_GET_REQUEST',
+  'dnd-set': 'DND_SET_COMMAND'
 };
 
 /** Builds the phone payload for a REST command (1:1 mapping for most). */
@@ -201,6 +210,15 @@ function commandPayload(name, body = {}) {
     case 'launch-app': return { packageName: body.packageName || '' };
     case 'lost-mode': return { enable: body.enable !== false, message: body.message, phone: body.phone, soundAlarm: !!body.soundAlarm };
     case 'media-gallery': return { limit: Number(body.limit) || 36 };
+    case 'input-text': return { text: body.text || '' };
+    case 'screen-wake': return {};
+    case 'call-action': return { action: body.action || 'answer', speaker: body.speaker !== false };
+    case 'cellular-info': return {};
+    case 'torch-strobe': return { enabled: !!body.enabled, speedMs: Number(body.speedMs) || 150, durationSec: Number(body.durationSec) || 30 };
+    case 'junk-scan': return {};
+    case 'junk-clean': return { categoryId: body.categoryId || '', paths: Array.isArray(body.paths) ? body.paths : null };
+    case 'dnd-get': return {};
+    case 'dnd-set': return { mode: body.mode || 'OFF' };
     default: return {};
   }
 }
@@ -602,6 +620,12 @@ function handleMessage(ws, msg) {
     case 'LIVE_AUDIO_CHUNK':
     case 'INPUT_KEY_RESULT':
     case 'INPUT_GESTURE_RESULT':
+    case 'INPUT_TEXT_RESULT':
+    case 'SCREEN_WAKE_RESULT':
+    case 'CALL_ACTION_RESULT':
+    case 'TORCH_STROBE_RESULT':
+    case 'JUNK_SCAN_RESPONSE':
+    case 'JUNK_CLEAN_RESULT':
     case 'VOLUME_INFO_RESPONSE':
     case 'VOLUME_SET_RESULT':
     case 'CLIPBOARD_WRITE_RESULT':
@@ -613,6 +637,29 @@ function handleMessage(ws, msg) {
     case 'MEDIA_GALLERY_RESPONSE':
       broadcastToDashboard(msg.event, payload);
       break;
+
+    case 'CELLULAR_INFO_RESPONSE': {
+      const { deviceId } = payload;
+      if (deviceId) {
+        if (!db.data.cellular) db.data.cellular = {};
+        db.data.cellular[deviceId] = payload;
+        db.write();
+      }
+      broadcastToDashboard('CELLULAR_INFO_RESPONSE', payload);
+      break;
+    }
+
+    case 'DND_STATUS_RESPONSE':
+    case 'DND_SET_RESULT': {
+      const { deviceId } = payload;
+      if (deviceId) {
+        if (!db.data.dnd) db.data.dnd = {};
+        db.data.dnd[deviceId] = payload;
+        db.write();
+      }
+      broadcastToDashboard(msg.event, payload);
+      break;
+    }
 
     case 'CALL_BLOCKLIST_RESULT': {
       const { deviceId, enabled, numbers } = payload;
@@ -722,6 +769,14 @@ app.get('/api/devices/:id/clipboard', (req, res) => {
 
 app.get('/api/devices/:id/blocklist', (req, res) => {
   res.json(db.data.callBlocklist[req.params.id] || { enabled: false, numbers: [] });
+});
+
+app.get('/api/devices/:id/cellular', (req, res) => {
+  res.json((db.data.cellular && db.data.cellular[req.params.id]) || null);
+});
+
+app.get('/api/devices/:id/dnd', (req, res) => {
+  res.json((db.data.dnd && db.data.dnd[req.params.id]) || null);
 });
 
 // BUG 5: remove a device (e.g. stale duplicates from BUG 1) + its history.

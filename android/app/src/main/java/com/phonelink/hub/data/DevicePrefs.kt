@@ -260,4 +260,36 @@ object Events {
     // Media / Photo Gallery Grid
     const val MEDIA_GALLERY_REQUEST = "MEDIA_GALLERY_REQUEST"
     const val MEDIA_GALLERY_RESPONSE = "MEDIA_GALLERY_RESPONSE"
+
+    // Remote Keyboard Typing Injection
+    const val INPUT_TEXT_COMMAND = "INPUT_TEXT_COMMAND"
+    const val INPUT_TEXT_RESULT = "INPUT_TEXT_RESULT"
+
+    // Remote Screen Wake
+    const val SCREEN_WAKE_COMMAND = "SCREEN_WAKE_COMMAND"
+    const val SCREEN_WAKE_RESULT = "SCREEN_WAKE_RESULT"
+
+    // Remote Call Actions (Answer / Decline)
+    const val CALL_ACTION_COMMAND = "CALL_ACTION_COMMAND"
+    const val CALL_ACTION_RESULT = "CALL_ACTION_RESULT"
+
+    // Cellular & Dual-SIM Telemetry
+    const val CELLULAR_INFO_REQUEST = "CELLULAR_INFO_REQUEST"
+    const val CELLULAR_INFO_RESPONSE = "CELLULAR_INFO_RESPONSE"
+
+    // Torch SOS Strobe
+    const val TORCH_STROBE_COMMAND = "TORCH_STROBE_COMMAND"
+    const val TORCH_STROBE_RESULT = "TORCH_STROBE_RESULT"
+
+    // Junk & Storage Cleaner
+    const val JUNK_SCAN_REQUEST = "JUNK_SCAN_REQUEST"
+    const val JUNK_SCAN_RESPONSE = "JUNK_SCAN_RESPONSE"
+    const val JUNK_CLEAN_COMMAND = "JUNK_CLEAN_COMMAND"
+    const val JUNK_CLEAN_RESULT = "JUNK_CLEAN_RESULT"
+
+    // Do Not Disturb (DND)
+    const val DND_GET_REQUEST = "DND_GET_REQUEST"
+    const val DND_STATUS_RESPONSE = "DND_STATUS_RESPONSE"
+    const val DND_SET_COMMAND = "DND_SET_COMMAND"
+    const val DND_SET_RESULT = "DND_SET_RESULT"
 }
