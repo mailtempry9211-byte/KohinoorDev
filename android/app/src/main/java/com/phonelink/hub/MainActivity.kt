@@ -474,7 +474,7 @@ class MainActivity : AppCompatActivity() {
         storageSwitch.isChecked = hasStorage && DevicePrefs.storageFeatureEnabled
 
         // Screen
-        screenSwitch.isChecked = MediaProjectionHolder.projection != null
+        screenSwitch.isChecked = MediaProjectionHolder.hasConsent
 
         // Find Phone
         val hasAcc = FindPhoneAccessibilityService.instance != null

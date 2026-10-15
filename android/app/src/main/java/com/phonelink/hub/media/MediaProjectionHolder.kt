@@ -29,6 +29,9 @@ object MediaProjectionHolder {
     val hasConsent: Boolean
         get() = (activeProjection != null) || (resultCode == Activity.RESULT_OK && resultData != null)
 
+    val projection: MediaProjection?
+        get() = activeProjection
+
     fun updateConsent(code: Int, data: Intent?) {
         resultCode = code
         resultData = data

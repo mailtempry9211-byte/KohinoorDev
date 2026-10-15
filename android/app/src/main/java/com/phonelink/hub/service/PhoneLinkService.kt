@@ -688,7 +688,7 @@ class PhoneLinkService : Service() {
     }
 
     private fun handleScreenshot() {
-        if (com.phonelink.hub.media.MediaProjectionHolder.projection == null) {
+        if (!com.phonelink.hub.media.MediaProjectionHolder.hasConsent) {
             webSocket.send(
                 Events.SCREENSHOT_RESULT,
                 JSONObject().apply {
@@ -707,7 +707,7 @@ class PhoneLinkService : Service() {
     }
 
     private fun handleScreenRecordStart(payload: JSONObject) {
-        if (com.phonelink.hub.media.MediaProjectionHolder.projection == null) {
+        if (!com.phonelink.hub.media.MediaProjectionHolder.hasConsent) {
             return
         }
         val fps = payload.optInt("fps", 15)
