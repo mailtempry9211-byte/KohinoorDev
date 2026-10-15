@@ -53,7 +53,7 @@ jobs:
           cd android
           if [ ! -f gradlew ]; then gradle wrapper; fi
           chmod +x gradlew
-          ./gradlew assembleRelease --stacktrace
+          ./gradlew assembleRelease --stacktrace --info
 
       - name: Generate SHA-256 Checksum
         run: |
