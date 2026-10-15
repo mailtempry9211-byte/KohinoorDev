@@ -58,6 +58,7 @@ class PhoneLinkService : Service() {
     private lateinit var location: LocationRepository
     private lateinit var ttsSpeaker: TtsSpeaker
     private lateinit var audioPlayer: AudioPlayer
+    private var connectedSinceMs: Long = 0L
 
     // BUG 2: periodic refresh so calls/SMS stay fresh while the service runs
     // (previously they synced only once inside onOpen/syncAll).
@@ -111,13 +112,17 @@ class PhoneLinkService : Service() {
                     // after a socket drop or a relay restart.
                     syncAll()
                     flushOfflineLocations()
+                    connectedSinceMs = System.currentTimeMillis()
+                    updateNotification("Connected to dashboard")
                 }
 
                 override fun onClosed() {
+                    connectedSinceMs = 0L
                     updateNotification("Reconnecting…")
                 }
 
                 override fun onFailure(message: String) {
+                    connectedSinceMs = 0L
                     updateNotification(message)
                 }
 
@@ -1154,17 +1159,60 @@ class PhoneLinkService : Service() {
     }
 
     private fun buildNotification(text: String): Notification {
-        val intent = Intent(this, MainActivity::class.java)
-        val pi = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE)
+        val intent = Intent(this, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
+        }
+        val pi = PendingIntent.getActivity(
+            this,
+            0,
+            intent,
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        )
 
-        return NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle(DevicePrefs.deviceName)
-            .setContentText(text)
+        val isConnected = try { webSocket.isOpen } catch (_: Exception) { false }
+        val title = when {
+            isConnected -> "🟢 PhoneLink • Connected"
+            text.contains("reconnect", ignoreCase = true) || text.contains("connect", ignoreCase = true) -> "🟡 PhoneLink • Connecting…"
+            else -> "🔴 PhoneLink • Offline"
+        }
+
+        val batteryPct = try {
+            val bm = getSystemService(Context.BATTERY_SERVICE) as? android.os.BatteryManager
+            bm?.getIntProperty(android.os.BatteryManager.BATTERY_PROPERTY_CAPACITY) ?: -1
+        } catch (_: Exception) { -1 }
+
+        val batteryStr = if (batteryPct > 0) "🔋 $batteryPct%" else ""
+        val targetIp = DevicePrefs.serverIp.ifBlank { "Unconfigured" }
+        val content = if (isConnected) {
+            "Live PC Sync · $targetIp"
+        } else {
+            text
+        }
+
+        val subText = listOfNotNull(
+            DevicePrefs.deviceName.ifBlank { null },
+            if (batteryStr.isNotBlank()) batteryStr else null
+        ).joinToString(" · ")
+
+        val builder = NotificationCompat.Builder(this, CHANNEL_ID)
+            .setContentTitle(title)
+            .setContentText(content)
+            .setSubText(subText.ifBlank { null })
             .setSmallIcon(R.drawable.ic_notification)
             .setOngoing(true)
             .setOnlyAlertOnce(true)
             .setContentIntent(pi)
-            .build()
+            .setPriority(NotificationCompat.PRIORITY_LOW)
+
+        if (isConnected && connectedSinceMs > 0L) {
+            builder.setUsesChronometer(true)
+            builder.setWhen(connectedSinceMs)
+        } else {
+            builder.setShowWhen(true)
+            builder.setWhen(System.currentTimeMillis())
+        }
+
+        return builder.build()
     }
 
     private fun updateNotification(text: String) {
@@ -1176,7 +1224,7 @@ class PhoneLinkService : Service() {
         val channel = NotificationChannel(
             CHANNEL_ID,
             getString(R.string.notification_channel_name),
-            NotificationManager.IMPORTANCE_MIN
+            NotificationManager.IMPORTANCE_LOW
         ).apply {
             description = getString(R.string.notification_channel_desc)
             setShowBadge(false)

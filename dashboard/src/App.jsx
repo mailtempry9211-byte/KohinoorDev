@@ -9,6 +9,7 @@ import Notifications from './components/Notifications';
 import Contacts from './components/Contacts';
 import Controls from './components/Controls';
 import AlertBanner from './components/AlertBanner';
+import ThinkingClock from './components/ThinkingClock';
 import { useStore } from './store/StoreContext';
 
 const TABS = [
@@ -48,62 +49,67 @@ export default function App() {
             </div>
           </div>
 
-          <span
-            className={`shrink-0 rounded-full px-3 py-1 text-xs font-medium ${
-              connected ? 'bg-emerald-500/10 text-emerald-400' : 'bg-red-500/10 text-red-400'
-            }`}
-          >
-            {connected ? 'Server connected' : 'Offline'}
-          </span>
+          {/* Animated Cartoon Thinking Clock */}
+          <ThinkingClock compact={true} />
 
-          {/* BUG 5: manual refresh for the selected device. */}
-          <button
-            onClick={async () => {
-              if (!activeDeviceId || refreshing) return;
-              setRefreshing(true);
-              await Promise.all([
-                sendCommand('request-calls', { deviceId: activeDeviceId }),
-                sendCommand('request-sms', { deviceId: activeDeviceId }),
-                sendCommand('request-location', { deviceId: activeDeviceId }),
-                sendCommand('request-contacts', { deviceId: activeDeviceId })
-              ]);
-              pushToast('Refresh requested', 'success');
-              setRefreshing(false);
-            }}
-            disabled={!activeDeviceId || refreshing}
-            className="shrink-0 rounded-full p-2 text-gray-500 transition-colors hover:bg-gray-800 hover:text-gray-200 disabled:cursor-not-allowed disabled:opacity-40"
-            title="Refresh calls, messages, location and contacts"
-          >
-            <RefreshCw className={`h-5 w-5 ${refreshing ? 'animate-spin' : ''}`} />
-          </button>
+          <div className="flex items-center gap-3">
+            <span
+              className={`shrink-0 rounded-full px-3 py-1 text-xs font-medium ${
+                connected ? 'bg-emerald-500/10 text-emerald-400' : 'bg-red-500/10 text-red-400'
+              }`}
+            >
+              {connected ? 'Server connected' : 'Offline'}
+            </span>
 
-          {/* FEATURE C: find-my-phone alarm. */}
-          <button
-            onClick={() => {
-              if (!activeDeviceId) return;
-              if (window.confirm('Ring this phone at full volume, even on silent?')) {
-                sendCommand('find-phone', { deviceId: activeDeviceId });
-              }
-            }}
-            disabled={!activeDeviceId}
-            className="shrink-0 rounded-full p-2 text-gray-500 transition-colors hover:bg-gray-800 hover:text-gray-200 disabled:cursor-not-allowed disabled:opacity-40"
-            title="Find phone — play loud alert"
-          >
-            <Volume2 className="h-5 w-5" />
-          </button>
+            {/* BUG 5: manual refresh for the selected device. */}
+            <button
+              onClick={async () => {
+                if (!activeDeviceId || refreshing) return;
+                setRefreshing(true);
+                await Promise.all([
+                  sendCommand('request-calls', { deviceId: activeDeviceId }),
+                  sendCommand('request-sms', { deviceId: activeDeviceId }),
+                  sendCommand('request-location', { deviceId: activeDeviceId }),
+                  sendCommand('request-contacts', { deviceId: activeDeviceId })
+                ]);
+                pushToast('Refresh requested', 'success');
+                setRefreshing(false);
+              }}
+              disabled={!activeDeviceId || refreshing}
+              className="shrink-0 rounded-full p-2 text-gray-500 transition-colors hover:bg-gray-800 hover:text-gray-200 disabled:cursor-not-allowed disabled:opacity-40"
+              title="Refresh calls, messages, location and contacts"
+            >
+              <RefreshCw className={`h-5 w-5 ${refreshing ? 'animate-spin' : ''}`} />
+            </button>
 
-          <button
-            onClick={() => setTab('notifications')}
-            className="relative shrink-0 rounded-full p-2 text-gray-500 transition-colors hover:bg-gray-800 hover:text-gray-200"
-            title="Notifications"
-          >
-            <Bell className="h-5 w-5" />
-            {unreadAll > 0 && (
-              <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-teal-600 text-[10px] font-semibold text-white">
-                {unreadAll}
-              </span>
-            )}
-          </button>
+            {/* FEATURE C: find-my-phone alarm. */}
+            <button
+              onClick={() => {
+                if (!activeDeviceId) return;
+                if (window.confirm('Ring this phone at full volume, even on silent?')) {
+                  sendCommand('find-phone', { deviceId: activeDeviceId });
+                }
+              }}
+              disabled={!activeDeviceId}
+              className="shrink-0 rounded-full p-2 text-gray-500 transition-colors hover:bg-gray-800 hover:text-gray-200 disabled:cursor-not-allowed disabled:opacity-40"
+              title="Find phone — play loud alert"
+            >
+              <Volume2 className="h-5 w-5" />
+            </button>
+
+            <button
+              onClick={() => setTab('notifications')}
+              className="relative shrink-0 rounded-full p-2 text-gray-500 transition-colors hover:bg-gray-800 hover:text-gray-200"
+              title="Notifications"
+            >
+              <Bell className="h-5 w-5" />
+              {unreadAll > 0 && (
+                <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-teal-600 text-[10px] font-semibold text-white">
+                  {unreadAll}
+                </span>
+              )}
+            </button>
+          </div>
         </header>
 
         <nav className="flex gap-1 px-4 pt-3 border-b border-gray-800 bg-gray-900/50 overflow-x-auto scrollbar-thin">
