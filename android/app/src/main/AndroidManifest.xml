@@ -20,11 +20,6 @@
     <uses-permission android:name="android.permission.SET_WALLPAPER" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.CAMERA" />
-    <queries>
-        <intent>
-            <action android:name="android.intent.action.MAIN" />
-        </intent>
-    </queries>
 
     <!-- Call log + incoming call detection -->
     <uses-permission android:name="android.permission.READ_CALL_LOG" />
@@ -55,6 +50,12 @@
 
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32" />
+
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.MAIN" />
+        </intent>
+    </queries>
 
     <application
         android:allowBackup="true"

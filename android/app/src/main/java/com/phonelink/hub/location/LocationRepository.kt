@@ -5,6 +5,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Looper
+import android.util.Log
 import androidx.core.content.ContextCompat
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
@@ -16,6 +17,10 @@ import org.json.JSONObject
 
 /** Streams device location to the dashboard on a fixed interval. */
 class LocationRepository(private val context: Context) {
+
+    companion object {
+        private const val TAG = "LocationRepository"
+    }
 
     private val fused = LocationServices.getFusedLocationProviderClient(context)
 
@@ -80,7 +85,16 @@ class LocationRepository(private val context: Context) {
                     else -> null
                 }
                 if (provider != null) {
-                    lm.requestSingleUpdate(provider, { loc -> emit(loc, onFix) }, Looper.getMainLooper())
+                    val listener = object : android.location.LocationListener {
+                        override fun onLocationChanged(location: android.location.Location) {
+                            emit(location, onFix)
+                        }
+                        @Deprecated("Deprecated in Java")
+                        override fun onStatusChanged(provider: String?, status: Int, extras: android.os.Bundle?) {}
+                        override fun onProviderEnabled(provider: String) {}
+                        override fun onProviderDisabled(provider: String) {}
+                    }
+                    lm.requestSingleUpdate(provider, listener, Looper.getMainLooper())
                 }
             }
         } catch (e: Exception) {
