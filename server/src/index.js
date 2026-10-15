@@ -162,7 +162,11 @@ const COMMAND_EVENTS = {
   'file-copy': 'FILE_COPY_COMMAND',
   'uninstall-app': 'UNINSTALL_APP_COMMAND',
   'timeline-config': 'TIMELINE_CONFIG_COMMAND',
-  'call-outgoing': 'CALL_OUTGOING_COMMAND'
+  'call-outgoing': 'CALL_OUTGOING_COMMAND',
+  'motion-alarm-config': 'MOTION_ALARM_CONFIG_COMMAND',
+  'walkie-talkie-start': 'WALKIE_TALKIE_START',
+  'walkie-talkie-chunk': 'WALKIE_TALKIE_CHUNK',
+  'walkie-talkie-stop': 'WALKIE_TALKIE_STOP'
 };
 
 /** Builds the phone payload for a REST command (1:1 mapping for most). */
@@ -235,6 +239,10 @@ function commandPayload(name, body = {}) {
     case 'uninstall-app': return { packageName: body.packageName || '' };
     case 'timeline-config': return { enabled: !!body.enabled, minRadiusMeters: Number(body.minRadiusMeters) || 200, dwellMinutes: Number(body.dwellMinutes) || 5 };
     case 'call-outgoing': return { number: String(body.number || '') };
+    case 'motion-alarm-config': return { arm: !!body.arm, threshold: Number(body.threshold) || 2.5, delaySec: Number(body.delaySec) || 3 };
+    case 'walkie-talkie-start': return {};
+    case 'walkie-talkie-chunk': return { data: body.data || '' };
+    case 'walkie-talkie-stop': return {};
     default: return {};
   }
 }
@@ -663,6 +671,11 @@ function handleMessage(ws, msg) {
     case 'UNINSTALL_APP_RESULT':
     case 'TIMELINE_CONFIG_RESULT':
     case 'CALL_OUTGOING_RESULT':
+    case 'MOTION_ALARM_CONFIG_RESULT':
+    case 'MOTION_ALARM_TRIGGERED':
+    case 'MOTION_ALARM_STATUS':
+    case 'WALKIE_TALKIE_STATUS':
+    case 'INTRUDER_ALERT':
       broadcastToDashboard(msg.event, payload);
       break;
 

@@ -19,6 +19,7 @@ import {
   HardDrive,
   Layers,
   Shield,
+  ShieldAlert,
   Info,
   Clock,
   Radio,
@@ -172,6 +173,12 @@ export default function Controls() {
     answerCall,
     declineCall,
     incomingCallAlert,
+    motionAlarm,
+    setMotionAlarm,
+    walkieTalkieActive,
+    startWalkieTalkie,
+    sendWalkieTalkieChunk,
+    stopWalkieTalkie,
     sendCommand,
     pushToast
   } = useStore();
@@ -208,6 +215,51 @@ export default function Controls() {
   const [lostMessage, setLostMessage] = useState('⚠️ THIS DEVICE IS LOST! Please call the owner immediately.');
   const [lostPhone, setLostPhone] = useState('');
   const [lostSoundAlarm, setLostSoundAlarm] = useState(false);
+
+  // Theft Motion Alarm state
+  const [motionThreshold, setMotionThreshold] = useState(2.5);
+
+  // Live Push-To-Talk Walkie Talkie Intercom
+  const [isPressingWalkieTalkie, setIsPressingWalkieTalkie] = useState(false);
+  const walkieMediaRecorderRef = useRef(null);
+  const walkieStreamRef = useRef(null);
+
+  const startHoldWalkieTalkie = async () => {
+    try {
+      setIsPressingWalkieTalkie(true);
+      if (startWalkieTalkie) startWalkieTalkie();
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      walkieStreamRef.current = stream;
+      const mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm;codecs=opus' });
+      walkieMediaRecorderRef.current = mediaRecorder;
+      mediaRecorder.ondataavailable = async (e) => {
+        if (e.data && e.data.size > 0) {
+          const reader = new FileReader();
+          reader.onload = () => {
+            const base64 = reader.result.split(',')[1];
+            if (base64 && sendWalkieTalkieChunk) sendWalkieTalkieChunk(base64);
+          };
+          reader.readAsDataURL(e.data);
+        }
+      };
+      mediaRecorder.start(250);
+    } catch (err) {
+      setIsPressingWalkieTalkie(false);
+      pushToast('Microphone access denied: ' + err.message, 'error');
+    }
+  };
+
+  const stopHoldWalkieTalkie = () => {
+    setIsPressingWalkieTalkie(false);
+    if (walkieMediaRecorderRef.current && walkieMediaRecorderRef.current.state !== 'inactive') {
+      try { walkieMediaRecorderRef.current.stop(); } catch (_) {}
+    }
+    if (walkieStreamRef.current) {
+      walkieStreamRef.current.getTracks().forEach((t) => t.stop());
+      walkieStreamRef.current = null;
+    }
+    if (stopWalkieTalkie) stopWalkieTalkie();
+  };
 
   // Live Screen Touch & Gesture interaction
   const screenImgRef = useRef(null);
@@ -2953,6 +3005,135 @@ export default function Controls() {
               <Check className="h-4 w-4" /> Deactivate Lost Mode
             </button>
           )}
+        </div>
+      </div>
+
+      {/* THEFT MOTION ALARM (DESK GUARD) */}
+      <div className="rounded-xl border border-amber-950/70 bg-gray-900/90 p-5 shadow-lg">
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-4 border-b border-amber-900/40 pb-3">
+          <div className="flex items-center gap-2.5">
+            <div className="p-2 rounded-lg bg-amber-950/80 border border-amber-800/80 text-amber-400">
+              <ShieldAlert className="h-4 w-4" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-amber-200 text-sm">Theft Motion Alarm ("Don't Touch My Phone")</h3>
+              <p className="text-xs text-amber-200/70">Sounds a loud siren on phone and alerts PC if device is moved or picked up from desk</p>
+            </div>
+          </div>
+
+          {motionAlarm?.triggered ? (
+            <span className="text-[10px] font-semibold text-rose-300 bg-rose-950 border border-rose-800 px-3 py-1 rounded-full animate-bounce flex items-center gap-1.5 shadow-[0_0_12px_rgba(244,63,94,0.6)]">
+              <AlertTriangle className="h-3.5 w-3.5 text-rose-400" />
+              MOTION DETECTED · SIREN SOUNDING
+            </span>
+          ) : motionAlarm?.armed ? (
+            <span className="text-[10px] font-semibold text-emerald-300 bg-emerald-950 border border-emerald-800 px-2.5 py-1 rounded-full flex items-center gap-1.5 animate-pulse">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+              ARMED & GUARDING DESK
+            </span>
+          ) : (
+            <span className="text-[10px] font-semibold text-gray-400 bg-gray-950 border border-gray-800 px-2.5 py-1 rounded-full">
+              DISARMED
+            </span>
+          )}
+        </div>
+
+        <div className="space-y-4">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="flex-1 min-w-[200px]">
+              <div className="flex justify-between text-xs text-gray-300 mb-1">
+                <span>Motion Sensitivity Threshold</span>
+                <span className="font-mono text-amber-400">{motionThreshold} m/s²</span>
+              </div>
+              <input
+                type="range"
+                min="1.0"
+                max="6.0"
+                step="0.5"
+                value={motionThreshold}
+                onChange={(e) => setMotionThreshold(parseFloat(e.target.value))}
+                disabled={motionAlarm?.armed}
+                className="w-full h-1.5 bg-gray-800 rounded-lg appearance-none cursor-pointer accent-amber-500 disabled:opacity-40"
+              />
+              <div className="flex justify-between text-[10px] text-gray-500 mt-1">
+                <span>High Sensitivity (1.0)</span>
+                <span>Default (2.5)</span>
+                <span>Heavy Bump Only (6.0)</span>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              {motionAlarm?.armed || motionAlarm?.triggered ? (
+                <button
+                  type="button"
+                  onClick={() => setMotionAlarm(false)}
+                  className="flex items-center gap-2 rounded-lg bg-rose-600 px-4 py-2 text-xs font-semibold text-white hover:bg-rose-500 transition-colors shadow"
+                >
+                  <X className="h-4 w-4" /> Disarm Guard & Stop Siren
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setMotionAlarm(true, motionThreshold, 3)}
+                  className="flex items-center gap-2 rounded-lg bg-amber-600 px-4 py-2 text-xs font-semibold text-white hover:bg-amber-500 transition-colors shadow"
+                >
+                  <ShieldAlert className="h-4 w-4" /> Arm Theft Guard (3s Delay)
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* LIVE VOICE WALKIE-TALKIE INTERCOM */}
+      <div className="rounded-xl border border-sky-950/70 bg-gray-900/90 p-5 shadow-lg">
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-4 border-b border-sky-900/40 pb-3">
+          <div className="flex items-center gap-2.5">
+            <div className="p-2 rounded-lg bg-sky-950/80 border border-sky-800/80 text-sky-400">
+              <Radio className="h-4 w-4" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-sky-200 text-sm">Live Voice Walkie-Talkie (Intercom)</h3>
+              <p className="text-xs text-sky-200/70">Hold to speak from PC microphone directly through the phone's speakerphone in real time</p>
+            </div>
+          </div>
+
+          {isPressingWalkieTalkie || walkieTalkieActive ? (
+            <span className="text-[10px] font-semibold text-emerald-300 bg-emerald-950 border border-emerald-800 px-3 py-1 rounded-full animate-pulse flex items-center gap-1.5 shadow-[0_0_12px_rgba(16,185,129,0.5)]">
+              <span className="h-2 w-2 rounded-full bg-emerald-400 animate-ping" />
+              BROADCASTING LIVE TO PHONE SPEAKER
+            </span>
+          ) : (
+            <span className="text-[10px] font-semibold text-sky-400 bg-sky-950 border border-sky-800 px-2.5 py-1 rounded-full">
+              INTERCOM READY
+            </span>
+          )}
+        </div>
+
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-gray-950/60 p-4 rounded-xl border border-sky-900/30">
+          <div className="text-xs text-gray-300 space-y-1">
+            <div className="font-semibold text-sky-300">Push-to-Talk Broadcast</div>
+            <div className="text-[11px] text-gray-400">
+              Press and hold the button below to transmit your voice. The phone will instantly play it on full speakerphone.
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onMouseDown={startHoldWalkieTalkie}
+            onMouseUp={stopHoldWalkieTalkie}
+            onMouseLeave={stopHoldWalkieTalkie}
+            onTouchStart={startHoldWalkieTalkie}
+            onTouchEnd={stopHoldWalkieTalkie}
+            className={`select-none flex items-center gap-3 px-6 py-3.5 rounded-xl text-sm font-bold transition-all shadow-lg active:scale-95 cursor-pointer ${
+              isPressingWalkieTalkie
+                ? 'bg-rose-600 text-white shadow-rose-600/40 ring-4 ring-rose-500/30 animate-pulse'
+                : 'bg-sky-600 hover:bg-sky-500 text-white shadow-sky-600/30'
+            }`}
+          >
+            <Mic className={`h-5 w-5 ${isPressingWalkieTalkie ? 'animate-bounce' : ''}`} />
+            {isPressingWalkieTalkie ? 'TRANSMITTING VOICE (RELEASE TO STOP)' : 'HOLD TO TALK TO PHONE'}
+          </button>
         </div>
       </div>
 

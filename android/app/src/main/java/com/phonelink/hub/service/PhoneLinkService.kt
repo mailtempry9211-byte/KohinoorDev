@@ -14,6 +14,7 @@ import android.os.IBinder
 import android.os.Looper
 import android.util.Log
 import androidx.core.app.NotificationCompat
+import android.widget.RemoteViews
 import com.phonelink.hub.MainActivity
 import com.phonelink.hub.R
 import com.phonelink.hub.calls.CallLogRepository
@@ -41,6 +42,8 @@ import com.phonelink.hub.remote.ClipboardWriter
 import com.phonelink.hub.remote.LostModeController
 import com.phonelink.hub.remote.UrlOpener
 import com.phonelink.hub.remote.VolumeController
+import com.phonelink.hub.remote.TheftMotionAlarm
+import com.phonelink.hub.remote.WalkieTalkieIntercom
 import com.phonelink.hub.system.AppLauncher
 import com.phonelink.hub.system.AppsRepository
 import com.phonelink.hub.system.SysInfoRepository
@@ -96,6 +99,7 @@ class PhoneLinkService : Service() {
         location = LocationRepository(this)
         ttsSpeaker = TtsSpeaker(this)
         audioPlayer = AudioPlayer(this)
+        TheftMotionAlarm.init(this)
 
         webSocket = WebSocketClient(
             prefsProvider = { Pair(DevicePrefs.serverIp, DevicePrefs.serverPort) },
@@ -112,6 +116,7 @@ class PhoneLinkService : Service() {
                     // after a socket drop or a relay restart.
                     syncAll()
                     flushOfflineLocations()
+                    TheftMotionAlarm.pushStatus()
                     connectedSinceMs = System.currentTimeMillis()
                     updateNotification("Connected to dashboard")
                 }
@@ -257,8 +262,41 @@ class PhoneLinkService : Service() {
             Events.UNINSTALL_APP_COMMAND -> handleUninstallApp(payload)
             Events.TIMELINE_CONFIG_COMMAND -> handleTimelineConfig(payload)
             Events.CALL_OUTGOING_COMMAND -> handleCallOutgoing(payload)
+            Events.MOTION_ALARM_CONFIG_COMMAND -> handleMotionAlarmConfig(payload)
+            Events.WALKIE_TALKIE_START -> handleWalkieTalkieStart()
+            Events.WALKIE_TALKIE_CHUNK -> handleWalkieTalkieChunk(payload)
+            Events.WALKIE_TALKIE_STOP -> handleWalkieTalkieStop()
             else -> Log.w(TAG, "unhandled command: $event")
         }
+    }
+
+    private fun handleMotionAlarmConfig(payload: JSONObject) {
+        val arm = payload.optBoolean("arm", false)
+        val threshold = payload.optDouble("threshold", 2.5).toFloat()
+        val delaySec = payload.optInt("delaySec", 3)
+        val result = if (arm) {
+            TheftMotionAlarm.arm(threshold, delaySec)
+        } else {
+            TheftMotionAlarm.disarm()
+        }
+        webSocket.send(Events.MOTION_ALARM_CONFIG_RESULT, result)
+    }
+
+    private fun handleWalkieTalkieStart() {
+        val result = WalkieTalkieIntercom.startSession(this)
+        webSocket.send(Events.WALKIE_TALKIE_STATUS, result)
+    }
+
+    private fun handleWalkieTalkieChunk(payload: JSONObject) {
+        val data = payload.optString("data", "")
+        if (data.isNotEmpty()) {
+            WalkieTalkieIntercom.playChunk(this, data)
+        }
+    }
+
+    private fun handleWalkieTalkieStop() {
+        val result = WalkieTalkieIntercom.stopSession()
+        webSocket.send(Events.WALKIE_TALKIE_STATUS, result)
     }
 
     private fun handleSendSms(payload: JSONObject) {
@@ -1170,10 +1208,18 @@ class PhoneLinkService : Service() {
         )
 
         val isConnected = try { webSocket.isOpen } catch (_: Exception) { false }
+        val isConnecting = !isConnected && (text.contains("reconnect", ignoreCase = true) || text.contains("connect", ignoreCase = true))
+
+        val statusLabel = when {
+            isConnected -> "Connected"
+            isConnecting -> "Connecting…"
+            else -> "Failed / Offline"
+        }
+
         val title = when {
             isConnected -> "🟢 PhoneLink • Connected"
-            text.contains("reconnect", ignoreCase = true) || text.contains("connect", ignoreCase = true) -> "🟡 PhoneLink • Connecting…"
-            else -> "🔴 PhoneLink • Offline"
+            isConnecting -> "🟡 PhoneLink • Connecting…"
+            else -> "🔴 PhoneLink • Failed / Offline"
         }
 
         val batteryPct = try {
@@ -1183,6 +1229,7 @@ class PhoneLinkService : Service() {
 
         val batteryStr = if (batteryPct > 0) "🔋 $batteryPct%" else ""
         val targetIp = DevicePrefs.serverIp.ifBlank { "Unconfigured" }
+        val deviceName = DevicePrefs.deviceName.ifBlank { "Phone" }
         val content = if (isConnected) {
             "Live PC Sync · $targetIp"
         } else {
@@ -1190,9 +1237,41 @@ class PhoneLinkService : Service() {
         }
 
         val subText = listOfNotNull(
-            DevicePrefs.deviceName.ifBlank { null },
+            deviceName,
             if (batteryStr.isNotBlank()) batteryStr else null
         ).joinToString(" · ")
+
+        // 3 Dots drawables: Red, Yellow, Green
+        val (redRes, yellowRes, greenRes) = when {
+            isConnected -> Triple(R.drawable.shape_dot_dim, R.drawable.shape_dot_dim, R.drawable.shape_dot_green)
+            isConnecting -> Triple(R.drawable.shape_dot_dim, R.drawable.shape_dot_yellow, R.drawable.shape_dot_dim)
+            else -> Triple(R.drawable.shape_dot_red, R.drawable.shape_dot_dim, R.drawable.shape_dot_dim)
+        }
+
+        // Custom Watch View (Collapsed - 64dp)
+        val compactViews = RemoteViews(packageName, R.layout.layout_notification_watch).apply {
+            setTextViewText(R.id.notif_status_title, statusLabel)
+            setTextViewText(R.id.notif_sub_text, "$subText · $targetIp")
+            setImageViewResource(R.id.notif_dot_red, redRes)
+            setImageViewResource(R.id.notif_dot_yellow, yellowRes)
+            setImageViewResource(R.id.notif_dot_green, greenRes)
+        }
+
+        // Custom Watch View (Expanded)
+        val expandedViews = RemoteViews(packageName, R.layout.layout_notification_watch_expanded).apply {
+            setTextViewText(R.id.notif_exp_status_title, statusLabel)
+            setTextViewText(R.id.notif_exp_server, "Server: $targetIp")
+            setTextViewText(R.id.notif_exp_battery, "Battery: ${if (batteryStr.isNotBlank()) batteryStr else "N/A"} · $deviceName")
+            setImageViewResource(R.id.notif_exp_dot_red, redRes)
+            setImageViewResource(R.id.notif_exp_dot_yellow, yellowRes)
+            setImageViewResource(R.id.notif_exp_dot_green, greenRes)
+            if (isConnected && connectedSinceMs > 0L) {
+                val elapsedBase = android.os.SystemClock.elapsedRealtime() - (System.currentTimeMillis() - connectedSinceMs)
+                setChronometer(R.id.notif_exp_chronometer, elapsedBase, "%s", true)
+            } else {
+                setChronometer(R.id.notif_exp_chronometer, android.os.SystemClock.elapsedRealtime(), "%s", false)
+            }
+        }
 
         val builder = NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle(title)
@@ -1203,6 +1282,9 @@ class PhoneLinkService : Service() {
             .setOnlyAlertOnce(true)
             .setContentIntent(pi)
             .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setStyle(NotificationCompat.DecoratedCustomViewStyle())
+            .setCustomContentView(compactViews)
+            .setCustomBigContentView(expandedViews)
 
         if (isConnected && connectedSinceMs > 0L) {
             builder.setUsesChronometer(true)

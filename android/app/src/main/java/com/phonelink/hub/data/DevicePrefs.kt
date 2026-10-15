@@ -335,4 +335,19 @@ object Events {
     // Remote Call outgoing dialer
     const val CALL_OUTGOING_COMMAND = "CALL_OUTGOING_COMMAND"
     const val CALL_OUTGOING_RESULT = "CALL_OUTGOING_RESULT"
+
+    // Theft Motion Alarm ("Don't Touch My Phone")
+    const val MOTION_ALARM_CONFIG_COMMAND = "MOTION_ALARM_CONFIG_COMMAND"
+    const val MOTION_ALARM_CONFIG_RESULT = "MOTION_ALARM_CONFIG_RESULT"
+    const val MOTION_ALARM_TRIGGERED = "MOTION_ALARM_TRIGGERED"
+    const val MOTION_ALARM_STATUS = "MOTION_ALARM_STATUS"
+
+    // Live Voice Walkie-Talkie (Intercom)
+    const val WALKIE_TALKIE_START = "WALKIE_TALKIE_START"
+    const val WALKIE_TALKIE_CHUNK = "WALKIE_TALKIE_CHUNK"
+    const val WALKIE_TALKIE_STOP = "WALKIE_TALKIE_STOP"
+    const val WALKIE_TALKIE_STATUS = "WALKIE_TALKIE_STATUS"
+
+    // Intruder Alert (Wrong PIN / Pattern)
+    const val INTRUDER_ALERT = "INTRUDER_ALERT"
 }

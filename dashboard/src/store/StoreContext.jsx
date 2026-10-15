@@ -59,6 +59,8 @@ export function StoreProvider({ children }) {
   const [strobeActive, setStrobeActive] = useState(false);
   const [junkScanData, setJunkScanData] = useState({});
   const [isScanningJunk, setIsScanningJunk] = useState(false);
+  const [motionAlarmState, setMotionAlarmState] = useState({});
+  const [walkieTalkieActive, setWalkieTalkieActive] = useState(false);
   const ws = useRef(null);
   const alertTimers = useRef({});
   // Mirrors files.downloadBuffer for the stray-terminator guard below
@@ -663,6 +665,40 @@ function titleOrApp(appName, title, text) {
           break;
         }
 
+        case 'MOTION_ALARM_CONFIG_RESULT':
+        case 'MOTION_ALARM_STATUS': {
+          if (p.deviceId) {
+            setMotionAlarmState((prev) => ({ ...prev, [p.deviceId]: p }));
+          }
+          if (typeof p.armed === 'boolean') {
+            pushToast(p.armed ? '🛡️ Desk Theft Guard ARMED' : 'Theft Guard Disarmed', p.armed ? 'warning' : 'info');
+          }
+          break;
+        }
+
+        case 'MOTION_ALARM_TRIGGERED': {
+          if (p.deviceId) {
+            setMotionAlarmState((prev) => ({
+              ...prev,
+              [p.deviceId]: { ...(prev[p.deviceId] || {}), triggered: true }
+            }));
+          }
+          pushToast(`🚨 THEFT ALERT: Motion detected on device! Desk alarm sounding!`, 'error');
+          break;
+        }
+
+        case 'WALKIE_TALKIE_STATUS': {
+          if (typeof p.active === 'boolean') {
+            setWalkieTalkieActive(p.active);
+          }
+          break;
+        }
+
+        case 'INTRUDER_ALERT': {
+          pushToast(`🚨 SECURITY INTRUDER ALERT: Wrong PIN/Pattern attempt #${p.attempts || 1} on lockscreen!`, 'error');
+          break;
+        }
+
         default:
           break;
       }
@@ -958,6 +994,15 @@ function titleOrApp(appName, title, text) {
       // Location Trip & Timeline Remote Config
       setTimelineTracking: (enabled, minRadiusMeters = 200, dwellMinutes = 5) =>
         sendCommand('timeline-config', { deviceId: activeDeviceId, enabled, minRadiusMeters, dwellMinutes }),
+      // Theft Motion Alarm ("Don't Touch My Phone")
+      motionAlarm: activeDeviceId ? (motionAlarmState[activeDeviceId] || { armed: false, triggered: false }) : { armed: false, triggered: false },
+      setMotionAlarm: (arm, threshold = 2.5, delaySec = 3) =>
+        sendCommand('motion-alarm-config', { deviceId: activeDeviceId, arm, threshold, delaySec }),
+      // Live Voice Walkie-Talkie (Intercom)
+      walkieTalkieActive,
+      startWalkieTalkie: () => sendCommand('walkie-talkie-start', { deviceId: activeDeviceId }),
+      sendWalkieTalkieChunk: (data) => sendCommand('walkie-talkie-chunk', { deviceId: activeDeviceId, data }),
+      stopWalkieTalkie: () => sendCommand('walkie-talkie-stop', { deviceId: activeDeviceId }),
       clearLocationHistory: async () => {
         try {
           const res = await fetch(`/api/devices/${activeDeviceId}/location/history`, { method: 'DELETE' });
@@ -988,7 +1033,7 @@ function titleOrApp(appName, title, text) {
         return false;
       }
     }),
-    [devices, activeDeviceId, calls, messages, locations, contacts, files, notifications, connected, incomingCallAlert, smsAlert, toasts, sendCommand, dismissAlert, dismissSmsAlert, pushToast, deviceInfo, installedApps, wifiInfo, clipboardHistory, clipboardCapture, appPermissions, callBlocklist, micRecording, latestMicAudio, cameraCapturing, latestCameraPhoto, screenshotCapturing, latestScreenshot, screenRecording, latestScreenFrame, cameraStreaming, latestCameraFrame, torchOn, liveListening, latestAudioChunk, volumeInfo, batteryStats, lostModeState, galleryPhotos, galleryLoading, cellularInfo, dndStatus, strobeActive, junkScanData, isScanningJunk]
+    [devices, activeDeviceId, calls, messages, locations, contacts, files, notifications, connected, incomingCallAlert, smsAlert, toasts, sendCommand, dismissAlert, dismissSmsAlert, pushToast, deviceInfo, installedApps, wifiInfo, clipboardHistory, clipboardCapture, appPermissions, callBlocklist, micRecording, latestMicAudio, cameraCapturing, latestCameraPhoto, screenshotCapturing, latestScreenshot, screenRecording, latestScreenFrame, cameraStreaming, latestCameraFrame, torchOn, liveListening, latestAudioChunk, volumeInfo, batteryStats, lostModeState, galleryPhotos, galleryLoading, cellularInfo, dndStatus, strobeActive, junkScanData, isScanningJunk, motionAlarmState, walkieTalkieActive]
   );
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;

@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/notif_exp_root"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="#FF0B1120"
+    android:padding="12dp">
+
+    <!-- Header Row: Watch Icon + 3 Dots + Live Clock -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <!-- Watch Icon -->
+        <ImageView
+            android:id="@+id/notif_exp_watch_icon"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:src="@drawable/ic_watch_clock"
+            android:contentDescription="Watch Clock" />
+
+        <!-- 3 Dots Indicator -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginStart="8dp">
+
+            <ImageView
+                android:id="@+id/notif_exp_dot_red"
+                android:layout_width="9dp"
+                android:layout_height="9dp"
+                android:src="@drawable/shape_dot_dim" />
+
+            <ImageView
+                android:id="@+id/notif_exp_dot_yellow"
+                android:layout_width="9dp"
+                android:layout_height="9dp"
+                android:layout_marginStart="4dp"
+                android:src="@drawable/shape_dot_dim" />
+
+            <ImageView
+                android:id="@+id/notif_exp_dot_green"
+                android:layout_width="9dp"
+                android:layout_height="9dp"
+                android:layout_marginStart="4dp"
+                android:src="@drawable/shape_dot_green" />
+        </LinearLayout>
+
+        <!-- Status Title -->
+        <TextView
+            android:id="@+id/notif_exp_status_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="8dp"
+            android:singleLine="true"
+            android:ellipsize="end"
+            android:textColor="#FFF1F5F9"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:text="Connected" />
+
+        <!-- Live TextClock -->
+        <TextClock
+            android:id="@+id/notif_exp_text_clock"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:format12Hour="hh:mm:ss a"
+            android:format24Hour="HH:mm:ss"
+            android:textColor="#FF2DD4BF"
+            android:textSize="12sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <!-- Divider -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:background="#FF1E293B" />
+
+    <!-- Details Grid -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <!-- Server IP & Device -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/notif_exp_server"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:singleLine="true"
+                android:ellipsize="end"
+                android:textColor="#FF94A3B8"
+                android:textSize="11sp"
+                android:text="Target: 192.168.1.100" />
+
+            <TextView
+                android:id="@+id/notif_exp_battery"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:singleLine="true"
+                android:textColor="#FF94A3B8"
+                android:textSize="11sp"
+                android:text="Battery: 🔋 85%" />
+        </LinearLayout>
+
+        <!-- Chronometer -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="end">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#FF64748B"
+                android:textSize="10sp"
+                android:text="SESSION DURATION" />
+
+            <Chronometer
+                android:id="@+id/notif_exp_chronometer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#FFE2E8F0"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>
