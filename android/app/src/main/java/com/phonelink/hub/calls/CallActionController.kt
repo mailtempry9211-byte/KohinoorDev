@@ -73,5 +73,41 @@ object CallActionController {
         }
         return result
     }
+
+    fun makeCall(context: Context, number: String): JSONObject {
+        val result = JSONObject().apply {
+            put("deviceId", DevicePrefs.deviceId)
+            put("action", "call")
+            put("number", number)
+        }
+        try {
+            val cleanNumber = number.filter { it.isDigit() || it == '+' || it == '*' || it == '#' }
+            if (cleanNumber.isBlank()) {
+                result.put("success", false)
+                result.put("error", "Phone number is empty or invalid")
+                return result
+            }
+
+            val hasCallPerm = androidx.core.content.ContextCompat.checkSelfPermission(
+                context,
+                android.Manifest.permission.CALL_PHONE
+            ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+
+            val intent = if (hasCallPerm) {
+                android.content.Intent(android.content.Intent.ACTION_CALL, android.net.Uri.parse("tel:$cleanNumber"))
+            } else {
+                android.content.Intent(android.content.Intent.ACTION_DIAL, android.net.Uri.parse("tel:$cleanNumber"))
+            }
+            intent.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+            context.startActivity(intent)
+            result.put("success", true)
+            result.put("mode", if (hasCallPerm) "direct_call" else "dialer_opened")
+        } catch (e: Exception) {
+            Log.e(TAG, "makeCall failed", e)
+            result.put("success", false)
+            result.put("error", e.message ?: "Failed to initiate call")
+        }
+        return result
+    }
 }
 

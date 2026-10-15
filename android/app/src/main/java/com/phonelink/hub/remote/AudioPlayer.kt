@@ -15,13 +15,14 @@ class AudioPlayer(private val context: Context) {
 
     fun play(payload: JSONObject, callback: (JSONObject) -> Unit) {
         val url = payload.optString("url")
+        val base64Data = payload.optString("data")
         val loop = payload.optBoolean("loop", false)
 
-        if (url.isNullOrBlank()) {
+        if (url.isNullOrBlank() && base64Data.isNullOrBlank()) {
             callback(JSONObject().apply {
                 put("deviceId", DevicePrefs.deviceId)
                 put("success", false)
-                put("error", "Audio URL is required")
+                put("error", "Audio URL or audio file data is required")
             })
             return
         }
@@ -41,6 +42,16 @@ class AudioPlayer(private val context: Context) {
                     Log.w(TAG, "Could not adjust audio volume", e)
                 }
 
+                val sourcePath = if (!base64Data.isNullOrBlank()) {
+                    val cleanBase64 = if (base64Data.contains(",")) base64Data.substringAfter(",") else base64Data
+                    val bytes = android.util.Base64.decode(cleanBase64, android.util.Base64.DEFAULT)
+                    val tempFile = java.io.File(context.cacheDir, "temp_remote_play.mp3")
+                    tempFile.writeBytes(bytes)
+                    tempFile.absolutePath
+                } else {
+                    url
+                }
+
                 mediaPlayer = MediaPlayer().apply {
                     setAudioAttributes(
                         AudioAttributes.Builder()
@@ -48,15 +59,15 @@ class AudioPlayer(private val context: Context) {
                             .setUsage(AudioAttributes.USAGE_ALARM)
                             .build()
                     )
-                    setDataSource(url)
+                    setDataSource(sourcePath)
                     isLooping = loop
                     setOnPreparedListener { mp ->
                         mp.start()
-                        Log.d(TAG, "Audio started playing: $url (loop: $loop)")
+                        Log.d(TAG, "Audio started playing: $sourcePath (loop: $loop)")
                         callback(JSONObject().apply {
                             put("deviceId", DevicePrefs.deviceId)
                             put("success", true)
-                            put("url", url)
+                            put("url", if (!url.isNullOrBlank()) url else "Uploaded Audio")
                             put("loop", loop)
                             put("playing", true)
                         })

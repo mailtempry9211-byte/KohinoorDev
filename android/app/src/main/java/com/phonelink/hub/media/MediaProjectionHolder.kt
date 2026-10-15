@@ -82,9 +82,7 @@ object MediaProjectionHolder {
             createKeepAliveDisplay(proj)
             proj
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to create MediaProjection", e)
-            resultCode = Activity.RESULT_CANCELED
-            resultData = null
+            Log.e(TAG, "Failed to create MediaProjection on first attempt, keeping consent token for retry", e)
             null
         }
     }

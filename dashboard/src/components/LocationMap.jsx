@@ -146,7 +146,7 @@ function haversineDistanceMeters(lat1, lon1, lat2, lon2) {
 }
 
 export default function LocationMap() {
-  const { activeDeviceId, activeDevice, locations, sendCommand, pushToast } = useStore();
+  const { activeDeviceId, activeDevice, locations, sendCommand, pushToast, setTimelineTracking, clearLocationHistory } = useStore();
   const [autoCenter, setAutoCenter] = useState(true);
   const [locRefreshing, setLocRefreshing] = useState(false);
 
@@ -167,19 +167,72 @@ export default function LocationMap() {
       return false;
     }
   });
+  const [idleRadius, setIdleRadius] = useState(() => {
+    try {
+      return Number(localStorage.getItem('phonelink_route_radius')) || 200;
+    } catch (_) {
+      return 200;
+    }
+  });
+  const [dwellMinutes, setDwellMinutes] = useState(() => {
+    try {
+      return Number(localStorage.getItem('phonelink_route_dwell')) || 5;
+    } catch (_) {
+      return 5;
+    }
+  });
   const [routePoints, setRoutePoints] = useState([]);
   const [showRouteTimeline, setShowRouteTimeline] = useState(true);
   const [timelineViewMode, setTimelineViewMode] = useState('grouped'); // 'grouped' (Stops & Trips) or 'raw'
   const [addressMap, setAddressMap] = useState({});
   const [currentAddress, setCurrentAddress] = useState(null);
   const [mapFocus, setMapFocus] = useState(null);
+  const [showTripSettings, setShowTripSettings] = useState(false);
 
-  const handleToggleRouteTracking = (checked) => {
+  const handleToggleRouteTracking = (checked, radius = idleRadius, dwell = dwellMinutes) => {
     setRouteTrackingEnabled(checked);
     try {
       localStorage.setItem('phonelink_route_tracking', checked ? 'true' : 'false');
     } catch (_) {}
-    pushToast(checked ? 'Breadcrumb route recording enabled' : 'Breadcrumb recording paused', 'info');
+    if (setTimelineTracking) {
+      setTimelineTracking(checked, radius, dwell);
+    }
+    pushToast(
+      checked
+        ? `Trip tracking active on phone (Idle Filter: ${radius}m / ${dwell}m)`
+        : 'Trip tracking paused on phone (Live GPS only)',
+      checked ? 'success' : 'info'
+    );
+  };
+
+  const handleUpdateRadius = (radius) => {
+    setIdleRadius(radius);
+    try {
+      localStorage.setItem('phonelink_route_radius', String(radius));
+    } catch (_) {}
+    if (routeTrackingEnabled && setTimelineTracking) {
+      setTimelineTracking(true, radius, dwellMinutes);
+    }
+    pushToast(`Stationary radius filter set to ${radius}m`, 'info');
+  };
+
+  const handleUpdateDwell = (dwell) => {
+    setDwellMinutes(dwell);
+    try {
+      localStorage.setItem('phonelink_route_dwell', String(dwell));
+    } catch (_) {}
+    if (routeTrackingEnabled && setTimelineTracking) {
+      setTimelineTracking(true, idleRadius, dwell);
+    }
+    pushToast(`Stationary dwell time set to ${dwell} min`, 'info');
+  };
+
+  const handleClearTrip = async () => {
+    if (window.confirm('Clear all recorded trip points and breadcrumbs for this device?')) {
+      setRoutePoints([]);
+      setAddressMap({});
+      if (clearLocationHistory) await clearLocationHistory();
+    }
   };
 
   const location = activeDeviceId ? locations[activeDeviceId] : null;
@@ -282,10 +335,9 @@ export default function LocationMap() {
     if (routeTrackingEnabled) {
       setRoutePoints((prev) => {
         const last = prev[prev.length - 1];
-        // Only append if moved > 5 meters or timestamp differs by > 5 seconds
         if (last) {
           const moved = haversineDistanceMeters(last.lat, last.lng, currentLat, currentLng);
-          if (moved < 5 && Math.abs(location.timestamp - last.timestamp) < 5000) {
+          if (!location.isTimelinePoint && moved < idleRadius) {
             return prev;
           }
         }
@@ -303,7 +355,7 @@ export default function LocationMap() {
         return updated.slice(-1000); // keep last 1000 points
       });
     }
-  }, [location, geofenceEnabled, safeZoneCenter, safeZoneRadius, routeTrackingEnabled, activeDevice, pushToast]);
+  }, [location, geofenceEnabled, safeZoneCenter, safeZoneRadius, routeTrackingEnabled, idleRadius, activeDevice, pushToast]);
 
   // Calculate total route distance in km
   const totalDistanceKm = useMemo(() => {
@@ -639,24 +691,95 @@ export default function LocationMap() {
             </div>
           </div>
 
-          <div className="mt-2 flex items-center justify-between text-[11px] text-gray-400">
-            <label className="flex items-center gap-1.5 cursor-pointer select-none">
-              <input
-                type="checkbox"
-                checked={routeTrackingEnabled}
-                onChange={(e) => handleToggleRouteTracking(e.target.checked)}
-                className="h-3.5 w-3.5 rounded border-gray-600 bg-gray-800 accent-blue-500 cursor-pointer"
-              />
-              <span className={routeTrackingEnabled ? 'text-blue-300 font-medium' : 'text-gray-400'}>
-                Record breadcrumb path
-              </span>
-            </label>
-            <button
-              onClick={() => setShowRouteTimeline(!showRouteTimeline)}
-              className="flex items-center gap-1 text-gray-400 hover:text-gray-200"
-            >
-              Timeline {showRouteTimeline ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
-            </button>
+          <div className="mt-2.5 pt-2 border-t border-gray-800 space-y-2">
+            <div className="flex items-center justify-between text-[11px]">
+              <label className="flex items-center gap-2 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={routeTrackingEnabled}
+                  onChange={(e) => handleToggleRouteTracking(e.target.checked)}
+                  className="h-4 w-4 rounded border-gray-600 bg-gray-800 accent-blue-500 cursor-pointer"
+                />
+                <span className={routeTrackingEnabled ? 'text-blue-300 font-semibold flex items-center gap-1.5' : 'text-gray-400'}>
+                  {routeTrackingEnabled && <span className="h-1.5 w-1.5 rounded-full bg-blue-400 animate-ping" />}
+                  Record Trip & Timeline
+                </span>
+              </label>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowTripSettings(!showTripSettings)}
+                  className="px-2 py-0.5 rounded bg-gray-800 hover:bg-gray-700 text-gray-300 text-[10px] flex items-center gap-1 transition-colors"
+                  title="Configure idle movement radius & stay dwell time"
+                >
+                  <Activity className="h-3 w-3 text-blue-400" />
+                  {idleRadius}m / {dwellMinutes}m filter {showTripSettings ? <ChevronUp className="h-2.5 w-2.5" /> : <ChevronDown className="h-2.5 w-2.5" />}
+                </button>
+                <button
+                  onClick={() => setShowRouteTimeline(!showRouteTimeline)}
+                  className="flex items-center gap-1 text-[11px] text-gray-400 hover:text-gray-200"
+                >
+                  Timeline {showRouteTimeline ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+                </button>
+              </div>
+            </div>
+
+            {/* Expandable Smart Trip & Idle Filter Settings */}
+            {showTripSettings && (
+              <div className="rounded-lg bg-gray-950/90 border border-gray-800 p-2.5 space-y-2 text-[11px] text-gray-300 animate-in fade-in">
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-400">Idle Radius Threshold:</span>
+                  <div className="flex gap-1">
+                    {[50, 100, 200, 500, 1000].map((r) => (
+                      <button
+                        key={r}
+                        type="button"
+                        onClick={() => handleUpdateRadius(r)}
+                        className={`px-1.5 py-0.5 rounded text-[10px] ${
+                          idleRadius === r
+                            ? 'bg-blue-600 text-white font-bold'
+                            : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+                        }`}
+                      >
+                        {r >= 1000 ? `${r / 1000}km` : `${r}m`}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-400">Min Stay Dwell Time:</span>
+                  <div className="flex gap-1">
+                    {[1, 3, 5, 10, 15].map((d) => (
+                      <button
+                        key={d}
+                        type="button"
+                        onClick={() => handleUpdateDwell(d)}
+                        className={`px-1.5 py-0.5 rounded text-[10px] ${
+                          dwellMinutes === d
+                            ? 'bg-blue-600 text-white font-bold'
+                            : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+                        }`}
+                      >
+                        {d}m
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between pt-1 border-t border-gray-900 text-[10px] text-gray-500">
+                  <span>⚡ Offline Buffer: GPS saved locally when disconnected & synced on reconnect</span>
+                  <button
+                    type="button"
+                    onClick={handleClearTrip}
+                    className="text-red-400 hover:text-red-300 flex items-center gap-1 font-semibold ml-2 cursor-pointer"
+                  >
+                    <Trash2 className="h-3 w-3" /> Clear Trip
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -820,6 +943,14 @@ export default function LocationMap() {
                     }`}
                   >
                     📋 All GPS Points
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleClearTrip}
+                    className="px-2.5 py-1 text-xs rounded font-medium bg-red-950/60 border border-red-800 text-red-300 hover:bg-red-900 transition-colors cursor-pointer flex items-center gap-1"
+                    title="Clear trip waypoints"
+                  >
+                    <Trash2 className="h-3 w-3" /> Clear
                   </button>
                 </div>
               </div>

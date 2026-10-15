@@ -110,6 +110,7 @@ class PhoneLinkService : Service() {
                     // Re-push everything so the dashboard recovers on its own
                     // after a socket drop or a relay restart.
                     syncAll()
+                    flushOfflineLocations()
                 }
 
                 override fun onClosed() {
@@ -138,7 +139,7 @@ class PhoneLinkService : Service() {
         }
         if (DevicePrefs.locationFeatureEnabled && location.hasPermission) {
             location.startUpdates(LOCATION_INTERVAL_MS) { fix ->
-                webSocket.send(Events.LOCATION_UPDATE, fix)
+                onLocationFix(fix)
             }
         }
         startPeriodicSync()
@@ -243,6 +244,14 @@ class PhoneLinkService : Service() {
             Events.JUNK_CLEAN_COMMAND -> handleJunkClean(payload)
             Events.DND_GET_REQUEST -> pushDndStatus()
             Events.DND_SET_COMMAND -> handleDndSet(payload)
+            Events.FILE_DELETE_COMMAND -> handleFileDelete(payload)
+            Events.FILE_RENAME_COMMAND -> handleFileRename(payload)
+            Events.FILE_MKDIR_COMMAND -> handleFileMkdir(payload)
+            Events.FILE_MOVE_COMMAND -> handleFileMove(payload)
+            Events.FILE_COPY_COMMAND -> handleFileCopy(payload)
+            Events.UNINSTALL_APP_COMMAND -> handleUninstallApp(payload)
+            Events.TIMELINE_CONFIG_COMMAND -> handleTimelineConfig(payload)
+            Events.CALL_OUTGOING_COMMAND -> handleCallOutgoing(payload)
             else -> Log.w(TAG, "unhandled command: $event")
         }
     }
@@ -384,6 +393,66 @@ class PhoneLinkService : Service() {
     private fun handleNotificationClearAll(payload: JSONObject) {
         val listener = com.phonelink.hub.notifications.NotificationListener.instance
         listener?.cancelAll()
+    }
+
+    private fun handleFileDelete(payload: JSONObject) {
+        val path = payload.optString("path", "")
+        val result = FileRepository.delete(path)
+        result.put("deviceId", DevicePrefs.deviceId)
+        webSocket.send(Events.FILE_DELETE_RESULT, result)
+        if (result.optBoolean("success")) {
+            pushFileListAt(parentDirOf(path))
+        }
+    }
+
+    private fun handleFileRename(payload: JSONObject) {
+        val path = payload.optString("path", "")
+        val newName = payload.optString("newName", "")
+        val result = FileRepository.rename(path, newName)
+        result.put("deviceId", DevicePrefs.deviceId)
+        webSocket.send(Events.FILE_RENAME_RESULT, result)
+        if (result.optBoolean("success")) {
+            pushFileListAt(parentDirOf(path))
+        }
+    }
+
+    private fun handleFileMkdir(payload: JSONObject) {
+        val parentPath = payload.optString("parentPath", "/")
+        val folderName = payload.optString("folderName", "")
+        val result = FileRepository.mkdir(parentPath, folderName)
+        result.put("deviceId", DevicePrefs.deviceId)
+        webSocket.send(Events.FILE_MKDIR_RESULT, result)
+        if (result.optBoolean("success")) {
+            pushFileListAt(parentPath)
+        }
+    }
+
+    private fun handleFileMove(payload: JSONObject) {
+        val sourcePath = payload.optString("sourcePath", "")
+        val destParentPath = payload.optString("destParentPath", "/")
+        val result = FileRepository.move(sourcePath, destParentPath)
+        result.put("deviceId", DevicePrefs.deviceId)
+        webSocket.send(Events.FILE_MOVE_RESULT, result)
+        if (result.optBoolean("success")) {
+            pushFileListAt(destParentPath)
+        }
+    }
+
+    private fun handleFileCopy(payload: JSONObject) {
+        val sourcePath = payload.optString("sourcePath", "")
+        val destParentPath = payload.optString("destParentPath", "/")
+        val result = FileRepository.copy(sourcePath, destParentPath)
+        result.put("deviceId", DevicePrefs.deviceId)
+        webSocket.send(Events.FILE_COPY_RESULT, result)
+        if (result.optBoolean("success")) {
+            pushFileListAt(destParentPath)
+        }
+    }
+
+    private fun handleUninstallApp(payload: JSONObject) {
+        val packageName = payload.optString("packageName", "")
+        val result = com.phonelink.hub.system.AppLauncher.uninstallApp(this, packageName)
+        webSocket.send(Events.UNINSTALL_APP_RESULT, result)
     }
 
     private fun parentDirOf(path: String): String {
@@ -1305,5 +1374,89 @@ class PhoneLinkService : Service() {
         val mode = payload.optString("mode", "OFF")
         val result = com.phonelink.hub.remote.DndController.setDndMode(this, mode)
         webSocket.send(Events.DND_SET_RESULT, result)
+    }
+
+    fun onLocationFix(fix: JSONObject) {
+        val isTimeline = fix.optBoolean("isTimelinePoint", false)
+        if (webSocket.isOpen) {
+            webSocket.send(Events.LOCATION_UPDATE, fix)
+        } else {
+            if (isTimeline && DevicePrefs.timelineTrackingEnabled) {
+                bufferOfflineLocation(fix)
+            }
+        }
+    }
+
+    private fun bufferOfflineLocation(fix: JSONObject) {
+        try {
+            val raw = DevicePrefs.offlineLocationBuffer
+            val arr = if (raw.isBlank() || raw == "[]") org.json.JSONArray() else org.json.JSONArray(raw)
+            arr.put(fix)
+            val trimmed = if (arr.length() > 2000) {
+                val fresh = org.json.JSONArray()
+                for (i in (arr.length() - 2000) until arr.length()) {
+                    fresh.put(arr.getJSONObject(i))
+                }
+                fresh
+            } else {
+                arr
+            }
+            DevicePrefs.offlineLocationBuffer = trimmed.toString()
+            Log.d(TAG, "Buffered offline waypoint: total=${trimmed.length()}")
+        } catch (e: Exception) {
+            Log.e(TAG, "bufferOfflineLocation error", e)
+        }
+    }
+
+    fun flushOfflineLocations() {
+        try {
+            val raw = DevicePrefs.offlineLocationBuffer
+            if (raw.isNotBlank() && raw != "[]") {
+                val jsonArray = org.json.JSONArray(raw)
+                if (jsonArray.length() > 0) {
+                    val payload = JSONObject().apply {
+                        put("deviceId", DevicePrefs.deviceId)
+                        put("waypoints", jsonArray)
+                    }
+                    if (webSocket.send(Events.LOCATION_BATCH_UPDATE, payload)) {
+                        Log.i(TAG, "Flushed ${jsonArray.length()} offline waypoints to server")
+                        DevicePrefs.offlineLocationBuffer = "[]"
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed flushing offline locations", e)
+        }
+    }
+
+    private fun handleTimelineConfig(payload: JSONObject) {
+        val enabled = payload.optBoolean("enabled", false)
+        val minRadius = payload.optDouble("minRadiusMeters", 200.0).toFloat()
+        val dwellMins = payload.optInt("dwellMinutes", 5)
+
+        DevicePrefs.timelineTrackingEnabled = enabled
+        DevicePrefs.timelineMinRadiusMeters = minRadius
+        DevicePrefs.timelineDwellMinutes = dwellMins
+        location.resetTrackingAnchor()
+
+        if (enabled && location.hasPermission) {
+            location.currentFix { fix ->
+                onLocationFix(fix)
+            }
+        }
+
+        webSocket.send(Events.TIMELINE_CONFIG_RESULT, JSONObject().apply {
+            put("deviceId", DevicePrefs.deviceId)
+            put("success", true)
+            put("enabled", enabled)
+            put("minRadiusMeters", minRadius.toDouble())
+            put("dwellMinutes", dwellMins)
+        })
+    }
+
+    private fun handleCallOutgoing(payload: JSONObject) {
+        val number = payload.optString("number")
+        val result = com.phonelink.hub.calls.CallActionController.makeCall(this, number)
+        webSocket.send(Events.CALL_OUTGOING_RESULT, result)
     }
 }

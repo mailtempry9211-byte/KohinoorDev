@@ -102,8 +102,43 @@ class LocationRepository(private val context: Context) {
         }
     }
 
+    private var lastRecordedLocation: android.location.Location? = null
+    private var lastRecordedTimeMs: Long = 0L
+
+    fun resetTrackingAnchor() {
+        lastRecordedLocation = null
+        lastRecordedTimeMs = 0L
+    }
+
     private fun emit(location: android.location.Location, onFix: (JSONObject) -> Unit) {
         val id = try { com.phonelink.hub.data.DevicePrefs.deviceId } catch (_: Exception) { null }
+        val now = if (location.time > 0) location.time else System.currentTimeMillis()
+
+        var isTimelinePoint = false
+        if (com.phonelink.hub.data.DevicePrefs.timelineTrackingEnabled) {
+            val lastLoc = lastRecordedLocation
+            val minRadius = com.phonelink.hub.data.DevicePrefs.timelineMinRadiusMeters
+            val minDwellMs = com.phonelink.hub.data.DevicePrefs.timelineDwellMinutes * 60_000L
+
+            if (lastLoc == null) {
+                isTimelinePoint = true
+                lastRecordedLocation = location
+                lastRecordedTimeMs = now
+            } else {
+                val dist = lastLoc.distanceTo(location)
+                val elapsed = now - lastRecordedTimeMs
+                if (dist >= minRadius) {
+                    isTimelinePoint = true
+                    lastRecordedLocation = location
+                    lastRecordedTimeMs = now
+                } else if (elapsed >= minDwellMs && dist >= 25f) {
+                    isTimelinePoint = true
+                    lastRecordedLocation = location
+                    lastRecordedTimeMs = now
+                }
+            }
+        }
+
         onFix(
             JSONObject().apply {
                 put("latitude", location.latitude)
@@ -112,7 +147,8 @@ class LocationRepository(private val context: Context) {
                 put("speed", location.speed.toDouble())
                 put("altitude", location.altitude)
                 put("bearing", location.bearing.toDouble())
-                put("timestamp", if (location.time > 0) location.time else System.currentTimeMillis())
+                put("timestamp", now)
+                put("isTimelinePoint", isTimelinePoint)
                 if (!id.isNullOrBlank()) put("deviceId", id)
             }
         )

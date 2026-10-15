@@ -1,13 +1,30 @@
 import { useEffect, useState } from 'react';
-import { Folder as FolderIcon, File as FileIcon, ChevronRight, Download, Upload, HardDrive, ArrowUp, RefreshCw } from 'lucide-react';
+import {
+  Folder as FolderIcon,
+  File as FileIcon,
+  ChevronRight,
+  Download,
+  Upload,
+  HardDrive,
+  ArrowUp,
+  RefreshCw,
+  Trash2,
+  Edit3,
+  FolderPlus
+} from 'lucide-react';
 import { useStore } from '../store/StoreContext';
 
 export default function FileManager() {
-  const { activeDeviceId, files, sendCommand } = useStore();
+  const { activeDeviceId, files, sendCommand, deleteFile, renameFile, createFolder, pushToast } = useStore();
   const [downloaded, setDownloaded] = useState(null);
   const [uploadOpen, setUploadOpen] = useState(false);
   const [uploadTarget, setUploadTarget] = useState(null);
   const [downloading, setDownloading] = useState(null);
+  const [newFolderOpen, setNewFolderOpen] = useState(false);
+  const [newFolderName, setNewFolderName] = useState('');
+  const [renameItem, setRenameItem] = useState(null);
+  const [renameValue, setRenameValue] = useState('');
+  const [deleteTarget, setDeleteTarget] = useState(null);
 
   useEffect(() => {
     if (activeDeviceId) sendCommand('file-list', { deviceId: activeDeviceId, path: '/' });
@@ -64,6 +81,17 @@ export default function FileManager() {
         </div>
         <div className="flex items-center gap-2">
           <button
+            onClick={() => {
+              setNewFolderName('');
+              setNewFolderOpen(true);
+            }}
+            className="flex items-center gap-1.5 rounded-lg bg-gray-800 px-3 py-2 text-xs text-gray-200 transition-colors hover:bg-gray-700 border border-gray-700 shadow-sm"
+            title="Create a new folder in this directory"
+          >
+            <FolderPlus className="h-3.5 w-3.5 text-teal-400" />
+            New Folder
+          </button>
+          <button
             onClick={() => openFolder(files.path || '/')}
             className="flex items-center gap-1.5 rounded-lg bg-gray-800 px-3 py-2 text-xs text-gray-300 transition-colors hover:bg-gray-700"
             title="Refresh this folder"
@@ -73,7 +101,7 @@ export default function FileManager() {
           </button>
           <button
             onClick={() => setUploadOpen(true)}
-            className="flex items-center gap-2 rounded-lg bg-teal-600 px-3.5 py-2 text-sm font-medium text-white transition-colors hover:bg-teal-500"
+            className="flex items-center gap-2 rounded-lg bg-teal-600 px-3.5 py-2 text-sm font-medium text-white transition-colors hover:bg-teal-500 shadow"
           >
             <Upload className="h-4 w-4" />
             Upload
@@ -157,24 +185,36 @@ export default function FileManager() {
                   <td className="hidden px-4 py-2.5 text-gray-500 md:table-cell truncate">
                     {entry.lastModified ? new Date(entry.lastModified).toLocaleString() : '—'}
                   </td>
-                  <td className="px-4 py-2.5 text-right whitespace-nowrap">
-                    {!isDir ? (
+                  <td className="px-4 py-2 text-right whitespace-nowrap">
+                    <div className="flex items-center justify-end gap-1.5">
+                      {!isDir && (
+                        <button
+                          onClick={() => download(entry)}
+                          disabled={downloading === entry.path}
+                          className="inline-flex items-center gap-1 rounded bg-gray-800 p-1.5 text-xs text-gray-300 hover:bg-teal-600 hover:text-white transition-colors disabled:opacity-50"
+                          title="Download file"
+                        >
+                          <Download className={`h-3.5 w-3.5 ${downloading === entry.path ? 'animate-bounce' : ''}`} />
+                        </button>
+                      )}
                       <button
-                        onClick={() => download(entry)}
-                        disabled={downloading === entry.path}
-                        className="inline-flex items-center gap-1.5 rounded-md bg-gray-800 px-2.5 py-1.5 text-xs text-gray-300 transition-colors hover:bg-teal-600 hover:text-white disabled:opacity-50"
+                        onClick={() => {
+                          setRenameItem(entry);
+                          setRenameValue(entry.name);
+                        }}
+                        className="inline-flex items-center gap-1 rounded bg-gray-800 p-1.5 text-xs text-gray-400 hover:text-teal-300 hover:bg-gray-750 transition-colors"
+                        title="Rename"
                       >
-                        <Download className={`h-3.5 w-3.5 ${downloading === entry.path ? 'animate-bounce' : ''}`} />
-                        {downloading === entry.path ? 'Fetching…' : 'Download'}
+                        <Edit3 className="h-3.5 w-3.5" />
                       </button>
-                    ) : (
                       <button
-                        onClick={() => openFolder(entry.path)}
-                        className="inline-flex items-center gap-1.5 rounded-md bg-gray-800/60 px-2.5 py-1.5 text-xs text-gray-400 hover:text-white"
+                        onClick={() => setDeleteTarget(entry)}
+                        className="inline-flex items-center gap-1 rounded bg-gray-800 p-1.5 text-xs text-gray-400 hover:text-red-400 hover:bg-gray-750 transition-colors"
+                        title="Delete"
                       >
-                        Open
+                        <Trash2 className="h-3.5 w-3.5" />
                       </button>
-                    )}
+                    </div>
                   </td>
                 </tr>
               );
@@ -228,6 +268,124 @@ export default function FileManager() {
             reader.readAsArrayBuffer(file);
           }}
         />
+      )}
+
+      {newFolderOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+          <div className="w-full max-w-sm rounded-xl border border-gray-800 bg-gray-900 p-5 shadow-2xl space-y-4">
+            <h3 className="text-sm font-semibold text-white flex items-center gap-2">
+              <FolderPlus className="h-4 w-4 text-teal-400" /> Create New Folder
+            </h3>
+            <p className="text-xs text-gray-400">
+              Create folder in: <span className="font-mono text-gray-300">{files.path || '/'}</span>
+            </p>
+            <input
+              type="text"
+              value={newFolderName}
+              onChange={(e) => setNewFolderName(e.target.value)}
+              placeholder="e.g. MyDocuments or Photos"
+              autoFocus
+              className="w-full rounded-lg border border-gray-800 bg-gray-950 px-3 py-2 text-xs text-white placeholder-gray-600 focus:border-teal-500 focus:outline-none"
+            />
+            <div className="flex justify-end gap-2 pt-1">
+              <button
+                type="button"
+                onClick={() => setNewFolderOpen(false)}
+                className="rounded-lg bg-gray-800 px-3 py-1.5 text-xs text-gray-300 hover:bg-gray-700"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={!newFolderName.trim()}
+                onClick={() => {
+                  createFolder(files.path || '/', newFolderName.trim());
+                  setNewFolderOpen(false);
+                }}
+                className="rounded-lg bg-teal-600 px-4 py-1.5 text-xs font-semibold text-white hover:bg-teal-500 disabled:opacity-40"
+              >
+                Create Folder
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {renameItem && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+          <div className="w-full max-w-sm rounded-xl border border-gray-800 bg-gray-900 p-5 shadow-2xl space-y-4">
+            <h3 className="text-sm font-semibold text-white flex items-center gap-2">
+              <Edit3 className="h-4 w-4 text-teal-400" /> Rename Item
+            </h3>
+            <p className="text-xs text-gray-400">
+              Current: <span className="font-mono text-gray-300">{renameItem.name}</span>
+            </p>
+            <input
+              type="text"
+              value={renameValue}
+              onChange={(e) => setRenameValue(e.target.value)}
+              autoFocus
+              className="w-full rounded-lg border border-gray-800 bg-gray-950 px-3 py-2 text-xs text-white placeholder-gray-600 focus:border-teal-500 focus:outline-none font-mono"
+            />
+            <div className="flex justify-end gap-2 pt-1">
+              <button
+                type="button"
+                onClick={() => setRenameItem(null)}
+                className="rounded-lg bg-gray-800 px-3 py-1.5 text-xs text-gray-300 hover:bg-gray-700"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={!renameValue.trim() || renameValue === renameItem.name}
+                onClick={() => {
+                  renameFile(renameItem.path, renameValue.trim());
+                  setRenameItem(null);
+                }}
+                className="rounded-lg bg-teal-600 px-4 py-1.5 text-xs font-semibold text-white hover:bg-teal-500 disabled:opacity-40"
+              >
+                Save Name
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {deleteTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+          <div className="w-full max-w-sm rounded-xl border border-red-900 bg-gray-950 p-5 shadow-2xl space-y-4">
+            <div className="flex items-center gap-2.5 text-red-400">
+              <Trash2 className="h-5 w-5" />
+              <h3 className="text-sm font-bold text-red-200">Confirm Deletion</h3>
+            </div>
+            <p className="text-xs text-gray-300 leading-relaxed">
+              Are you sure you want to permanently delete:
+              <br />
+              <strong className="text-white font-mono block mt-1.5 p-2 bg-gray-900 rounded border border-gray-800 break-all">
+                {deleteTarget.name}
+              </strong>
+            </p>
+            <div className="flex justify-end gap-2 pt-1">
+              <button
+                type="button"
+                onClick={() => setDeleteTarget(null)}
+                className="rounded-lg bg-gray-800 px-3 py-1.5 text-xs text-gray-300 hover:bg-gray-700"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  deleteFile(deleteTarget.path);
+                  setDeleteTarget(null);
+                }}
+                className="rounded-lg bg-red-600 px-4 py-1.5 text-xs font-bold text-white hover:bg-red-500 shadow-md shadow-red-950"
+              >
+                Permanently Delete
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

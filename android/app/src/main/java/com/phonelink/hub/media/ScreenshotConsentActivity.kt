@@ -24,7 +24,11 @@ class ScreenshotConsentActivity : ComponentActivity() {
         if (code == Activity.RESULT_OK && data != null) {
             Log.d(TAG, "Screen capture permission granted by user")
             MediaProjectionHolder.updateConsent(code, data)
+            com.phonelink.hub.data.DevicePrefs.screenMirrorFeatureEnabled = true
             try {
+                if (com.phonelink.hub.service.PhoneLinkService.instance == null) {
+                    com.phonelink.hub.service.PhoneLinkService.start(applicationContext)
+                }
                 com.phonelink.hub.service.PhoneLinkService.instance?.ensureMediaProjectionForegroundType()
             } catch (e: Exception) {
                 Log.w(TAG, "ensureMediaProjectionForegroundType error", e)
@@ -34,6 +38,7 @@ class ScreenshotConsentActivity : ComponentActivity() {
             MediaProjectionHolder.notifyConsentGranted(applicationContext)
         } else {
             Log.w(TAG, "Screen capture permission denied by user (code=$code)")
+            com.phonelink.hub.data.DevicePrefs.screenMirrorFeatureEnabled = false
             MediaProjectionHolder.notifyConsentDenied()
         }
         finish()

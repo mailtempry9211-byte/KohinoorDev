@@ -176,6 +176,125 @@ object FileRepository {
         }
     }
 
+    fun delete(path: String): JSONObject {
+        val target = resolve(path)
+        if (!target.exists()) {
+            return JSONObject().apply {
+                put("success", false)
+                put("error", "File or folder does not exist")
+                put("path", path)
+            }
+        }
+        val deleted = if (target.isDirectory) target.deleteRecursively() else target.delete()
+        return JSONObject().apply {
+            put("success", deleted)
+            put("path", path)
+            if (!deleted) put("error", "Could not delete file or folder")
+        }
+    }
+
+    fun rename(path: String, newName: String): JSONObject {
+        val target = resolve(path)
+        if (!target.exists()) {
+            return JSONObject().apply {
+                put("success", false)
+                put("error", "Source file or directory does not exist")
+                put("path", path)
+            }
+        }
+        val safeName = newName.trim().replace('/', '_').replace('\\', '_')
+        if (safeName.isEmpty()) {
+            return JSONObject().apply {
+                put("success", false)
+                put("error", "New name cannot be empty")
+                put("path", path)
+            }
+        }
+        val dest = File(target.parentFile, safeName)
+        val renamed = target.renameTo(dest)
+        return JSONObject().apply {
+            put("success", renamed)
+            put("oldPath", path)
+            put("newName", safeName)
+            if (!renamed) put("error", "Rename failed")
+        }
+    }
+
+    fun mkdir(parentPath: String, folderName: String): JSONObject {
+        val parent = resolve(parentPath)
+        val safeName = folderName.trim().replace('/', '_').replace('\\', '_')
+        if (safeName.isEmpty()) {
+            return JSONObject().apply {
+                put("success", false)
+                put("error", "Folder name cannot be empty")
+            }
+        }
+        val newDir = File(parent, safeName)
+        val created = newDir.mkdirs() || newDir.exists()
+        return JSONObject().apply {
+            put("success", created)
+            put("folderName", safeName)
+            put("parentPath", parentPath)
+            if (!created) put("error", "Could not create directory")
+        }
+    }
+
+    fun move(sourcePath: String, destParentPath: String): JSONObject {
+        val source = resolve(sourcePath)
+        val destParent = resolve(destParentPath)
+        if (!source.exists()) {
+            return JSONObject().apply {
+                put("success", false)
+                put("error", "Source file does not exist")
+            }
+        }
+        if (!destParent.isDirectory && !destParent.mkdirs()) {
+            return JSONObject().apply {
+                put("success", false)
+                put("error", "Destination directory does not exist")
+            }
+        }
+        val dest = File(destParent, source.name)
+        val success = source.renameTo(dest)
+        return JSONObject().apply {
+            put("success", success)
+            put("sourcePath", sourcePath)
+            put("destPath", dest.relativeTo(storageRoot()).path.replace('\\', '/'))
+            if (!success) put("error", "Could not move file")
+        }
+    }
+
+    fun copy(sourcePath: String, destParentPath: String): JSONObject {
+        val source = resolve(sourcePath)
+        val destParent = resolve(destParentPath)
+        if (!source.exists()) {
+            return JSONObject().apply {
+                put("success", false)
+                put("error", "Source file does not exist")
+            }
+        }
+        if (!destParent.isDirectory && !destParent.mkdirs()) {
+            return JSONObject().apply {
+                put("success", false)
+                put("error", "Destination directory does not exist")
+            }
+        }
+        val dest = File(destParent, source.name)
+        val success = try {
+            if (source.isDirectory) source.copyRecursively(dest, overwrite = true)
+            else { source.copyTo(dest, overwrite = true); true }
+        } catch (e: Exception) {
+            Log.e(TAG, "copy failed", e)
+            false
+        }
+        return JSONObject().apply {
+            put("success", success)
+            put("sourcePath", sourcePath)
+            put("destPath", dest.relativeTo(storageRoot()).path.replace('\\', '/'))
+            if (!success) put("error", "Could not copy file")
+        }
+    }
+
     fun mimeOf(fileName: String): String {
         val ext = fileName.substringAfterLast('.', "").lowercase()
         return MimeTypeMap.getSingleton().getMimeTypeFromExtension(ext) ?: "application/octet-stream"

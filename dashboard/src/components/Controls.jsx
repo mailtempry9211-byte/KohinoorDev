@@ -167,6 +167,11 @@ export default function Controls() {
     dndStatus,
     fetchDndStatus,
     setDndMode,
+    uninstallApp,
+    makeCall,
+    answerCall,
+    declineCall,
+    incomingCallAlert,
     sendCommand,
     pushToast
   } = useStore();
@@ -312,6 +317,26 @@ export default function Controls() {
   // Audio state
   const [audioUrl, setAudioUrl] = useState('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
   const [audioLoop, setAudioLoop] = useState(false);
+  const [audioSourceMode, setAudioSourceMode] = useState('upload'); // 'upload' or 'url'
+  const [audioFileBase64, setAudioFileBase64] = useState(null);
+  const [audioFileName, setAudioFileName] = useState('');
+  const [dialNumber, setDialNumber] = useState('');
+
+  const handleAudioFileChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 25 * 1024 * 1024) {
+      pushToast('Audio file exceeds 25MB limit', 'error');
+      return;
+    }
+    setAudioFileName(file.name);
+    const reader = new FileReader();
+    reader.onload = () => {
+      setAudioFileBase64(reader.result);
+      pushToast(`Ready to play: ${file.name}`, 'info');
+    };
+    reader.readAsDataURL(file);
+  };
 
   // Wallpaper state
   const [wallpaperColor, setWallpaperColor] = useState('#0d9488');
@@ -873,51 +898,107 @@ export default function Controls() {
             </div>
 
             <p className="text-xs text-gray-400 mb-3">
-              Stream or play any direct audio stream/URL on the phone.
+              Play music or audio directly from your PC or stream via web URL on phone speakers.
             </p>
 
-            <div className="space-y-3">
-              <div>
-                <input
-                  type="text"
-                  value={audioUrl}
-                  onChange={(e) => setAudioUrl(e.target.value)}
-                  placeholder="https://example.com/sound.mp3"
-                  className="w-full rounded-lg border border-gray-800 bg-gray-950 px-3 py-2 text-xs text-gray-200 focus:border-teal-500 focus:outline-none"
-                />
-              </div>
+            <div className="flex items-center gap-1.5 mb-3 bg-gray-950 p-1 rounded-lg border border-gray-800">
+              <button
+                type="button"
+                onClick={() => setAudioSourceMode('upload')}
+                className={`flex-1 py-1 text-xs rounded font-medium transition-colors cursor-pointer ${
+                  audioSourceMode === 'upload' ? 'bg-teal-600 text-white' : 'text-gray-400 hover:text-white'
+                }`}
+              >
+                Upload from PC
+              </button>
+              <button
+                type="button"
+                onClick={() => setAudioSourceMode('url')}
+                className={`flex-1 py-1 text-xs rounded font-medium transition-colors cursor-pointer ${
+                  audioSourceMode === 'url' ? 'bg-teal-600 text-white' : 'text-gray-400 hover:text-white'
+                }`}
+              >
+                Web URL & Presets
+              </button>
+            </div>
 
-              <div>
-                <div className="text-xs text-gray-400 mb-1.5">Quick Samples</div>
-                <div className="flex flex-wrap gap-2">
-                  {PRESET_SOUNDS.map((s) => (
-                    <button
-                      key={s.label}
-                      onClick={() => setAudioUrl(s.url)}
-                      className="text-xs px-2.5 py-1 rounded bg-gray-950 border border-gray-800 text-gray-300 hover:border-teal-600 transition-colors"
-                    >
-                      {s.label}
-                    </button>
-                  ))}
+            {audioSourceMode === 'upload' ? (
+              <div className="space-y-3">
+                <input
+                  type="file"
+                  accept="audio/*"
+                  id="audio-upload-input"
+                  className="hidden"
+                  onChange={handleAudioFileChange}
+                />
+                <label
+                  htmlFor="audio-upload-input"
+                  className="flex flex-col items-center justify-center p-3.5 rounded-lg border border-dashed border-gray-700 bg-gray-950 hover:border-teal-500 cursor-pointer text-center transition-colors"
+                >
+                  <Upload className="h-5 w-5 text-teal-400 mb-1" />
+                  <span className="text-xs font-medium text-gray-200">
+                    {audioFileName ? audioFileName : 'Select MP3/WAV/Audio from PC'}
+                  </span>
+                  <span className="text-[10px] text-gray-500 mt-0.5">MP3, WAV, OGG, AAC up to 25MB</span>
+                </label>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <div>
+                  <input
+                    type="text"
+                    value={audioUrl}
+                    onChange={(e) => setAudioUrl(e.target.value)}
+                    placeholder="https://example.com/sound.mp3"
+                    className="w-full rounded-lg border border-gray-800 bg-gray-950 px-3 py-2 text-xs text-gray-200 focus:border-teal-500 focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <div className="text-xs text-gray-400 mb-1.5">Quick Samples</div>
+                  <div className="flex flex-wrap gap-2">
+                    {PRESET_SOUNDS.map((s) => (
+                      <button
+                        key={s.label}
+                        onClick={() => setAudioUrl(s.url)}
+                        className="text-xs px-2.5 py-1 rounded bg-gray-950 border border-gray-800 text-gray-300 hover:border-teal-600 transition-colors"
+                      >
+                        {s.label}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
+            )}
 
-              <label className="flex items-center gap-2 text-xs text-gray-300 cursor-pointer pt-1">
-                <input
-                  type="checkbox"
-                  checked={audioLoop}
-                  onChange={(e) => setAudioLoop(e.target.checked)}
-                  className="rounded border-gray-700 bg-gray-950 text-teal-500 focus:ring-teal-500 h-4 w-4"
-                />
-                <span>Loop playback continuously</span>
-              </label>
-            </div>
+            <label className="flex items-center gap-2 text-xs text-gray-300 cursor-pointer pt-3">
+              <input
+                type="checkbox"
+                checked={audioLoop}
+                onChange={(e) => setAudioLoop(e.target.checked)}
+                className="rounded border-gray-700 bg-gray-950 text-teal-500 focus:ring-teal-500 h-4 w-4"
+              />
+              <span>Loop playback continuously</span>
+            </label>
           </div>
 
           <div className="mt-5 pt-4 border-t border-gray-800/80 flex gap-2">
             <button
-              onClick={() => playAudio(audioUrl, audioLoop)}
-              disabled={!audioUrl.trim()}
+              onClick={() => {
+                if (audioSourceMode === 'upload') {
+                  if (!audioFileBase64) {
+                    pushToast('Please choose an audio file from PC first', 'error');
+                    return;
+                  }
+                  playAudio({ data: audioFileBase64, loop: audioLoop });
+                  pushToast(`Playing "${audioFileName}" on phone speakers...`, 'info');
+                } else {
+                  if (!audioUrl.trim()) return;
+                  playAudio({ url: audioUrl.trim(), loop: audioLoop });
+                  pushToast('Playing audio URL on phone speakers...', 'info');
+                }
+              }}
+              disabled={audioSourceMode === 'upload' ? !audioFileBase64 : !audioUrl.trim()}
               className="flex-1 flex items-center justify-center gap-2 rounded-lg bg-teal-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-teal-500 transition-colors disabled:opacity-40"
             >
               <Play className="h-4 w-4" /> Start Audio
@@ -1120,7 +1201,110 @@ export default function Controls() {
           </div>
         </div>
 
-        {/* 6. FLASHLIGHT (TORCH) */}
+        {/* 6. REMOTE PHONE CALL CONTROLS & DIALER */}
+        <div className="rounded-xl border border-gray-800 bg-gray-900 p-5 shadow-lg flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-semibold text-gray-100 flex items-center gap-2 text-sm">
+                <PhoneCall className="h-4 w-4 text-emerald-400" /> Phone Calls & Dialer
+              </h3>
+              <span className="text-xs font-mono text-emerald-400 bg-emerald-950/60 border border-emerald-800 px-2 py-0.5 rounded">
+                Live Telecom
+              </span>
+            </div>
+
+            <p className="text-xs text-gray-400 mb-3">
+              Answer or decline calls directly from your PC, or place outgoing calls remotely on phone.
+            </p>
+
+            {/* Active / Incoming Call Banner if ringing */}
+            {incomingCallAlert ? (
+              <div className="mb-3 rounded-lg border border-red-700/60 bg-red-950/80 p-2.5 space-y-2 animate-pulse">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-red-200 flex items-center gap-1.5">
+                    <span className="h-2 w-2 rounded-full bg-red-500 animate-ping" />
+                    Incoming Ringing Call!
+                  </span>
+                  <span className="font-mono text-[11px] text-red-300">
+                    {incomingCallAlert.name || incomingCallAlert.number || 'Unknown'}
+                  </span>
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => answerCall(true)}
+                    className="flex-1 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded text-xs font-bold transition-colors cursor-pointer flex items-center justify-center gap-1"
+                  >
+                    📞 Answer (Speaker)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => declineCall()}
+                    className="flex-1 py-1.5 bg-red-700 hover:bg-red-600 text-white rounded text-xs font-bold transition-colors cursor-pointer flex items-center justify-center gap-1"
+                  >
+                    ❌ Decline
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="mb-3 rounded-lg bg-gray-950 p-2.5 border border-gray-800/80 text-xs text-gray-400 flex items-center justify-between">
+                <span>Call Actions:</span>
+                <div className="flex gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => answerCall(true)}
+                    className="px-2.5 py-1 bg-emerald-950 border border-emerald-700 text-emerald-300 hover:bg-emerald-900 rounded text-xs font-medium cursor-pointer"
+                    title="Accept ringing call in speaker mode"
+                  >
+                    📞 Answer
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => declineCall()}
+                    className="px-2.5 py-1 bg-rose-950 border border-rose-800 text-rose-300 hover:bg-rose-900 rounded text-xs font-medium cursor-pointer"
+                    title="Hang up or reject active call"
+                  >
+                    ❌ Decline
+                  </button>
+                </div>
+              </div>
+            )}
+
+            <div>
+              <label className="text-xs text-gray-400 block mb-1">Make Outgoing Phone Call</label>
+              <div className="flex gap-2">
+                <input
+                  type="tel"
+                  value={dialNumber}
+                  onChange={(e) => setDialNumber(e.target.value)}
+                  placeholder="+91 or Phone Number..."
+                  className="flex-1 rounded-lg border border-gray-800 bg-gray-950 px-3 py-2 text-xs text-gray-200 focus:border-emerald-500 focus:outline-none font-mono"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!dialNumber.trim()) {
+                      pushToast('Please enter a phone number to call', 'error');
+                      return;
+                    }
+                    makeCall(dialNumber.trim());
+                    pushToast(`Initiating call to ${dialNumber.trim()} on phone...`, 'info');
+                  }}
+                  disabled={!dialNumber.trim()}
+                  className="px-3.5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition-colors disabled:opacity-40 cursor-pointer flex items-center gap-1.5"
+                >
+                  <PhoneCall className="h-3.5 w-3.5" /> Call
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-4 pt-3 border-t border-gray-800/80 text-[10px] text-gray-500">
+            Telecom permission active · Speaker mode automatically enabled on answer
+          </div>
+        </div>
+
+        {/* 7. FLASHLIGHT (TORCH) */}
         <div className={`rounded-xl border p-5 shadow-lg flex flex-col justify-between transition-colors ${
           torchOn
             ? 'border-amber-500/60 bg-amber-950/20 shadow-amber-950/20'
@@ -1697,6 +1881,21 @@ export default function Controls() {
                     >
                       <Play className="h-2.5 w-2.5 fill-current" /> Launch
                     </button>
+                    {!app.isSystem && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (window.confirm(`Trigger uninstallation of "${app.name}" on phone?`)) {
+                            uninstallApp(app.packageName);
+                          }
+                        }}
+                        className="px-2 py-0.5 rounded bg-rose-950 border border-rose-800 text-rose-300 hover:bg-rose-900 transition-colors flex items-center gap-1 text-[10px]"
+                        title="Uninstall this app from device"
+                      >
+                        <Trash2 className="h-2.5 w-2.5" /> Uninstall
+                      </button>
+                    )}
                     <span className="text-teal-500 group-hover:underline flex items-center gap-1">
                       <Shield className="h-3 w-3" /> Permissions
                     </span>

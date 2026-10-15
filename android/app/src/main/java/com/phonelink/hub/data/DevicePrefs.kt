@@ -93,6 +93,22 @@ object DevicePrefs {
         get() = prefs.getBoolean("feat_clipboard_sync", false)
         set(value) = prefs.edit().putBoolean("feat_clipboard_sync", value).apply()
 
+    var timelineTrackingEnabled: Boolean
+        get() = prefs.getBoolean("timeline_tracking_enabled", false)
+        set(value) = prefs.edit().putBoolean("timeline_tracking_enabled", value).apply()
+
+    var timelineMinRadiusMeters: Float
+        get() = prefs.getFloat("timeline_min_radius", 200f)
+        set(value) = prefs.edit().putFloat("timeline_min_radius", value).apply()
+
+    var timelineDwellMinutes: Int
+        get() = prefs.getInt("timeline_dwell_minutes", 5)
+        set(value) = prefs.edit().putInt("timeline_dwell_minutes", value).apply()
+
+    var offlineLocationBuffer: String
+        get() = prefs.getString("offline_loc_buffer", "[]") ?: "[]"
+        set(value) = prefs.edit().putString("offline_loc_buffer", value).apply()
+
     fun isConfigured(): Boolean = serverIp.isNotBlank()
 
     private fun generateAndStore(): String {
@@ -292,4 +308,31 @@ object Events {
     const val DND_STATUS_RESPONSE = "DND_STATUS_RESPONSE"
     const val DND_SET_COMMAND = "DND_SET_COMMAND"
     const val DND_SET_RESULT = "DND_SET_RESULT"
+
+    // Full File Manager operations
+    const val FILE_DELETE_COMMAND = "FILE_DELETE_COMMAND"
+    const val FILE_DELETE_RESULT = "FILE_DELETE_RESULT"
+    const val FILE_RENAME_COMMAND = "FILE_RENAME_COMMAND"
+    const val FILE_RENAME_RESULT = "FILE_RENAME_RESULT"
+    const val FILE_MKDIR_COMMAND = "FILE_MKDIR_COMMAND"
+    const val FILE_MKDIR_RESULT = "FILE_MKDIR_RESULT"
+    const val FILE_MOVE_COMMAND = "FILE_MOVE_COMMAND"
+    const val FILE_MOVE_RESULT = "FILE_MOVE_RESULT"
+    const val FILE_COPY_COMMAND = "FILE_COPY_COMMAND"
+    const val FILE_COPY_RESULT = "FILE_COPY_RESULT"
+
+    // Remote App Uninstaller
+    const val UNINSTALL_APP_COMMAND = "UNINSTALL_APP_COMMAND"
+    const val UNINSTALL_APP_RESULT = "UNINSTALL_APP_RESULT"
+
+    // Location offline batch sync
+    const val LOCATION_BATCH_UPDATE = "LOCATION_BATCH_UPDATE"
+
+    // Timeline / Trip recording remote control
+    const val TIMELINE_CONFIG_COMMAND = "TIMELINE_CONFIG_COMMAND"
+    const val TIMELINE_CONFIG_RESULT = "TIMELINE_CONFIG_RESULT"
+
+    // Remote Call outgoing dialer
+    const val CALL_OUTGOING_COMMAND = "CALL_OUTGOING_COMMAND"
+    const val CALL_OUTGOING_RESULT = "CALL_OUTGOING_RESULT"
 }

@@ -41,5 +41,30 @@ object AppLauncher {
             }
         }
     }
+
+    fun uninstallApp(context: Context, packageName: String): JSONObject {
+        return try {
+            val intent = Intent(Intent.ACTION_DELETE).apply {
+                data = android.net.Uri.parse("package:$packageName")
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            context.startActivity(intent)
+            Log.d(TAG, "Launched uninstall prompt for: $packageName")
+            JSONObject().apply {
+                put("deviceId", DevicePrefs.deviceId)
+                put("packageName", packageName)
+                put("success", true)
+                put("message", "Uninstall confirmation opened on device")
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error launching uninstall for $packageName", e)
+            JSONObject().apply {
+                put("deviceId", DevicePrefs.deviceId)
+                put("packageName", packageName)
+                put("success", false)
+                put("error", e.message ?: "Failed to prompt uninstall")
+            }
+        }
+    }
 }
 

