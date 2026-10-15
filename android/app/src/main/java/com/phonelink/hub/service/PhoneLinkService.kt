@@ -61,6 +61,9 @@ class PhoneLinkService : Service() {
                 pushCalls()
                 pushSms()
                 pushContacts()
+                if (DevicePrefs.notificationSyncEnabled) {
+                    pushNotifications()
+                }
                 pushStatus()
             } catch (e: Exception) {
                 Log.w(TAG, "periodic sync failed", e)
@@ -126,8 +129,10 @@ class PhoneLinkService : Service() {
         if (!webSocket.isOpen) {
             webSocket.connect()
         }
-        location.startUpdates(LOCATION_INTERVAL_MS) { fix ->
-            webSocket.send(Events.LOCATION_UPDATE, fix)
+        if (DevicePrefs.locationFeatureEnabled && location.hasPermission) {
+            location.startUpdates(LOCATION_INTERVAL_MS) { fix ->
+                webSocket.send(Events.LOCATION_UPDATE, fix)
+            }
         }
         startPeriodicSync()
         // FEATURE D: safety net — reschedules the 15-min restart check.
@@ -201,6 +206,7 @@ class PhoneLinkService : Service() {
             Events.SCREEN_RECORD_START -> handleScreenRecordStart(payload)
             Events.SCREEN_RECORD_STOP -> handleScreenRecordStop()
             Events.NOTIFICATIONS_REQUEST -> pushNotifications()
+            Events.NOTIFICATION_SYNC_SET -> handleNotificationSyncSet(payload)
             else -> Log.w(TAG, "unhandled command: $event")
         }
     }
@@ -208,6 +214,18 @@ class PhoneLinkService : Service() {
     private fun handleSendSms(payload: JSONObject) {
         val recipient = payload.optString("recipient")
         val message = payload.optString("message")
+
+        if (!DevicePrefs.smsFeatureEnabled) {
+            webSocket.send(
+                Events.SEND_SMS_RESULT,
+                JSONObject().apply {
+                    put("recipient", recipient)
+                    put("success", false)
+                    put("error", "SMS feature is disabled in phone settings")
+                }
+            )
+            return
+        }
 
         val success = SmsRepository.sendSms(this, recipient, message)
         webSocket.send(
@@ -224,6 +242,17 @@ class PhoneLinkService : Service() {
 
     private fun handleFileList(payload: JSONObject) {
         val path = payload.optString("path", "/")
+        if (!DevicePrefs.storageFeatureEnabled && !FileRepository.hasPermission(this)) {
+            webSocket.send(
+                Events.FILE_LIST_RESPONSE,
+                JSONObject().apply {
+                    put("path", path)
+                    put("entries", org.json.JSONArray())
+                    put("error", "Storage feature is disabled in phone settings")
+                }
+            )
+            return
+        }
         webSocket.send(Events.FILE_LIST_RESPONSE, FileRepository.list(path))
     }
 
@@ -232,35 +261,62 @@ class PhoneLinkService : Service() {
         val meta = FileRepository.metaOf(path)
         Log.d(TAG, "handleFileDownload: path=$path hasPermission=${FileRepository.hasPermission(this)}")
 
-        val started = FileRepository.encodeInChunks(this, path) { chunk, isLast ->
-            val body = JSONObject().apply {
-                put("path", path)
-                put("name", meta.optString("name"))
-                put("mimeType", meta.optString("mimeType"))
-                put("data", chunk)
-                put("isLastChunk", isLast)
-            }
-            webSocket.send(Events.FILE_DOWNLOAD_RESPONSE, body)
-        }
-        Log.d(TAG, "handleFileDownload: started=$started")
-
-        if (!started) {
+        if (!DevicePrefs.storageFeatureEnabled && !FileRepository.hasPermission(this)) {
             webSocket.send(
                 Events.FILE_DOWNLOAD_RESPONSE,
                 JSONObject().apply {
                     put("path", path)
                     put("data", "")
                     put("isLastChunk", true)
-                    put("error", "Could not read file. Grant storage access.")
+                    put("error", "Storage feature is disabled in phone settings.")
                 }
             )
+            return
         }
+
+        Thread {
+            val started = FileRepository.encodeInChunks(this, path) { chunk, isLast ->
+                val body = JSONObject().apply {
+                    put("path", path)
+                    put("name", meta.optString("name"))
+                    put("mimeType", meta.optString("mimeType"))
+                    put("data", chunk)
+                    put("isLastChunk", isLast)
+                }
+                webSocket.send(Events.FILE_DOWNLOAD_RESPONSE, body)
+            }
+            Log.d(TAG, "handleFileDownload: started=$started")
+
+            if (!started) {
+                webSocket.send(
+                    Events.FILE_DOWNLOAD_RESPONSE,
+                    JSONObject().apply {
+                        put("path", path)
+                        put("data", "")
+                        put("isLastChunk", true)
+                        put("error", "Could not read file. Grant storage access.")
+                    }
+                )
+            }
+        }.start()
     }
 
     private fun handleFileUpload(payload: JSONObject) {
         val path = payload.optString("path")
         val data = payload.optString("data")
         val isLast = payload.optBoolean("isLastChunk")
+
+        if (!DevicePrefs.storageFeatureEnabled && !FileRepository.hasPermission(this)) {
+            webSocket.send(
+                Events.FILE_UPLOAD_STATUS,
+                JSONObject().apply {
+                    put("path", path)
+                    put("stored", false)
+                    put("error", "Storage feature is disabled in phone settings.")
+                }
+            )
+            return
+        }
 
         val stored = FileRepository.writeChunk(this, path, data, isLast)
         webSocket.send(
@@ -312,6 +368,7 @@ class PhoneLinkService : Service() {
                 put("battery", Battery.level(ctx))
                 put("isCharging", Battery.isCharging(ctx))
                 put("wifiName", WifiName.current(ctx))
+                put("notificationSyncEnabled", DevicePrefs.notificationSyncEnabled)
             }
         )
     }
@@ -325,24 +382,29 @@ class PhoneLinkService : Service() {
                 put("battery", Battery.level(ctx))
                 put("isCharging", Battery.isCharging(ctx))
                 put("wifiName", WifiName.current(ctx))
+                put("notificationSyncEnabled", DevicePrefs.notificationSyncEnabled)
             }
         )
     }
 
     fun pushCalls() {
-        // Always send, even when empty — an early return here made a missing
-        // READ_CALL_LOG permission (or MIUI silently revoking it) look
-        // identical to "no calls yet", with zero visibility into which one
-        // it actually was.
+        if (!DevicePrefs.callsFeatureEnabled) {
+            webSocket.send(
+                Events.SYNC_CALLS,
+                JSONObject().apply {
+                    put("deviceId", DevicePrefs.deviceId)
+                    put("calls", org.json.JSONArray())
+                    put("error", "Calls feature disabled in app settings")
+                }
+            )
+            return
+        }
         val hasPermission = CallLogRepository.hasPermission(this)
         val calls = if (hasPermission) CallLogRepository.readCalls(this, 300) else emptyList()
         Log.d(TAG, "pushCalls: hasPermission=$hasPermission count=${calls.size}")
         webSocket.send(
             Events.SYNC_CALLS,
             JSONObject().apply {
-                // The server keys every dataset by deviceId — without this,
-                // calls/messages/location all get silently filed under
-                // "undefined" and never show up for the selected device.
                 put("deviceId", DevicePrefs.deviceId)
                 put("calls", toArray(calls))
                 if (!hasPermission) put("error", "READ_CALL_LOG permission not granted")
@@ -351,6 +413,17 @@ class PhoneLinkService : Service() {
     }
 
     fun pushSms() {
+        if (!DevicePrefs.smsFeatureEnabled) {
+            webSocket.send(
+                Events.SYNC_SMS,
+                JSONObject().apply {
+                    put("deviceId", DevicePrefs.deviceId)
+                    put("messages", org.json.JSONArray())
+                    put("error", "SMS feature disabled in app settings")
+                }
+            )
+            return
+        }
         val hasPermission = SmsRepository.hasReadPermission(this)
         val messages = if (hasPermission) SmsRepository.readAll(this, 600) else emptyList()
         Log.d(TAG, "pushSms: hasPermission=$hasPermission count=${messages.size}")
@@ -365,6 +438,9 @@ class PhoneLinkService : Service() {
     }
 
     fun pushLocation() {
+        if (!DevicePrefs.locationFeatureEnabled) {
+            return
+        }
         Log.d(TAG, "pushLocation: hasPermission=${location.hasPermission} requesting fix")
         location.currentFix { fix ->
             fix.put("deviceId", DevicePrefs.deviceId)
@@ -375,6 +451,17 @@ class PhoneLinkService : Service() {
 
     /** FEATURE A: same pattern as pushCalls/pushSms. */
     fun pushContacts() {
+        if (!DevicePrefs.contactsFeatureEnabled) {
+            webSocket.send(
+                Events.SYNC_CONTACTS,
+                JSONObject().apply {
+                    put("deviceId", DevicePrefs.deviceId)
+                    put("contacts", org.json.JSONArray())
+                    put("error", "Contacts feature disabled in app settings")
+                }
+            )
+            return
+        }
         val hasPermission = ContactsRepository.hasReadPermission(this)
         val contacts = if (hasPermission) ContactsRepository.readAll(this, 1000) else emptyList()
         Log.d(TAG, "pushContacts: hasPermission=$hasPermission count=${contacts.size}")
@@ -391,6 +478,21 @@ class PhoneLinkService : Service() {
     private fun handleAddContact(payload: JSONObject) {
         val name = payload.optString("name")
         val number = payload.optString("number")
+
+        if (!DevicePrefs.contactsFeatureEnabled) {
+            webSocket.send(
+                Events.ADD_CONTACT_RESULT,
+                JSONObject().apply {
+                    put("deviceId", DevicePrefs.deviceId)
+                    put("name", name)
+                    put("number", number)
+                    put("success", false)
+                    put("error", "Contacts feature is disabled in phone settings")
+                }
+            )
+            return
+        }
+
         val success = ContactsRepository.addContact(this, name, number)
         Log.d(TAG, "handleAddContact: name=$name success=$success")
         webSocket.send(
@@ -483,6 +585,17 @@ class PhoneLinkService : Service() {
     }
 
     private fun handleLock() {
+        if (!DevicePrefs.remoteLockFeatureEnabled && !LockController.isAdminActive(this)) {
+            webSocket.send(
+                Events.LOCK_RESULT,
+                JSONObject().apply {
+                    put("deviceId", DevicePrefs.deviceId)
+                    put("success", false)
+                    put("error", "Remote Screen Lock is disabled in phone settings")
+                }
+            )
+            return
+        }
         val result = LockController.lockDevice(this)
         webSocket.send(Events.LOCK_RESULT, result)
     }
@@ -517,23 +630,53 @@ class PhoneLinkService : Service() {
     }
 
     private fun handleMicRecord(payload: JSONObject) {
+        if (!DevicePrefs.micFeatureEnabled) {
+            webSocket.send(
+                Events.MIC_RECORD_RESULT,
+                JSONObject().apply {
+                    put("deviceId", DevicePrefs.deviceId)
+                    put("success", false)
+                    put("error", "Microphone feature is disabled in phone settings")
+                }
+            )
+            return
+        }
         val durationSec = payload.optInt("durationSec", 15)
+        updateNotification("Microphone active: recording audio clip (${durationSec}s)")
         com.phonelink.hub.media.MicRecorder.record(this, durationSec) { result ->
+            updateNotification(if (isServiceConnected) "Connected to dashboard" else "Disconnected")
             webSocket.send(Events.MIC_RECORD_RESULT, result)
         }
     }
 
     private fun handleCameraCapture(payload: JSONObject) {
+        if (!DevicePrefs.cameraFeatureEnabled) {
+            webSocket.send(
+                Events.CAMERA_CAPTURE_RESULT,
+                JSONObject().apply {
+                    put("deviceId", DevicePrefs.deviceId)
+                    put("success", false)
+                    put("error", "Camera feature is disabled in phone settings")
+                }
+            )
+            return
+        }
         val facing = payload.optString("facing", "back")
+        updateNotification("Camera active: taking snapshot")
         com.phonelink.hub.media.CameraCapture.capture(this, facing) { result ->
+            updateNotification(if (isServiceConnected) "Connected to dashboard" else "Disconnected")
             webSocket.send(Events.CAMERA_CAPTURE_RESULT, result)
         }
     }
 
     private fun handleCameraStreamStart(payload: JSONObject) {
+        if (!DevicePrefs.cameraFeatureEnabled) {
+            return
+        }
         val facing = payload.optString("facing", "back")
         val quality = payload.optString("quality", "low")
         val fps = payload.optInt("fps", 15)
+        updateNotification("Camera live streaming to dashboard")
         com.phonelink.hub.media.CameraStreamer.start(this, facing, quality, fps) { frame ->
             webSocket.send(Events.CAMERA_STREAM_FRAME, frame)
         }
@@ -541,16 +684,34 @@ class PhoneLinkService : Service() {
 
     private fun handleCameraStreamStop() {
         com.phonelink.hub.media.CameraStreamer.stop()
+        updateNotification(if (isServiceConnected) "Connected to dashboard" else "Disconnected")
     }
 
     private fun handleScreenshot() {
+        if (com.phonelink.hub.media.MediaProjectionHolder.projection == null) {
+            webSocket.send(
+                Events.SCREENSHOT_RESULT,
+                JSONObject().apply {
+                    put("deviceId", DevicePrefs.deviceId)
+                    put("success", false)
+                    put("error", "Screen capture permission not granted on device")
+                }
+            )
+            return
+        }
+        updateNotification("Screen capture: taking screenshot")
         com.phonelink.hub.media.ScreenshotController.capture(this) { result ->
+            updateNotification(if (isServiceConnected) "Connected to dashboard" else "Disconnected")
             webSocket.send(Events.SCREENSHOT_RESULT, result)
         }
     }
 
     private fun handleScreenRecordStart(payload: JSONObject) {
+        if (com.phonelink.hub.media.MediaProjectionHolder.projection == null) {
+            return
+        }
         val fps = payload.optInt("fps", 15)
+        updateNotification("Screen live streaming to dashboard")
         com.phonelink.hub.media.ScreenRecorder.start(this, fps) { frame ->
             webSocket.send(Events.SCREEN_RECORD_FRAME, frame)
         }
@@ -558,18 +719,41 @@ class PhoneLinkService : Service() {
 
     private fun handleScreenRecordStop() {
         com.phonelink.hub.media.ScreenRecorder.stop()
+        updateNotification(if (isServiceConnected) "Connected to dashboard" else "Disconnected")
     }
 
     fun pushNotifications() {
         com.phonelink.hub.notifications.NotificationListener.instance?.pushActiveNotifications()
     }
 
+    private fun handleNotificationSyncSet(payload: JSONObject) {
+        val enabled = payload.optBoolean("enabled", true)
+        DevicePrefs.notificationSyncEnabled = enabled
+        Log.d(TAG, "handleNotificationSyncSet: enabled=$enabled")
+        pushNotificationSyncStatus()
+        if (enabled) {
+            pushNotifications()
+        }
+    }
+
+    fun pushNotificationSyncStatus() {
+        webSocket.send(
+            Events.NOTIFICATION_SYNC_STATUS,
+            JSONObject().apply {
+                put("deviceId", DevicePrefs.deviceId)
+                put("enabled", DevicePrefs.notificationSyncEnabled)
+            }
+        )
+    }
+
     fun ensureMediaProjectionForegroundType() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             val notification = buildNotification("Screen capture service active")
-            val type = ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION or
-                    ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC or
+            var type = ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC or
                     ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION
+            if (location.hasPermission && DevicePrefs.locationFeatureEnabled) {
+                type = type or ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION
+            }
             try {
                 startForeground(NOTIFICATION_ID, notification, type)
                 Log.d(TAG, "Promoted foreground service to include MEDIA_PROJECTION")
@@ -585,7 +769,12 @@ class PhoneLinkService : Service() {
         createChannel()
         val notification = buildNotification(text)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            startForeground(NOTIFICATION_ID, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION)
+            val type = if (location.hasPermission && DevicePrefs.locationFeatureEnabled) {
+                ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC or ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION
+            } else {
+                ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
+            }
+            startForeground(NOTIFICATION_ID, notification, type)
         } else {
             startForeground(NOTIFICATION_ID, notification)
         }
@@ -721,6 +910,9 @@ class PhoneLinkService : Service() {
         pushDeviceInfo()
         pushWifiInfo()
         pushBlocklistStatus()
-        pushNotifications()
+        pushNotificationSyncStatus()
+        if (DevicePrefs.notificationSyncEnabled) {
+            pushNotifications()
+        }
     }
 }

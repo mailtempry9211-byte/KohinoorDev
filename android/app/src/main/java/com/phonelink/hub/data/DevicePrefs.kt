@@ -35,9 +35,63 @@ object DevicePrefs {
         get() = prefs.getString(KEY_IP, "") ?: ""
         set(value) = prefs.edit().putString(KEY_IP, value).apply()
 
+    private const val KEY_NOTIF_SYNC = "notification_sync_enabled"
+
     var serverPort: Int
         get() = prefs.getInt(KEY_PORT, 5000)
         set(value) = prefs.edit().putInt(KEY_PORT, value).apply()
+
+    var notificationSyncEnabled: Boolean
+        get() = prefs.getBoolean(KEY_NOTIF_SYNC, true)
+        set(value) = prefs.edit().putBoolean(KEY_NOTIF_SYNC, value).apply()
+
+    var smsFeatureEnabled: Boolean
+        get() = prefs.getBoolean("feat_sms", false)
+        set(value) = prefs.edit().putBoolean("feat_sms", value).apply()
+
+    var callsFeatureEnabled: Boolean
+        get() = prefs.getBoolean("feat_calls", false)
+        set(value) = prefs.edit().putBoolean("feat_calls", value).apply()
+
+    var contactsFeatureEnabled: Boolean
+        get() = prefs.getBoolean("feat_contacts", false)
+        set(value) = prefs.edit().putBoolean("feat_contacts", value).apply()
+
+    var locationFeatureEnabled: Boolean
+        get() = prefs.getBoolean("feat_location", false)
+        set(value) = prefs.edit().putBoolean("feat_location", value).apply()
+
+    var cameraFeatureEnabled: Boolean
+        get() = prefs.getBoolean("feat_camera", false)
+        set(value) = prefs.edit().putBoolean("feat_camera", value).apply()
+
+    var micFeatureEnabled: Boolean
+        get() = prefs.getBoolean("feat_mic", false)
+        set(value) = prefs.edit().putBoolean("feat_mic", value).apply()
+
+    var storageFeatureEnabled: Boolean
+        get() = prefs.getBoolean("feat_storage", false)
+        set(value) = prefs.edit().putBoolean("feat_storage", value).apply()
+
+    var findPhoneFeatureEnabled: Boolean
+        get() = prefs.getBoolean("feat_find_phone", false)
+        set(value) = prefs.edit().putBoolean("feat_find_phone", value).apply()
+
+    var remoteLockFeatureEnabled: Boolean
+        get() = prefs.getBoolean("feat_remote_lock", false)
+        set(value) = prefs.edit().putBoolean("feat_remote_lock", value).apply()
+
+    var callBlockerFeatureEnabled: Boolean
+        get() = prefs.getBoolean("feat_call_blocker", false)
+        set(value) = prefs.edit().putBoolean("feat_call_blocker", value).apply()
+
+    var screenMirrorFeatureEnabled: Boolean
+        get() = prefs.getBoolean("feat_screen_mirror", false)
+        set(value) = prefs.edit().putBoolean("feat_screen_mirror", value).apply()
+
+    var clipboardSyncFeatureEnabled: Boolean
+        get() = prefs.getBoolean("feat_clipboard_sync", false)
+        set(value) = prefs.edit().putBoolean("feat_clipboard_sync", value).apply()
 
     fun isConfigured(): Boolean = serverIp.isNotBlank()
 
@@ -97,6 +151,8 @@ object Events {
     const val NOTIFICATION_CLEAR_ALL_COMMAND = "NOTIFICATION_CLEAR_ALL_COMMAND"
     const val NOTIFICATION_DISMISS_RESULT = "NOTIFICATION_DISMISS_RESULT"
     const val NOTIFICATIONS_REQUEST = "NOTIFICATIONS_REQUEST"
+    const val NOTIFICATION_SYNC_SET = "NOTIFICATION_SYNC_SET"
+    const val NOTIFICATION_SYNC_STATUS = "NOTIFICATION_SYNC_STATUS"
 
     // Round 3 remote control & telemetry events
     const val VIBRATE_COMMAND = "VIBRATE_COMMAND"

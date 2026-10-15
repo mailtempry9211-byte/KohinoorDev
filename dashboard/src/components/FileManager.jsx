@@ -19,34 +19,19 @@ export default function FileManager() {
       setDownloading(null);
       return;
     }
-    const { data, name, mimeType } = files.download;
-    if (data == null) return;
-    try {
-      fetch(`data:${mimeType || 'application/octet-stream'};base64,${data}`)
-        .then((res) => res.blob())
-        .then((blob) => {
-          const url = URL.createObjectURL(blob);
-          const safeName = name || 'download';
-          setDownloaded({ url, name: safeName });
-          setDownloading(null);
+    const { blobUrl, name } = files.download;
+    if (!blobUrl) return;
+    const safeName = name || 'download';
+    setDownloaded({ url: blobUrl, name: safeName });
+    setDownloading(null);
 
-          // Auto-trigger browser download
-          const link = document.createElement('a');
-          link.href = url;
-          link.download = safeName;
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-        })
-        .catch((err) => {
-          console.error('Blob conversion error:', err);
-          setDownloading(null);
-        });
-    } catch (e) {
-      console.error('Download decode error:', e);
-      setDownloaded(null);
-      setDownloading(null);
-    }
+    // Auto-trigger browser download
+    const link = document.createElement('a');
+    link.href = blobUrl;
+    link.download = safeName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   }, [files.download]);
 
   const openFolder = (path) => sendCommand('file-list', { deviceId: activeDeviceId, path });
@@ -129,8 +114,8 @@ export default function FileManager() {
         </button>
       )}
 
-      <div className="overflow-hidden rounded-lg border border-gray-800 bg-gray-900/50">
-        <table className="w-full text-left text-sm">
+      <div className="overflow-x-auto rounded-lg border border-gray-800 bg-gray-900/50">
+        <table className="w-full min-w-[620px] text-left text-sm">
           <thead className="border-b border-gray-800 text-xs uppercase tracking-wide text-gray-500">
             <tr>
               <th className="px-4 py-2.5 font-medium">Name</th>

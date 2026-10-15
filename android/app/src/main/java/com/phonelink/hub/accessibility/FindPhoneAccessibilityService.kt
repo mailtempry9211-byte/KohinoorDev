@@ -13,7 +13,13 @@ class FindPhoneAccessibilityService : AccessibilityService() {
 
     override fun onServiceConnected() {
         super.onServiceConnected()
+        instance = this
         Log.i(TAG, "find-phone accessibility service connected")
+    }
+
+    override fun onDestroy() {
+        instance = null
+        super.onDestroy()
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
@@ -25,5 +31,8 @@ class FindPhoneAccessibilityService : AccessibilityService() {
 
     companion object {
         private const val TAG = "FindPhoneAccService"
+        @Volatile
+        var instance: FindPhoneAccessibilityService? = null
+            private set
     }
 }

@@ -3,6 +3,7 @@ package com.phonelink.hub
 import android.Manifest
 import android.content.ComponentName
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -13,13 +14,22 @@ import android.text.TextUtils
 import android.view.View
 import android.widget.Button
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.materialswitch.MaterialSwitch
 import com.google.android.material.textfield.TextInputEditText
+import com.phonelink.hub.accessibility.FindPhoneAccessibilityService
 import com.phonelink.hub.data.DevicePrefs
 import com.phonelink.hub.files.FileRepository
+import com.phonelink.hub.media.MediaProjectionHolder
+import com.phonelink.hub.media.ScreenshotConsentActivity
+import com.phonelink.hub.notifications.NotificationListener
+import com.phonelink.hub.remote.LockController
 import com.phonelink.hub.service.PhoneLinkService
+import com.phonelink.hub.util.AutostartHelper
 
 class MainActivity : AppCompatActivity() {
 
@@ -28,69 +38,403 @@ class MainActivity : AppCompatActivity() {
     private lateinit var nameInput: TextInputEditText
     private lateinit var statusDot: View
     private lateinit var statusText: TextView
-    private lateinit var notifyText: TextView
+
+    // Feature switches
+    private lateinit var smsSwitch: MaterialSwitch
+    private lateinit var callsSwitch: MaterialSwitch
+    private lateinit var contactsSwitch: MaterialSwitch
+    private lateinit var locationSwitch: MaterialSwitch
+    private lateinit var cameraSwitch: MaterialSwitch
+    private lateinit var micSwitch: MaterialSwitch
+    private lateinit var storageSwitch: MaterialSwitch
+    private lateinit var screenSwitch: MaterialSwitch
+    private lateinit var findPhoneSwitch: MaterialSwitch
+    private lateinit var deviceAdminSwitch: MaterialSwitch
+    private lateinit var callBlockerSwitch: MaterialSwitch
+    private lateinit var notifSyncSwitch: MaterialSwitch
 
     private val statusHandler = Handler(Looper.getMainLooper())
     private var statusRefreshing = false
 
-    private val permissionLauncher = registerForActivityResult(
+    // Lazy, one-by-one runtime permission launchers
+    private val smsLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
-    ) { /* granted or not, the service adapts */ }
+    ) { results ->
+        val granted = results.values.any { it }
+        DevicePrefs.smsFeatureEnabled = granted
+        smsSwitch.isChecked = granted
+        if (granted) {
+            PhoneLinkService.instance?.pushSms()
+        } else {
+            Toast.makeText(this, "SMS permissions denied", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private val callsLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { results ->
+        val granted = results.values.any { it }
+        DevicePrefs.callsFeatureEnabled = granted
+        callsSwitch.isChecked = granted
+        if (granted) {
+            PhoneLinkService.instance?.pushCalls()
+        } else {
+            Toast.makeText(this, "Call permissions denied", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private val contactsLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { results ->
+        val granted = results.values.any { it }
+        DevicePrefs.contactsFeatureEnabled = granted
+        contactsSwitch.isChecked = granted
+        if (granted) {
+            PhoneLinkService.instance?.pushContacts()
+        } else {
+            Toast.makeText(this, "Contacts permissions denied", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private val locationLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { results ->
+        val granted = results.values.any { it }
+        DevicePrefs.locationFeatureEnabled = granted
+        locationSwitch.isChecked = granted
+        if (granted) {
+            PhoneLinkService.instance?.pushLocation()
+        } else {
+            Toast.makeText(this, "Location permission denied", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private val cameraLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        DevicePrefs.cameraFeatureEnabled = granted
+        cameraSwitch.isChecked = granted
+        if (!granted) {
+            Toast.makeText(this, "Camera permission denied", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private val micLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        DevicePrefs.micFeatureEnabled = granted
+        micSwitch.isChecked = granted
+        if (!granted) {
+            Toast.makeText(this, "Microphone permission denied", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private val legacyStorageLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { results ->
+        val granted = results.values.any { it }
+        DevicePrefs.storageFeatureEnabled = granted
+        storageSwitch.isChecked = granted
+        if (!granted) {
+            Toast.makeText(this, "Storage permission denied", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private val notificationPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { /* Service foreground notification */ }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         DevicePrefs.init(this)
         setContentView(R.layout.activity_main)
 
-        ipInput = findViewById<TextInputEditText>(R.id.serverIpInput)
-        portInput = findViewById<TextInputEditText>(R.id.serverPortInput)
-        nameInput = findViewById<TextInputEditText>(R.id.deviceNameInput)
-        statusDot = findViewById<View>(R.id.statusDot)
-        statusText = findViewById<TextView>(R.id.statusText)
-        notifyText = findViewById<TextView>(R.id.notifyAccessText)
+        bindViews()
+        setupListeners()
+    }
 
-        findViewById<Button>(R.id.grantStorageBtn).setOnClickListener { requestStorage() }
+    private fun bindViews() {
+        ipInput = findViewById(R.id.serverIpInput)
+        portInput = findViewById(R.id.serverPortInput)
+        nameInput = findViewById(R.id.deviceNameInput)
+        statusDot = findViewById(R.id.statusDot)
+        statusText = findViewById(R.id.statusText)
+
+        smsSwitch = findViewById(R.id.smsSwitch)
+        callsSwitch = findViewById(R.id.callsSwitch)
+        contactsSwitch = findViewById(R.id.contactsSwitch)
+        locationSwitch = findViewById(R.id.locationSwitch)
+        cameraSwitch = findViewById(R.id.cameraSwitch)
+        micSwitch = findViewById(R.id.micSwitch)
+        storageSwitch = findViewById(R.id.storageSwitch)
+        screenSwitch = findViewById(R.id.screenSwitch)
+        findPhoneSwitch = findViewById(R.id.findPhoneSwitch)
+        deviceAdminSwitch = findViewById(R.id.deviceAdminSwitch)
+        callBlockerSwitch = findViewById(R.id.callBlockerSwitch)
+        notifSyncSwitch = findViewById(R.id.notifSyncSwitch)
+    }
+
+    private fun setupListeners() {
         findViewById<Button>(R.id.batteryBtn).setOnClickListener { requestBatteryExemption() }
         findViewById<Button>(R.id.autostartBtn).setOnClickListener {
-            com.phonelink.hub.util.AutostartHelper.openAutostartSettings(this)
+            AutostartHelper.openAutostartSettings(this)
         }
-        findViewById<Button>(R.id.findPhoneBtn).setOnClickListener { openAccessibilitySettings() }
-        findViewById<Button>(R.id.deviceAdminBtn).setOnClickListener {
-            if (!com.phonelink.hub.remote.LockController.isAdminActive(this)) {
-                startActivity(com.phonelink.hub.remote.LockController.getAdminIntent(this))
-            } else {
-                android.widget.Toast.makeText(this, "Device Admin already active", android.widget.Toast.LENGTH_SHORT).show()
-            }
-        }
-        findViewById<Button>(R.id.callBlockerRoleBtn).setOnClickListener {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                val rm = getSystemService(android.app.role.RoleManager::class.java)
-                if (rm != null && rm.isRoleAvailable(android.app.role.RoleManager.ROLE_CALL_SCREENING)) {
-                    if (!rm.isRoleHeld(android.app.role.RoleManager.ROLE_CALL_SCREENING)) {
-                        startActivity(rm.createRequestRoleIntent(android.app.role.RoleManager.ROLE_CALL_SCREENING))
-                    } else {
-                        android.widget.Toast.makeText(this, "Call Screening role is already active", android.widget.Toast.LENGTH_SHORT).show()
-                    }
-                }
-            } else {
-                android.widget.Toast.makeText(this, "Call Screening is active on this Android version", android.widget.Toast.LENGTH_SHORT).show()
-            }
-        }
-        findViewById<Button>(R.id.screenCaptureConsentBtn).setOnClickListener {
-            com.phonelink.hub.media.ScreenshotConsentActivity.launch(this)
-        }
-        findViewById<Button>(R.id.notifyAccessBtn).setOnClickListener { openNotificationAccessSettings() }
         findViewById<Button>(R.id.startBtn).setOnClickListener { startService() }
         findViewById<Button>(R.id.stopBtn).setOnClickListener { stopService() }
         findViewById<Button>(R.id.syncNowBtn).setOnClickListener { PhoneLinkService.instance?.syncAll() }
 
-        requestAppPermissions()
+        // Feature 1: SMS
+        smsSwitch.setOnClickListener {
+            if (smsSwitch.isChecked) {
+                smsSwitch.isChecked = false
+                showRationaleDialog(
+                    title = "Enable SMS Relay?",
+                    message = "SMS Relay allows you to read and send SMS from your self-hosted PC dashboard.\n\n" +
+                            "Privacy Guarantee: Messages stay strictly on your local network between your phone and your private dashboard. No data is sent to external servers."
+                ) {
+                    smsLauncher.launch(
+                        arrayOf(
+                            Manifest.permission.READ_SMS,
+                            Manifest.permission.RECEIVE_SMS,
+                            Manifest.permission.SEND_SMS
+                        )
+                    )
+                }
+            } else {
+                DevicePrefs.smsFeatureEnabled = false
+            }
+        }
+
+        // Feature 2: Calls
+        callsSwitch.setOnClickListener {
+            if (callsSwitch.isChecked) {
+                callsSwitch.isChecked = false
+                showRationaleDialog(
+                    title = "Enable Call Logs & Alerts?",
+                    message = "This displays your recent call log and notifies your PC in real-time when the phone is ringing.\n\n" +
+                            "Privacy Guarantee: Call logs are transferred solely to your private PC over local WiFi."
+                ) {
+                    callsLauncher.launch(
+                        arrayOf(
+                            Manifest.permission.READ_CALL_LOG,
+                            Manifest.permission.READ_PHONE_STATE
+                        )
+                    )
+                }
+            } else {
+                DevicePrefs.callsFeatureEnabled = false
+            }
+        }
+
+        // Feature 3: Contacts
+        contactsSwitch.setOnClickListener {
+            if (contactsSwitch.isChecked) {
+                contactsSwitch.isChecked = false
+                showRationaleDialog(
+                    title = "Enable Contacts Sync?",
+                    message = "Allows you to view phone contacts on your desktop dashboard and add new contacts remotely.\n\n" +
+                            "Privacy Guarantee: Contact details are shared exclusively with your self-hosted dashboard."
+                ) {
+                    contactsLauncher.launch(
+                        arrayOf(
+                            Manifest.permission.READ_CONTACTS,
+                            Manifest.permission.WRITE_CONTACTS
+                        )
+                    )
+                }
+            } else {
+                DevicePrefs.contactsFeatureEnabled = false
+            }
+        }
+
+        // Feature 4: Location
+        locationSwitch.setOnClickListener {
+            if (locationSwitch.isChecked) {
+                locationSwitch.isChecked = false
+                showRationaleDialog(
+                    title = "Enable Device Location?",
+                    message = "Shares your device GPS and network coordinates with your PC dashboard map.\n\n" +
+                            "Privacy Guarantee: Location data is sent only to your own LAN dashboard while the service is running. No background tracking servers exist."
+                ) {
+                    locationLauncher.launch(
+                        arrayOf(
+                            Manifest.permission.ACCESS_FINE_LOCATION,
+                            Manifest.permission.ACCESS_COARSE_LOCATION
+                        )
+                    )
+                }
+            } else {
+                DevicePrefs.locationFeatureEnabled = false
+            }
+        }
+
+        // Feature 5: Camera
+        cameraSwitch.setOnClickListener {
+            if (cameraSwitch.isChecked) {
+                cameraSwitch.isChecked = false
+                showRationaleDialog(
+                    title = "Enable Camera Live Stream?",
+                    message = "Allows capturing one-shot photos or streaming live video (pet/room monitor) to your private dashboard.\n\n" +
+                            "Privacy Guarantee: Camera streams are rendered directly to your local computer. A persistent notification is shown whenever the camera is actively transmitting."
+                ) {
+                    cameraLauncher.launch(Manifest.permission.CAMERA)
+                }
+            } else {
+                DevicePrefs.cameraFeatureEnabled = false
+            }
+        }
+
+        // Feature 6: Microphone
+        micSwitch.setOnClickListener {
+            if (micSwitch.isChecked) {
+                micSwitch.isChecked = false
+                showRationaleDialog(
+                    title = "Enable Microphone Recording?",
+                    message = "Records short audio clips on request to help locate your device or listen nearby.\n\n" +
+                            "Privacy Guarantee: Audio recordings remain strictly on your local PC. An active notification is visible whenever recording is in progress."
+                ) {
+                    micLauncher.launch(Manifest.permission.RECORD_AUDIO)
+                }
+            } else {
+                DevicePrefs.micFeatureEnabled = false
+            }
+        }
+
+        // Feature 7: Storage
+        storageSwitch.setOnClickListener {
+            if (storageSwitch.isChecked) {
+                storageSwitch.isChecked = false
+                showRationaleDialog(
+                    title = "Enable File Explorer?",
+                    message = "Grants access to internal storage so you can download, browse, and upload files from your desktop browser over local WiFi."
+                ) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                        try {
+                            startActivity(FileRepository.storageSettingsIntent(this))
+                        } catch (e: Exception) {
+                            Toast.makeText(this, "Could not open storage settings", Toast.LENGTH_SHORT).show()
+                        }
+                    } else {
+                        legacyStorageLauncher.launch(
+                            arrayOf(
+                                Manifest.permission.READ_EXTERNAL_STORAGE,
+                                Manifest.permission.WRITE_EXTERNAL_STORAGE
+                            )
+                        )
+                    }
+                }
+            } else {
+                DevicePrefs.storageFeatureEnabled = false
+            }
+        }
+
+        // Feature 8: Screen Mirror
+        screenSwitch.setOnClickListener {
+            if (screenSwitch.isChecked) {
+                screenSwitch.isChecked = false
+                showRationaleDialog(
+                    title = "Enable Screen View & Screenshot?",
+                    message = "Streams your phone screen or takes screenshots for your private PC dashboard.\n\n" +
+                            "For your protection, Android will present a system authorization prompt ('Start now') every session."
+                ) {
+                    ScreenshotConsentActivity.launch(this)
+                }
+            } else {
+                DevicePrefs.screenMirrorFeatureEnabled = false
+                MediaProjectionHolder.release()
+            }
+        }
+
+        // Feature 9: Find Phone
+        findPhoneSwitch.setOnClickListener {
+            if (findPhoneSwitch.isChecked) {
+                findPhoneSwitch.isChecked = false
+                showRationaleDialog(
+                    title = "Enable Find My Phone?",
+                    message = "Uses a minimal Accessibility Service solely to allow the ring alarm to sound at full volume even when the phone is on silent or DND.\n\n" +
+                            "Disclosure: This service does NOT read your screen text, inspect touch inputs, or perform automated gestures."
+                ) {
+                    openAccessibilitySettings()
+                }
+            } else {
+                DevicePrefs.findPhoneFeatureEnabled = false
+            }
+        }
+
+        // Feature 10: Remote Lock
+        deviceAdminSwitch.setOnClickListener {
+            if (deviceAdminSwitch.isChecked) {
+                deviceAdminSwitch.isChecked = false
+                showRationaleDialog(
+                    title = "Enable Remote Screen Lock?",
+                    message = "Uses Android Device Administrator privileges solely to turn off and lock your screen when you click 'Lock Phone' from your PC dashboard.\n\n" +
+                            "Disclosure: It cannot wipe data or change device passwords."
+                ) {
+                    if (!LockController.isAdminActive(this)) {
+                        startActivity(LockController.getAdminIntent(this))
+                    }
+                }
+            } else {
+                DevicePrefs.remoteLockFeatureEnabled = false
+            }
+        }
+
+        // Feature 11: Call Blocker
+        callBlockerSwitch.setOnClickListener {
+            if (callBlockerSwitch.isChecked) {
+                callBlockerSwitch.isChecked = false
+                showRationaleDialog(
+                    title = "Enable Call Screening & Blocker?",
+                    message = "Allows Phone Link Hub to evaluate incoming numbers against your custom blocklist configured on the dashboard and silence unwanted callers."
+                ) {
+                    requestCallScreeningRole()
+                }
+            } else {
+                DevicePrefs.callBlockerFeatureEnabled = false
+            }
+        }
+
+        // Feature 12: Notification Mirroring
+        notifSyncSwitch.setOnClickListener {
+            if (notifSyncSwitch.isChecked) {
+                if (!isNotificationListenerEnabled()) {
+                    notifSyncSwitch.isChecked = false
+                    showRationaleDialog(
+                        title = "Enable Notification Mirroring?",
+                        message = "Mirrors incoming notifications to your desktop dashboard in real time over your local network.\n\n" +
+                                "Privacy Guarantee: Notification contents are sent directly to your self-hosted PC. You can dismiss notifications remotely."
+                    ) {
+                        openNotificationAccessSettings()
+                    }
+                } else {
+                    DevicePrefs.notificationSyncEnabled = true
+                    PhoneLinkService.instance?.pushNotificationSyncStatus()
+                    PhoneLinkService.instance?.pushNotifications()
+                }
+            } else {
+                DevicePrefs.notificationSyncEnabled = false
+                PhoneLinkService.instance?.pushNotificationSyncStatus()
+            }
+        }
+    }
+
+    private fun showRationaleDialog(
+        title: String,
+        message: String,
+        onAccept: () -> Unit
+    ) {
+        MaterialAlertDialogBuilder(this)
+            .setTitle(title)
+            .setMessage(message)
+            .setPositiveButton("Allow & Proceed") { _, _ -> onAccept() }
+            .setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss() }
+            .show()
     }
 
     override fun onResume() {
         super.onResume()
         loadConfig()
-        refreshNotificationAccess()
+        refreshFeatureSwitches()
         startStatusRefresh()
     }
 
@@ -98,6 +442,54 @@ class MainActivity : AppCompatActivity() {
         super.onPause()
         statusRefreshing = false
         statusHandler.removeCallbacksAndMessages(null)
+    }
+
+    private fun refreshFeatureSwitches() {
+        // SMS
+        val hasSms = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_SMS) == PackageManager.PERMISSION_GRANTED
+        smsSwitch.isChecked = hasSms && DevicePrefs.smsFeatureEnabled
+
+        // Calls
+        val hasCalls = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CALL_LOG) == PackageManager.PERMISSION_GRANTED
+        callsSwitch.isChecked = hasCalls && DevicePrefs.callsFeatureEnabled
+
+        // Contacts
+        val hasContacts = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CONTACTS) == PackageManager.PERMISSION_GRANTED
+        contactsSwitch.isChecked = hasContacts && DevicePrefs.contactsFeatureEnabled
+
+        // Location
+        val hasLocation = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+        locationSwitch.isChecked = hasLocation && DevicePrefs.locationFeatureEnabled
+
+        // Camera
+        val hasCamera = ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
+        cameraSwitch.isChecked = hasCamera && DevicePrefs.cameraFeatureEnabled
+
+        // Mic
+        val hasMic = ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
+        micSwitch.isChecked = hasMic && DevicePrefs.micFeatureEnabled
+
+        // Storage
+        val hasStorage = FileRepository.hasPermission(this)
+        storageSwitch.isChecked = hasStorage && DevicePrefs.storageFeatureEnabled
+
+        // Screen
+        screenSwitch.isChecked = MediaProjectionHolder.projection != null
+
+        // Find Phone
+        val hasAcc = FindPhoneAccessibilityService.instance != null
+        findPhoneSwitch.isChecked = hasAcc
+
+        // Device Admin
+        val hasAdmin = LockController.isAdminActive(this)
+        deviceAdminSwitch.isChecked = hasAdmin
+
+        // Call Blocker
+        callBlockerSwitch.isChecked = DevicePrefs.callBlockerFeatureEnabled
+
+        // Notification Mirroring
+        val hasNotif = isNotificationListenerEnabled()
+        notifSyncSwitch.isChecked = hasNotif && DevicePrefs.notificationSyncEnabled
     }
 
     private fun loadConfig() {
@@ -114,6 +506,14 @@ class MainActivity : AppCompatActivity() {
 
     private fun startService() {
         saveConfig()
+
+        // Request POST_NOTIFICATIONS on Android 13+ so the foreground service notification shows
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            }
+        }
+
         PhoneLinkService.resetReceiverState()
         PhoneLinkService.start(this)
         statusText.text = "Starting…"
@@ -124,86 +524,77 @@ class MainActivity : AppCompatActivity() {
         statusText.text = "Disconnected"
     }
 
-    private fun requestStorage() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            if (!FileRepository.hasFullStorageAccess()) {
-                startActivity(FileRepository.storageSettingsIntent(this))
-            }
-        }
-    }
-
     private fun requestBatteryExemption() {
         val power = getSystemService(android.os.PowerManager::class.java)
-        if (power?.isIgnoringBatteryOptimizations(packageName) == true) return
+        if (power?.isIgnoringBatteryOptimizations(packageName) == true) {
+            Toast.makeText(this, "Battery optimization is already disabled", Toast.LENGTH_SHORT).show()
+            return
+        }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             try {
                 startActivity(
-                    android.content.Intent(
-                        android.provider.Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
+                    Intent(
+                        Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
                         android.net.Uri.fromParts("package", packageName, null)
                     )
                 )
             } catch (e: Exception) {
-                startActivity(android.content.Intent(android.provider.Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS))
+                startActivity(Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS))
             }
         }
     }
 
     private fun openNotificationAccessSettings() {
-        startActivity(android.content.Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
-    }
-
-    /** FEATURE C: Android never allows enabling this silently — user flips the toggle. */
-    private fun openAccessibilitySettings() {
         try {
-            startActivity(android.content.Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
-        } catch (_: Exception) {
+            startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
+        } catch (e: Exception) {
+            Toast.makeText(this, "Could not open notification settings", Toast.LENGTH_SHORT).show()
         }
     }
 
-    private fun refreshNotificationAccess() {
-        val enabled = isNotificationListenerEnabled()
-        notifyText.text = if (enabled) "Notification access: Enabled (mirroring active)" else "Notification access: Not enabled — tap the button above"
-        val color = if (enabled) R.color.emerald else R.color.red
-        notifyText.setTextColor(ContextCompat.getColor(this, color))
+    private fun openAccessibilitySettings() {
+        try {
+            startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
+        } catch (e: Exception) {
+            Toast.makeText(this, "Could not open accessibility settings", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun requestCallScreeningRole() {
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                val rm = getSystemService(android.app.role.RoleManager::class.java)
+                if (rm != null && rm.isRoleAvailable(android.app.role.RoleManager.ROLE_CALL_SCREENING)) {
+                    if (!rm.isRoleHeld(android.app.role.RoleManager.ROLE_CALL_SCREENING)) {
+                        startActivity(rm.createRequestRoleIntent(android.app.role.RoleManager.ROLE_CALL_SCREENING))
+                    } else {
+                        DevicePrefs.callBlockerFeatureEnabled = true
+                        callBlockerSwitch.isChecked = true
+                        Toast.makeText(this, "Call Screening role is active", Toast.LENGTH_SHORT).show()
+                    }
+                } else {
+                    try {
+                        startActivity(Intent(Settings.ACTION_MANAGE_DEFAULT_APPS_SETTINGS))
+                        Toast.makeText(this, "Select Phone Link Hub as Default Caller ID & Spam app", Toast.LENGTH_LONG).show()
+                    } catch (_: Exception) {
+                        startActivity(Intent(Settings.ACTION_SETTINGS))
+                    }
+                }
+            } else {
+                DevicePrefs.callBlockerFeatureEnabled = true
+                callBlockerSwitch.isChecked = true
+                Toast.makeText(this, "Call Screening is enabled on this Android version", Toast.LENGTH_SHORT).show()
+            }
+        } catch (e: Exception) {
+            Toast.makeText(this, "Could not open screening settings: ${e.message}", Toast.LENGTH_LONG).show()
+        }
     }
 
     private fun isNotificationListenerEnabled(): Boolean {
-        val listener = ComponentName(this, com.phonelink.hub.notifications.NotificationListener::class.java)
+        val listener = ComponentName(this, NotificationListener::class.java)
         val enabled = Settings.Secure.getString(contentResolver, "enabled_notification_listeners") ?: ""
         return TextUtils.split(enabled, ":").any { ComponentName.unflattenFromString(it) == listener }
-    }
-
-    private fun requestAppPermissions() {
-        val wanted = mutableListOf(
-            Manifest.permission.ACCESS_FINE_LOCATION,
-            Manifest.permission.READ_CALL_LOG,
-            Manifest.permission.READ_SMS,
-            Manifest.permission.SEND_SMS,
-            Manifest.permission.RECEIVE_SMS,
-            // FEATURE A: view + add contacts.
-            Manifest.permission.READ_CONTACTS,
-            Manifest.permission.WRITE_CONTACTS,
-            // Round 3 remote media permissions
-            Manifest.permission.RECORD_AUDIO,
-            Manifest.permission.CAMERA
-        )
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            wanted += Manifest.permission.POST_NOTIFICATIONS
-        }
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
-            wanted += Manifest.permission.READ_EXTERNAL_STORAGE
-            wanted += Manifest.permission.WRITE_EXTERNAL_STORAGE
-        }
-
-        val missing = wanted.filter {
-            ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
-        }
-
-        if (missing.isNotEmpty()) {
-            permissionLauncher.launch(missing.toTypedArray())
-        }
     }
 
     private fun startStatusRefresh() {

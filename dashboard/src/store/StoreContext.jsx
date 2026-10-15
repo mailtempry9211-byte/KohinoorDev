@@ -51,6 +51,7 @@ export function StoreProvider({ children }) {
   // Mirrors files.downloadBuffer for the stray-terminator guard below
   // (reading state inside setState-updater would be a side effect).
   const filesRef = useRef({ downloadBuffer: '', download: null });
+  const downloadChunksRef = useRef([]);
   const setFilesTracked = useCallback((updater) => {
     setFiles((f) => {
       const next = typeof updater === 'function' ? updater(f) : updater;
@@ -171,27 +172,33 @@ export function StoreProvider({ children }) {
 
         case 'FILE_DOWNLOAD_RESPONSE': {
           if (p.error) {
-            setFilesTracked((f) => ({ ...f, download: { error: p.error }, downloadBuffer: '' }));
+            downloadChunksRef.current = [];
+            setFilesTracked((f) => ({ ...f, download: { error: p.error } }));
             pushToast(`Download failed: ${p.error}`, 'error');
             break;
           }
-          // Guard: a stray empty terminator (old phone builds sent one AFTER
-          // the real last chunk) must not wipe a buffered/completed transfer.
-          // A legit empty FILE starts with an empty buffer, so only skip when
-          // something is already buffered or completed.
-          if (!p.data && p.isLastChunk && (filesRef.current.downloadBuffer || (filesRef.current.download && filesRef.current.download.data))) {
-            break;
+          if (p.data) {
+            try {
+              const bin = atob(p.data);
+              const len = bin.length;
+              const bytes = new Uint8Array(len);
+              for (let i = 0; i < len; i++) {
+                bytes[i] = bin.charCodeAt(i);
+              }
+              downloadChunksRef.current.push(bytes);
+            } catch (err) {
+              console.error('Chunk decode error:', err);
+            }
           }
-          if (p.data == null && !p.isLastChunk) break;
-          setFilesTracked((f) => {
-            const buffer = f.downloadBuffer ? f.downloadBuffer + (p.data || '') : p.data || '';
-            const isLast = !!p.isLastChunk;
-            return {
+          if (p.isLastChunk) {
+            const blob = new Blob(downloadChunksRef.current, { type: p.mimeType || 'application/octet-stream' });
+            const blobUrl = URL.createObjectURL(blob);
+            downloadChunksRef.current = [];
+            setFilesTracked((f) => ({
               ...f,
-              downloadBuffer: isLast ? '' : buffer,
-              download: isLast ? { name: p.name, mimeType: p.mimeType, data: buffer } : null
-            };
-          });
+              download: { name: p.name, mimeType: p.mimeType, blobUrl }
+            }));
+          }
           break;
         }
 

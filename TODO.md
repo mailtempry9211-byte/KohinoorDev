@@ -184,4 +184,29 @@ CallLogs.jsx, Contacts.jsx, SmsManager.jsx, LocationMap.jsx, Notifications.jsx.
    - [x] `StoreContext.jsx` & `Controls.jsx`: Added Live Camera Stream card with lens selector, quality selector, FPS selector, live video player, and "Save Current Frame" button.
 
 ---
+## ROUND 5 (2026-10-14) — User Feedback Deep Fixes & Performance Polish ✅ DONE
+
+1. **Android Server IP Keyboard / Domain Input:**
+   - [x] `activity_main.xml`: Changed `serverIpInput` to `android:inputType="textUri|textNoSuggestions"` so domain names, ngrok subdomains, and pasted URLs are fully accepted instead of showing dialpad.
+2. **Persistent Screen Capture Consent (No Repeated Prompts):**
+   - [x] `MediaProjectionHolder.kt`: Created 1x1 keep-alive `dummyDisplay` (`PhoneLink_KeepAlive`) so Android 14 does not tear down the session token when streams pause or capture finishes.
+   - [x] `ScreenshotConsentActivity.kt`: Pre-initializes projection instance while in foreground.
+3. **MIUI Call Screening & Blocking Action:**
+   - [x] `MainActivity.kt`: Added fallback to `Settings.ACTION_MANAGE_DEFAULT_APPS_SETTINGS` and informative toast on Xiaomi/MIUI where AOSP `RoleManager` is disabled.
+4. **Large File Downloads (>2MB) & Root Directory Action Button:**
+   - [x] `StoreContext.jsx`: Decodes each 32KB base64 chunk into `Uint8Array` in `downloadChunksRef` and creates `new Blob(chunks)` -> `URL.createObjectURL(blob)`, completely eliminating the ~2MB Chromium data URI limit.
+   - [x] `FileManager.jsx`: Auto-triggers download directly using `blobUrl`; added `overflow-x-auto` and `min-w-[620px]` to table container so the Action/Download column is always visible.
+   - [x] `FileRepository.kt`: Added flow-control pacing (sleep 5ms every 8 chunks / 256KB) in `encodeInChunks`.
+   - [x] `PhoneLinkService.kt`: Offloaded `handleFileDownload` to background thread `Thread { ... }.start()` to avoid WebSocket socket buffer flooding.
+5. **Notification Mirroring & Periodic Refresh:**
+   - [x] `PhoneLinkService.kt`: Added `pushNotifications()` to `periodicSync` (runs every 45s) and `syncAll()` on connect.
+6. **Background Clipboard Reading on Android 10-14 & MIUI:**
+   - [x] `FindPhoneAccessibilityService.kt`: Exposed active `instance`.
+   - [x] `ClipboardReader.kt`: Implemented `launchFocusActivity` using active AccessibilityService exemption and Android 14 `MODE_BACKGROUND_ACTIVITY_START_ALLOWED` PendingIntent.
+   - [x] `ClipboardFocusActivity.kt`: Window focus and lock-screen flags ensure clip is safely read and delivered to dashboard.
+7. **Smooth 30 FPS Screen Recording:**
+   - [x] `ScreenRecorder.kt`: Pre-allocated reusable Bitmaps and ByteStreams to eliminate GC pauses; adaptive scaling for 25-30 FPS modes ensures <15ms frame encoding time.
+
+---
 Update rule: har task complete hone par `[ ]` → `[x]` + date + files changed likho.
+

@@ -24,18 +24,18 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Connect this phone to the dashboard running on your PC."
+            android:text="Private, self-hosted phone management over your local network."
             android:textColor="@color/text_secondary"
             android:textSize="13sp"
             android:layout_marginTop="4dp" />
 
-        <!-- Connection status -->
+        <!-- Connection status card -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center_vertical"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="16dp"
             android:padding="14dp"
             android:background="@drawable/bg_card">
 
@@ -57,16 +57,16 @@
                 android:textStyle="bold" />
         </LinearLayout>
 
-        <!-- Server connection -->
+        <!-- Server configuration -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="SERVER (your PC)"
+            android:text="SERVER CONNECTION (Your PC)"
             android:textColor="@color/indigo"
             android:textSize="11sp"
             android:textStyle="bold"
             android:letterSpacing="0.1"
-            android:layout_marginTop="24dp" />
+            android:layout_marginTop="20dp" />
 
         <com.google.android.material.textfield.TextInputLayout
             style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
@@ -82,7 +82,7 @@
                 android:id="@+id/serverIpInput"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="text|number"
+                android:inputType="textUri|textNoSuggestions"
                 android:maxLines="1"
                 android:textColor="@color/text_primary" />
         </com.google.android.material.textfield.TextInputLayout>
@@ -95,7 +95,7 @@
             app:boxStrokeColor="@color/indigo"
             app:hintTextColor="@color/indigo"
             android:textColorHint="@color/text_secondary"
-            android:layout_marginTop="10dp">
+            android:layout_marginTop="8dp">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/serverPortInput"
@@ -106,17 +106,6 @@
                 android:text="5000"
                 android:textColor="@color/text_primary" />
         </com.google.android.material.textfield.TextInputLayout>
-
-        <!-- Device identity -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="THIS PHONE"
-            android:textColor="@color/indigo"
-            android:textSize="11sp"
-            android:textStyle="bold"
-            android:letterSpacing="0.1"
-            android:layout_marginTop="24dp" />
 
         <com.google.android.material.textfield.TextInputLayout
             style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
@@ -137,104 +126,272 @@
                 android:textColor="@color/text_primary" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <Button
-            android:id="@+id/grantStorageBtn"
-            android:layout_width="match_parent"
+        <!-- System Background Controls -->
+        <TextView
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:backgroundTint="@color/surface_variant"
-            android:text="Grant storage access"
-            android:textColor="@color/text_primary" />
+            android:text="SYSTEM SETTINGS"
+            android:textColor="@color/indigo"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.1"
+            android:layout_marginTop="20dp" />
 
         <Button
             android:id="@+id/batteryBtn"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="8dp"
             android:backgroundTint="@color/surface_variant"
-            android:text="Allow background running"
+            android:text="Disable Battery Optimization"
             android:textColor="@color/text_primary" />
 
         <Button
             android:id="@+id/autostartBtn"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="6dp"
             android:backgroundTint="@color/surface_variant"
-            android:text="Enable Autostart"
+            android:text="Enable Autostart (Xiaomi / MIUI / Vivo)"
             android:textColor="@color/text_primary" />
 
+        <!-- Privacy & Features Opt-In Header -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginTop="24dp"
+            android:padding="12dp"
+            android:background="@drawable/bg_card">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="FEATURES &amp; PERMISSIONS (OPT-IN)"
+                android:textColor="@color/indigo"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.05" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Every feature is disabled by default. Enabling a feature will explain its privacy scope and request only the required permission."
+                android:textColor="@color/text_secondary"
+                android:textSize="11sp"
+                android:layout_marginTop="4dp" />
+        </LinearLayout>
+
+        <!-- Feature 1: SMS -->
+        <com.google.android.material.materialswitch.MaterialSwitch
+            android:id="@+id/smsSwitch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="SMS Relay"
+            android:textColor="@color/text_primary"
+            android:textSize="14sp"
+            android:textStyle="bold" />
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
-            android:text="Tap this, then enable Autostart for this app in the screen that opens"
+            android:text="Read and send SMS directly from your PC dashboard via local network."
             android:textColor="@color/text_secondary"
             android:textSize="11sp" />
 
-        <Button
-            android:id="@+id/findPhoneBtn"
+        <!-- Feature 2: Calls -->
+        <com.google.android.material.materialswitch.MaterialSwitch
+            android:id="@+id/callsSwitch"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:backgroundTint="@color/surface_variant"
-            android:text="Enable Find Phone feature"
-            android:textColor="@color/text_primary" />
-
-        <Button
-            android:id="@+id/deviceAdminBtn"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:backgroundTint="@color/surface_variant"
-            android:text="Enable Remote Screen Lock (Device Admin)"
-            android:textColor="@color/text_primary" />
-
-        <Button
-            android:id="@+id/callBlockerRoleBtn"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:backgroundTint="@color/surface_variant"
-            android:text="Enable Call Screening &amp; Blocker"
-            android:textColor="@color/text_primary" />
-
-        <Button
-            android:id="@+id/screenCaptureConsentBtn"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:backgroundTint="@color/surface_variant"
-            android:text="Authorize Screen View / Screenshot"
-            android:textColor="@color/text_primary" />
-
-
-        <TextView
-            android:id="@+id/notifyAccessText"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="14dp"
-            android:padding="14dp"
-            android:background="@drawable/bg_card"
-            android:text="Notification access: Not enabled — tap the button above"
+            android:layout_marginTop="12dp"
+            android:text="Call Log &amp; Alerts"
             android:textColor="@color/text_primary"
-            android:textSize="13sp" />
-
-        <Button
-            android:id="@+id/notifyAccessBtn"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+        <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:backgroundTint="@color/surface_variant"
-            android:text="Enable notification access"
-            android:textColor="@color/text_primary" />
+            android:text="View call history and receive real-time incoming ring alerts on your PC."
+            android:textColor="@color/text_secondary"
+            android:textSize="11sp" />
 
-        <!-- Controls -->
+        <!-- Feature 3: Contacts -->
+        <com.google.android.material.materialswitch.MaterialSwitch
+            android:id="@+id/contactsSwitch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="Contacts Sync"
+            android:textColor="@color/text_primary"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="View address book and add contacts from your PC dashboard."
+            android:textColor="@color/text_secondary"
+            android:textSize="11sp" />
+
+        <!-- Feature 4: Location -->
+        <com.google.android.material.materialswitch.MaterialSwitch
+            android:id="@+id/locationSwitch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="Device Location"
+            android:textColor="@color/text_primary"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Display phone location coordinates on dashboard map over local network."
+            android:textColor="@color/text_secondary"
+            android:textSize="11sp" />
+
+        <!-- Feature 5: Camera -->
+        <com.google.android.material.materialswitch.MaterialSwitch
+            android:id="@+id/cameraSwitch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="Camera &amp; Live Stream"
+            android:textColor="@color/text_primary"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Capture snapshots or stream live camera video (pet/room monitor) to dashboard."
+            android:textColor="@color/text_secondary"
+            android:textSize="11sp" />
+
+        <!-- Feature 6: Microphone -->
+        <com.google.android.material.materialswitch.MaterialSwitch
+            android:id="@+id/micSwitch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="Microphone Recording"
+            android:textColor="@color/text_primary"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Record brief audio clips to locate your phone or listen on demand."
+            android:textColor="@color/text_secondary"
+            android:textSize="11sp" />
+
+        <!-- Feature 7: Storage / File Explorer -->
+        <com.google.android.material.materialswitch.MaterialSwitch
+            android:id="@+id/storageSwitch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="File Explorer"
+            android:textColor="@color/text_primary"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Browse, download, and upload files to phone storage from your PC."
+            android:textColor="@color/text_secondary"
+            android:textSize="11sp" />
+
+        <!-- Feature 8: Screen Mirror & Screenshot -->
+        <com.google.android.material.materialswitch.MaterialSwitch
+            android:id="@+id/screenSwitch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="Screen View &amp; Screenshot"
+            android:textColor="@color/text_primary"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Live screen stream and screenshot capture with per-session system consent."
+            android:textColor="@color/text_secondary"
+            android:textSize="11sp" />
+
+        <!-- Feature 9: Find Phone -->
+        <com.google.android.material.materialswitch.MaterialSwitch
+            android:id="@+id/findPhoneSwitch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="Find My Phone (Audible Alert)"
+            android:textColor="@color/text_primary"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Sound a loud siren even if device is set to silent or DND (uses accessibility service)."
+            android:textColor="@color/text_secondary"
+            android:textSize="11sp" />
+
+        <!-- Feature 10: Remote Lock -->
+        <com.google.android.material.materialswitch.MaterialSwitch
+            android:id="@+id/deviceAdminSwitch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="Remote Screen Lock"
+            android:textColor="@color/text_primary"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Lock screen immediately on command from dashboard (uses Device Admin)."
+            android:textColor="@color/text_secondary"
+            android:textSize="11sp" />
+
+        <!-- Feature 11: Call Blocker -->
+        <com.google.android.material.materialswitch.MaterialSwitch
+            android:id="@+id/callBlockerSwitch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="Call Screening &amp; Blocker"
+            android:textColor="@color/text_primary"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Screen and automatically reject calls from numbers on your dashboard blocklist."
+            android:textColor="@color/text_secondary"
+            android:textSize="11sp" />
+
+        <!-- Feature 12: Notification Mirroring -->
+        <com.google.android.material.materialswitch.MaterialSwitch
+            android:id="@+id/notifSyncSwitch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="Notification Mirroring"
+            android:textColor="@color/text_primary"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Stream incoming notifications live to your PC and dismiss them remotely."
+            android:textColor="@color/text_secondary"
+            android:textSize="11sp" />
+
+        <!-- Action Buttons -->
         <Button
             android:id="@+id/startBtn"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Start service"
+            android:text="Start Service"
             android:textSize="15sp"
             android:layout_marginTop="24dp"
             android:backgroundTint="@color/indigo" />
@@ -243,7 +400,7 @@
             android:id="@+id/stopBtn"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Stop service"
+            android:text="Stop Service"
             android:layout_marginTop="8dp"
             android:backgroundTint="@color/surface_variant"
             android:textColor="@color/text_primary" />
@@ -252,31 +409,24 @@
             android:id="@+id/syncNowBtn"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Sync all data now"
+            android:text="Sync Enabled Data Now"
             android:layout_marginTop="8dp"
             android:backgroundTint="@color/surface_variant"
             android:textColor="@color/text_primary" />
 
+        <!-- Privacy & Local LAN Disclosure Footer -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Tip: keep this app open-free in the background. The persistent notification keeps the service alive so the dashboard stays live."
+            android:text="Privacy Guarantee: Phone Link Hub is open source and self-hosted. All communications are direct peer-to-peer over your local WiFi network. No data is ever sent to external cloud servers or third parties."
             android:textColor="@color/text_secondary"
             android:textSize="11sp"
-            android:layout_marginTop="18dp" />
+            android:layout_marginTop="20dp" />
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Tip 2: disable battery optimisation for this app, otherwise Android may kill the service while the screen is off."
-            android:textColor="@color/text_secondary"
-            android:textSize="11sp"
-            android:layout_marginTop="8dp" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="MIUI/Xiaomi note: ALSO enable Autostart for this app (button above, or Security app &gt; Permissions &gt; Autostart) and set battery saver to No restrictions (Settings &gt; Battery &gt; App battery saver). MIUI kills background apps on its own list even with battery optimisation disabled."
+            android:text="MIUI / Xiaomi / ColorOS Note: Please enable Autostart and set Battery Saver to 'No restrictions' to prevent Android from prematurely stopping the local relay."
             android:textColor="@color/text_secondary"
             android:textSize="11sp"
             android:layout_marginTop="8dp" />

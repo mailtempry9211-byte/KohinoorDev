@@ -2,7 +2,9 @@ package com.phonelink.hub.media
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.Canvas
 import android.graphics.PixelFormat
+import android.graphics.Rect
 import android.hardware.display.DisplayManager
 import android.hardware.display.VirtualDisplay
 import android.media.ImageReader
@@ -18,7 +20,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * Streams low-latency screen frames (1-30 fps) over WebSocket for live screen preview.
- * Reuses MediaProjectionHolder for projection access.
+ * Reuses MediaProjectionHolder for projection access with optimized bitmap caching.
  */
 object ScreenRecorder {
 
@@ -36,6 +38,10 @@ object ScreenRecorder {
 
     private var pendingFps: Int = 0
     private var pendingContext: Context? = null
+
+    private var cachedRawBitmap: Bitmap? = null
+    private var cachedFinalBitmap: Bitmap? = null
+    private val reusableStream = ByteArrayOutputStream(64 * 1024)
 
     val isActive: Boolean
         get() = isRunning.get()
@@ -93,8 +99,13 @@ object ScreenRecorder {
         val screenHeight = metrics.heightPixels
         val density = metrics.densityDpi
 
-        // Scale down to 540p or 720p for fast transmission and low overhead
-        val targetWidth: Int = if (screenWidth > 540) 540 else screenWidth
+        // Adaptive scaling based on target FPS to guarantee high frame rates without dropped frames
+        val maxTargetWidth = when {
+            fps >= 25 -> 400
+            fps >= 15 -> 480
+            else -> 540
+        }
+        val targetWidth: Int = if (screenWidth > maxTargetWidth) maxTargetWidth else screenWidth
         val targetHeight: Int = (screenHeight.toDouble() * (targetWidth.toDouble() / screenWidth.toDouble())).toInt()
 
         val thread = HandlerThread("ScreenStreamThread").apply { start() }
@@ -123,7 +134,11 @@ object ScreenRecorder {
             return
         }
 
-        val quality = if (fps >= 20) 50 else if (fps >= 10) 60 else 70
+        val quality = when {
+            fps >= 25 -> 50
+            fps >= 15 -> 60
+            else -> 70
+        }
 
         val runnable = object : Runnable {
             override fun run() {
@@ -138,28 +153,38 @@ object ScreenRecorder {
                             val pixelStride = planes[0].pixelStride
                             val rowStride = planes[0].rowStride
                             val rowPadding = rowStride - pixelStride * targetWidth
+                            val rawWidth = targetWidth + rowPadding / pixelStride
 
-                            val rawBitmap = Bitmap.createBitmap(
-                                targetWidth + rowPadding / pixelStride,
-                                targetHeight,
-                                Bitmap.Config.ARGB_8888
-                            )
+                            var rawBitmap = cachedRawBitmap
+                            if (rawBitmap == null || rawBitmap.width != rawWidth || rawBitmap.height != targetHeight || rawBitmap.isRecycled) {
+                                rawBitmap?.recycle()
+                                rawBitmap = Bitmap.createBitmap(rawWidth, targetHeight, Bitmap.Config.ARGB_8888)
+                                cachedRawBitmap = rawBitmap
+                            }
+
                             rawBitmap.copyPixelsFromBuffer(buffer)
                             image.close()
 
-                            val finalBitmap = if (rowPadding > 0) {
-                                Bitmap.createBitmap(rawBitmap, 0, 0, targetWidth, targetHeight).also {
-                                    rawBitmap.recycle()
+                            val finalBitmap: Bitmap
+                            if (rowPadding > 0) {
+                                var cropped = cachedFinalBitmap
+                                if (cropped == null || cropped.width != targetWidth || cropped.height != targetHeight || cropped.isRecycled) {
+                                    cropped?.recycle()
+                                    cropped = Bitmap.createBitmap(targetWidth, targetHeight, Bitmap.Config.ARGB_8888)
+                                    cachedFinalBitmap = cropped
                                 }
+                                val canvas = Canvas(cropped)
+                                val srcRect = Rect(0, 0, targetWidth, targetHeight)
+                                canvas.drawBitmap(rawBitmap, srcRect, srcRect, null)
+                                finalBitmap = cropped
                             } else {
-                                rawBitmap
+                                finalBitmap = rawBitmap
                             }
 
-                            val outStream = ByteArrayOutputStream()
-                            finalBitmap.compress(Bitmap.CompressFormat.JPEG, quality, outStream)
-                            finalBitmap.recycle()
+                            reusableStream.reset()
+                            finalBitmap.compress(Bitmap.CompressFormat.JPEG, quality, reusableStream)
 
-                            val bytes = outStream.toByteArray()
+                            val bytes = reusableStream.toByteArray()
                             val base64 = Base64.encodeToString(bytes, Base64.NO_WRAP)
 
                             activeCallback?.invoke(JSONObject().apply {
@@ -209,5 +234,11 @@ object ScreenRecorder {
         activeCallback = null
         isEncoding.set(false)
         pendingFps = 0
+
+        try { cachedRawBitmap?.recycle() } catch (_: Exception) {}
+        cachedRawBitmap = null
+        try { cachedFinalBitmap?.recycle() } catch (_: Exception) {}
+        cachedFinalBitmap = null
+        reusableStream.reset()
     }
 }

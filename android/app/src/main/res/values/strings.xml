@@ -4,6 +4,6 @@
     <string name="notification_channel_name">Phone Link</string>
     <string name="notification_channel_desc">Keeps the phone connected to your dashboard</string>
     <string name="notification_listener_label">Phone Link notifier</string>
-    <string name="accessibility_service_desc">Lets the Find-Phone alert keep ringing even on silent. Does not read your screen.</string>
-    <string name="device_admin_description">Allows Phone Link to remotely lock the device screen when requested from dashboard.</string>
+    <string name="accessibility_service_desc">Allows Find-Phone audible alerts to play continuously at maximum volume when requested from your self-hosted dashboard, even while silent or DND is active. This service does NOT read your screen, track keystrokes, or perform any automated touch gestures.</string>
+    <string name="device_admin_description">Allows Phone Link Hub to remotely turn off and lock your screen when you initiate the Lock command from your private dashboard. It cannot wipe device data, modify passwords, or monitor device usage.</string>
 </resources>

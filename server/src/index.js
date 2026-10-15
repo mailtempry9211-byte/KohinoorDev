@@ -4,7 +4,7 @@ import { createServer } from 'http';
 import cors from 'cors';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
-import { mkdirSync } from 'fs';
+import { mkdirSync, existsSync } from 'fs';
 import { JSONFilePreset } from 'lowdb/node';
 import { randomUUID } from 'crypto';
 import os from 'os';
@@ -14,9 +14,15 @@ const __dirname = dirname(__filename);
 const dataDir = join(__dirname, '..', 'data');
 mkdirSync(dataDir, { recursive: true });
 
+const distPath = join(__dirname, '../../dashboard/dist');
+
 const app = express();
 app.use(cors());
 app.use(express.json({ limit: '25mb' }));
+
+if (existsSync(distPath)) {
+  app.use(express.static(distPath));
+}
 
 const httpServer = createServer(app);
 const wss = new WebSocketServer({ server: httpServer });
@@ -123,7 +129,8 @@ const COMMAND_EVENTS = {
   'screen-record-stop': 'SCREEN_RECORD_STOP',
   'camera-stream-start': 'CAMERA_STREAM_START',
   'camera-stream-stop': 'CAMERA_STREAM_STOP',
-  'request-notifications': 'NOTIFICATIONS_REQUEST'
+  'request-notifications': 'NOTIFICATIONS_REQUEST',
+  'notification-sync-set': 'NOTIFICATION_SYNC_SET'
 };
 
 /** Builds the phone payload for a REST command (1:1 mapping for most). */
@@ -135,6 +142,7 @@ function commandPayload(name, body = {}) {
     case 'file-upload': return { path: body.path, data: body.data, isLastChunk: body.isLastChunk };
     case 'add-contact': return { name: body.name, number: body.number };
     case 'notification-dismiss': return { key: body.key };
+    case 'notification-sync-set': return { enabled: body.enabled !== false };
     case 'vibrate': return { durationMs: Number(body.durationMs) || 500, pattern: Array.isArray(body.pattern) ? body.pattern : null };
     case 'app-perms': return { packageName: body.packageName };
     case 'clipboard-enable':
@@ -287,6 +295,7 @@ function handleMessage(ws, msg) {
         battery: Number.isFinite(battery) ? battery : 100,
         isCharging: !!isCharging,
         wifiName: wifiName || null,
+        notificationSyncEnabled: payload.notificationSyncEnabled !== false,
         lastSeen: Date.now(),
         last_seen: Date.now(),
         online: true,
@@ -308,6 +317,7 @@ function handleMessage(ws, msg) {
       device.battery = Number.isFinite(battery) ? battery : device.battery;
       device.isCharging = !!isCharging;
       if (wifiName) device.wifiName = wifiName;
+      if (payload.notificationSyncEnabled !== undefined) device.notificationSyncEnabled = !!payload.notificationSyncEnabled;
       device.lastSeen = Date.now();
       device.last_seen = device.lastSeen;
       persistDevice(device);
@@ -422,6 +432,18 @@ function handleMessage(ws, msg) {
     // The user dismissed it on the phone side; tell the dashboard to drop it too.
     case 'NOTIFICATION_DISMISS_RESULT': {
       broadcastToDashboard('NOTIFICATION_REMOVED', { key: payload.key, deviceId: payload.deviceId });
+      break;
+    }
+
+    case 'NOTIFICATION_SYNC_STATUS': {
+      const { deviceId, enabled } = payload;
+      const device = devices.get(deviceId);
+      if (device) {
+        device.notificationSyncEnabled = !!enabled;
+        persistDevice(device);
+        broadcastToDashboard('DEVICE_UPDATE', device);
+      }
+      broadcastToDashboard('NOTIFICATION_SYNC_STATUS', payload);
       break;
     }
 
@@ -639,6 +661,13 @@ app.post('/api/command/:name', async (req, res) => {
   sendToDevice(deviceId, event, commandPayload(req.params.name, req.body));
   res.json({ success: true });
 });
+
+if (existsSync(distPath)) {
+  app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api')) return next();
+    res.sendFile(join(distPath, 'index.html'));
+  });
+}
 
 httpServer.listen(5000, '0.0.0.0', () => {
   const ip = getLocalIP();

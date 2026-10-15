@@ -128,12 +128,17 @@ object FileRepository {
             file.inputStream().use { stream ->
                 val buffer = ByteArray(CHUNK_BYTES)
                 var remaining = file.length()
+                var chunksSent = 0
                 while (remaining > 0) {
                     val read = stream.read(buffer)
                     if (read <= 0) break
                     remaining -= read
                     val payload = Base64.encodeToString(buffer.copyOf(read), Base64.NO_WRAP)
                     onChunk(payload, remaining <= 0)
+                    chunksSent++
+                    if (chunksSent % 8 == 0) {
+                        try { Thread.sleep(5) } catch (_: InterruptedException) {}
+                    }
                 }
             }
             true

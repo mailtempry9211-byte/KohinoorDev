@@ -1,11 +1,15 @@
 package com.phonelink.hub.remote
 
+import android.app.ActivityOptions
+import android.app.PendingIntent
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import com.phonelink.hub.accessibility.FindPhoneAccessibilityService
 import com.phonelink.hub.data.DevicePrefs
 import org.json.JSONObject
 
@@ -59,10 +63,7 @@ object ClipboardReader {
                 // If empty or null on Android 10+ (API 29+), background apps cannot access clipboard.
                 // Launch transparent focus activity to legally retrieve primaryClip.
                 pendingReadCallback = callback
-                val intent = Intent(context, ClipboardFocusActivity::class.java).apply {
-                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NO_ANIMATION)
-                }
-                context.startActivity(intent)
+                launchFocusActivity(context)
 
                 // Timeout fallback if activity never opened
                 mainHandler.postDelayed({
@@ -110,10 +111,7 @@ object ClipboardReader {
                             } else {
                                 // Background listener might have received clip event without focus.
                                 // Briefly launch focus activity to retrieve text.
-                                val intent = Intent(context, ClipboardFocusActivity::class.java).apply {
-                                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NO_ANIMATION)
-                                }
-                                context.startActivity(intent)
+                                launchFocusActivity(context)
                             }
                         } catch (e: Exception) {
                             Log.w(TAG, "Error in primary clip listener", e)
@@ -129,6 +127,52 @@ object ClipboardReader {
                     Log.d(TAG, "Clipboard capture listener unregistered")
                 }
             }
+        }
+    }
+
+    private fun launchFocusActivity(context: Context) {
+        val intent = Intent(context, ClipboardFocusActivity::class.java).apply {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NO_ANIMATION)
+        }
+
+        // Exemption 1: Accessibility service can start activity from background
+        val acc = FindPhoneAccessibilityService.instance
+        if (acc != null) {
+            try {
+                Log.d(TAG, "Launching focus activity via active AccessibilityService")
+                acc.startActivity(intent)
+                return
+            } catch (e: Exception) {
+                Log.w(TAG, "Failed to start activity via AccessibilityService", e)
+            }
+        }
+
+        // Exemption 2: Android 14 PendingIntent with MODE_BACKGROUND_ACTIVITY_START_ALLOWED
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            try {
+                val options = ActivityOptions.makeBasic().apply {
+                    pendingIntentBackgroundActivityStartMode = ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED
+                }
+                val pi = PendingIntent.getActivity(
+                    context,
+                    8832,
+                    intent,
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+                    options.toBundle()
+                )
+                pi.send()
+                Log.d(TAG, "Launched focus activity via PendingIntent background start mode")
+                return
+            } catch (e: Exception) {
+                Log.w(TAG, "Failed to send PendingIntent with background activity start mode", e)
+            }
+        }
+
+        // Fallback: direct context start
+        try {
+            context.startActivity(intent)
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to start ClipboardFocusActivity directly", e)
         }
     }
 

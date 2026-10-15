@@ -24,6 +24,13 @@ class ScreenshotConsentActivity : ComponentActivity() {
         if (code == Activity.RESULT_OK && data != null) {
             Log.d(TAG, "Screen capture permission granted by user")
             MediaProjectionHolder.updateConsent(code, data)
+            try {
+                com.phonelink.hub.service.PhoneLinkService.instance?.ensureMediaProjectionForegroundType()
+            } catch (e: Exception) {
+                Log.w(TAG, "ensureMediaProjectionForegroundType error", e)
+            }
+            // Acquire projection instance while activity is in foreground
+            MediaProjectionHolder.getOrCreateProjection(applicationContext)
             MediaProjectionHolder.notifyConsentGranted(applicationContext)
         } else {
             Log.w(TAG, "Screen capture permission denied by user (code=$code)")

@@ -1,4 +1,4 @@
-name: Build Android APK
+name: Build Signed Android APK
 
 on: [push, workflow_dispatch]
 
@@ -20,15 +20,51 @@ jobs:
         with:
           gradle-version: '8.7'
 
-      - name: Build with Gradle
+      - name: Prepare Release Keystore
+        id: keystore
+        run: |
+          mkdir -p android/app
+          if [ -n "${{ secrets.KEYSTORE_BASE64 }}" ]; then
+            echo "Decoding release keystore from GitHub Secrets..."
+            echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > android/app/release.keystore
+            echo "KEYSTORE_FILE=release.keystore" >> $GITHUB_ENV
+            echo "KEYSTORE_PASSWORD=${{ secrets.KEYSTORE_PASSWORD }}" >> $GITHUB_ENV
+            echo "KEY_ALIAS=${{ secrets.KEY_ALIAS }}" >> $GITHUB_ENV
+            echo "KEY_PASSWORD=${{ secrets.KEY_PASSWORD }}" >> $GITHUB_ENV
+          else
+            echo "No KEYSTORE_BASE64 secret found. Generating standalone release keystore..."
+            keytool -genkeypair -v \
+              -keystore android/app/release.keystore \
+              -alias phonelink \
+              -keyalg RSA \
+              -keysize 2048 \
+              -validity 10000 \
+              -storepass phonelink123 \
+              -keypass phonelink123 \
+              -dname "CN=PhoneLink, OU=Hub, O=OpenSource, L=Local, S=State, C=US"
+            echo "KEYSTORE_FILE=release.keystore" >> $GITHUB_ENV
+            echo "KEYSTORE_PASSWORD=phonelink123" >> $GITHUB_ENV
+            echo "KEY_ALIAS=phonelink" >> $GITHUB_ENV
+            echo "KEY_PASSWORD=phonelink123" >> $GITHUB_ENV
+          fi
+
+      - name: Build Signed Release APK with Gradle
         run: |
           cd android
           if [ ! -f gradlew ]; then gradle wrapper; fi
           chmod +x gradlew
-          ./gradlew assembleDebug --stacktrace
+          ./gradlew assembleRelease --stacktrace
 
-      - name: Upload APK Artifact
+      - name: Generate SHA-256 Checksum
+        run: |
+          cd android/app/build/outputs/apk/release
+          sha256sum *.apk > SHA256SUMS.txt
+          cat SHA256SUMS.txt
+
+      - name: Upload Signed Release APK & Checksum
         uses: actions/upload-artifact@v4
         with:
-          name: app-debug
-          path: android/app/build/outputs/apk/debug/*.apk
+          name: phonelink-hub-release
+          path: |
+            android/app/build/outputs/apk/release/*.apk
+            android/app/build/outputs/apk/release/SHA256SUMS.txt

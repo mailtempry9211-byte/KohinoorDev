@@ -43,6 +43,10 @@ class NotificationListener : NotificationListenerService() {
 
     override fun onNotificationPosted(sbn: StatusBarNotification) {
         super.onNotificationPosted(sbn)
+        if (!com.phonelink.hub.data.DevicePrefs.notificationSyncEnabled) {
+            Log.d(TAG, "Notification sync paused, dropping notification from ${sbn.packageName}")
+            return
+        }
         try {
             val context = applicationContext ?: return
             val payload = NotificationExtractor.extract(context, sbn)
@@ -72,6 +76,9 @@ class NotificationListener : NotificationListenerService() {
 
     override fun onNotificationRemoved(sbn: StatusBarNotification) {
         super.onNotificationRemoved(sbn)
+        if (!com.phonelink.hub.data.DevicePrefs.notificationSyncEnabled) {
+            return
+        }
         try {
             val ws = WebSocketHolder.webSocket ?: return
             ws.send(
