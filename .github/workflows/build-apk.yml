@@ -50,16 +50,17 @@ jobs:
 
       - name: Build Signed Release APK with Gradle
         run: |
+          set -o pipefail
           cd android
           if [ ! -f gradlew ]; then gradle wrapper; fi
           chmod +x gradlew
-          ./gradlew assembleRelease --stacktrace 2>&1 | tee build.log
+          ./gradlew assembleRelease --stacktrace 2>&1 | tee build.log || (echo "=== GRADLE FAILED ===" && tail -n 120 build.log && exit 1)
 
-      - name: Upload Build Log on Failure
-        if: failure()
+      - name: Upload Build Log
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: gradle-failure-log
+          name: gradle-build-log
           path: android/build.log
 
       - name: Generate SHA-256 Checksum
