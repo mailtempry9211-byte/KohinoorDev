@@ -53,7 +53,14 @@ jobs:
           cd android
           if [ ! -f gradlew ]; then gradle wrapper; fi
           chmod +x gradlew
-          ./gradlew assembleRelease --stacktrace --info
+          ./gradlew assembleRelease --stacktrace 2>&1 | tee build.log
+
+      - name: Upload Build Log on Failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gradle-failure-log
+          path: android/build.log
 
       - name: Generate SHA-256 Checksum
         run: |

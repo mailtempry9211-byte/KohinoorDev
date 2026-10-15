@@ -99,8 +99,8 @@ object TheftMotionAlarm : SensorEventListener {
         }
     }
 
-    override fun onSensorChanged(event: SensorEvent?) {
-        if (!isArmed || event == null || event.sensor.type != Sensor.TYPE_ACCELEROMETER) return
+    override fun onSensorChanged(event: SensorEvent) {
+        if (!isArmed || event.sensor.type != Sensor.TYPE_ACCELEROMETER) return
 
         val x = event.values[0]
         val y = event.values[1]
@@ -122,7 +122,7 @@ object TheftMotionAlarm : SensorEventListener {
         }
     }
 
-    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
+    override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {}
 
     private fun onAlarmTriggered(delta: Float) {
         val ctx = contextRef ?: return
