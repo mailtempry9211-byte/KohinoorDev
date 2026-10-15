@@ -12,6 +12,23 @@
       "last_seen": 1792049118789,
       "online": true,
       "wsClientId": "b61bf39e-08ff-4889-92cf-7966c848993c"
+    },
+    {
+      "id": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "deviceName": "Xiaomi Mi 10",
+      "battery": 86,
+      "isCharging": false,
+      "temperatureC": 32.5,
+      "voltageMv": 4098,
+      "health": "Good",
+      "plugged": "On Battery",
+      "wifiName": "Xiaomi 11i",
+      "notificationSyncEnabled": true,
+      "lastSeen": 1792054266489,
+      "last_seen": 1792054266489,
+      "online": false,
+      "wsClientId": null
     }
   ],
   "calls": [
@@ -22,7 +39,7 @@
       "type": "outgoing",
       "duration": 0,
       "timestamp": 1792048702901,
-      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be"
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04"
     },
     {
       "id": "call-13",
@@ -31,7 +48,7 @@
       "type": "outgoing",
       "duration": 0,
       "timestamp": 1792048698268,
-      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be"
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04"
     },
     {
       "id": "call-12",
@@ -40,7 +57,7 @@
       "type": "outgoing",
       "duration": 0,
       "timestamp": 1791981740153,
-      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be"
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04"
     },
     {
       "id": "call-11",
@@ -49,7 +66,7 @@
       "type": "outgoing",
       "duration": 0,
       "timestamp": 1791981736087,
-      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be"
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04"
     },
     {
       "id": "call-10",
@@ -58,7 +75,7 @@
       "type": "outgoing",
       "duration": 0,
       "timestamp": 1791981729067,
-      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be"
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04"
     },
     {
       "id": "call-9",
@@ -67,7 +84,7 @@
       "type": "outgoing",
       "duration": 0,
       "timestamp": 1791966430650,
-      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be"
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04"
     },
     {
       "id": "call-8",
@@ -76,7 +93,7 @@
       "type": "outgoing",
       "duration": 0,
       "timestamp": 1791966425881,
-      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be"
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04"
     },
     {
       "id": "call-7",
@@ -85,7 +102,7 @@
       "type": "outgoing",
       "duration": 0,
       "timestamp": 1791965507094,
-      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be"
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04"
     },
     {
       "id": "call-6",
@@ -94,7 +111,7 @@
       "type": "outgoing",
       "duration": 0,
       "timestamp": 1791965502711,
-      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be"
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04"
     },
     {
       "id": "call-5",
@@ -103,7 +120,7 @@
       "type": "outgoing",
       "duration": 0,
       "timestamp": 1791961551904,
-      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be"
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04"
     },
     {
       "id": "call-4",
@@ -112,7 +129,7 @@
       "type": "outgoing",
       "duration": 0,
       "timestamp": 1791961547040,
-      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be"
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04"
     },
     {
       "id": "call-3",
@@ -121,7 +138,7 @@
       "type": "outgoing",
       "duration": 0,
       "timestamp": 1791961543729,
-      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be"
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04"
     },
     {
       "id": "call-2",
@@ -130,7 +147,7 @@
       "type": "outgoing",
       "duration": 0,
       "timestamp": 1791890023961,
-      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be"
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04"
     },
     {
       "id": "call-1",
@@ -139,7 +156,7 @@
       "type": "outgoing",
       "duration": 0,
       "timestamp": 1791890010847,
-      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be"
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04"
     }
   ],
   "messages": [],
@@ -1914,20 +1931,42 @@
       "longitude": 80.6746779,
       "accuracy": 100,
       "timestamp": 1792049142635
+    },
+    {
+      "id": "f92cc92f-db1a-4a3c-80b6-7ed461b83c49",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718193,
+      "longitude": 80.6746724,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792054251508
+    },
+    {
+      "id": "59c87b5e-7b28-43f8-ab7b-aac19cbb5e0d",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718193,
+      "longitude": 80.6746724,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792054281521
+    },
+    {
+      "id": "1d36778d-212e-4d17-a53e-50fc0903852a",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "latitude": 27.5718193,
+      "longitude": 80.6746724,
+      "accuracy": 100,
+      "speed": 0,
+      "altitude": 80.69999694824219,
+      "bearing": 0,
+      "timestamp": 1792054317535
     }
   ],
   "notifications": [
-    {
-      "key": "0|com.milink.service|110|null|10129",
-      "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
-      "packageName": "com.milink.service",
-      "appName": "Cast",
-      "title": "全场景音乐服务",
-      "text": "全场景音乐服务运行中",
-      "postTime": 1792047556208,
-      "ongoing": true,
-      "cleared": false
-    },
     {
       "key": "0|com.google.android.googlequicksearchbox|0|2054347708::a:snotification:[0x394,wx.f,NOTIFICATION]|10216",
       "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be",
@@ -1937,6 +1976,28 @@
       "text": "Partly sunny · See full forecast",
       "postTime": 1792048243243,
       "ongoing": false,
+      "cleared": false
+    },
+    {
+      "key": "0|com.milink.service|110|null|10129",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "packageName": "com.milink.service",
+      "appName": "Cast",
+      "title": "全场景音乐服务",
+      "text": "全场景音乐服务运行中",
+      "postTime": 1792047556208,
+      "ongoing": true,
+      "cleared": false
+    },
+    {
+      "key": "0|com.phonelink.localhub|4201|null|10257",
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "packageName": "com.phonelink.localhub",
+      "appName": "Phone Link Hub",
+      "title": "Xiaomi Mi 10",
+      "text": "Connecting to dashboard…",
+      "postTime": 1792054277067,
+      "ongoing": true,
       "cleared": false
     }
   ],
@@ -1976,6 +2037,42 @@
       ],
       "photoAvailable": false,
       "deviceId": "android-235aaf1c-d5c5-48a0-a6ea-03fa7dba24be"
+    },
+    {
+      "id": "contact-4",
+      "name": "SHANWAZ",
+      "numbers": [
+        "8081408020"
+      ],
+      "photoAvailable": false,
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04"
+    },
+    {
+      "id": "contact-1",
+      "name": "raju",
+      "numbers": [
+        "97675 484"
+      ],
+      "photoAvailable": false,
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04"
+    },
+    {
+      "id": "contact-2",
+      "name": "suaib",
+      "numbers": [
+        "8418944572"
+      ],
+      "photoAvailable": false,
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04"
+    },
+    {
+      "id": "contact-3",
+      "name": "test",
+      "numbers": [
+        "123"
+      ],
+      "photoAvailable": false,
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04"
     }
   ],
   "clipboardHistory": [
@@ -2016,6 +2113,42 @@
         "totalBytes": 117694369792,
         "availableBytes": 93858316288,
         "usedBytes": 23836053504
+      },
+      "display": {
+        "widthPixels": 1080,
+        "heightPixels": 2220,
+        "density": 2.75,
+        "densityDpi": 440
+      }
+    },
+    "android-e24d536b-c22b-488c-a560-761285560b04": {
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "deviceName": "Xiaomi Mi 10",
+      "manufacturer": "Xiaomi",
+      "brand": "Redmi",
+      "model": "Mi 10",
+      "product": "begonia",
+      "board": "begonia",
+      "hardware": "mt6785",
+      "androidVersion": "11",
+      "sdkInt": 30,
+      "securityPatch": "2022-04-01",
+      "bootloader": "unknown",
+      "fingerprint": "Redmi/begonia/begonia:11/RP1A.200720.011/V12.5.6.0.RGGIDXM:user/release-keys",
+      "batteryLevel": 86,
+      "isCharging": false,
+      "uptimeMs": 9339589,
+      "adminActive": false,
+      "ram": {
+        "totalMem": 5909716992,
+        "availMem": 2989244416,
+        "lowMemory": false,
+        "threshold": 1313656832
+      },
+      "storage": {
+        "totalBytes": 117694369792,
+        "availableBytes": 93840244736,
+        "usedBytes": 23854125056
       },
       "display": {
         "widthPixels": 1080,
@@ -2074,6 +2207,26 @@
           "capabilities": "[WPA2-PSK-CCMP][RSN-PSK-CCMP][ESS]"
         }
       ]
+    },
+    "android-e24d536b-c22b-488c-a560-761285560b04": {
+      "deviceId": "android-e24d536b-c22b-488c-a560-761285560b04",
+      "enabled": true,
+      "connected": true,
+      "ssid": "Xiaomi 11i",
+      "bssid": "ca:01:3a:e8:35:47",
+      "rssi": -31,
+      "linkSpeedMbps": 96,
+      "frequencyMHz": 2412,
+      "ipAddress": "10.87.107.109",
+      "scanResults": [
+        {
+          "ssid": "Xiaomi 11i",
+          "bssid": "ca:01:3a:e8:35:47",
+          "level": -37,
+          "frequency": 2412,
+          "capabilities": "[WPA2-PSK-CCMP][RSN-PSK-CCMP][ESS]"
+        }
+      ]
     }
   },
   "callBlocklist": {
@@ -2082,6 +2235,10 @@
       "numbers": [
         "000000000000"
       ]
+    },
+    "android-e24d536b-c22b-488c-a560-761285560b04": {
+      "enabled": false,
+      "numbers": []
     }
   }
 }

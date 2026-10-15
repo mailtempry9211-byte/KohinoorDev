@@ -533,6 +533,19 @@ function titleOrApp(appName, title, text) {
       .catch(() => {});
   }, []);
 
+  const sendCommand = useCallback(async (path, body) => {
+    try {
+      const res = await fetch(`/api/command/${path}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      return await res.json();
+    } catch (e) {
+      return { success: false, error: String(e) };
+    }
+  }, []);
+
   useEffect(() => {
     if (!activeDeviceId) return;
     fetch(`/api/devices/${activeDeviceId}/calls`)
@@ -579,19 +592,6 @@ function titleOrApp(appName, title, text) {
     sendCommand('volume-get', { deviceId: activeDeviceId }).catch(() => {});
     sendCommand('battery-stats', { deviceId: activeDeviceId }).catch(() => {});
   }, [activeDeviceId, sendCommand]);
-
-  const sendCommand = useCallback(async (path, body) => {
-    try {
-      const res = await fetch(`/api/command/${path}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
-      });
-      return await res.json();
-    } catch (e) {
-      return { success: false, error: String(e) };
-    }
-  }, []);
 
   const value = useMemo(
     () => ({
