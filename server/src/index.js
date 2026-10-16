@@ -169,7 +169,15 @@ const COMMAND_EVENTS = {
   'walkie-talkie-stop': 'WALKIE_TALKIE_STOP',
   'sync-config': 'SYNC_CONFIG_COMMAND',
   'parental-control': 'PARENTAL_CONTROL_CONFIG_COMMAND',
-  'app-usage': 'APP_USAGE_REQUEST'
+  'app-usage': 'APP_USAGE_REQUEST',
+  'battery-config': 'BATTERY_CONFIG_COMMAND',
+  'auto-timelapse-config': 'AUTO_TIMELAPSE_CONFIG_COMMAND',
+  'geofence-config': 'GEOFENCE_CONFIG_COMMAND',
+  'auto-reply-config': 'AUTO_REPLY_CONFIG_COMMAND',
+  'network-usage': 'NETWORK_USAGE_REQUEST',
+  'schedule-command': 'SCHEDULE_COMMAND',
+  'sos-config': 'SOS_CONFIG_COMMAND',
+  'call-recording-config': 'CALL_RECORDING_CONFIG_COMMAND'
 };
 
 /** Builds the phone payload for a REST command (1:1 mapping for most). */
@@ -263,6 +271,42 @@ function commandPayload(name, body = {}) {
       allowedPackages: body.allowedPackages
     };
     case 'app-usage': return {};
+    case 'battery-config': return {
+      batteryAlertsEnabled: body.batteryAlertsEnabled,
+      batteryMaxLevelCutoff: Number(body.batteryMaxLevelCutoff) || 90,
+      batteryOverheatTempThreshold: Number(body.batteryOverheatTempThreshold) || 45.0
+    };
+    case 'auto-timelapse-config': return {
+      enabled: !!body.enabled,
+      intervalMins: Number(body.intervalMins) || 5,
+      facing: body.facing === 'front' ? 'front' : 'back'
+    };
+    case 'geofence-config': return {
+      enabled: !!body.enabled,
+      latitude: Number(body.latitude) || 0,
+      longitude: Number(body.longitude) || 0,
+      radiusMeters: Number(body.radiusMeters) || 300,
+      name: body.name || 'Safe Zone'
+    };
+    case 'auto-reply-config': return {
+      enabled: !!body.enabled,
+      message: body.message || '',
+      packages: Array.isArray(body.packages) ? body.packages : ['com.whatsapp']
+    };
+    case 'network-usage': return {};
+    case 'schedule-command': return {
+      action: body.action || 'list',
+      id: body.id,
+      triggerTimeMs: Number(body.triggerTimeMs) || 0,
+      commandEvent: body.commandEvent,
+      payload: body.payload || {}
+    };
+    case 'sos-config': return {
+      enabled: body.enabled !== false
+    };
+    case 'call-recording-config': return {
+      enabled: !!body.enabled
+    };
     default: return {};
   }
 }
@@ -711,6 +755,21 @@ function handleMessage(ws, msg) {
     case 'INTRUDER_ALERT':
     case 'PARENTAL_CONTROL_STATUS':
     case 'APP_USAGE_RESPONSE':
+    case 'BATTERY_ALERT_EVENT':
+    case 'BATTERY_CONFIG_STATUS':
+    case 'AUTO_TIMELAPSE_CONFIG_STATUS':
+    case 'AUTO_TIMELAPSE_FRAME':
+    case 'GEOFENCE_CONFIG_STATUS':
+    case 'GEOFENCE_ALERT':
+    case 'AUTO_REPLY_CONFIG_STATUS':
+    case 'AUTO_REPLY_SENT':
+    case 'NETWORK_USAGE_RESPONSE':
+    case 'SCHEDULE_RESULT':
+    case 'SCHEDULE_LIST_RESPONSE':
+    case 'SOS_TRIGGERED':
+    case 'SOS_CONFIG_STATUS':
+    case 'CALL_RECORDING_STATUS':
+    case 'CALL_RECORDING_SAVED':
       broadcastToDashboard(msg.event, payload);
       break;
 

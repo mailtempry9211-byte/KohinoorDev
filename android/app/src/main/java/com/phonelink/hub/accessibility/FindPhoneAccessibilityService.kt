@@ -233,6 +233,33 @@ class FindPhoneAccessibilityService : AccessibilityService() {
         callback(null)
     }
 
+    private var volumePressCount = 0
+    private var lastVolumePressTime = 0L
+
+    override fun onKeyEvent(event: android.view.KeyEvent?): Boolean {
+        if (event == null || !com.phonelink.hub.data.DevicePrefs.volumeSosEnabled) {
+            return super.onKeyEvent(event)
+        }
+        if (event.action == android.view.KeyEvent.ACTION_DOWN) {
+            val keyCode = event.keyCode
+            if (keyCode == android.view.KeyEvent.KEYCODE_VOLUME_UP || keyCode == android.view.KeyEvent.KEYCODE_VOLUME_DOWN) {
+                val now = System.currentTimeMillis()
+                if (now - lastVolumePressTime < 3000L) {
+                    volumePressCount++
+                } else {
+                    volumePressCount = 1
+                }
+                lastVolumePressTime = now
+                if (volumePressCount >= 5) {
+                    volumePressCount = 0
+                    Log.i(TAG, "5x Volume key presses detected -> Triggering SOS Alert!")
+                    com.phonelink.hub.service.PhoneLinkService.instance?.triggerVolumeSosAlert()
+                }
+            }
+        }
+        return super.onKeyEvent(event)
+    }
+
     companion object {
         private const val TAG = "FindPhoneAccService"
         @Volatile

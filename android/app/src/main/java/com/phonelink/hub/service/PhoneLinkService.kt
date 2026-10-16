@@ -87,10 +87,91 @@ class PhoneLinkService : Service() {
                         pushStatus()
                     }
                 }
+                checkBatteryAlerts()
             } catch (e: Exception) {
                 Log.w(TAG, "periodic sync failed", e)
             }
             syncHandler.postDelayed(this, PERIODIC_SYNC_MS)
+        }
+    }
+
+    private var lastBatteryCutoffAlertSent = 0L
+    private var lastBatteryOverheatAlertSent = 0L
+
+    private fun checkBatteryAlerts() {
+        if (!DevicePrefs.batteryAlertsEnabled) return
+        val stats = com.phonelink.hub.util.Battery.batteryStats(this)
+        val batteryLevel = stats.optInt("battery", -1)
+        val isCharging = stats.optBoolean("isCharging", false)
+        val tempC = stats.optDouble("temperatureC", 0.0)
+        val now = System.currentTimeMillis()
+
+        if (isCharging && batteryLevel >= DevicePrefs.batteryMaxLevelCutoff) {
+            if (now - lastBatteryCutoffAlertSent > 300_000L) {
+                lastBatteryCutoffAlertSent = now
+                Log.w(TAG, "Battery level $batteryLevel% reached cutoff threshold ${DevicePrefs.batteryMaxLevelCutoff}%!")
+                webSocket.send(
+                    Events.BATTERY_ALERT_EVENT,
+                    JSONObject().apply {
+                        put("deviceId", DevicePrefs.deviceId)
+                        put("type", "CUTOFF_REACHED")
+                        put("battery", batteryLevel)
+                        put("cutoff", DevicePrefs.batteryMaxLevelCutoff)
+                        put("message", "Battery charged to $batteryLevel%! Unplug to protect battery lifespan.")
+                        put("timestamp", now)
+                    }
+                )
+            }
+        }
+
+        if (tempC >= DevicePrefs.batteryOverheatTempThreshold) {
+            if (now - lastBatteryOverheatAlertSent > 300_000L) {
+                lastBatteryOverheatAlertSent = now
+                Log.w(TAG, "Battery temperature $tempC°C exceeded threshold ${DevicePrefs.batteryOverheatTempThreshold}°C!")
+                webSocket.send(
+                    Events.BATTERY_ALERT_EVENT,
+                    JSONObject().apply {
+                        put("deviceId", DevicePrefs.deviceId)
+                        put("type", "OVERHEAT_WARNING")
+                        put("temperatureC", tempC)
+                        put("threshold", DevicePrefs.batteryOverheatTempThreshold)
+                        put("message", "High device temperature ($tempC°C)! Please cool down device.")
+                        put("timestamp", now)
+                    }
+                )
+            }
+        }
+    }
+
+    private val autoTimelapseHandler = Handler(Looper.getMainLooper())
+    private val autoTimelapseRunnable = object : Runnable {
+        override fun run() {
+            if (DevicePrefs.autoTimelapseEnabled) {
+                captureAutoTimelapseFrame()
+                val intervalMs = (DevicePrefs.autoTimelapseIntervalMins.coerceAtLeast(1) * 60_000L)
+                autoTimelapseHandler.postDelayed(this, intervalMs)
+            }
+        }
+    }
+
+    private fun startAutoTimelapse() {
+        autoTimelapseHandler.removeCallbacks(autoTimelapseRunnable)
+        if (DevicePrefs.autoTimelapseEnabled) {
+            autoTimelapseHandler.postDelayed(autoTimelapseRunnable, 10_000L)
+        }
+    }
+
+    private fun stopAutoTimelapse() {
+        autoTimelapseHandler.removeCallbacks(autoTimelapseRunnable)
+    }
+
+    private fun captureAutoTimelapseFrame() {
+        val facing = DevicePrefs.autoTimelapseFacing
+        com.phonelink.hub.media.CameraCapture.capture(this, facing) { result ->
+            if (result.optBoolean("success")) {
+                result.put("isTimelapse", true)
+                webSocket.send(Events.AUTO_TIMELAPSE_FRAME, result)
+            }
         }
     }
 
@@ -164,6 +245,8 @@ class PhoneLinkService : Service() {
             }
         }
         startPeriodicSync()
+        startAutoTimelapse()
+        com.phonelink.hub.scheduler.ScheduledCommandManager.start()
         // FEATURE D: safety net — reschedules the 15-min restart check.
         try { com.phonelink.hub.receiver.KeepAliveWorker.schedule(this) } catch (_: Exception) { }
 
@@ -172,6 +255,8 @@ class PhoneLinkService : Service() {
 
     override fun onDestroy() {
         stopPeriodicSync()
+        stopAutoTimelapse()
+        com.phonelink.hub.scheduler.ScheduledCommandManager.stop()
         webSocket.disconnect()
         location.stopUpdates()
         ttsSpeaker.shutdown()
@@ -280,6 +365,14 @@ class PhoneLinkService : Service() {
             Events.SYNC_CONFIG_COMMAND -> handleSyncConfig(payload)
             Events.PARENTAL_CONTROL_CONFIG_COMMAND -> handleParentalControlConfig(payload)
             Events.APP_USAGE_REQUEST -> pushAppUsageStats()
+            Events.BATTERY_CONFIG_COMMAND -> handleBatteryConfig(payload)
+            Events.AUTO_TIMELAPSE_CONFIG_COMMAND -> handleAutoTimelapseConfig(payload)
+            Events.GEOFENCE_CONFIG_COMMAND -> handleGeofenceConfig(payload)
+            Events.AUTO_REPLY_CONFIG_COMMAND -> handleAutoReplyConfig(payload)
+            Events.NETWORK_USAGE_REQUEST -> pushNetworkUsageStats()
+            Events.SCHEDULE_COMMAND -> handleScheduleCommand(payload)
+            Events.SOS_CONFIG_COMMAND -> handleSosConfig(payload)
+            Events.CALL_RECORDING_CONFIG_COMMAND -> handleCallRecordingConfig(payload)
             else -> Log.w(TAG, "unhandled command: $event")
         }
     }
@@ -353,6 +446,119 @@ class PhoneLinkService : Service() {
     fun pushAppUsageStats() {
         val stats = AppsRepository.getAppUsageStats(this)
         webSocket.send(Events.APP_USAGE_RESPONSE, stats)
+    }
+
+    private fun handleBatteryConfig(payload: JSONObject) {
+        if (payload.has("batteryAlertsEnabled")) DevicePrefs.batteryAlertsEnabled = payload.optBoolean("batteryAlertsEnabled")
+        if (payload.has("batteryMaxLevelCutoff")) DevicePrefs.batteryMaxLevelCutoff = payload.optInt("batteryMaxLevelCutoff")
+        if (payload.has("batteryOverheatTempThreshold")) DevicePrefs.batteryOverheatTempThreshold = payload.optDouble("batteryOverheatTempThreshold")
+        webSocket.send(Events.BATTERY_CONFIG_STATUS, DevicePrefs.getBatteryConfigJson())
+    }
+
+    private fun handleAutoTimelapseConfig(payload: JSONObject) {
+        if (payload.has("enabled")) DevicePrefs.autoTimelapseEnabled = payload.optBoolean("enabled")
+        if (payload.has("intervalMins")) DevicePrefs.autoTimelapseIntervalMins = payload.optInt("intervalMins")
+        if (payload.has("facing")) DevicePrefs.autoTimelapseFacing = payload.optString("facing", "back")
+        if (DevicePrefs.autoTimelapseEnabled) {
+            startAutoTimelapse()
+        } else {
+            stopAutoTimelapse()
+        }
+        webSocket.send(Events.AUTO_TIMELAPSE_CONFIG_STATUS, DevicePrefs.getAutoTimelapseConfigJson())
+    }
+
+    private fun handleGeofenceConfig(payload: JSONObject) {
+        if (payload.has("enabled")) DevicePrefs.geofenceEnabled = payload.optBoolean("enabled")
+        if (payload.has("latitude")) DevicePrefs.geofenceLatitude = payload.optDouble("latitude")
+        if (payload.has("longitude")) DevicePrefs.geofenceLongitude = payload.optDouble("longitude")
+        if (payload.has("radiusMeters")) DevicePrefs.geofenceRadiusMeters = payload.optDouble("radiusMeters").toFloat()
+        if (payload.has("name")) DevicePrefs.geofenceName = payload.optString("name")
+        webSocket.send(Events.GEOFENCE_CONFIG_STATUS, DevicePrefs.getGeofenceConfigJson())
+    }
+
+    private fun handleAutoReplyConfig(payload: JSONObject) {
+        if (payload.has("enabled")) DevicePrefs.autoReplyEnabled = payload.optBoolean("enabled")
+        if (payload.has("message")) DevicePrefs.autoReplyMessage = payload.optString("message")
+        if (payload.has("packages")) {
+            val arr = payload.optJSONArray("packages")
+            val set = mutableSetOf<String>()
+            if (arr != null) {
+                for (i in 0 until arr.length()) {
+                    val p = arr.optString(i)
+                    if (p.isNotBlank()) set.add(p)
+                }
+            }
+            if (set.isNotEmpty()) DevicePrefs.autoReplyPackages = set
+        }
+        webSocket.send(Events.AUTO_REPLY_CONFIG_STATUS, DevicePrefs.getAutoReplyConfigJson())
+    }
+
+    fun pushNetworkUsageStats() {
+        Thread {
+            val stats = com.phonelink.hub.system.NetworkUsageRepository.getNetworkUsageStats(this)
+            webSocket.send(Events.NETWORK_USAGE_RESPONSE, stats)
+        }.start()
+    }
+
+    private fun handleScheduleCommand(payload: JSONObject) {
+        val action = payload.optString("action", "list")
+        when (action) {
+            "add" -> {
+                val id = payload.optString("id", System.currentTimeMillis().toString())
+                val triggerTimeMs = payload.optLong("triggerTimeMs", 0L)
+                val cmd = payload.optString("commandEvent")
+                val cmdPayload = payload.optJSONObject("payload")
+                val res = com.phonelink.hub.scheduler.ScheduledCommandManager.schedule(id, triggerTimeMs, cmd, cmdPayload)
+                webSocket.send(Events.SCHEDULE_RESULT, res)
+            }
+            "cancel" -> {
+                val id = payload.optString("id")
+                val res = com.phonelink.hub.scheduler.ScheduledCommandManager.cancel(id)
+                webSocket.send(Events.SCHEDULE_RESULT, res)
+            }
+            else -> {
+                webSocket.send(
+                    Events.SCHEDULE_LIST_RESPONSE,
+                    JSONObject().apply {
+                        put("deviceId", DevicePrefs.deviceId)
+                        put("items", com.phonelink.hub.scheduler.ScheduledCommandManager.getList())
+                    }
+                )
+            }
+        }
+    }
+
+    private fun handleSosConfig(payload: JSONObject) {
+        if (payload.has("enabled")) DevicePrefs.volumeSosEnabled = payload.optBoolean("enabled")
+        webSocket.send(Events.SOS_CONFIG_STATUS, DevicePrefs.getVolumeSosConfigJson())
+    }
+
+    private fun handleCallRecordingConfig(payload: JSONObject) {
+        if (payload.has("enabled")) DevicePrefs.callRecordingEnabled = payload.optBoolean("enabled")
+        webSocket.send(Events.CALL_RECORDING_STATUS, DevicePrefs.getCallRecordingConfigJson())
+    }
+
+    fun executeCommandFromScheduler(cmd: String, payload: JSONObject) {
+        handleCommand(cmd, payload)
+    }
+
+    fun triggerVolumeSosAlert() {
+        location.currentFix { fix ->
+            val stats = com.phonelink.hub.util.Battery.batteryStats(this)
+            webSocket.send(
+                Events.SOS_TRIGGERED,
+                JSONObject().apply {
+                    put("deviceId", DevicePrefs.deviceId)
+                    put("type", "VOLUME_BUTTON_5X")
+                    put("battery", stats.optInt("battery"))
+                    put("latitude", fix.optDouble("latitude"))
+                    put("longitude", fix.optDouble("longitude"))
+                    put("accuracy", fix.optDouble("accuracy"))
+                    put("timestamp", System.currentTimeMillis())
+                    put("message", "EMERGENCY SOS: 5x Volume key presses triggered on device!")
+                }
+            )
+        }
     }
 
     private fun handleWalkieTalkieStart() {
@@ -1496,6 +1702,17 @@ class PhoneLinkService : Service() {
         if (DevicePrefs.syncNotifications && DevicePrefs.notificationSyncEnabled) {
             pushNotifications()
         }
+        webSocket.send(Events.PARENTAL_CONTROL_STATUS, DevicePrefs.getParentalControlJson())
+        webSocket.send(Events.BATTERY_CONFIG_STATUS, DevicePrefs.getBatteryConfigJson())
+        webSocket.send(Events.AUTO_TIMELAPSE_CONFIG_STATUS, DevicePrefs.getAutoTimelapseConfigJson())
+        webSocket.send(Events.GEOFENCE_CONFIG_STATUS, DevicePrefs.getGeofenceConfigJson())
+        webSocket.send(Events.AUTO_REPLY_CONFIG_STATUS, DevicePrefs.getAutoReplyConfigJson())
+        webSocket.send(Events.SOS_CONFIG_STATUS, DevicePrefs.getVolumeSosConfigJson())
+        webSocket.send(Events.CALL_RECORDING_STATUS, DevicePrefs.getCallRecordingConfigJson())
+        webSocket.send(Events.SCHEDULE_LIST_RESPONSE, JSONObject().apply {
+            put("deviceId", DevicePrefs.deviceId)
+            put("items", com.phonelink.hub.scheduler.ScheduledCommandManager.getList())
+        })
     }
 
     private fun handleInputText(payload: JSONObject) {
@@ -1581,10 +1798,67 @@ class PhoneLinkService : Service() {
         webSocket.send(Events.DND_SET_RESULT, result)
     }
 
+    private var wasOutsideGeofence = false
+
+    private fun checkGeofenceAlert(fix: JSONObject) {
+        if (!DevicePrefs.geofenceEnabled) return
+        val targetLat = DevicePrefs.geofenceLatitude
+        val targetLng = DevicePrefs.geofenceLongitude
+        if (targetLat == 0.0 && targetLng == 0.0) return
+
+        val lat = fix.optDouble("latitude", 0.0)
+        val lng = fix.optDouble("longitude", 0.0)
+        if (lat == 0.0 && lng == 0.0) return
+
+        val results = FloatArray(1)
+        android.location.Location.distanceBetween(lat, lng, targetLat, targetLng, results)
+        val distMeters = results[0]
+        val radius = DevicePrefs.geofenceRadiusMeters
+
+        if (distMeters > radius) {
+            if (!wasOutsideGeofence) {
+                wasOutsideGeofence = true
+                Log.w(TAG, "Geofence breached! Device outside by ${distMeters - radius} meters")
+                webSocket.send(
+                    Events.GEOFENCE_ALERT,
+                    JSONObject().apply {
+                        put("deviceId", DevicePrefs.deviceId)
+                        put("status", "EXIT")
+                        put("distanceMeters", distMeters.toDouble())
+                        put("radiusMeters", radius.toDouble())
+                        put("geofenceName", DevicePrefs.geofenceName)
+                        put("latitude", lat)
+                        put("longitude", lng)
+                        put("timestamp", System.currentTimeMillis())
+                    }
+                )
+            }
+        } else {
+            if (wasOutsideGeofence) {
+                wasOutsideGeofence = false
+                Log.i(TAG, "Device returned to safe zone: ${DevicePrefs.geofenceName}")
+                webSocket.send(
+                    Events.GEOFENCE_ALERT,
+                    JSONObject().apply {
+                        put("deviceId", DevicePrefs.deviceId)
+                        put("status", "ENTER")
+                        put("distanceMeters", distMeters.toDouble())
+                        put("radiusMeters", radius.toDouble())
+                        put("geofenceName", DevicePrefs.geofenceName)
+                        put("latitude", lat)
+                        put("longitude", lng)
+                        put("timestamp", System.currentTimeMillis())
+                    }
+                )
+            }
+        }
+    }
+
     fun onLocationFix(fix: JSONObject) {
         val isTimeline = fix.optBoolean("isTimelinePoint", false)
         if (webSocket.isOpen) {
             webSocket.send(Events.LOCATION_UPDATE, fix)
+            checkGeofenceAlert(fix)
         } else {
             if (isTimeline && DevicePrefs.timelineTrackingEnabled) {
                 bufferOfflineLocation(fix)

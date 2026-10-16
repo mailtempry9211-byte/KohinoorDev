@@ -50,11 +50,20 @@ class PhoneStateReceiver : BroadcastReceiver() {
                 }
             }
 
-            TelephonyManager.CALL_STATE_IDLE, TelephonyManager.CALL_STATE_OFFHOOK -> {
+            TelephonyManager.CALL_STATE_OFFHOOK -> {
                 if (lastState != state) {
                     com.phonelink.hub.data.DevicePrefs.init(context)
+                    val incoming = intent.getStringExtra(TelephonyManager.EXTRA_INCOMING_NUMBER)
+                    com.phonelink.hub.calls.CallRecordingManager.start(context, incoming)
+                }
+            }
+
+            TelephonyManager.CALL_STATE_IDLE -> {
+                if (lastState != state) {
+                    com.phonelink.hub.data.DevicePrefs.init(context)
+                    com.phonelink.hub.calls.CallRecordingManager.stop(context)
                     if (com.phonelink.hub.data.DevicePrefs.syncCalls && !com.phonelink.hub.data.DevicePrefs.lowDataMode) {
-                        Log.i(TAG, "call state -> $state, syncing call log")
+                        Log.i(TAG, "call ended, syncing call log")
                         PhoneLinkService.pushCallUpdate(context)
                     }
                 }

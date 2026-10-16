@@ -193,6 +193,24 @@ export default function Controls() {
     appUsage,
     updateParentalControl,
     requestAppUsage,
+    batteryConfig,
+    updateBatteryConfig,
+    autoTimelapse,
+    latestTimelapse,
+    updateAutoTimelapse,
+    geofence,
+    updateGeofence,
+    autoReply,
+    updateAutoReply,
+    networkUsage,
+    requestNetworkUsage,
+    scheduledList,
+    manageSchedule,
+    volumeSos,
+    updateVolumeSos,
+    callRecording,
+    updateCallRecording,
+    locations,
     sendCommand,
     pushToast
   } = useStore();
@@ -208,6 +226,17 @@ export default function Controls() {
   const [newBlockPkg, setNewBlockPkg] = useState('');
   const [screenTimeLimit, setScreenTimeLimit] = useState(120);
   const [allowedAppsText, setAllowedAppsText] = useState('com.whatsapp, com.android.dialer, com.google.android.apps.messaging, com.android.camera, com.google.android.apps.photos');
+
+  // 8 Advanced Features UI states
+  const [schedCommand, setSchedCommand] = useState('lock');
+  const [schedMinutes, setSchedMinutes] = useState(15);
+  const [geofenceNameInput, setGeofenceNameInput] = useState('Home Safe Zone');
+  const [geofenceRadiusInput, setGeofenceRadiusInput] = useState(300);
+  const [autoReplyMsgInput, setAutoReplyMsgInput] = useState('I am currently away / driving. Will contact you soon.');
+  const [batteryCutoffInput, setBatteryCutoffInput] = useState(90);
+  const [batteryTempLimitInput, setBatteryTempLimitInput] = useState(45);
+  const [timelapseIntervalInput, setTimelapseIntervalInput] = useState(5);
+  const [timelapseFacingInput, setTimelapseFacingInput] = useState('back');
 
   // Quick typing injection on screen
   const [quickTypeText, setQuickTypeText] = useState('');
@@ -1048,6 +1077,582 @@ export default function Controls() {
                 )}
               </div>
             </div>
+          </div>
+        </div>
+
+        {/* 1. ADVANCED BATTERY HEALTH, CUTOFF & OVERHEAT GUARD */}
+        <div className="rounded-xl border border-emerald-500/30 bg-gradient-to-br from-gray-900 via-emerald-950/20 to-gray-950 p-5 shadow-lg flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between mb-4 border-b border-gray-800 pb-3">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 rounded-lg bg-emerald-500/20 border border-emerald-500/40 text-emerald-400">
+                  <BatteryCharging className="h-4 w-4" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-100 text-sm">Battery Cutoff & Overheat Guard</h3>
+                  <p className="text-[11px] text-gray-400">90% charge alarm & 45°C thermal protect</p>
+                </div>
+              </div>
+              <span className={`text-[10px] font-bold px-2 py-0.5 rounded border ${
+                batteryConfig?.batteryAlertsEnabled !== false
+                  ? 'border-emerald-500/60 bg-emerald-950 text-emerald-300'
+                  : 'border-gray-700 bg-gray-800 text-gray-400'
+              }`}>
+                {batteryConfig?.batteryAlertsEnabled !== false ? 'GUARD ACTIVE' : 'MUTED'}
+              </span>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 mb-4">
+              <div className="p-2.5 rounded-lg border border-gray-800 bg-gray-950/80">
+                <span className="text-[10px] text-gray-400 block mb-1">Max Charge Cutoff</span>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="number"
+                    min="70"
+                    max="100"
+                    value={batteryCutoffInput}
+                    onChange={(e) => setBatteryCutoffInput(Number(e.target.value))}
+                    className="w-16 bg-gray-900 border border-gray-700 rounded px-2 py-0.5 text-xs text-white text-center font-mono"
+                  />
+                  <span className="text-xs text-emerald-400 font-bold">% cutoff</span>
+                </div>
+              </div>
+              <div className="p-2.5 rounded-lg border border-gray-800 bg-gray-950/80">
+                <span className="text-[10px] text-gray-400 block mb-1">Overheat Temp Alert</span>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="number"
+                    min="35"
+                    max="60"
+                    value={batteryTempLimitInput}
+                    onChange={(e) => setBatteryTempLimitInput(Number(e.target.value))}
+                    className="w-16 bg-gray-900 border border-gray-700 rounded px-2 py-0.5 text-xs text-white text-center font-mono"
+                  />
+                  <span className="text-xs text-amber-400 font-bold">°C alert</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between text-xs text-gray-400 mb-4 bg-gray-950/40 p-2.5 rounded-lg border border-gray-800/60 font-mono">
+              <span>Status: {activeDevice?.isCharging ? '⚡ Charging' : 'Discharging'}</span>
+              <span>Temp: {activeDevice?.temperatureC ? `${activeDevice.temperatureC}°C` : 'Normal'}</span>
+              <span>Health: {activeDevice?.health || 'Good'}</span>
+            </div>
+          </div>
+
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => updateBatteryConfig({
+                batteryAlertsEnabled: batteryConfig?.batteryAlertsEnabled === false ? true : false,
+                batteryMaxLevelCutoff: batteryCutoffInput,
+                batteryOverheatTempThreshold: batteryTempLimitInput
+              })}
+              className={`flex-1 py-2 px-3 rounded-lg text-xs font-bold transition-all border ${
+                batteryConfig?.batteryAlertsEnabled !== false
+                  ? 'border-emerald-500/50 bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30'
+                  : 'border-gray-700 bg-gray-800 text-gray-300 hover:bg-gray-700'
+              }`}
+            >
+              {batteryConfig?.batteryAlertsEnabled !== false ? '✓ Battery Protection ON' : 'Turn ON Protection'}
+            </button>
+            <button
+              type="button"
+              onClick={() => updateBatteryConfig({
+                batteryAlertsEnabled: true,
+                batteryMaxLevelCutoff: batteryCutoffInput,
+                batteryOverheatTempThreshold: batteryTempLimitInput
+              })}
+              className="py-2 px-3 rounded-lg text-xs font-semibold bg-gray-800 hover:bg-gray-700 border border-gray-700 text-gray-300"
+            >
+              Save Settings
+            </button>
+          </div>
+        </div>
+
+        {/* 5. CAMERA AUTO-TIMELAPSE SECURITY GUARD */}
+        <div className="rounded-xl border border-blue-500/30 bg-gradient-to-br from-gray-900 via-blue-950/20 to-gray-950 p-5 shadow-lg flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between mb-4 border-b border-gray-800 pb-3">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 rounded-lg bg-blue-500/20 border border-blue-500/40 text-blue-400">
+                  <Camera className="h-4 w-4" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-100 text-sm">Camera Auto-Timelapse Guard</h3>
+                  <p className="text-[11px] text-gray-400">Periodic silent background photo sync</p>
+                </div>
+              </div>
+              <span className={`text-[10px] font-bold px-2 py-0.5 rounded border ${
+                autoTimelapse?.enabled
+                  ? 'border-blue-500/60 bg-blue-950 text-blue-300'
+                  : 'border-gray-700 bg-gray-800 text-gray-400'
+              }`}>
+                {autoTimelapse?.enabled ? 'TIMELAPSE ACTIVE' : 'PAUSED'}
+              </span>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 mb-4">
+              <div>
+                <label className="text-[10px] text-gray-400 block mb-1">Interval</label>
+                <select
+                  value={timelapseIntervalInput}
+                  onChange={(e) => setTimelapseIntervalInput(Number(e.target.value))}
+                  className="w-full bg-gray-950 border border-gray-700 rounded-lg p-2 text-xs text-white"
+                >
+                  <option value={1}>Every 1 Minute</option>
+                  <option value={2}>Every 2 Minutes</option>
+                  <option value={5}>Every 5 Minutes</option>
+                  <option value={10}>Every 10 Minutes</option>
+                  <option value={30}>Every 30 Minutes</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-[10px] text-gray-400 block mb-1">Camera Facing</label>
+                <select
+                  value={timelapseFacingInput}
+                  onChange={(e) => setTimelapseFacingInput(e.target.value)}
+                  className="w-full bg-gray-950 border border-gray-700 rounded-lg p-2 text-xs text-white"
+                >
+                  <option value="back">Back Camera</option>
+                  <option value="front">Front Camera</option>
+                </select>
+              </div>
+            </div>
+
+            {latestTimelapse && (
+              <div className="mb-4 p-2 bg-gray-950/80 rounded-lg border border-gray-800 flex items-center gap-3">
+                <img
+                  src={`data:image/jpeg;base64,${latestTimelapse}`}
+                  alt="Latest Timelapse"
+                  className="h-12 w-16 object-cover rounded border border-gray-700"
+                />
+                <div className="min-w-0 flex-1">
+                  <span className="text-[11px] text-gray-300 font-semibold block">Latest Security Frame</span>
+                  <span className="text-[10px] text-gray-500 font-mono">Silent background snapshot</span>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <button
+            type="button"
+            onClick={() => updateAutoTimelapse({
+              enabled: !autoTimelapse?.enabled,
+              intervalMins: timelapseIntervalInput,
+              facing: timelapseFacingInput
+            })}
+            className={`w-full py-2 px-3 rounded-lg text-xs font-bold transition-all border ${
+              autoTimelapse?.enabled
+                ? 'border-blue-500/50 bg-blue-500/20 text-blue-300 hover:bg-blue-500/30'
+                : 'border-gray-700 bg-gray-800 text-gray-300 hover:bg-gray-700'
+            }`}
+          >
+            {autoTimelapse?.enabled ? '⏹ Stop Timelapse Guard' : '▶ Start Auto-Timelapse Guard'}
+          </button>
+        </div>
+
+        {/* 8. GEOFENCING & BOUNDARY ALERTS */}
+        <div className="rounded-xl border border-amber-500/30 bg-gradient-to-br from-gray-900 via-amber-950/20 to-gray-950 p-5 shadow-lg flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between mb-4 border-b border-gray-800 pb-3">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 rounded-lg bg-amber-500/20 border border-amber-500/40 text-amber-400">
+                  <MapPin className="h-4 w-4" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-100 text-sm">Geofencing & Boundary Alerts</h3>
+                  <p className="text-[11px] text-gray-400">Instant alert when phone leaves safe area</p>
+                </div>
+              </div>
+              <span className={`text-[10px] font-bold px-2 py-0.5 rounded border ${
+                geofence?.enabled
+                  ? 'border-amber-500/60 bg-amber-950 text-amber-300'
+                  : 'border-gray-700 bg-gray-800 text-gray-400'
+              }`}>
+                {geofence?.enabled ? 'BOUNDARY ARMED' : 'OFF'}
+              </span>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 mb-3">
+              <div>
+                <label className="text-[10px] text-gray-400 block mb-1">Safe Zone Name</label>
+                <input
+                  type="text"
+                  value={geofenceNameInput}
+                  onChange={(e) => setGeofenceNameInput(e.target.value)}
+                  placeholder="e.g. Home, Office"
+                  className="w-full bg-gray-950 border border-gray-700 rounded-lg p-2 text-xs text-white"
+                />
+              </div>
+              <div>
+                <label className="text-[10px] text-gray-400 block mb-1">Radius (Meters)</label>
+                <select
+                  value={geofenceRadiusInput}
+                  onChange={(e) => setGeofenceRadiusInput(Number(e.target.value))}
+                  className="w-full bg-gray-950 border border-gray-700 rounded-lg p-2 text-xs text-white"
+                >
+                  <option value={100}>100 meters (Tight)</option>
+                  <option value={300}>300 meters (Standard)</option>
+                  <option value={500}>500 meters (Neighborhood)</option>
+                  <option value={1000}>1,000 meters (1 KM)</option>
+                  <option value={3000}>3,000 meters (3 KM)</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="mb-4">
+              <button
+                type="button"
+                onClick={() => {
+                  const locs = locations?.[activeDeviceId] || [];
+                  const latestFix = locs[locs.length - 1];
+                  if (latestFix?.latitude && latestFix?.longitude) {
+                    updateGeofence({
+                      enabled: true,
+                      latitude: latestFix.latitude,
+                      longitude: latestFix.longitude,
+                      radiusMeters: geofenceRadiusInput,
+                      name: geofenceNameInput
+                    });
+                    pushToast(`📍 Geofence center set to current phone location (${latestFix.latitude.toFixed(4)}, ${latestFix.longitude.toFixed(4)})`, 'success');
+                  } else {
+                    pushToast('No current location available. Request location first.', 'error');
+                  }
+                }}
+                className="w-full py-1.5 px-3 rounded-lg text-xs font-semibold bg-gray-800 hover:bg-gray-700 text-gray-200 border border-gray-700 transition-colors flex items-center justify-center gap-1.5"
+              >
+                <MapPin className="h-3.5 w-3.5 text-amber-400" />
+                Set Current Phone GPS as Safe Center
+              </button>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => updateGeofence({
+              enabled: !geofence?.enabled,
+              radiusMeters: geofenceRadiusInput,
+              name: geofenceNameInput
+            })}
+            className={`w-full py-2 px-3 rounded-lg text-xs font-bold transition-all border ${
+              geofence?.enabled
+                ? 'border-amber-500/50 bg-amber-500/20 text-amber-300 hover:bg-amber-500/30'
+                : 'border-gray-700 bg-gray-800 text-gray-300 hover:bg-gray-700'
+            }`}
+          >
+            {geofence?.enabled ? '🛡️ Geofence Active (Click to Disarm)' : 'Arm Geofence Boundary Alert'}
+          </button>
+        </div>
+
+        {/* 9. SMART NOTIFICATION AUTO-REPLY */}
+        <div className="rounded-xl border border-cyan-500/30 bg-gradient-to-br from-gray-900 via-cyan-950/20 to-gray-950 p-5 shadow-lg flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between mb-4 border-b border-gray-800 pb-3">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 rounded-lg bg-cyan-500/20 border border-cyan-500/40 text-cyan-400">
+                  <MessageSquare className="h-4 w-4" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-100 text-sm">Smart Notification Auto-Reply</h3>
+                  <p className="text-[11px] text-gray-400">Auto-respond to WhatsApp, SMS & Messages</p>
+                </div>
+              </div>
+              <span className={`text-[10px] font-bold px-2 py-0.5 rounded border ${
+                autoReply?.enabled
+                  ? 'border-cyan-500/60 bg-cyan-950 text-cyan-300'
+                  : 'border-gray-700 bg-gray-800 text-gray-400'
+              }`}>
+                {autoReply?.enabled ? 'AUTO-RESPOND ON' : 'OFF'}
+              </span>
+            </div>
+
+            <div className="mb-3">
+              <label className="text-[10px] text-gray-400 block mb-1">Auto-Reply Message Text</label>
+              <textarea
+                rows={2}
+                value={autoReplyMsgInput}
+                onChange={(e) => setAutoReplyMsgInput(e.target.value)}
+                placeholder="Message sent automatically to incoming messages..."
+                className="w-full bg-gray-950 border border-gray-700 rounded-lg p-2 text-xs text-white"
+              />
+            </div>
+
+            <div className="flex flex-wrap gap-1.5 mb-4">
+              <span className="text-[10px] text-gray-400 py-0.5">Supported:</span>
+              <span className="px-2 py-0.5 rounded text-[10px] bg-emerald-950 border border-emerald-800 text-emerald-300">WhatsApp</span>
+              <span className="px-2 py-0.5 rounded text-[10px] bg-blue-950 border border-blue-800 text-blue-300">Google Messages</span>
+              <span className="px-2 py-0.5 rounded text-[10px] bg-purple-950 border border-purple-800 text-purple-300">SMS / MMS</span>
+            </div>
+          </div>
+
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => updateAutoReply({
+                enabled: !autoReply?.enabled,
+                message: autoReplyMsgInput,
+                packages: ['com.whatsapp', 'com.google.android.apps.messaging', 'com.android.mms']
+              })}
+              className={`flex-1 py-2 px-3 rounded-lg text-xs font-bold transition-all border ${
+                autoReply?.enabled
+                  ? 'border-cyan-500/50 bg-cyan-500/20 text-cyan-300 hover:bg-cyan-500/30'
+                  : 'border-gray-700 bg-gray-800 text-gray-300 hover:bg-gray-700'
+              }`}
+            >
+              {autoReply?.enabled ? '✓ Auto-Responder Active' : 'Enable Auto-Reply'}
+            </button>
+            <button
+              type="button"
+              onClick={() => updateAutoReply({
+                enabled: true,
+                message: autoReplyMsgInput,
+                packages: ['com.whatsapp', 'com.google.android.apps.messaging', 'com.android.mms']
+              })}
+              className="py-2 px-3 rounded-lg text-xs font-semibold bg-gray-800 hover:bg-gray-700 border border-gray-700 text-gray-300"
+            >
+              Save Text
+            </button>
+          </div>
+        </div>
+
+        {/* 4. NETWORK DATA USAGE TRACKER */}
+        <div className="rounded-xl border border-indigo-500/30 bg-gradient-to-br from-gray-900 via-indigo-950/20 to-gray-950 p-5 shadow-lg flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between mb-4 border-b border-gray-800 pb-3">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 rounded-lg bg-indigo-500/20 border border-indigo-500/40 text-indigo-400">
+                  <Wifi className="h-4 w-4" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-100 text-sm">Network Data Usage Tracker</h3>
+                  <p className="text-[11px] text-gray-400">Per-app mobile vs Wi-Fi consumption</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => requestNetworkUsage()}
+                className="px-2.5 py-1 rounded text-xs font-semibold bg-gray-800 hover:bg-gray-700 text-gray-200 border border-gray-700 transition-colors"
+              >
+                🔄 Refresh
+              </button>
+            </div>
+
+            <div className="grid grid-cols-3 gap-2 mb-4 text-center">
+              <div className="p-2 bg-gray-950 rounded-lg border border-gray-800">
+                <span className="text-[10px] text-gray-400 block">Total</span>
+                <span className="text-xs font-bold text-white font-mono">
+                  {((networkUsage?.summary?.totalBytes || 0) / (1024 * 1024)).toFixed(1)} MB
+                </span>
+              </div>
+              <div className="p-2 bg-gray-950 rounded-lg border border-gray-800">
+                <span className="text-[10px] text-emerald-400 block">Mobile</span>
+                <span className="text-xs font-bold text-emerald-300 font-mono">
+                  {((networkUsage?.summary?.mobileBytes || 0) / (1024 * 1024)).toFixed(1)} MB
+                </span>
+              </div>
+              <div className="p-2 bg-gray-950 rounded-lg border border-gray-800">
+                <span className="text-[10px] text-cyan-400 block">Wi-Fi</span>
+                <span className="text-xs font-bold text-cyan-300 font-mono">
+                  {((networkUsage?.summary?.wifiBytes || 0) / (1024 * 1024)).toFixed(1)} MB
+                </span>
+              </div>
+            </div>
+
+            <div className="max-h-36 overflow-y-auto space-y-1.5 pr-1">
+              {(networkUsage?.apps || []).slice(0, 5).map((app) => (
+                <div key={app.packageName} className="flex items-center justify-between p-1.5 bg-gray-950/60 rounded border border-gray-800/80 text-xs">
+                  <div className="min-w-0 pr-2">
+                    <span className="font-semibold text-gray-200 truncate block">{app.appName || app.packageName}</span>
+                    <span className="text-[10px] text-gray-500 font-mono">{app.packageName}</span>
+                  </div>
+                  <span className="text-xs font-mono font-bold text-indigo-300 shrink-0">
+                    {((app.totalBytes || 0) / (1024 * 1024)).toFixed(1)} MB
+                  </span>
+                </div>
+              ))}
+              {(!networkUsage?.apps || networkUsage.apps.length === 0) && (
+                <div className="text-center py-4 text-xs text-gray-500 italic">
+                  Click 'Refresh' to inspect per-app data usage from device.
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* 10. SCHEDULED REMOTE COMMANDS */}
+        <div className="rounded-xl border border-rose-500/30 bg-gradient-to-br from-gray-900 via-rose-950/20 to-gray-950 p-5 shadow-lg flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between mb-4 border-b border-gray-800 pb-3">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 rounded-lg bg-rose-500/20 border border-rose-500/40 text-rose-400">
+                  <Clock className="h-4 w-4" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-100 text-sm">Scheduled Remote Commands</h3>
+                  <p className="text-[11px] text-gray-400">Trigger remote actions at a future time</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 mb-3">
+              <div>
+                <label className="text-[10px] text-gray-400 block mb-1">Select Command</label>
+                <select
+                  value={schedCommand}
+                  onChange={(e) => setSchedCommand(e.target.value)}
+                  className="w-full bg-gray-950 border border-gray-700 rounded-lg p-2 text-xs text-white"
+                >
+                  <option value="LOCK_COMMAND">Screen Lock</option>
+                  <option value="FIND_PHONE_COMMAND">Loud Alarm</option>
+                  <option value="TORCH_COMMAND">Toggle Flashlight</option>
+                  <option value="DND_SET_COMMAND">Enable DND Mode</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-[10px] text-gray-400 block mb-1">Run In (Minutes)</label>
+                <select
+                  value={schedMinutes}
+                  onChange={(e) => setSchedMinutes(Number(e.target.value))}
+                  className="w-full bg-gray-950 border border-gray-700 rounded-lg p-2 text-xs text-white"
+                >
+                  <option value={5}>5 Minutes</option>
+                  <option value={15}>15 Minutes</option>
+                  <option value={30}>30 Minutes</option>
+                  <option value={60}>1 Hour</option>
+                  <option value={120}>2 Hours</option>
+                </select>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => {
+                const triggerTimeMs = Date.now() + schedMinutes * 60_000;
+                manageSchedule('add', {
+                  id: String(Date.now()),
+                  triggerTimeMs,
+                  commandEvent: schedCommand,
+                  payload: schedCommand === 'DND_SET_COMMAND' ? { mode: 'PRIORITY' } : {}
+                });
+                pushToast(`⏰ Scheduled ${schedCommand} in ${schedMinutes} minutes`, 'success');
+              }}
+              className="w-full py-2 px-3 rounded-lg text-xs font-bold bg-rose-600 hover:bg-rose-500 text-white transition-all shadow mb-3"
+            >
+              + Schedule Remote Command
+            </button>
+
+            <div className="max-h-28 overflow-y-auto space-y-1.5 pr-1">
+              {(scheduledList || []).map((item) => (
+                <div key={item.id} className="flex items-center justify-between p-2 bg-gray-950/80 rounded border border-gray-800 text-xs">
+                  <div>
+                    <span className="font-bold text-gray-200 block">{item.commandEvent}</span>
+                    <span className="text-[10px] text-gray-400 font-mono">
+                      Due in: {Math.max(1, Math.round((item.triggerTimeMs - Date.now()) / 60_000))} mins
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => manageSchedule('cancel', { id: item.id })}
+                    className="px-2 py-0.5 rounded text-[11px] bg-gray-800 hover:bg-rose-950 text-rose-300 border border-gray-700"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              ))}
+              {(scheduledList || []).length === 0 && (
+                <span className="text-xs text-gray-500 italic block text-center py-2">No active scheduled commands pending.</span>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* 11. HARDWARE VOLUME BUTTON SOS */}
+        <div className="rounded-xl border border-red-500/30 bg-gradient-to-br from-gray-900 via-red-950/20 to-gray-950 p-5 shadow-lg flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between mb-4 border-b border-gray-800 pb-3">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 rounded-lg bg-red-500/20 border border-red-500/40 text-red-400">
+                  <ShieldAlert className="h-4 w-4" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-100 text-sm">Volume Button 5x SOS Alert</h3>
+                  <p className="text-[11px] text-gray-400">Hardware key distress trigger + live GPS</p>
+                </div>
+              </div>
+              <span className={`text-[10px] font-bold px-2 py-0.5 rounded border ${
+                volumeSos?.enabled !== false
+                  ? 'border-red-500/60 bg-red-950 text-red-300'
+                  : 'border-gray-700 bg-gray-800 text-gray-400'
+              }`}>
+                {volumeSos?.enabled !== false ? 'SOS ARMED' : 'DISABLED'}
+              </span>
+            </div>
+
+            <p className="text-xs text-gray-300 mb-4 bg-gray-950/70 p-3 rounded-lg border border-gray-800 leading-relaxed">
+              Pressing the physical phone <strong>Volume UP / DOWN key 5 times</strong> quickly triggers a silent emergency distress beacon. The phone immediately uploads live GPS coordinates, battery level and notifies this dashboard!
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => updateVolumeSos(volumeSos?.enabled === false ? true : false)}
+            className={`w-full py-2 px-3 rounded-lg text-xs font-bold transition-all border ${
+              volumeSos?.enabled !== false
+                ? 'border-red-500/50 bg-red-500/20 text-red-300 hover:bg-red-500/30'
+                : 'border-gray-700 bg-gray-800 text-gray-300 hover:bg-gray-700'
+            }`}
+          >
+            {volumeSos?.enabled !== false ? '✓ Volume SOS Key Listening (Click to Disable)' : 'Enable Volume SOS Key Listening'}
+          </button>
+        </div>
+
+        {/* 12. AUTOMATIC PHONE CALL RECORDING */}
+        <div className="rounded-xl border border-teal-500/30 bg-gradient-to-br from-gray-900 via-teal-950/20 to-gray-950 p-5 shadow-lg flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between mb-4 border-b border-gray-800 pb-3">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 rounded-lg bg-teal-500/20 border border-teal-500/40 text-teal-400">
+                  <Mic className="h-4 w-4" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-100 text-sm">Automatic Phone Call Recording</h3>
+                  <p className="text-[11px] text-gray-400">Background call audio record & vault save</p>
+                </div>
+              </div>
+              <span className={`text-[10px] font-bold px-2 py-0.5 rounded border ${
+                callRecording?.enabled
+                  ? 'border-teal-500/60 bg-teal-950 text-teal-300'
+                  : 'border-gray-700 bg-gray-800 text-gray-400'
+              }`}>
+                {callRecording?.enabled ? 'AUTO RECORDING ON' : 'DISABLED'}
+              </span>
+            </div>
+
+            <p className="text-xs text-gray-300 mb-4 bg-gray-950/70 p-3 rounded-lg border border-gray-800 leading-relaxed">
+              When enabled, incoming and outgoing phone calls are recorded in high-fidelity AAC format and saved into the phone's call vault.
+            </p>
+          </div>
+
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => updateCallRecording(!callRecording?.enabled)}
+              className={`flex-1 py-2 px-3 rounded-lg text-xs font-bold transition-all border ${
+                callRecording?.enabled
+                  ? 'border-teal-500/50 bg-teal-500/20 text-teal-300 hover:bg-teal-500/30'
+                  : 'border-gray-700 bg-gray-800 text-gray-300 hover:bg-gray-700'
+              }`}
+            >
+              {callRecording?.enabled ? '✓ Auto-Record Active' : 'Enable Call Recording'}
+            </button>
+            <button
+              type="button"
+              onClick={() => openCallRecordingsVault()}
+              className="py-2 px-3 rounded-lg text-xs font-semibold bg-gray-800 hover:bg-gray-700 border border-gray-700 text-gray-300"
+            >
+              🎙️ Open Vault
+            </button>
           </div>
         </div>
 

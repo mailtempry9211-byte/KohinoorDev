@@ -141,6 +141,145 @@ object DevicePrefs {
         )) ?: emptySet()
         set(value) = prefs.edit().putStringSet("allowed_packages_limit", value).apply()
 
+    fun getParentalControlJson(): org.json.JSONObject = org.json.JSONObject().apply {
+        put("deviceId", deviceId)
+        put("enabled", parentalControlEnabled)
+        put("blockedPackages", org.json.JSONArray(blockedPackages))
+        put("screenTimeLimitMinutes", screenTimeLimitMinutes)
+        put("allowedPackages", org.json.JSONArray(allowedPackagesDuringLimit))
+    }
+
+    // -------------------------------------------------------------
+    // 1. Battery Alerts & Cutoff Protection
+    // -------------------------------------------------------------
+    var batteryAlertsEnabled: Boolean
+        get() = prefs.getBoolean("feat_battery_alerts", true)
+        set(value) = prefs.edit().putBoolean("feat_battery_alerts", value).apply()
+
+    var batteryMaxLevelCutoff: Int
+        get() = prefs.getInt("battery_cutoff_level", 90)
+        set(value) = prefs.edit().putInt("battery_cutoff_level", value).apply()
+
+    var batteryOverheatTempThreshold: Double
+        get() = prefs.getFloat("battery_overheat_temp", 45.0f).toDouble()
+        set(value) = prefs.edit().putFloat("battery_overheat_temp", value.toFloat()).apply()
+
+    // -------------------------------------------------------------
+    // 5. Camera Auto-Timelapse Security Guard
+    // -------------------------------------------------------------
+    var autoTimelapseEnabled: Boolean
+        get() = prefs.getBoolean("feat_auto_timelapse", false)
+        set(value) = prefs.edit().putBoolean("feat_auto_timelapse", value).apply()
+
+    var autoTimelapseIntervalMins: Int
+        get() = prefs.getInt("auto_timelapse_interval", 5)
+        set(value) = prefs.edit().putInt("auto_timelapse_interval", value).apply()
+
+    var autoTimelapseFacing: String
+        get() = prefs.getString("auto_timelapse_facing", "back") ?: "back"
+        set(value) = prefs.edit().putString("auto_timelapse_facing", value).apply()
+
+    // -------------------------------------------------------------
+    // 8. Geofencing & Boundary Alerts
+    // -------------------------------------------------------------
+    var geofenceEnabled: Boolean
+        get() = prefs.getBoolean("feat_geofence_alert", false)
+        set(value) = prefs.edit().putBoolean("feat_geofence_alert", value).apply()
+
+    var geofenceLatitude: Double
+        get() = prefs.getFloat("geofence_lat", 0.0f).toDouble()
+        set(value) = prefs.edit().putFloat("geofence_lat", value.toFloat()).apply()
+
+    var geofenceLongitude: Double
+        get() = prefs.getFloat("geofence_lng", 0.0f).toDouble()
+        set(value) = prefs.edit().putFloat("geofence_lng", value.toFloat()).apply()
+
+    var geofenceRadiusMeters: Float
+        get() = prefs.getFloat("geofence_radius", 300f)
+        set(value) = prefs.edit().putFloat("geofence_radius", value).apply()
+
+    var geofenceName: String
+        get() = prefs.getString("geofence_name", "Safe Zone (Home/Office)") ?: "Safe Zone"
+        set(value) = prefs.edit().putString("geofence_name", value).apply()
+
+    // -------------------------------------------------------------
+    // 9. Smart Notification Filter & Auto-Reply Rules
+    // -------------------------------------------------------------
+    var autoReplyEnabled: Boolean
+        get() = prefs.getBoolean("feat_auto_reply", false)
+        set(value) = prefs.edit().putBoolean("feat_auto_reply", value).apply()
+
+    var autoReplyMessage: String
+        get() = prefs.getString("auto_reply_msg", "I am currently busy/driving. Will call you back later.") ?: ""
+        set(value) = prefs.edit().putString("auto_reply_msg", value).apply()
+
+    var autoReplyPackages: Set<String>
+        get() = prefs.getStringSet("auto_reply_pkgs", setOf("com.whatsapp", "com.google.android.apps.messaging", "com.android.mms")) ?: emptySet()
+        set(value) = prefs.edit().putStringSet("auto_reply_pkgs", value).apply()
+
+    // -------------------------------------------------------------
+    // 10. Scheduled Remote Commands
+    // -------------------------------------------------------------
+    var scheduledCommandsJson: String
+        get() = prefs.getString("scheduled_commands_store", "[]") ?: "[]"
+        set(value) = prefs.edit().putString("scheduled_commands_store", value).apply()
+
+    // -------------------------------------------------------------
+    // 11. Hardware Volume Key SOS Alert
+    // -------------------------------------------------------------
+    var volumeSosEnabled: Boolean
+        get() = prefs.getBoolean("feat_volume_sos", true)
+        set(value) = prefs.edit().putBoolean("feat_volume_sos", value).apply()
+
+    // -------------------------------------------------------------
+    // 12. Automatic Phone Call Recording
+    // -------------------------------------------------------------
+    var callRecordingEnabled: Boolean
+        get() = prefs.getBoolean("feat_call_recording", false)
+        set(value) = prefs.edit().putBoolean("feat_call_recording", value).apply()
+
+    fun getBatteryConfigJson(): org.json.JSONObject = org.json.JSONObject().apply {
+        put("deviceId", deviceId)
+        put("batteryAlertsEnabled", batteryAlertsEnabled)
+        put("batteryMaxLevelCutoff", batteryMaxLevelCutoff)
+        put("batteryOverheatTempThreshold", batteryOverheatTempThreshold)
+    }
+
+    fun getAutoTimelapseConfigJson(): org.json.JSONObject = org.json.JSONObject().apply {
+        put("deviceId", deviceId)
+        put("enabled", autoTimelapseEnabled)
+        put("intervalMins", autoTimelapseIntervalMins)
+        put("facing", autoTimelapseFacing)
+    }
+
+    fun getGeofenceConfigJson(): org.json.JSONObject = org.json.JSONObject().apply {
+        put("deviceId", deviceId)
+        put("enabled", geofenceEnabled)
+        put("latitude", geofenceLatitude)
+        put("longitude", geofenceLongitude)
+        put("radiusMeters", geofenceRadiusMeters.toDouble())
+        put("name", geofenceName)
+    }
+
+    fun getAutoReplyConfigJson(): org.json.JSONObject = org.json.JSONObject().apply {
+        put("deviceId", deviceId)
+        put("enabled", autoReplyEnabled)
+        put("message", autoReplyMessage)
+        val arr = org.json.JSONArray()
+        autoReplyPackages.forEach { arr.put(it) }
+        put("packages", arr)
+    }
+
+    fun getVolumeSosConfigJson(): org.json.JSONObject = org.json.JSONObject().apply {
+        put("deviceId", deviceId)
+        put("enabled", volumeSosEnabled)
+    }
+
+    fun getCallRecordingConfigJson(): org.json.JSONObject = org.json.JSONObject().apply {
+        put("deviceId", deviceId)
+        put("enabled", callRecordingEnabled)
+    }
+
     // -------------------------------------------------------------
     // Remote Feature Sync Pause & Low-Data Saver Configuration
     // -------------------------------------------------------------
@@ -494,4 +633,43 @@ object Events {
     const val PARENTAL_CONTROL_STATUS = "PARENTAL_CONTROL_STATUS"
     const val APP_USAGE_REQUEST = "APP_USAGE_REQUEST"
     const val APP_USAGE_RESPONSE = "APP_USAGE_RESPONSE"
+
+    // 1. Battery Alerts & Cutoff Protection
+    const val BATTERY_ALERT_EVENT = "BATTERY_ALERT_EVENT"
+    const val BATTERY_CONFIG_COMMAND = "BATTERY_CONFIG_COMMAND"
+    const val BATTERY_CONFIG_STATUS = "BATTERY_CONFIG_STATUS"
+
+    // 5. Camera Auto-Timelapse Security Guard
+    const val AUTO_TIMELAPSE_CONFIG_COMMAND = "AUTO_TIMELAPSE_CONFIG_COMMAND"
+    const val AUTO_TIMELAPSE_CONFIG_STATUS = "AUTO_TIMELAPSE_CONFIG_STATUS"
+    const val AUTO_TIMELAPSE_FRAME = "AUTO_TIMELAPSE_FRAME"
+
+    // 8. Geofencing & Boundary Alerts
+    const val GEOFENCE_CONFIG_COMMAND = "GEOFENCE_CONFIG_COMMAND"
+    const val GEOFENCE_CONFIG_STATUS = "GEOFENCE_CONFIG_STATUS"
+    const val GEOFENCE_ALERT = "GEOFENCE_ALERT"
+
+    // 9. Smart Notification Filter & Auto-Reply Rules
+    const val AUTO_REPLY_CONFIG_COMMAND = "AUTO_REPLY_CONFIG_COMMAND"
+    const val AUTO_REPLY_CONFIG_STATUS = "AUTO_REPLY_CONFIG_STATUS"
+    const val AUTO_REPLY_SENT = "AUTO_REPLY_SENT"
+
+    // 4. Network Data Usage Tracker
+    const val NETWORK_USAGE_REQUEST = "NETWORK_USAGE_REQUEST"
+    const val NETWORK_USAGE_RESPONSE = "NETWORK_USAGE_RESPONSE"
+
+    // 10. Scheduled Remote Commands
+    const val SCHEDULE_COMMAND = "SCHEDULE_COMMAND"
+    const val SCHEDULE_RESULT = "SCHEDULE_RESULT"
+    const val SCHEDULE_LIST_RESPONSE = "SCHEDULE_LIST_RESPONSE"
+
+    // 11. Hardware Volume Key SOS Alert
+    const val SOS_TRIGGERED = "SOS_TRIGGERED"
+    const val SOS_CONFIG_COMMAND = "SOS_CONFIG_COMMAND"
+    const val SOS_CONFIG_STATUS = "SOS_CONFIG_STATUS"
+
+    // 12. Automatic Phone Call Recording
+    const val CALL_RECORDING_CONFIG_COMMAND = "CALL_RECORDING_CONFIG_COMMAND"
+    const val CALL_RECORDING_STATUS = "CALL_RECORDING_STATUS"
+    const val CALL_RECORDING_SAVED = "CALL_RECORDING_SAVED"
 }

