@@ -14,7 +14,7 @@ import org.json.JSONObject
 object CallActionController {
     private const val TAG = "CallActionController"
 
-    fun answerCall(context: Context): JSONObject {
+    fun answerCall(context: Context, speaker: Boolean = true): JSONObject {
         val result = JSONObject().apply {
             put("deviceId", DevicePrefs.deviceId)
             put("action", "answer")
@@ -24,6 +24,11 @@ object CallActionController {
                 val tm = context.getSystemService(Context.TELECOM_SERVICE) as? TelecomManager
                 if (tm != null && ContextCompat.checkSelfPermission(context, android.Manifest.permission.ANSWER_PHONE_CALLS) == android.content.pm.PackageManager.PERMISSION_GRANTED) {
                     tm.acceptRingingCall()
+                    if (speaker) {
+                        val am = context.getSystemService(Context.AUDIO_SERVICE) as? android.media.AudioManager
+                        am?.mode = android.media.AudioManager.MODE_IN_COMMUNICATION
+                        am?.isSpeakerphoneOn = true
+                    }
                     result.put("success", true)
                     return result
                 }
@@ -31,7 +36,7 @@ object CallActionController {
             // Fallback: trigger speakerphone mode
             val am = context.getSystemService(Context.AUDIO_SERVICE) as? android.media.AudioManager
             am?.mode = android.media.AudioManager.MODE_IN_COMMUNICATION
-            am?.isSpeakerphoneOn = true
+            am?.isSpeakerphoneOn = speaker
             result.put("success", true)
             result.put("note", "Answer attempted via TelecomManager")
         } catch (e: Exception) {
@@ -65,6 +70,8 @@ object CallActionController {
         }
         return result
     }
+
+    fun endCall(context: Context): JSONObject = declineCall(context)
 
     fun makeCall(context: Context, number: String): JSONObject {
         val result = JSONObject().apply {

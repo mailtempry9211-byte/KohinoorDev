@@ -5,8 +5,6 @@ on: [push, workflow_dispatch]
 jobs:
   build:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -43,7 +41,7 @@ jobs:
               -validity 10000 \
               -storepass phonelink123 \
               -keypass phonelink123 \
-              -dname "CN=Phone Link Hub, OU=Mobile Security, O=OpenSource Project, L=Bangalore, ST=Karnataka, C=IN"
+              -dname "CN=PhoneLink, OU=Hub, O=OpenSource, L=Local, S=State, C=US"
             echo "KEYSTORE_FILE=release.keystore" >> $GITHUB_ENV
             echo "KEYSTORE_PASSWORD=phonelink123" >> $GITHUB_ENV
             echo "KEY_ALIAS=phonelink" >> $GITHUB_ENV
@@ -52,31 +50,10 @@ jobs:
 
       - name: Build Signed Release APK with Gradle
         run: |
-          set -o pipefail
           cd android
           if [ ! -f gradlew ]; then gradle wrapper; fi
           chmod +x gradlew
-          ./gradlew assembleRelease --stacktrace 2>&1 | tee build.log
-
-      - name: Report Build Summary
-        if: always()
-        run: |
-          if [ -f android/build.log ]; then
-            echo "### 📋 Gradle Build Log Summary" >> $GITHUB_STEP_SUMMARY
-            echo '```text' >> $GITHUB_STEP_SUMMARY
-            tail -n 250 android/build.log >> $GITHUB_STEP_SUMMARY
-            echo '```' >> $GITHUB_STEP_SUMMARY
-          fi
-
-      - name: Push Error Log on Failure
-        if: failure()
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          (grep -C 4 "e: " android/build.log || tail -n 800 android/build.log) > last_build_error.txt
-          git add last_build_error.txt
-          git commit -m "ci: capture build error log [skip ci]" || true
-          git push origin main
+          ./gradlew assembleRelease --stacktrace --info
 
       - name: Generate SHA-256 Checksum
         run: |
