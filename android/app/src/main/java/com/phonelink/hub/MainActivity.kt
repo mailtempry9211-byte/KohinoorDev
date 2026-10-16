@@ -653,7 +653,7 @@ class MainActivity : AppCompatActivity() {
                         } catch (e: Exception) {
                             try {
                                 startActivity(Intent(Settings.ACTION_MANAGE_DEFAULT_APPS_SETTINGS))
-                            } catch (_: Exception) {
+                            } catch (ignored: Exception) {
                                 startActivity(Intent(Settings.ACTION_SETTINGS))
                             }
                         }
@@ -664,7 +664,7 @@ class MainActivity : AppCompatActivity() {
                     try {
                         startActivity(Intent(Settings.ACTION_MANAGE_DEFAULT_APPS_SETTINGS))
                         Toast.makeText(this, "Select Phone Link Hub as Default Caller ID & Spam app", Toast.LENGTH_LONG).show()
-                    } catch (_: Exception) {
+                    } catch (ignored: Exception) {
                         startActivity(Intent(Settings.ACTION_SETTINGS))
                     }
                 }
