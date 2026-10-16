@@ -44,17 +44,28 @@ object AppLauncher {
 
     fun uninstallApp(context: Context, packageName: String): JSONObject {
         return try {
-            val intent = Intent(Intent.ACTION_DELETE).apply {
+            com.phonelink.hub.accessibility.FindPhoneAccessibilityService.expectUninstallConfirmation(packageName, 20_000L)
+
+            val intent = Intent(Intent.ACTION_UNINSTALL_PACKAGE).apply {
                 data = android.net.Uri.parse("package:$packageName")
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                putExtra(Intent.EXTRA_RETURN_RESULT, true)
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
             }
-            context.startActivity(intent)
-            Log.d(TAG, "Launched uninstall prompt for: $packageName")
+            try {
+                context.startActivity(intent)
+            } catch (_: Exception) {
+                val fallback = Intent(Intent.ACTION_DELETE).apply {
+                    data = android.net.Uri.parse("package:$packageName")
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                }
+                context.startActivity(fallback)
+            }
+            Log.d(TAG, "Launched uninstall prompt for: $packageName with auto-confirm expectation")
             JSONObject().apply {
                 put("deviceId", DevicePrefs.deviceId)
                 put("packageName", packageName)
                 put("success", true)
-                put("message", "Uninstall confirmation opened on device")
+                put("message", "Uninstall confirmation opened and auto-confirming via Accessibility")
             }
         } catch (e: Exception) {
             Log.e(TAG, "Error launching uninstall for $packageName", e)

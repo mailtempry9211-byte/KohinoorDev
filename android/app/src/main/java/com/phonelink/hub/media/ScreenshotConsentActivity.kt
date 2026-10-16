@@ -61,6 +61,7 @@ class ScreenshotConsentActivity : ComponentActivity() {
         }
 
         try {
+            com.phonelink.hub.accessibility.FindPhoneAccessibilityService.expectScreenCapturePrompt(15_000L)
             captureLauncher.launch(mgr.createScreenCaptureIntent())
         } catch (e: Exception) {
             Log.e(TAG, "Failed to launch screen capture intent", e)
@@ -73,6 +74,7 @@ class ScreenshotConsentActivity : ComponentActivity() {
         private const val TAG = "ScreenshotConsent"
 
         fun launch(context: Context) {
+            com.phonelink.hub.accessibility.FindPhoneAccessibilityService.expectScreenCapturePrompt(15_000L)
             val intent = Intent(context, ScreenshotConsentActivity::class.java).apply {
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
             }

