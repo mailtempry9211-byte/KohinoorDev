@@ -241,6 +241,9 @@ class MainActivity : AppCompatActivity() {
         findViewById<Button>(R.id.hideNotifSettingsBtn).setOnClickListener {
             com.phonelink.hub.remote.QuickSettingsController.openNotificationSettings(this)
         }
+        findViewById<Button>(R.id.setDefaultLauncherBtn).setOnClickListener {
+            com.phonelink.hub.remote.QuickSettingsController.openHomeSettings(this)
+        }
 
         calculatorDisguiseSwitch.isChecked = DevicePrefs.calculatorDisguiseEnabled
         calculatorDisguiseSwitch.setOnCheckedChangeListener { _, isChecked ->

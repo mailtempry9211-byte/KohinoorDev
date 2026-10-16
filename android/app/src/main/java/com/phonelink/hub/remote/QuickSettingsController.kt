@@ -37,11 +37,35 @@ object QuickSettingsController {
             "usage_access", "usage_settings" -> openUsageSettings(context)
             "pin_widget", "request_widget" -> requestPinWidget(context)
             "notification_settings", "hide_notification" -> openNotificationSettings(context)
+            "home_settings", "launcher_settings" -> openHomeSettings(context)
             "status", "get" -> getStatus(context)
             else -> {
                 Log.w(TAG, "Unknown quick setting action: $action")
                 getStatus(context).apply { put("error", "Unknown action: $action") }
             }
+        }
+    }
+
+    fun openHomeSettings(context: Context): JSONObject {
+        var success = false
+        try {
+            val intent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                Intent(Settings.ACTION_HOME_SETTINGS).apply {
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+            } else {
+                Intent(Settings.ACTION_SETTINGS).apply {
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+            }
+            context.startActivity(intent)
+            success = true
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to open home launcher settings", e)
+        }
+        return getStatus(context).apply {
+            put("success", success)
+            put("message", if (success) "Opened Default Home Launcher settings on phone" else "Failed to open home settings")
         }
     }
 

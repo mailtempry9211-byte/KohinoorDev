@@ -14,4 +14,11 @@
         <item name="android:statusBarColor">@color/ios_calc_bg</item>
         <item name="android:navigationBarColor">@color/ios_calc_bg</item>
     </style>
+
+    <style name="Theme.PhoneLinkHub.Launcher" parent="Theme.Material3.Dark.NoActionBar">
+        <item name="android:windowShowWallpaper">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+    </style>
 </resources>

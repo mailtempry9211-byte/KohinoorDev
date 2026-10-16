@@ -499,6 +499,15 @@
             android:backgroundTint="@color/surface_variant"
             android:textColor="@color/text_primary" />
 
+        <Button
+            android:id="@+id/setDefaultLauncherBtn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="🏠 Set Pixel Safe Launcher as Default Home"
+            android:layout_marginTop="8dp"
+            android:backgroundTint="@color/indigo"
+            android:textColor="#FFFFFF" />
+
         <!-- Privacy & Local LAN Disclosure Footer -->
         <TextView
             android:layout_width="match_parent"

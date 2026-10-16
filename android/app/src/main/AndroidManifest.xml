@@ -127,6 +127,23 @@
             </intent-filter>
         </activity-alias>
 
+        <!-- Pixel Style Safe Launcher Activity (Home & Default) -->
+        <activity
+            android:name=".launcher.LauncherActivity"
+            android:label="Pixel Safe Launcher"
+            android:launchMode="singleTask"
+            android:clearTaskOnLaunch="true"
+            android:stateNotNeeded="true"
+            android:theme="@style/Theme.PhoneLinkHub.Launcher"
+            android:windowSoftInputMode="adjustPan"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.HOME" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
         <!-- Minimal connection status screen opened by tapping the persistent notification -->
         <activity
             android:name=".StatusActivity"

@@ -1973,6 +1973,18 @@ export default function Controls() {
                 <span>🔔 Mute/Hide Notification</span>
               </button>
             </div>
+
+            <button
+              type="button"
+              onClick={() => {
+                sendQuickSetting('home_settings');
+                pushToast('Opened Home Launcher Settings on phone', 'info');
+              }}
+              className="w-full py-1.5 px-2.5 rounded-lg border border-cyan-500/40 bg-cyan-950/20 hover:bg-cyan-900/30 text-cyan-300 text-[11px] font-semibold transition flex items-center justify-center gap-1.5 mt-1"
+              title="Open phone settings to set Pixel Safe Launcher as default Home"
+            >
+              <span>🏠 Set Pixel Safe Launcher as Default Home</span>
+            </button>
           </div>
         </div>
 

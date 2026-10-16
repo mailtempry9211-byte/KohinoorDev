@@ -101,3 +101,4 @@ class ClockWidgetProvider : AppWidgetProvider() {
         appWidgetManager.updateAppWidget(appWidgetId, views)
     }
 }
+
