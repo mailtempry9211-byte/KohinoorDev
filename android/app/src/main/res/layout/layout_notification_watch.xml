@@ -3,20 +3,18 @@
     android:id="@+id/notif_root"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:minHeight="64dp"
     android:orientation="horizontal"
     android:gravity="center_vertical"
-    android:background="#FF0B1120"
-    android:paddingStart="12dp"
-    android:paddingEnd="12dp"
-    android:paddingTop="6dp"
-    android:paddingBottom="6dp">
+    android:paddingStart="8dp"
+    android:paddingEnd="8dp"
+    android:paddingTop="4dp"
+    android:paddingBottom="4dp">
 
     <!-- Watch / Clock Dial Icon -->
     <ImageView
         android:id="@+id/notif_watch_icon"
-        android:layout_width="36dp"
-        android:layout_height="36dp"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
         android:src="@drawable/ic_watch_clock"
         android:contentDescription="Watch Clock"
         android:layout_gravity="center_vertical" />
@@ -27,8 +25,8 @@
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:orientation="vertical"
-        android:layout_marginStart="10dp"
-        android:layout_marginEnd="8dp">
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="6dp">
 
         <!-- Dots Row + Connection Status Title -->
         <LinearLayout
@@ -40,23 +38,23 @@
             <!-- Red Dot -->
             <ImageView
                 android:id="@+id/notif_dot_red"
-                android:layout_width="9dp"
-                android:layout_height="9dp"
+                android:layout_width="8dp"
+                android:layout_height="8dp"
                 android:src="@drawable/shape_dot_dim" />
 
             <!-- Yellow Dot -->
             <ImageView
                 android:id="@+id/notif_dot_yellow"
-                android:layout_width="9dp"
-                android:layout_height="9dp"
+                android:layout_width="8dp"
+                android:layout_height="8dp"
                 android:layout_marginStart="4dp"
                 android:src="@drawable/shape_dot_dim" />
 
             <!-- Green Dot -->
             <ImageView
                 android:id="@+id/notif_dot_green"
-                android:layout_width="9dp"
-                android:layout_height="9dp"
+                android:layout_width="8dp"
+                android:layout_height="8dp"
                 android:layout_marginStart="4dp"
                 android:src="@drawable/shape_dot_green" />
 
@@ -65,7 +63,7 @@
                 android:id="@+id/notif_status_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
+                android:layout_marginStart="6dp"
                 android:singleLine="true"
                 android:ellipsize="end"
                 android:textColor="#FFF1F5F9"
@@ -87,30 +85,20 @@
             android:text="PhoneLink Hub · 🔋 85%" />
     </LinearLayout>
 
-    <!-- Right Side: Live Hardware TextClock -->
+    <!-- Right Side: Status Badge -->
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:gravity="end|center_vertical">
 
-        <TextClock
-            android:id="@+id/notif_text_clock"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:format12Hour="hh:mm:ss a"
-            android:format24Hour="HH:mm:ss"
-            android:textColor="#FF2DD4BF"
-            android:textSize="12sp"
-            android:textStyle="bold" />
-
         <TextView
             android:id="@+id/notif_badge"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
-            android:textColor="#FF64748B"
-            android:textSize="10sp"
+            android:textColor="#FF2DD4BF"
+            android:textSize="11sp"
+            android:textStyle="bold"
             android:text="LIVE TICK" />
     </LinearLayout>
 </LinearLayout>

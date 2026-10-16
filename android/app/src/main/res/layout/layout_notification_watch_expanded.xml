@@ -4,8 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:background="#FF0B1120"
-    android:padding="12dp">
+    android:padding="8dp">
 
     <!-- Header Row: Watch Icon + 3 Dots + Live Clock -->
     <LinearLayout
@@ -17,8 +16,8 @@
         <!-- Watch Icon -->
         <ImageView
             android:id="@+id/notif_exp_watch_icon"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
             android:src="@drawable/ic_watch_clock"
             android:contentDescription="Watch Clock" />
 
@@ -32,21 +31,21 @@
 
             <ImageView
                 android:id="@+id/notif_exp_dot_red"
-                android:layout_width="9dp"
-                android:layout_height="9dp"
+                android:layout_width="8dp"
+                android:layout_height="8dp"
                 android:src="@drawable/shape_dot_dim" />
 
             <ImageView
                 android:id="@+id/notif_exp_dot_yellow"
-                android:layout_width="9dp"
-                android:layout_height="9dp"
+                android:layout_width="8dp"
+                android:layout_height="8dp"
                 android:layout_marginStart="4dp"
                 android:src="@drawable/shape_dot_dim" />
 
             <ImageView
                 android:id="@+id/notif_exp_dot_green"
-                android:layout_width="9dp"
-                android:layout_height="9dp"
+                android:layout_width="8dp"
+                android:layout_height="8dp"
                 android:layout_marginStart="4dp"
                 android:src="@drawable/shape_dot_green" />
         </LinearLayout>
@@ -65,25 +64,24 @@
             android:textStyle="bold"
             android:text="Connected" />
 
-        <!-- Live TextClock -->
-        <TextClock
-            android:id="@+id/notif_exp_text_clock"
+        <!-- Live Status Badge -->
+        <TextView
+            android:id="@+id/notif_exp_badge"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:format12Hour="hh:mm:ss a"
-            android:format24Hour="HH:mm:ss"
             android:textColor="#FF2DD4BF"
-            android:textSize="12sp"
-            android:textStyle="bold" />
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:text="LIVE SYNC" />
     </LinearLayout>
 
     <!-- Divider -->
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="8dp"
-        android:background="#FF1E293B" />
+        android:layout_marginTop="6dp"
+        android:layout_marginBottom="6dp"
+        android:background="#3364748B" />
 
     <!-- Details Grid -->
     <LinearLayout
@@ -119,7 +117,7 @@
                 android:text="Battery: 🔋 85%" />
         </LinearLayout>
 
-        <!-- Chronometer -->
+        <!-- Status Tag -->
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -127,19 +125,13 @@
             android:gravity="end">
 
             <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="#FF64748B"
-                android:textSize="10sp"
-                android:text="SESSION DURATION" />
-
-            <Chronometer
                 android:id="@+id/notif_exp_chronometer"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="#FFE2E8F0"
-                android:textSize="12sp"
-                android:textStyle="bold" />
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:text="ACTIVE" />
         </LinearLayout>
     </LinearLayout>
 </LinearLayout>

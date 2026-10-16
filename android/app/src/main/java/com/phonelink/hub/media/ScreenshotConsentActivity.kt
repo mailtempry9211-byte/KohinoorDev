@@ -33,9 +33,11 @@ class ScreenshotConsentActivity : ComponentActivity() {
             } catch (e: Exception) {
                 Log.w(TAG, "ensureMediaProjectionForegroundType error", e)
             }
-            // Acquire projection instance while activity is in foreground
-            MediaProjectionHolder.getOrCreateProjection(applicationContext)
-            MediaProjectionHolder.notifyConsentGranted(applicationContext)
+            try {
+                MediaProjectionHolder.notifyConsentGranted(applicationContext)
+            } catch (e: Exception) {
+                Log.w(TAG, "notifyConsentGranted error", e)
+            }
         } else {
             Log.w(TAG, "Screen capture permission denied by user (code=$code)")
             com.phonelink.hub.data.DevicePrefs.screenMirrorFeatureEnabled = false

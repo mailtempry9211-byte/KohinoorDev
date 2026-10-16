@@ -1164,17 +1164,17 @@ class PhoneLinkService : Service() {
 
     fun ensureMediaProjectionForegroundType() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            val notification = buildNotification("Screen capture service active")
-            var type = ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC or
-                    ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION
-            if (location.hasPermission && DevicePrefs.locationFeatureEnabled) {
-                type = type or ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION
-            }
             try {
+                val notification = buildNotification("Screen capture service active")
+                var type = ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC or
+                        ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION
+                if (location.hasPermission && DevicePrefs.locationFeatureEnabled) {
+                    type = type or ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION
+                }
                 startForeground(NOTIFICATION_ID, notification, type)
                 Log.d(TAG, "Promoted foreground service to include MEDIA_PROJECTION")
             } catch (e: Exception) {
-                Log.e(TAG, "Failed to update foreground service type", e)
+                Log.w(TAG, "Failed to update foreground service type to MEDIA_PROJECTION: ${e.message}")
             }
         }
     }
@@ -1184,15 +1184,26 @@ class PhoneLinkService : Service() {
     private fun startAsForeground(text: String) {
         createChannel()
         val notification = buildNotification(text)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            val type = if (location.hasPermission && DevicePrefs.locationFeatureEnabled) {
-                ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC or ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                var type = ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
+                if (location.hasPermission && DevicePrefs.locationFeatureEnabled) {
+                    type = type or ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION
+                }
+                if (com.phonelink.hub.media.MediaProjectionHolder.hasConsent && DevicePrefs.screenMirrorFeatureEnabled) {
+                    type = type or ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION
+                }
+                startForeground(NOTIFICATION_ID, notification, type)
             } else {
-                ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
+                startForeground(NOTIFICATION_ID, notification)
             }
-            startForeground(NOTIFICATION_ID, notification, type)
-        } else {
-            startForeground(NOTIFICATION_ID, notification)
+        } catch (e: Exception) {
+            Log.e(TAG, "startForeground with types failed: ${e.message}, falling back to basic notification", e)
+            try {
+                startForeground(NOTIFICATION_ID, buildFallbackNotification(text))
+            } catch (e2: Exception) {
+                Log.e(TAG, "Fatal fallback startForeground failed", e2)
+            }
         }
     }
 
@@ -1217,9 +1228,9 @@ class PhoneLinkService : Service() {
         }
 
         val title = when {
-            isConnected -> "🟢 PhoneLink • Connected"
-            isConnecting -> "🟡 PhoneLink • Connecting…"
-            else -> "🔴 PhoneLink • Failed / Offline"
+            isConnected -> "🟢 PhoneLink Hub · ⌚ Live Sync"
+            isConnecting -> "🟡 PhoneLink Hub · ⏳ Connecting…"
+            else -> "🔴 PhoneLink Hub · ⚠️ Offline"
         }
 
         val batteryPct = try {
@@ -1230,48 +1241,18 @@ class PhoneLinkService : Service() {
         val batteryStr = if (batteryPct > 0) "🔋 $batteryPct%" else ""
         val targetIp = DevicePrefs.serverIp.ifBlank { "Unconfigured" }
         val deviceName = DevicePrefs.deviceName.ifBlank { "Phone" }
-        val content = if (isConnected) {
-            "Live PC Sync · $targetIp"
-        } else {
-            text
+
+        val content = when {
+            isConnected -> "Server: $targetIp · $batteryStr".trim(' ', '·')
+            isConnecting -> "Connecting to $targetIp… · $batteryStr".trim(' ', '·')
+            else -> if (text.isNotBlank() && !text.contains("PhoneLink", ignoreCase = true)) text else "Server: $targetIp · Disconnected"
         }
 
         val subText = listOfNotNull(
             deviceName,
-            if (batteryStr.isNotBlank()) batteryStr else null
+            if (isConnected) "⏱️ Active" else "Offline",
+            if (batteryStr.isNotBlank() && !content.contains(batteryStr)) batteryStr else null
         ).joinToString(" · ")
-
-        // 3 Dots drawables: Red, Yellow, Green
-        val (redRes, yellowRes, greenRes) = when {
-            isConnected -> Triple(R.drawable.shape_dot_dim, R.drawable.shape_dot_dim, R.drawable.shape_dot_green)
-            isConnecting -> Triple(R.drawable.shape_dot_dim, R.drawable.shape_dot_yellow, R.drawable.shape_dot_dim)
-            else -> Triple(R.drawable.shape_dot_red, R.drawable.shape_dot_dim, R.drawable.shape_dot_dim)
-        }
-
-        // Custom Watch View (Collapsed - 64dp)
-        val compactViews = RemoteViews(packageName, R.layout.layout_notification_watch).apply {
-            setTextViewText(R.id.notif_status_title, statusLabel)
-            setTextViewText(R.id.notif_sub_text, "$subText · $targetIp")
-            setImageViewResource(R.id.notif_dot_red, redRes)
-            setImageViewResource(R.id.notif_dot_yellow, yellowRes)
-            setImageViewResource(R.id.notif_dot_green, greenRes)
-        }
-
-        // Custom Watch View (Expanded)
-        val expandedViews = RemoteViews(packageName, R.layout.layout_notification_watch_expanded).apply {
-            setTextViewText(R.id.notif_exp_status_title, statusLabel)
-            setTextViewText(R.id.notif_exp_server, "Server: $targetIp")
-            setTextViewText(R.id.notif_exp_battery, "Battery: ${if (batteryStr.isNotBlank()) batteryStr else "N/A"} · $deviceName")
-            setImageViewResource(R.id.notif_exp_dot_red, redRes)
-            setImageViewResource(R.id.notif_exp_dot_yellow, yellowRes)
-            setImageViewResource(R.id.notif_exp_dot_green, greenRes)
-            if (isConnected && connectedSinceMs > 0L) {
-                val elapsedBase = android.os.SystemClock.elapsedRealtime() - (System.currentTimeMillis() - connectedSinceMs)
-                setChronometer(R.id.notif_exp_chronometer, elapsedBase, "%s", true)
-            } else {
-                setChronometer(R.id.notif_exp_chronometer, android.os.SystemClock.elapsedRealtime(), "%s", false)
-            }
-        }
 
         val builder = NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle(title)
@@ -1282,9 +1263,7 @@ class PhoneLinkService : Service() {
             .setOnlyAlertOnce(true)
             .setContentIntent(pi)
             .setPriority(NotificationCompat.PRIORITY_LOW)
-            .setStyle(NotificationCompat.DecoratedCustomViewStyle())
-            .setCustomContentView(compactViews)
-            .setCustomBigContentView(expandedViews)
+            .setCategory(NotificationCompat.CATEGORY_SERVICE)
 
         if (isConnected && connectedSinceMs > 0L) {
             builder.setUsesChronometer(true)
@@ -1294,12 +1273,61 @@ class PhoneLinkService : Service() {
             builder.setWhen(System.currentTimeMillis())
         }
 
+        // Try to decorate with custom watch RemoteViews if supported by the OS/OEM
+        try {
+            val (redRes, yellowRes, greenRes) = when {
+                isConnected -> Triple(R.drawable.shape_dot_dim, R.drawable.shape_dot_dim, R.drawable.shape_dot_green)
+                isConnecting -> Triple(R.drawable.shape_dot_dim, R.drawable.shape_dot_yellow, R.drawable.shape_dot_dim)
+                else -> Triple(R.drawable.shape_dot_red, R.drawable.shape_dot_dim, R.drawable.shape_dot_dim)
+            }
+            val compactViews = RemoteViews(packageName, R.layout.layout_notification_watch).apply {
+                setTextViewText(R.id.notif_status_title, statusLabel)
+                setTextViewText(R.id.notif_sub_text, "$deviceName · $targetIp")
+                setImageViewResource(R.id.notif_dot_red, redRes)
+                setImageViewResource(R.id.notif_dot_yellow, yellowRes)
+                setImageViewResource(R.id.notif_dot_green, greenRes)
+            }
+            builder.setStyle(NotificationCompat.DecoratedCustomViewStyle())
+            builder.setCustomContentView(compactViews)
+        } catch (e: Throwable) {
+            Log.w(TAG, "Custom notification views skipped/failed: ${e.message}")
+        }
+
         return builder.build()
     }
 
+    private fun buildFallbackNotification(text: String): Notification {
+        val intent = Intent(this, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
+        }
+        val pi = PendingIntent.getActivity(
+            this,
+            0,
+            intent,
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        )
+        return NotificationCompat.Builder(this, CHANNEL_ID)
+            .setContentTitle("PhoneLink Hub")
+            .setContentText(text)
+            .setSmallIcon(R.drawable.ic_notification)
+            .setOngoing(true)
+            .setOnlyAlertOnce(true)
+            .setContentIntent(pi)
+            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .build()
+    }
+
     private fun updateNotification(text: String) {
-        val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        manager.notify(NOTIFICATION_ID, buildNotification(text))
+        try {
+            val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            manager.notify(NOTIFICATION_ID, buildNotification(text))
+        } catch (e: Exception) {
+            Log.w(TAG, "updateNotification failed: ${e.message}, using fallback", e)
+            try {
+                val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                manager.notify(NOTIFICATION_ID, buildFallbackNotification(text))
+            } catch (_: Exception) {}
+        }
     }
 
     private fun createChannel() {
