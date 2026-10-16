@@ -44,6 +44,19 @@ class AppsAdapter(
                 Toast.makeText(context, "Error launching app: ${e.message}", Toast.LENGTH_SHORT).show()
             }
         }
+
+        holder.itemView.setOnLongClickListener {
+            try {
+                val intent = Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                    data = android.net.Uri.parse("package:${app.packageName}")
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+                context.startActivity(intent)
+            } catch (e: Exception) {
+                Toast.makeText(context, app.label, Toast.LENGTH_SHORT).show()
+            }
+            true
+        }
     }
 
     override fun getItemCount(): Int = appsList.size

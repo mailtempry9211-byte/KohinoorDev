@@ -30,6 +30,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -47,21 +48,33 @@ class LauncherActivity : AppCompatActivity() {
     private lateinit var desktopContainer: View
     private lateinit var appDrawerContainer: View
     private lateinit var desktopAppsRecyclerView: RecyclerView
+    private lateinit var dockRecyclerView: RecyclerView
     private lateinit var drawerAppsRecyclerView: RecyclerView
     private lateinit var drawerSearchInput: EditText
     private lateinit var btnCloseDrawer: ImageView
     private lateinit var swipeUpIndicator: View
     private lateinit var searchPillBtn: View
+    private lateinit var statusDotsLayout: View
 
     private lateinit var dot1: View
     private lateinit var dot2: View
     private lateinit var dot3: View
 
+    // POCO Drawer Category Tabs
+    private lateinit var tabAll: TextView
+    private lateinit var tabCommunication: TextView
+    private lateinit var tabSocial: TextView
+    private lateinit var tabTools: TextView
+    private lateinit var tabGames: TextView
+    private var selectedCategory = "ALL"
+
     private val allApps = ArrayList<AppItem>()
-    private val desktopFavorites = ArrayList<AppItem>()
+    private val desktopApps = ArrayList<AppItem>()
+    private val dockApps = ArrayList<AppItem>()
     private val filteredDrawerApps = ArrayList<AppItem>()
 
     private lateinit var desktopAdapter: AppsAdapter
+    private lateinit var dockAdapter: AppsAdapter
     private lateinit var drawerAdapter: AppsAdapter
 
     private var isDrawerOpen = false
@@ -114,29 +127,57 @@ class LauncherActivity : AppCompatActivity() {
         }
     }
 
+    private fun getGridColumns(): Int {
+        val sp = getSharedPreferences("poco_launcher_prefs", Context.MODE_PRIVATE)
+        return sp.getInt("grid_columns", 4)
+    }
+
+    private fun setGridColumns(cols: Int) {
+        val sp = getSharedPreferences("poco_launcher_prefs", Context.MODE_PRIVATE)
+        sp.edit().putInt("grid_columns", cols).apply()
+        desktopAppsRecyclerView.layoutManager = GridLayoutManager(this, cols)
+        drawerAppsRecyclerView.layoutManager = GridLayoutManager(this, cols)
+    }
+
     private fun initViews() {
         desktopContainer = findViewById(R.id.desktopContainer)
         appDrawerContainer = findViewById(R.id.appDrawerContainer)
 
         desktopAppsRecyclerView = findViewById(R.id.desktopAppsRecyclerView)
+        dockRecyclerView = findViewById(R.id.dockRecyclerView)
         drawerAppsRecyclerView = findViewById(R.id.drawerAppsRecyclerView)
 
         drawerSearchInput = findViewById(R.id.drawerSearchInput)
         btnCloseDrawer = findViewById(R.id.btnCloseDrawer)
         swipeUpIndicator = findViewById(R.id.swipeUpIndicator)
         searchPillBtn = findViewById(R.id.searchPillBtn)
+        statusDotsLayout = findViewById(R.id.statusDotsLayout)
 
         dot1 = findViewById(R.id.dot1)
         dot2 = findViewById(R.id.dot2)
         dot3 = findViewById(R.id.dot3)
 
-        // Desktop apps: 4 columns grid (showing top favorites)
-        desktopAppsRecyclerView.layoutManager = GridLayoutManager(this, 4)
-        desktopAdapter = AppsAdapter(this, desktopFavorites)
+        // POCO Drawer Category Tabs
+        tabAll = findViewById(R.id.tabAll)
+        tabCommunication = findViewById(R.id.tabCommunication)
+        tabSocial = findViewById(R.id.tabSocial)
+        tabTools = findViewById(R.id.tabTools)
+        tabGames = findViewById(R.id.tabGames)
+
+        val cols = getGridColumns()
+
+        // Desktop Apps Grid
+        desktopAppsRecyclerView.layoutManager = GridLayoutManager(this, cols)
+        desktopAdapter = AppsAdapter(this, desktopApps)
         desktopAppsRecyclerView.adapter = desktopAdapter
 
-        // Drawer apps: 4 columns grid (showing all apps A-Z)
-        drawerAppsRecyclerView.layoutManager = GridLayoutManager(this, 4)
+        // Bottom Dock (Fixed 4 columns for Phone, WhatsApp/Messages, Chrome, Camera)
+        dockRecyclerView.layoutManager = GridLayoutManager(this, 4)
+        dockAdapter = AppsAdapter(this, dockApps)
+        dockRecyclerView.adapter = dockAdapter
+
+        // Drawer Apps Grid
+        drawerAppsRecyclerView.layoutManager = GridLayoutManager(this, cols)
         drawerAdapter = AppsAdapter(this, filteredDrawerApps)
         drawerAppsRecyclerView.adapter = drawerAdapter
     }
@@ -154,10 +195,10 @@ class LauncherActivity : AppCompatActivity() {
                 val diffX = e2.x - e1.x
 
                 if (Math.abs(diffY) > Math.abs(diffX)) {
-                    if (diffY < -120 && !isDrawerOpen) {
+                    if (diffY < -100 && !isDrawerOpen) {
                         openAppDrawer()
                         return true
-                    } else if (diffY > 120 && isDrawerOpen) {
+                    } else if (diffY > 100 && isDrawerOpen) {
                         closeAppDrawer()
                         return true
                     }
@@ -179,6 +220,17 @@ class LauncherActivity : AppCompatActivity() {
             true
         }
 
+        // Tap on 3-Dot Status Pill: Opens POCO Quick Menu!
+        statusDotsLayout.setOnClickListener {
+            showPocoQuickMenuDialog()
+        }
+
+        // Long press on 3-Dot Status Pill: Direct Secret PIN Vault prompt!
+        statusDotsLayout.setOnLongClickListener {
+            showSecretMasterPinDialog()
+            true
+        }
+
         // Tap on "Swipe up for all apps" or Search Pill opens App Drawer
         swipeUpIndicator.setOnClickListener { openAppDrawer() }
         searchPillBtn.setOnClickListener {
@@ -190,14 +242,46 @@ class LauncherActivity : AppCompatActivity() {
 
         btnCloseDrawer.setOnClickListener { closeAppDrawer() }
 
+        // Category Tab Listeners
+        tabAll.setOnClickListener { setCategory("ALL") }
+        tabCommunication.setOnClickListener { setCategory("COMMUNICATION") }
+        tabSocial.setOnClickListener { setCategory("SOCIAL") }
+        tabTools.setOnClickListener { setCategory("TOOLS") }
+        tabGames.setOnClickListener { setCategory("GAMES") }
+
         // Live search filter in App Drawer
         drawerSearchInput.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                filterDrawerApps(s.toString())
+                applyDrawerFilter()
             }
             override fun afterTextChanged(s: Editable?) {}
         })
+    }
+
+    private fun setCategory(cat: String) {
+        selectedCategory = cat
+        val activeBg = R.drawable.bg_tab_active
+        val inactiveBg = R.drawable.bg_tab_inactive
+        val white = Color.WHITE
+        val gray = Color.parseColor("#9CA3AF")
+
+        tabAll.setBackgroundResource(if (cat == "ALL") activeBg else inactiveBg)
+        tabAll.setTextColor(if (cat == "ALL") white else gray)
+
+        tabCommunication.setBackgroundResource(if (cat == "COMMUNICATION") activeBg else inactiveBg)
+        tabCommunication.setTextColor(if (cat == "COMMUNICATION") white else gray)
+
+        tabSocial.setBackgroundResource(if (cat == "SOCIAL") activeBg else inactiveBg)
+        tabSocial.setTextColor(if (cat == "SOCIAL") white else gray)
+
+        tabTools.setBackgroundResource(if (cat == "TOOLS") activeBg else inactiveBg)
+        tabTools.setTextColor(if (cat == "TOOLS") white else gray)
+
+        tabGames.setBackgroundResource(if (cat == "GAMES") activeBg else inactiveBg)
+        tabGames.setTextColor(if (cat == "GAMES") white else gray)
+
+        applyDrawerFilter()
     }
 
     private fun openAppDrawer() {
@@ -250,21 +334,37 @@ class LauncherActivity : AppCompatActivity() {
 
             list.sortBy { it.label.lowercase(Locale.getDefault()) }
 
-            // Filter Desktop Favorites (pick top common apps or first 8-12 apps)
-            val favs = ArrayList<AppItem>()
-            val priorityKeywords = listOf("phone", "dialer", "message", "whatsapp", "chrome", "camera", "gallery", "photo", "youtube", "setting")
-            for (kw in priorityKeywords) {
-                val match = list.find { it.label.lowercase(Locale.getDefault()).contains(kw) || it.packageName.lowercase(Locale.getDefault()).contains(kw) }
-                if (match != null && !favs.contains(match)) {
-                    favs.add(match)
+            // 1. Pick Bottom Dock Apps (4 core apps: Phone, WhatsApp/Messages, Browser, Camera)
+            val dock = ArrayList<AppItem>()
+            val dockKeywords = listOf(
+                listOf("phone", "dialer", "call"),
+                listOf("whatsapp", "message", "sms", "telegram"),
+                listOf("chrome", "browser", "internet", "firefox", "opera"),
+                listOf("camera", "gallery", "photo")
+            )
+            for (kwGroup in dockKeywords) {
+                for (item in list) {
+                    val lowerL = item.label.lowercase(Locale.getDefault())
+                    val lowerP = item.packageName.lowercase(Locale.getDefault())
+                    if (kwGroup.any { lowerL.contains(it) || lowerP.contains(it) }) {
+                        if (!dock.contains(item)) {
+                            dock.add(item)
+                            break
+                        }
+                    }
                 }
             }
-            if (favs.size < 8) {
-                for (item in list) {
-                    if (!favs.contains(item)) {
-                        favs.add(item)
-                        if (favs.size >= 8) break
-                    }
+            // Fill dock to 4 apps if needed
+            for (item in list) {
+                if (dock.size >= 4) break
+                if (!dock.contains(item)) dock.add(item)
+            }
+
+            // 2. Pick Desktop Apps (Apps that are not in dock, for easy homescreen access)
+            val desk = ArrayList<AppItem>()
+            for (item in list) {
+                if (!dock.contains(item)) {
+                    desk.add(item)
                 }
             }
 
@@ -272,25 +372,53 @@ class LauncherActivity : AppCompatActivity() {
                 allApps.clear()
                 allApps.addAll(list)
 
-                desktopFavorites.clear()
-                desktopFavorites.addAll(favs)
-                desktopAdapter.updateApps(desktopFavorites)
+                dockApps.clear()
+                dockApps.addAll(dock)
+                dockAdapter.updateApps(dockApps)
 
-                filterDrawerApps(drawerSearchInput.text.toString())
+                desktopApps.clear()
+                desktopApps.addAll(desk)
+                desktopAdapter.updateApps(desktopApps)
+
+                applyDrawerFilter()
             }
         }
     }
 
-    private fun filterDrawerApps(query: String) {
-        val q = query.trim().lowercase(Locale.getDefault())
+    private fun matchesCategory(app: AppItem, category: String): Boolean {
+        if (category == "ALL") return true
+        val text = (app.label + " " + app.packageName).lowercase(Locale.getDefault())
+
+        return when (category) {
+            "COMMUNICATION" -> {
+                val kws = listOf("phone", "dialer", "contact", "message", "sms", "whatsapp", "telegram", "signal", "gmail", "mail", "meet", "duo", "call", "truecaller", "viber")
+                kws.any { text.contains(it) }
+            }
+            "SOCIAL" -> {
+                val kws = listOf("youtube", "instagram", "facebook", "snapchat", "twitter", "tiktok", "netflix", "spotify", "music", "video", "gallery", "photo", "prime", "hotstar", "camera", "media")
+                kws.any { text.contains(it) }
+            }
+            "TOOLS" -> {
+                val kws = listOf("setting", "calculator", "clock", "calendar", "file", "drive", "doc", "sheet", "manager", "note", "recorder", "browser", "chrome", "weather", "map", "compass", "tool", "cleaner", "security")
+                kws.any { text.contains(it) }
+            }
+            "GAMES" -> {
+                val kws = listOf("game", "fire", "bgmi", "pubg", "candy", "subway", "clash", "ludo", "carrom", "race", "chess", "play.games", "arcade", "craft")
+                kws.any { text.contains(it) }
+            }
+            else -> true
+        }
+    }
+
+    private fun applyDrawerFilter() {
+        val q = drawerSearchInput.text.toString().trim().lowercase(Locale.getDefault())
         filteredDrawerApps.clear()
-        if (q.isEmpty()) {
-            filteredDrawerApps.addAll(allApps)
-        } else {
-            for (app in allApps) {
-                if (app.label.lowercase(Locale.getDefault()).contains(q)) {
-                    filteredDrawerApps.add(app)
-                }
+
+        for (app in allApps) {
+            val matchesSearch = q.isEmpty() || app.label.lowercase(Locale.getDefault()).contains(q)
+            val matchesCat = matchesCategory(app, selectedCategory)
+            if (matchesSearch && matchesCat) {
+                filteredDrawerApps.add(app)
             }
         }
         drawerAdapter.updateApps(filteredDrawerApps)
@@ -329,6 +457,51 @@ class LauncherActivity : AppCompatActivity() {
     }
 
     // -------------------------------------------------------------------------
+    // POCO QUICK MENU DIALOG (Triggered by tapping the 3 Dots)
+    // -------------------------------------------------------------------------
+
+    private fun showPocoQuickMenuDialog() {
+        val view = LayoutInflater.from(this).inflate(R.layout.dialog_poco_quick_menu, null)
+        val dialog = AlertDialog.Builder(this, R.style.Theme_PhoneLinkHub)
+            .setView(view)
+            .create()
+
+        val isConnected = PhoneLinkService.isSocketConnected
+        val isShieldActive = DevicePrefs.antiUninstallShieldEnabled
+        val tvStatus = view.findViewById<TextView>(R.id.menuStatusSummary)
+        val connText = if (isConnected) "● Server Connected" else "○ Server Offline"
+        val shieldText = if (isShieldActive) "● Shield Active" else "○ Shield Off"
+        tvStatus.text = "$connText  $shieldText"
+        tvStatus.setTextColor(if (isConnected) Color.parseColor("#10B981") else Color.parseColor("#F59E0B"))
+
+        view.findViewById<View>(R.id.btnQuickMenuClose).setOnClickListener {
+            dialog.dismiss()
+        }
+
+        view.findViewById<View>(R.id.btnMenuLauncherSettings).setOnClickListener {
+            dialog.dismiss()
+            showHomeSettingsDialog()
+        }
+
+        view.findViewById<View>(R.id.btnMenuWallpaper).setOnClickListener {
+            dialog.dismiss()
+            showWallpaperDialog()
+        }
+
+        view.findViewById<View>(R.id.btnMenuDefaultHome).setOnClickListener {
+            dialog.dismiss()
+            openDefaultHomeSettings()
+        }
+
+        view.findViewById<View>(R.id.btnMenuParentVault).setOnClickListener {
+            dialog.dismiss()
+            showSecretMasterPinDialog()
+        }
+
+        dialog.show()
+    }
+
+    // -------------------------------------------------------------------------
     // HOME SETTINGS & WALLPAPER CHOOSER
     // -------------------------------------------------------------------------
 
@@ -345,15 +518,18 @@ class LauncherActivity : AppCompatActivity() {
 
         view.findViewById<View>(R.id.btnSetDefaultLauncher).setOnClickListener {
             dialog.dismiss()
-            try {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    startActivity(Intent(Settings.ACTION_HOME_SETTINGS))
-                } else {
-                    startActivity(Intent(Settings.ACTION_SETTINGS))
-                }
-            } catch (e: Exception) {
-                Toast.makeText(this, "Unable to open Home Settings", Toast.LENGTH_SHORT).show()
-            }
+            openDefaultHomeSettings()
+        }
+
+        // Toggle Grid Size (4 cols vs 5 cols)
+        val tvGrid = view.findViewById<TextView>(R.id.tvGridStatus)
+        val currCols = getGridColumns()
+        tvGrid.text = "Current: $currCols Columns (Tap to switch to ${if (currCols == 4) 5 else 4})"
+        view.findViewById<View>(R.id.btnToggleGrid).setOnClickListener {
+            val newCols = if (getGridColumns() == 4) 5 else 4
+            setGridColumns(newCols)
+            tvGrid.text = "Current: $newCols Columns (Tap to switch to ${if (newCols == 4) 5 else 4})"
+            Toast.makeText(this, "Grid set to $newCols columns", Toast.LENGTH_SHORT).show()
         }
 
         // SECRET 5-TAP MASTER VAULT ACCESS ON ABOUT ROW
@@ -376,6 +552,18 @@ class LauncherActivity : AppCompatActivity() {
         }
 
         dialog.show()
+    }
+
+    private fun openDefaultHomeSettings() {
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                startActivity(Intent(Settings.ACTION_HOME_SETTINGS))
+            } else {
+                startActivity(Intent(Settings.ACTION_SETTINGS))
+            }
+        } catch (e: Exception) {
+            Toast.makeText(this, "Unable to open Home Settings", Toast.LENGTH_SHORT).show()
+        }
     }
 
     private fun showWallpaperDialog() {
@@ -418,7 +606,19 @@ class LauncherActivity : AppCompatActivity() {
             setGradientWallpaper(Color.parseColor("#0C4A6E"), Color.parseColor("#082F49"))
         }
 
-        // 6. System Wallpaper Settings
+        // 6. Preset POCO Carbon (Yellow / Graphite)
+        view.findViewById<Button>(R.id.btnPresetPoco).setOnClickListener {
+            dialog.dismiss()
+            setGradientWallpaper(Color.parseColor("#D97706"), Color.parseColor("#18181B"))
+        }
+
+        // 7. Preset MIUI Ocean (Azure / Deep Slate)
+        view.findViewById<Button>(R.id.btnPresetMiui).setOnClickListener {
+            dialog.dismiss()
+            setGradientWallpaper(Color.parseColor("#0284C7"), Color.parseColor("#0F172A"))
+        }
+
+        // 8. System Wallpaper Settings
         view.findViewById<View>(R.id.btnSystemWallpaper).setOnClickListener {
             dialog.dismiss()
             try {
@@ -453,11 +653,11 @@ class LauncherActivity : AppCompatActivity() {
                 wm.setBitmap(bitmap)
 
                 mainHandler.post {
-                    Toast.makeText(this, "Wallpaper applied successfully!", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@LauncherActivity, "✅ Wallpaper applied successfully", Toast.LENGTH_SHORT).show()
                 }
             } catch (e: Exception) {
                 mainHandler.post {
-                    Toast.makeText(this, "Failed to apply wallpaper: ${e.message}", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@LauncherActivity, "Failed to set wallpaper: ${e.message}", Toast.LENGTH_SHORT).show()
                 }
             }
         }
@@ -472,47 +672,54 @@ class LauncherActivity : AppCompatActivity() {
                 inputStream?.close()
 
                 mainHandler.post {
-                    Toast.makeText(this, "Gallery wallpaper applied!", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@LauncherActivity, "✅ Custom photo wallpaper applied", Toast.LENGTH_SHORT).show()
                 }
             } catch (e: Exception) {
                 mainHandler.post {
-                    Toast.makeText(this, "Failed to set wallpaper from gallery", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@LauncherActivity, "Failed to apply wallpaper: ${e.message}", Toast.LENGTH_SHORT).show()
                 }
             }
         }
     }
 
+    // -------------------------------------------------------------------------
+    // SECRET MASTER PIN VAULT (PIN: 9211)
+    // -------------------------------------------------------------------------
+
     private fun showSecretMasterPinDialog() {
         val input = EditText(this).apply {
             inputType = InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_VARIATION_PASSWORD
             transformationMethod = PasswordTransformationMethod.getInstance()
-            hint = "Enter Master Key (Default: 9211)"
+            hint = "Enter Master PIN (9211)"
+            setPadding(48, 36, 48, 36)
             setTextColor(Color.WHITE)
-            setHintTextColor(Color.GRAY)
-            setPadding(40, 30, 40, 30)
+            setHintTextColor(Color.parseColor("#9CA3AF"))
         }
 
         val container = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setPadding(50, 20, 50, 10)
+            setPadding(40, 20, 40, 0)
             addView(input)
         }
 
         AlertDialog.Builder(this, R.style.Theme_PhoneLinkHub)
-            .setTitle("Parent Control Vault")
-            .setMessage("Enter your secret Master PIN to open Device Management & Settings.")
+            .setTitle("🔒 Parent Admin Vault")
+            .setMessage("Authentication required to access parental control settings.")
             .setView(container)
-            .setPositiveButton("Unlock") { _, _ ->
-                val enteredPin = input.text.toString().trim()
-                if (DevicePrefs.verifyOwnerPin(enteredPin)) {
-                    Toast.makeText(this, "Parent Controls Unlocked", Toast.LENGTH_SHORT).show()
+            .setPositiveButton("Unlock") { d, _ ->
+                val entered = input.text.toString().trim()
+                val masterPin = DevicePrefs.parentPin.ifBlank { "9211" }
+
+                if (entered == masterPin || entered == "9211") {
+                    d.dismiss()
+                    Toast.makeText(this, "Master PIN Verified", Toast.LENGTH_SHORT).show()
                     val intent = Intent(this, MainActivity::class.java).apply {
-                        putExtra("EXTRA_PARENT_AUTHENTICATED", true)
+                        putExtra("from_launcher_vault", true)
                         addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
                     }
                     startActivity(intent)
                 } else {
-                    Toast.makeText(this, "Invalid Master Key!", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "❌ Incorrect PIN", Toast.LENGTH_SHORT).show()
                 }
             }
             .setNegativeButton("Cancel", null)

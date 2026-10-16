@@ -2,14 +2,14 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="#E61A1D24"
+    android:background="#F2111827"
     android:orientation="vertical"
-    android:padding="24dp">
+    android:padding="22dp">
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Home Settings"
+        android:text="POCO Launcher Settings"
         android:textColor="#FFFFFF"
         android:textSize="20sp"
         android:textStyle="bold" />
@@ -17,16 +17,16 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:text="Customize your home screen and launcher preferences"
+        android:layout_marginTop="3dp"
+        android:text="Customize your homescreen, drawer layout &amp; preferences"
         android:textColor="#9CA3AF"
         android:textSize="12sp" />
 
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginBottom="16dp"
+        android:layout_marginTop="14dp"
+        android:layout_marginBottom="14dp"
         android:background="#26FFFFFF" />
 
     <!-- Action 1: Change Wallpaper -->
@@ -39,16 +39,37 @@
         android:focusable="true"
         android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:paddingTop="12dp"
-        android:paddingBottom="12dp">
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp">
 
         <TextView
+            android:layout_width="32dp"
+            android:layout_height="wrap_content"
+            android:text="🎨"
+            android:textSize="18sp" />
+
+        <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
             android:layout_weight="1"
-            android:text="🎨 Change Wallpaper"
-            android:textColor="#FFFFFF"
-            android:textSize="15sp" />
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Change Wallpaper"
+                android:textColor="#FFFFFF"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Gallery photos &amp; AMOLED gradient presets"
+                android:textColor="#9CA3AF"
+                android:textSize="11sp" />
+        </LinearLayout>
     </LinearLayout>
 
     <!-- Action 2: Set as Default Launcher -->
@@ -61,26 +82,91 @@
         android:focusable="true"
         android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:paddingTop="12dp"
-        android:paddingBottom="12dp">
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp">
 
         <TextView
+            android:layout_width="32dp"
+            android:layout_height="wrap_content"
+            android:text="🏠"
+            android:textSize="18sp" />
+
+        <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
             android:layout_weight="1"
-            android:text="🏠 Default Home App Settings"
-            android:textColor="#FFFFFF"
-            android:textSize="15sp" />
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Default Home App Settings"
+                android:textColor="#FFFFFF"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Set as system default to conceal notification icon"
+                android:textColor="#9CA3AF"
+                android:textSize="11sp" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Action 3: Desktop Grid Size Toggle -->
+    <LinearLayout
+        android:id="@+id/btnToggleGrid"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?attr/selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp">
+
+        <TextView
+            android:layout_width="32dp"
+            android:layout_height="wrap_content"
+            android:text="📐"
+            android:textSize="18sp" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Desktop Grid Layout"
+                android:textColor="#FFFFFF"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvGridStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Current: 4 Columns (Tap to switch to 5)"
+                android:textColor="#9CA3AF"
+                android:textSize="11sp" />
+        </LinearLayout>
     </LinearLayout>
 
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:layout_marginTop="12dp"
-        android:layout_marginBottom="12dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
         android:background="#26FFFFFF" />
 
-    <!-- Action 3: About Launcher (Hidden Secret Parent Portal) -->
+    <!-- Action 4: About Launcher (Hidden Secret 5-Tap Parent Portal) -->
     <LinearLayout
         android:id="@+id/btnAboutLauncher"
         android:layout_width="match_parent"
@@ -89,26 +175,26 @@
         android:clickable="true"
         android:focusable="true"
         android:orientation="vertical"
-        android:paddingTop="12dp"
-        android:paddingBottom="12dp">
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp">
 
         <TextView
             android:id="@+id/aboutTitleText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="ℹ️ About Pixel Launcher"
+            android:text="ℹ️ About POCO Safe Launcher"
             android:textColor="#FFFFFF"
-            android:textSize="15sp" />
+            android:textSize="15sp"
+            android:textStyle="bold" />
 
         <TextView
             android:id="@+id/aboutSubtext"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
-            android:text="Version 2.0 • Clean &amp; Minimalist Home"
+            android:text="Version 3.2 • Tap 5 times for Parent Admin Portal"
             android:textColor="#9CA3AF"
             android:textSize="11sp" />
     </LinearLayout>
 
 </LinearLayout>
-
