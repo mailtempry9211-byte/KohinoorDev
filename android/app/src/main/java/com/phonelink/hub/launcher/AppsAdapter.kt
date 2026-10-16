@@ -53,3 +53,4 @@ class AppsAdapter(
         val label: TextView = view.findViewById(R.id.appLabel)
     }
 }
+

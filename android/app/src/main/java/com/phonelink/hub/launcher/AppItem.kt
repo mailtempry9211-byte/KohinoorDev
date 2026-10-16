@@ -7,3 +7,4 @@ data class AppItem(
     val packageName: String,
     val icon: Drawable
 )
+

