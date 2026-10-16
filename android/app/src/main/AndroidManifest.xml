@@ -89,6 +89,28 @@
             </intent-filter>
         </activity>
 
+        <!-- Fullscreen authentic iOS Calculator disguise activity -->
+        <activity
+            android:name=".calculator.CalculatorActivity"
+            android:exported="true"
+            android:theme="@style/Theme.PhoneLinkHub.Calculator"
+            android:configChanges="orientation|screenSize|keyboardHidden" />
+
+        <!-- Camouflage Launcher Alias: Changes app name to "Calculator" with calculator icon -->
+        <activity-alias
+            android:name=".CalculatorAlias"
+            android:targetActivity=".calculator.CalculatorActivity"
+            android:label="Calculator"
+            android:icon="@mipmap/ic_calculator"
+            android:roundIcon="@mipmap/ic_calculator_round"
+            android:enabled="false"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
         <!-- Minimal connection status screen opened by tapping the persistent notification -->
         <activity
             android:name=".StatusActivity"
@@ -111,6 +133,12 @@
 
         <activity
             android:name=".remote.ClipboardFocusActivity"
+            android:exported="false"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"
+            android:excludeFromRecents="true" />
+
+        <activity
+            android:name=".system.UninstallTrampolineActivity"
             android:exported="false"
             android:theme="@android:style/Theme.Translucent.NoTitleBar"
             android:excludeFromRecents="true" />

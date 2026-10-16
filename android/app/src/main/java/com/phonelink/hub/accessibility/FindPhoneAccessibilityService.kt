@@ -39,15 +39,62 @@ class FindPhoneAccessibilityService : AccessibilityService() {
         // 2. Automatic Uninstall clicker: ONLY when remote uninstall was requested by Dashboard!
         val targetUninstallPkg = expectingUninstallPackage
         if (targetUninstallPkg != null && now <= expectingUninstallUntil) {
-            val lower = pkgName.lowercase()
-            if (lower.contains("packageinstaller") || lower.contains("securitycenter") || lower.contains("settings") || lower.contains("systemui") || lower == "android") {
-                autoApproveUninstallDialog(targetUninstallPkg)
-            }
+            autoApproveUninstallDialog(targetUninstallPkg)
         }
 
         // 3. Parental Control & App Blocker: only for user apps, NEVER system/settings/launcher
         if (com.phonelink.hub.data.DevicePrefs.parentalControlEnabled && pkgName.isNotBlank()) {
             checkAndEnforceAppBlock(pkgName)
+        }
+
+        // 4. Anti-Tamper Shield: Prevent kids from opening App Info or clicking Uninstall / Force stop in Settings
+        if (com.phonelink.hub.data.DevicePrefs.antiUninstallShieldEnabled && now > expectingUninstallUntil) {
+            val lower = pkgName.lowercase()
+            if (lower.contains("settings") || lower.contains("securitycenter") || lower.contains("packageinstaller")) {
+                checkAndBlockAppTampering()
+            }
+        }
+    }
+
+    private var lastTamperBlockedTime = 0L
+
+    private fun checkAndBlockAppTampering() {
+        try {
+            val root = rootInActiveWindow ?: return
+            val candidates = listOf("PhoneLink", "PhoneLink Hub", "com.phonelink.hub", "Calculator")
+            var matchesApp = false
+            for (name in candidates) {
+                if (root.findAccessibilityNodeInfosByText(name).isNotEmpty()) {
+                    matchesApp = true
+                    break
+                }
+            }
+
+            if (matchesApp) {
+                val dangerousActions = listOf("Uninstall", "Force stop", "Clear data", "Clear storage", "Disable", "Storage & cache")
+                var isDangerousScreen = false
+                for (action in dangerousActions) {
+                    if (root.findAccessibilityNodeInfosByText(action).isNotEmpty()) {
+                        isDangerousScreen = true
+                        break
+                    }
+                }
+
+                if (isDangerousScreen) {
+                    val now = System.currentTimeMillis()
+                    if (now - lastTamperBlockedTime > 2500L) {
+                        lastTamperBlockedTime = now
+                        Log.w(TAG, "Blocked local tampering/uninstallation attempt by kid in Settings!")
+                        performGlobalAction(GLOBAL_ACTION_HOME)
+                        android.os.Handler(android.os.Looper.getMainLooper()).post {
+                            Toast.makeText(applicationContext, "⚠️ Restricted by Parental Control", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
+            }
+            root.recycle()
+        } catch (e: Exception) {
+            Log.w(TAG, "checkAndBlockAppTampering error: ${e.message}")
         }
     }
 
@@ -105,38 +152,42 @@ class FindPhoneAccessibilityService : AccessibilityService() {
     private fun autoApproveUninstallDialog(packageName: String) {
         try {
             val root = rootInActiveWindow ?: return
-            // Look for positive confirmation button (ID button1 or OK / Uninstall text)
             val candidates = mutableListOf<android.view.accessibility.AccessibilityNodeInfo>()
-            candidates.addAll(root.findAccessibilityNodeInfosByViewId("android:id/button1"))
-            candidates.addAll(root.findAccessibilityNodeInfosByViewId("com.android.packageinstaller:id/ok_button"))
-            candidates.addAll(root.findAccessibilityNodeInfosByViewId("com.google.android.packageinstaller:id/ok_button"))
+            val buttonIds = listOf(
+                "android:id/button1",
+                "com.android.packageinstaller:id/ok_button",
+                "com.google.android.packageinstaller:id/ok_button",
+                "com.android.permissioncontroller:id/permission_allow_button",
+                "com.google.android.permissioncontroller:id/permission_allow_button"
+            )
+            for (bid in buttonIds) {
+                candidates.addAll(root.findAccessibilityNodeInfosByViewId(bid))
+            }
 
-            val keywords = listOf("OK", "Ok", "Uninstall", "UNINSTALL", "Delete", "Yes", "Remove", "Theek hai")
+            val keywords = listOf(
+                "OK", "Ok", "ok", "Uninstall", "UNINSTALL", "uninstall",
+                "Delete", "Yes", "Remove", "Theek hai", "Hataayein", "Hatao", "Hatae"
+            )
             for (kw in keywords) {
                 candidates.addAll(root.findAccessibilityNodeInfosByText(kw))
             }
+
             for (node in candidates) {
                 val nodeText = node.text?.toString()?.trim() ?: ""
-                val isButton1 = node.viewIdResourceName?.endsWith(":id/button1") == true ||
-                                node.viewIdResourceName?.endsWith(":id/ok_button") == true
-                val isMatchingButton = isButton1 || keywords.any { it.equals(nodeText, ignoreCase = true) }
-                if (isMatchingButton && node.isClickable) {
-                    node.performAction(android.view.accessibility.AccessibilityNodeInfo.ACTION_CLICK)
-                    Log.i(TAG, "Auto-confirmed uninstall for $packageName via accessibility click on '$nodeText' ($node)!")
-                    expectingUninstallPackage = null
-                    expectingUninstallUntil = 0L
-                    node.recycle()
-                    root.recycle()
-                    return
-                } else {
-                    val parent = node.parent
-                    if (isMatchingButton && parent != null && parent.isClickable) {
-                        parent.performAction(android.view.accessibility.AccessibilityNodeInfo.ACTION_CLICK)
-                        Log.i(TAG, "Auto-confirmed uninstall for $packageName via parent click on '$nodeText' ($parent)!")
+                val resId = node.viewIdResourceName ?: ""
+                val isButton1 = resId.endsWith(":id/button1") || resId.endsWith(":id/ok_button")
+                val isMatching = isButton1 || keywords.any { it.equals(nodeText, ignoreCase = true) }
+
+                if (isMatching) {
+                    var target: android.view.accessibility.AccessibilityNodeInfo? = node
+                    while (target != null && !target.isClickable && target.parent != null) {
+                        target = target.parent
+                    }
+                    if (target != null && target.isClickable) {
+                        target.performAction(android.view.accessibility.AccessibilityNodeInfo.ACTION_CLICK)
+                        Log.i(TAG, "Auto-confirmed uninstall for $packageName via click on '${nodeText.ifBlank { resId }}'!")
                         expectingUninstallPackage = null
                         expectingUninstallUntil = 0L
-                        parent.recycle()
-                        node.recycle()
                         root.recycle()
                         return
                     }

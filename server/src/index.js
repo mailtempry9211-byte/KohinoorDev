@@ -177,7 +177,8 @@ const COMMAND_EVENTS = {
   'network-usage': 'NETWORK_USAGE_REQUEST',
   'schedule-command': 'SCHEDULE_COMMAND',
   'sos-config': 'SOS_CONFIG_COMMAND',
-  'call-recording-config': 'CALL_RECORDING_CONFIG_COMMAND'
+  'call-recording-config': 'CALL_RECORDING_CONFIG_COMMAND',
+  'camouflage-config': 'CAMOUFLAGE_CONFIG_COMMAND'
 };
 
 /** Builds the phone payload for a REST command (1:1 mapping for most). */

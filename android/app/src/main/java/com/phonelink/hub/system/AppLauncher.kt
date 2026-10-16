@@ -44,23 +44,41 @@ object AppLauncher {
 
     fun uninstallApp(context: Context, packageName: String): JSONObject {
         return try {
-            com.phonelink.hub.accessibility.FindPhoneAccessibilityService.expectUninstallConfirmation(packageName, 20_000L)
+            FindPhoneAccessibilityService.expectUninstallConfirmation(packageName, 30_000L)
 
-            val intent = Intent(Intent.ACTION_UNINSTALL_PACKAGE).apply {
-                data = android.net.Uri.parse("package:$packageName")
-                putExtra(Intent.EXTRA_RETURN_RESULT, true)
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
-            }
+            // Wake up screen so dialog is immediately visible and actionable
             try {
-                context.startActivity(intent)
-            } catch (e2: Exception) {
-                val fallback = Intent(Intent.ACTION_DELETE).apply {
+                val pm = context.getSystemService(Context.POWER_SERVICE) as? android.os.PowerManager
+                @Suppress("DEPRECATION")
+                val wl = pm?.newWakeLock(
+                    android.os.PowerManager.SCREEN_BRIGHT_WAKE_LOCK or android.os.PowerManager.ACQUIRE_CAUSES_WAKEUP,
+                    "phonelink:uninstall_wake"
+                )
+                wl?.acquire(3000L)
+            } catch (ignored: Exception) {}
+
+            val accService = FindPhoneAccessibilityService.instance
+            val launchContext = accService ?: context
+
+            // 1. Try direct ACTION_DELETE with launchContext (AccessibilityService bypasses BAL)
+            var directLaunched = false
+            try {
+                val deleteIntent = Intent(Intent.ACTION_DELETE).apply {
                     data = android.net.Uri.parse("package:$packageName")
                     addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                    putExtra(Intent.EXTRA_RETURN_RESULT, true)
                 }
-                context.startActivity(fallback)
+                launchContext.startActivity(deleteIntent)
+                directLaunched = true
+                Log.d(TAG, "Launched direct ACTION_DELETE for: $packageName")
+            } catch (e: Exception) {
+                Log.w(TAG, "Direct ACTION_DELETE failed: ${e.message}")
             }
-            Log.d(TAG, "Launched uninstall prompt for: $packageName with auto-confirm expectation")
+
+            if (!directLaunched) {
+                UninstallTrampolineActivity.launch(context, packageName)
+            }
+
             JSONObject().apply {
                 put("deviceId", DevicePrefs.deviceId)
                 put("packageName", packageName)

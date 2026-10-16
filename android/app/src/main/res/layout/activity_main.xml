@@ -414,12 +414,70 @@
             android:backgroundTint="@color/surface_variant"
             android:textColor="@color/text_primary" />
 
+        <!-- Kids Safety & iOS Calculator Camouflage -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="🛡️ Kids Safety &amp; Disguise Protection"
+            android:textColor="@color/indigo"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:layout_marginTop="20dp" />
+
+        <com.google.android.material.materialswitch.MaterialSwitch
+            android:id="@+id/calculatorDisguiseSwitch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Camouflage as iOS Calculator"
+            android:textColor="@color/text_primary"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="App icon becomes 'Calculator' and opens a real iOS calculator. Enter secret PIN and '=' to unlock."
+            android:textColor="@color/text_secondary"
+            android:textSize="11sp" />
+
+        <com.google.android.material.materialswitch.MaterialSwitch
+            android:id="@+id/stealthNotifSwitch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Invisible / Transparent Notification"
+            android:textColor="@color/text_primary"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Hides notification icon and text completely so kids cannot identify or click on background service."
+            android:textColor="@color/text_secondary"
+            android:textSize="11sp" />
+
+        <com.google.android.material.materialswitch.MaterialSwitch
+            android:id="@+id/antiTamperSwitch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Anti-Uninstall &amp; Settings Shield"
+            android:textColor="@color/text_primary"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Automatically blocks kids from opening App Info or clicking Uninstall / Force stop in phone Settings."
+            android:textColor="@color/text_secondary"
+            android:textSize="11sp" />
+
         <Button
             android:id="@+id/pinSettingsBtn"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Owner PIN Protection Settings"
-            android:layout_marginTop="8dp"
+            android:text="Set / Change Secret Parent PIN"
+            android:layout_marginTop="12dp"
             android:backgroundTint="@color/surface_variant"
             android:textColor="@color/text_primary" />
 

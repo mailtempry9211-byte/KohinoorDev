@@ -1,0 +1,346 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/ios_calc_bg"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <!-- Digital Readout Display -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:gravity="bottom|end"
+        android:orientation="vertical"
+        android:paddingEnd="16dp"
+        android:paddingBottom="12dp">
+
+        <TextView
+            android:id="@+id/calcExpression"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/text_secondary"
+            android:textSize="20sp"
+            android:fontFamily="sans-serif-light"
+            android:singleLine="true" />
+
+        <TextView
+            android:id="@+id/calcDisplay"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="0"
+            android:textColor="@color/ios_calc_text_white"
+            android:textSize="64sp"
+            android:fontFamily="sans-serif-light"
+            android:textStyle="normal"
+            android:singleLine="true"
+            android:ellipsize="start" />
+    </LinearLayout>
+
+    <!-- Keypad Grid (Authentic iOS Style) -->
+    <!-- Row 1: AC, +/-, %, / -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="12dp">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnAc"
+            android:layout_width="0dp"
+            android:layout_height="72dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="10dp"
+            android:text="AC"
+            android:textColor="@color/ios_calc_text_black"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            app:cornerRadius="36dp"
+            app:backgroundTint="@color/ios_calc_light_btn"
+            android:insetTop="0dp"
+            android:insetBottom="0dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnPlusMinus"
+            android:layout_width="0dp"
+            android:layout_height="72dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="10dp"
+            android:text="±"
+            android:textColor="@color/ios_calc_text_black"
+            android:textSize="24sp"
+            app:cornerRadius="36dp"
+            app:backgroundTint="@color/ios_calc_light_btn"
+            android:insetTop="0dp"
+            android:insetBottom="0dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnPercent"
+            android:layout_width="0dp"
+            android:layout_height="72dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="10dp"
+            android:text="%"
+            android:textColor="@color/ios_calc_text_black"
+            android:textSize="24sp"
+            app:cornerRadius="36dp"
+            app:backgroundTint="@color/ios_calc_light_btn"
+            android:insetTop="0dp"
+            android:insetBottom="0dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnDivide"
+            android:layout_width="0dp"
+            android:layout_height="72dp"
+            android:layout_weight="1"
+            android:text="÷"
+            android:textColor="@color/ios_calc_text_white"
+            android:textSize="32sp"
+            app:cornerRadius="36dp"
+            app:backgroundTint="@color/ios_calc_orange"
+            android:insetTop="0dp"
+            android:insetBottom="0dp" />
+    </LinearLayout>
+
+    <!-- Row 2: 7, 8, 9, x -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="12dp">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn7"
+            android:layout_width="0dp"
+            android:layout_height="72dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="10dp"
+            android:text="7"
+            android:textColor="@color/ios_calc_text_white"
+            android:textSize="28sp"
+            app:cornerRadius="36dp"
+            app:backgroundTint="@color/ios_calc_dark_btn"
+            android:insetTop="0dp"
+            android:insetBottom="0dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn8"
+            android:layout_width="0dp"
+            android:layout_height="72dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="10dp"
+            android:text="8"
+            android:textColor="@color/ios_calc_text_white"
+            android:textSize="28sp"
+            app:cornerRadius="36dp"
+            app:backgroundTint="@color/ios_calc_dark_btn"
+            android:insetTop="0dp"
+            android:insetBottom="0dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn9"
+            android:layout_width="0dp"
+            android:layout_height="72dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="10dp"
+            android:text="9"
+            android:textColor="@color/ios_calc_text_white"
+            android:textSize="28sp"
+            app:cornerRadius="36dp"
+            app:backgroundTint="@color/ios_calc_dark_btn"
+            android:insetTop="0dp"
+            android:insetBottom="0dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnMultiply"
+            android:layout_width="0dp"
+            android:layout_height="72dp"
+            android:layout_weight="1"
+            android:text="×"
+            android:textColor="@color/ios_calc_text_white"
+            android:textSize="32sp"
+            app:cornerRadius="36dp"
+            app:backgroundTint="@color/ios_calc_orange"
+            android:insetTop="0dp"
+            android:insetBottom="0dp" />
+    </LinearLayout>
+
+    <!-- Row 3: 4, 5, 6, - -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="12dp">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn4"
+            android:layout_width="0dp"
+            android:layout_height="72dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="10dp"
+            android:text="4"
+            android:textColor="@color/ios_calc_text_white"
+            android:textSize="28sp"
+            app:cornerRadius="36dp"
+            app:backgroundTint="@color/ios_calc_dark_btn"
+            android:insetTop="0dp"
+            android:insetBottom="0dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn5"
+            android:layout_width="0dp"
+            android:layout_height="72dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="10dp"
+            android:text="5"
+            android:textColor="@color/ios_calc_text_white"
+            android:textSize="28sp"
+            app:cornerRadius="36dp"
+            app:backgroundTint="@color/ios_calc_dark_btn"
+            android:insetTop="0dp"
+            android:insetBottom="0dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn6"
+            android:layout_width="0dp"
+            android:layout_height="72dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="10dp"
+            android:text="6"
+            android:textColor="@color/ios_calc_text_white"
+            android:textSize="28sp"
+            app:cornerRadius="36dp"
+            app:backgroundTint="@color/ios_calc_dark_btn"
+            android:insetTop="0dp"
+            android:insetBottom="0dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnMinus"
+            android:layout_width="0dp"
+            android:layout_height="72dp"
+            android:layout_weight="1"
+            android:text="−"
+            android:textColor="@color/ios_calc_text_white"
+            android:textSize="32sp"
+            app:cornerRadius="36dp"
+            app:backgroundTint="@color/ios_calc_orange"
+            android:insetTop="0dp"
+            android:insetBottom="0dp" />
+    </LinearLayout>
+
+    <!-- Row 4: 1, 2, 3, + -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="12dp">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn1"
+            android:layout_width="0dp"
+            android:layout_height="72dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="10dp"
+            android:text="1"
+            android:textColor="@color/ios_calc_text_white"
+            android:textSize="28sp"
+            app:cornerRadius="36dp"
+            app:backgroundTint="@color/ios_calc_dark_btn"
+            android:insetTop="0dp"
+            android:insetBottom="0dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn2"
+            android:layout_width="0dp"
+            android:layout_height="72dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="10dp"
+            android:text="2"
+            android:textColor="@color/ios_calc_text_white"
+            android:textSize="28sp"
+            app:cornerRadius="36dp"
+            app:backgroundTint="@color/ios_calc_dark_btn"
+            android:insetTop="0dp"
+            android:insetBottom="0dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn3"
+            android:layout_width="0dp"
+            android:layout_height="72dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="10dp"
+            android:text="3"
+            android:textColor="@color/ios_calc_text_white"
+            android:textSize="28sp"
+            app:cornerRadius="36dp"
+            app:backgroundTint="@color/ios_calc_dark_btn"
+            android:insetTop="0dp"
+            android:insetBottom="0dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnPlus"
+            android:layout_width="0dp"
+            android:layout_height="72dp"
+            android:layout_weight="1"
+            android:text="+"
+            android:textColor="@color/ios_calc_text_white"
+            android:textSize="32sp"
+            app:cornerRadius="36dp"
+            app:backgroundTint="@color/ios_calc_orange"
+            android:insetTop="0dp"
+            android:insetBottom="0dp" />
+    </LinearLayout>
+
+    <!-- Row 5: 0 (wide), ., = -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="16dp">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn0"
+            android:layout_width="0dp"
+            android:layout_height="72dp"
+            android:layout_weight="2"
+            android:layout_marginEnd="10dp"
+            android:text="0"
+            android:textColor="@color/ios_calc_text_white"
+            android:textSize="28sp"
+            android:gravity="start|center_vertical"
+            android:paddingStart="32dp"
+            app:cornerRadius="36dp"
+            app:backgroundTint="@color/ios_calc_dark_btn"
+            android:insetTop="0dp"
+            android:insetBottom="0dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnDot"
+            android:layout_width="0dp"
+            android:layout_height="72dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="10dp"
+            android:text="."
+            android:textColor="@color/ios_calc_text_white"
+            android:textSize="28sp"
+            app:cornerRadius="36dp"
+            app:backgroundTint="@color/ios_calc_dark_btn"
+            android:insetTop="0dp"
+            android:insetBottom="0dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnEquals"
+            android:layout_width="0dp"
+            android:layout_height="72dp"
+            android:layout_weight="1"
+            android:text="="
+            android:textColor="@color/ios_calc_text_white"
+            android:textSize="32sp"
+            app:cornerRadius="36dp"
+            app:backgroundTint="@color/ios_calc_orange"
+            android:insetTop="0dp"
+            android:insetBottom="0dp" />
+    </LinearLayout>
+</LinearLayout>

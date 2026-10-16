@@ -53,6 +53,11 @@ class MainActivity : AppCompatActivity() {
     private lateinit var callBlockerSwitch: MaterialSwitch
     private lateinit var notifSyncSwitch: MaterialSwitch
 
+    // Kids Safety & Camouflage switches
+    private lateinit var calculatorDisguiseSwitch: MaterialSwitch
+    private lateinit var stealthNotifSwitch: MaterialSwitch
+    private lateinit var antiTamperSwitch: MaterialSwitch
+
     private val statusHandler = Handler(Looper.getMainLooper())
     private var statusRefreshing = false
 
@@ -155,6 +160,17 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         DevicePrefs.init(this)
+
+        val isParentAuth = intent.getBooleanExtra("EXTRA_PARENT_AUTHENTICATED", false)
+        if (DevicePrefs.calculatorDisguiseEnabled && !isParentAuth) {
+            val calcIntent = Intent(this, com.phonelink.hub.calculator.CalculatorActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
+            }
+            startActivity(calcIntent)
+            finish()
+            return
+        }
+
         setContentView(R.layout.activity_main)
 
         bindViews()
@@ -180,6 +196,10 @@ class MainActivity : AppCompatActivity() {
         deviceAdminSwitch = findViewById(R.id.deviceAdminSwitch)
         callBlockerSwitch = findViewById(R.id.callBlockerSwitch)
         notifSyncSwitch = findViewById(R.id.notifSyncSwitch)
+
+        calculatorDisguiseSwitch = findViewById(R.id.calculatorDisguiseSwitch)
+        stealthNotifSwitch = findViewById(R.id.stealthNotifSwitch)
+        antiTamperSwitch = findViewById(R.id.antiTamperSwitch)
     }
 
     private fun setupListeners() {
@@ -202,6 +222,32 @@ class MainActivity : AppCompatActivity() {
         }
         findViewById<Button>(R.id.syncNowBtn).setOnClickListener { PhoneLinkService.instance?.syncAll() }
         findViewById<Button>(R.id.pinSettingsBtn).setOnClickListener { openPinManager() }
+
+        calculatorDisguiseSwitch.isChecked = DevicePrefs.calculatorDisguiseEnabled
+        calculatorDisguiseSwitch.setOnCheckedChangeListener { _, isChecked ->
+            DevicePrefs.calculatorDisguiseEnabled = isChecked
+            DevicePrefs.updateCalculatorAlias(this, isChecked)
+            val msg = if (isChecked) {
+                "Camouflage active! App icon changed to 'Calculator'. Enter PIN in calculator to access settings."
+            } else {
+                "Camouflage disabled. Default PhoneLink launcher icon restored."
+            }
+            Toast.makeText(this, msg, Toast.LENGTH_LONG).show()
+        }
+
+        stealthNotifSwitch.isChecked = DevicePrefs.stealthNotificationEnabled
+        stealthNotifSwitch.setOnCheckedChangeListener { _, isChecked ->
+            DevicePrefs.stealthNotificationEnabled = isChecked
+            val msg = if (isChecked) "Invisible notification enabled" else "Standard notification enabled"
+            Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+        }
+
+        antiTamperSwitch.isChecked = DevicePrefs.antiUninstallShieldEnabled
+        antiTamperSwitch.setOnCheckedChangeListener { _, isChecked ->
+            DevicePrefs.antiUninstallShieldEnabled = isChecked
+            val msg = if (isChecked) "Anti-Uninstall & Settings Shield active" else "Anti-Uninstall shield paused"
+            Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+        }
 
         // Feature 1: SMS
         smsSwitch.setOnClickListener {

