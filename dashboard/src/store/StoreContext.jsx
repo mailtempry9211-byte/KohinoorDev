@@ -17,6 +17,8 @@ const StoreContext = createContext(null);
 export function StoreProvider({ children }) {
   const [devices, setDevices] = useState({});
   const [activeDeviceId, setActiveDeviceId] = useState(null);
+  const [currentTab, setCurrentTab] = useState('calls');
+  const [callLogsSubTab, setCallLogsSubTab] = useState('history');
   const [calls, setCalls] = useState({});
   const [messages, setMessages] = useState({});
   const [locations, setLocations] = useState({});
@@ -1012,6 +1014,15 @@ function titleOrApp(appName, title, text) {
           }
         } catch (_) {}
       },
+      // Navigation & Vault shortcuts
+      currentTab,
+      setCurrentTab,
+      callLogsSubTab,
+      setCallLogsSubTab,
+      openCallRecordingsVault: () => {
+        setCurrentTab('calls');
+        setCallLogsSubTab('recordings');
+      },
       removeDevice: async (deviceId) => {
         try {
           const res = await fetch(`/api/devices/${deviceId}`, { method: 'DELETE' });
@@ -1033,7 +1044,7 @@ function titleOrApp(appName, title, text) {
         return false;
       }
     }),
-    [devices, activeDeviceId, calls, messages, locations, contacts, files, notifications, connected, incomingCallAlert, smsAlert, toasts, sendCommand, dismissAlert, dismissSmsAlert, pushToast, deviceInfo, installedApps, wifiInfo, clipboardHistory, clipboardCapture, appPermissions, callBlocklist, micRecording, latestMicAudio, cameraCapturing, latestCameraPhoto, screenshotCapturing, latestScreenshot, screenRecording, latestScreenFrame, cameraStreaming, latestCameraFrame, torchOn, liveListening, latestAudioChunk, volumeInfo, batteryStats, lostModeState, galleryPhotos, galleryLoading, cellularInfo, dndStatus, strobeActive, junkScanData, isScanningJunk, motionAlarmState, walkieTalkieActive]
+    [devices, activeDeviceId, currentTab, callLogsSubTab, calls, messages, locations, contacts, files, notifications, connected, incomingCallAlert, smsAlert, toasts, sendCommand, dismissAlert, dismissSmsAlert, pushToast, deviceInfo, installedApps, wifiInfo, clipboardHistory, clipboardCapture, appPermissions, callBlocklist, micRecording, latestMicAudio, cameraCapturing, latestCameraPhoto, screenshotCapturing, latestScreenshot, screenRecording, latestScreenFrame, cameraStreaming, latestCameraFrame, torchOn, liveListening, latestAudioChunk, volumeInfo, batteryStats, lostModeState, galleryPhotos, galleryLoading, cellularInfo, dndStatus, strobeActive, junkScanData, isScanningJunk, motionAlarmState, walkieTalkieActive]
   );
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;

@@ -275,8 +275,38 @@ The dashboard still needs internet for tiles even though everything else is loca
 
 ## Permissions & Privacy Architecture
 
-Phone Link Hub follows the consent and privacy standards of KDE Connect and Microsoft Phone Link:
-- **Zero Cloud**: Operates strictly peer-to-peer over your local network. No analytics, tracking, or cloud servers.
-- **Opt-In by Default**: All sensitive features (SMS, Calls, Contacts, Camera, Microphone, Location, Files, Screen View, Remote Lock) are disabled by default. Permissions are requested lazily only when a feature is explicitly enabled by the user.
-- **Real-Time Indicators**: Visible foreground notifications inform you whenever Camera, Microphone, or Screen sharing is active.
-- For complete disclosures and revocation steps, see [PERMISSIONS.md](file:///c:/Users/Kohinoor/Desktop/phone%20managment/PERMISSIONS.md) and [PRIVACY.md](file:///c:/Users/Kohinoor/Desktop/phone%20managment/PRIVACY.md).
+Phone Link Hub follows the transparent consent and privacy standards of KDE Connect and Microsoft Phone Link:
+- **Repurposing Purpose**: Designed specifically to transparently repurpose spare or old Android devices as dedicated home security cameras, pet monitors, or authorized connected monitoring hubs.
+- **Zero Cloud & Zero Tracking**: Operates strictly peer-to-peer over your local network or user-configured private relay (e.g. self-hosted ngrok/reverse-proxy). No third-party analytics, ads, or hidden telemetry.
+- **Transparent Identity**: Never disguises itself as an unrelated utility (e.g. calculator or system app). Preserves all Android OS privacy indicators (green camera/mic dots, projection indicators, and ongoing foreground notification).
+- **Opt-In Permissions**: Sensitive features (Camera, Microphone, Screen Casting, Calls, Files, Location) require explicit runtime user grant. Permissions can be revoked at any time via Android System Settings.
+
+## Minimal Notification & Connection Status
+
+To maintain clean, unobtrusive operation when used as a security camera or monitoring station:
+- **Monochrome Status Icon**: Uses a clean, static, monochrome status icon (`ic_notification_minimal`) complying with Android status bar design guidelines.
+- **Silent & Compact**: Uses a low-importance notification channel (`IMPORTANCE_LOW`) without sound, vibration, or redundant timer/IP text.
+- **Minimal Status Screen (`StatusActivity`)**: Tapping the notification opens a lightweight, clean connection indicator (Connected / Connecting / Disconnected) with network status, rather than exposing the full configuration dashboard.
+
+## In-App Owner PIN Protection
+
+To protect monitoring stations from unauthorized configuration changes or accidental termination:
+- **Salted SHA-256 Hash**: The Owner PIN is hashed using cryptographically secure random salt + SHA-256 and stored in private app preferences.
+- **Protected Actions**: Changing server endpoints, toggling sensitive background monitors, and tapping the **Stop Service** button requires entering the Owner PIN.
+- **Honest Android Architecture Disclosure**:
+  > [!NOTE]
+  > Under Android's standard security architecture, an in-app PIN cannot prevent a user with physical access from force-stopping or uninstalling the app via the Android system Settings app. For fully tamper-resistant kiosk deployments, provision the phone in **Device Owner** mode.
+
+## Enterprise Device Owner Mode (Optional Kiosk Provisioning)
+
+While standard Android legacy Device Admin provides remote lock capabilities, true tamper-proofing against app uninstallation and force-stopping requires Android Enterprise **Device Owner** provisioning:
+
+1. Factory reset the device or ensure no personal Google accounts are added.
+2. Enable USB Debugging in Developer Options and connect to PC via ADB.
+3. Provision Phone Link Hub as the Device Owner:
+   ```bash
+   adb shell dpm set-device-owner com.phonelink.hub/.admin.DeviceAdminReceiver
+   ```
+4. Once provisioned as Device Owner, the application can legitimately lock the screen, enforce kiosk lock-task mode, and prevent unauthorized uninstallation.
+
+For complete permission details, see [PERMISSIONS.md](file:///c:/Users/Kohinoor/Desktop/phone%20managment/PERMISSIONS.md) and [PRIVACY.md](file:///c:/Users/Kohinoor/Desktop/phone%20managment/PRIVACY.md).

@@ -188,8 +188,20 @@ class MainActivity : AppCompatActivity() {
             AutostartHelper.openAutostartSettings(this)
         }
         findViewById<Button>(R.id.startBtn).setOnClickListener { startService() }
-        findViewById<Button>(R.id.stopBtn).setOnClickListener { stopService() }
+        findViewById<Button>(R.id.stopBtn).setOnClickListener {
+            if (DevicePrefs.hasOwnerPin()) {
+                showPinPrompt(
+                    title = "Confirm Stop Service",
+                    message = "Enter Owner PIN to authorize stopping the Phone Link monitoring service."
+                ) {
+                    stopService()
+                }
+            } else {
+                stopService()
+            }
+        }
         findViewById<Button>(R.id.syncNowBtn).setOnClickListener { PhoneLinkService.instance?.syncAll() }
+        findViewById<Button>(R.id.pinSettingsBtn).setOnClickListener { openPinManager() }
 
         // Feature 1: SMS
         smsSwitch.setOnClickListener {
@@ -218,16 +230,19 @@ class MainActivity : AppCompatActivity() {
             if (callsSwitch.isChecked) {
                 callsSwitch.isChecked = false
                 showRationaleDialog(
-                    title = "Enable Call Logs & Alerts?",
-                    message = "This displays your recent call log and notifies your PC in real-time when the phone is ringing.\n\n" +
-                            "Privacy Guarantee: Call logs are transferred solely to your private PC over local WiFi."
+                    title = "Enable Calls & Remote Dialer?",
+                    message = "Displays recent calls, alerts PC in real-time when ringing, and enables direct outgoing call placing and remote answering from your dashboard.\n\n" +
+                            "Privacy Guarantee: Call data stays on your local WiFi network."
                 ) {
-                    callsLauncher.launch(
-                        arrayOf(
-                            Manifest.permission.READ_CALL_LOG,
-                            Manifest.permission.READ_PHONE_STATE
-                        )
+                    val perms = mutableListOf(
+                        Manifest.permission.READ_CALL_LOG,
+                        Manifest.permission.READ_PHONE_STATE,
+                        Manifest.permission.CALL_PHONE
                     )
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        perms.add(Manifest.permission.ANSWER_PHONE_CALLS)
+                    }
+                    callsLauncher.launch(perms.toTypedArray())
                 }
             } else {
                 DevicePrefs.callsFeatureEnabled = false
@@ -637,5 +652,84 @@ class MainActivity : AppCompatActivity() {
         statusText.text = if (connected) "Connected to dashboard" else "Disconnected"
         val color = if (connected) R.color.emerald else R.color.red
         statusDot.background?.setTint(ContextCompat.getColor(this, color))
+    }
+
+    // -------------------------------------------------------------
+    // In-App Owner PIN Management & Verification
+    // -------------------------------------------------------------
+    private fun openPinManager() {
+        if (!DevicePrefs.hasOwnerPin()) {
+            showSetPinDialog()
+        } else {
+            showPinOptionsDialog()
+        }
+    }
+
+    private fun showSetPinDialog() {
+        val input = android.widget.EditText(this).apply {
+            inputType = android.text.InputType.TYPE_CLASS_NUMBER or android.text.InputType.TYPE_NUMBER_VARIATION_PASSWORD
+            hint = "Enter 4 to 8 digit numeric PIN"
+            setPadding(40, 30, 40, 30)
+        }
+        MaterialAlertDialogBuilder(this)
+            .setTitle("Set In-App Owner PIN")
+            .setMessage("Set a numeric PIN to protect application settings and prevent unauthorized service shutdown from the phone's UI.\n\nNotice: This protects in-app settings only. By Android security design, it cannot prevent users with device access from uninstalling or force-stopping the app in Android Settings.")
+            .setView(input)
+            .setPositiveButton("Save PIN") { _, _ ->
+                val pin = input.text.toString().trim()
+                if (pin.length < 4) {
+                    Toast.makeText(this, "PIN must be at least 4 digits", Toast.LENGTH_SHORT).show()
+                } else {
+                    DevicePrefs.setOwnerPin(pin)
+                    Toast.makeText(this, "Owner PIN enabled successfully", Toast.LENGTH_SHORT).show()
+                }
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
+    private fun showPinOptionsDialog() {
+        val options = arrayOf("Change PIN", "Remove PIN")
+        MaterialAlertDialogBuilder(this)
+            .setTitle("Owner PIN Protection (Active)")
+            .setItems(options) { _, which ->
+                when (which) {
+                    0 -> {
+                        showPinPrompt("Verify Current PIN", "Enter your current PIN to change it:") {
+                            showSetPinDialog()
+                        }
+                    }
+                    1 -> {
+                        showPinPrompt("Verify Current PIN", "Enter your current PIN to remove protection:") {
+                            DevicePrefs.clearOwnerPin()
+                            Toast.makeText(this, "PIN protection removed", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
+            }
+            .setNegativeButton("Close", null)
+            .show()
+    }
+
+    private fun showPinPrompt(title: String, message: String, onSuccess: () -> Unit) {
+        val input = android.widget.EditText(this).apply {
+            inputType = android.text.InputType.TYPE_CLASS_NUMBER or android.text.InputType.TYPE_NUMBER_VARIATION_PASSWORD
+            hint = "Owner PIN"
+            setPadding(40, 30, 40, 30)
+        }
+        MaterialAlertDialogBuilder(this)
+            .setTitle(title)
+            .setMessage(message)
+            .setView(input)
+            .setPositiveButton("Verify") { _, _ ->
+                val pin = input.text.toString().trim()
+                if (DevicePrefs.verifyOwnerPin(pin)) {
+                    onSuccess()
+                } else {
+                    Toast.makeText(this, "Incorrect PIN", Toast.LENGTH_SHORT).show()
+                }
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
     }
 }

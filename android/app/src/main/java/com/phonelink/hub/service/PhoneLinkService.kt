@@ -1207,8 +1207,10 @@ class PhoneLinkService : Service() {
         }
     }
 
+    private var lastNotifiedState: String? = null
+
     private fun buildNotification(text: String): Notification {
-        val intent = Intent(this, MainActivity::class.java).apply {
+        val intent = Intent(this, StatusActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
         }
         val pi = PendingIntent.getActivity(
@@ -1221,83 +1223,28 @@ class PhoneLinkService : Service() {
         val isConnected = try { webSocket.isOpen } catch (_: Exception) { false }
         val isConnecting = !isConnected && (text.contains("reconnect", ignoreCase = true) || text.contains("connect", ignoreCase = true))
 
-        val statusLabel = when {
+        val statusText = when {
             isConnected -> "Connected"
             isConnecting -> "Connecting…"
-            else -> "Failed / Offline"
+            else -> "Disconnected"
         }
 
-        val title = when {
-            isConnected -> "🟢 PhoneLink Hub · ⌚ Live Sync"
-            isConnecting -> "🟡 PhoneLink Hub · ⏳ Connecting…"
-            else -> "🔴 PhoneLink Hub · ⚠️ Offline"
-        }
-
-        val batteryPct = try {
-            val bm = getSystemService(Context.BATTERY_SERVICE) as? android.os.BatteryManager
-            bm?.getIntProperty(android.os.BatteryManager.BATTERY_PROPERTY_CAPACITY) ?: -1
-        } catch (_: Exception) { -1 }
-
-        val batteryStr = if (batteryPct > 0) "🔋 $batteryPct%" else ""
-        val targetIp = DevicePrefs.serverIp.ifBlank { "Unconfigured" }
-        val deviceName = DevicePrefs.deviceName.ifBlank { "Phone" }
-
-        val content = when {
-            isConnected -> "Server: $targetIp · $batteryStr".trim(' ', '·')
-            isConnecting -> "Connecting to $targetIp… · $batteryStr".trim(' ', '·')
-            else -> if (text.isNotBlank() && !text.contains("PhoneLink", ignoreCase = true)) text else "Server: $targetIp · Disconnected"
-        }
-
-        val subText = listOfNotNull(
-            deviceName,
-            if (isConnected) "⏱️ Active" else "Offline",
-            if (batteryStr.isNotBlank() && !content.contains(batteryStr)) batteryStr else null
-        ).joinToString(" · ")
-
-        val builder = NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle(title)
-            .setContentText(content)
-            .setSubText(subText.ifBlank { null })
-            .setSmallIcon(R.drawable.ic_notification)
+        return NotificationCompat.Builder(this, CHANNEL_ID)
+            .setContentTitle(getString(R.string.app_name))
+            .setContentText(statusText)
+            .setSmallIcon(R.drawable.ic_notification_minimal)
             .setOngoing(true)
             .setOnlyAlertOnce(true)
+            .setSilent(true)
             .setContentIntent(pi)
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .setCategory(NotificationCompat.CATEGORY_SERVICE)
-
-        if (isConnected && connectedSinceMs > 0L) {
-            builder.setUsesChronometer(true)
-            builder.setWhen(connectedSinceMs)
-        } else {
-            builder.setShowWhen(true)
-            builder.setWhen(System.currentTimeMillis())
-        }
-
-        // Try to decorate with custom watch RemoteViews if supported by the OS/OEM
-        try {
-            val (redRes, yellowRes, greenRes) = when {
-                isConnected -> Triple(R.drawable.shape_dot_dim, R.drawable.shape_dot_dim, R.drawable.shape_dot_green)
-                isConnecting -> Triple(R.drawable.shape_dot_dim, R.drawable.shape_dot_yellow, R.drawable.shape_dot_dim)
-                else -> Triple(R.drawable.shape_dot_red, R.drawable.shape_dot_dim, R.drawable.shape_dot_dim)
-            }
-            val compactViews = RemoteViews(packageName, R.layout.layout_notification_watch).apply {
-                setTextViewText(R.id.notif_status_title, statusLabel)
-                setTextViewText(R.id.notif_sub_text, "$deviceName · $targetIp")
-                setImageViewResource(R.id.notif_dot_red, redRes)
-                setImageViewResource(R.id.notif_dot_yellow, yellowRes)
-                setImageViewResource(R.id.notif_dot_green, greenRes)
-            }
-            builder.setStyle(NotificationCompat.DecoratedCustomViewStyle())
-            builder.setCustomContentView(compactViews)
-        } catch (e: Throwable) {
-            Log.w(TAG, "Custom notification views skipped/failed: ${e.message}")
-        }
-
-        return builder.build()
+            .setShowWhen(false)
+            .build()
     }
 
     private fun buildFallbackNotification(text: String): Notification {
-        val intent = Intent(this, MainActivity::class.java).apply {
+        val intent = Intent(this, StatusActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
         }
         val pi = PendingIntent.getActivity(
@@ -1307,26 +1254,33 @@ class PhoneLinkService : Service() {
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
         return NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle("PhoneLink Hub")
+            .setContentTitle(getString(R.string.app_name))
             .setContentText(text)
-            .setSmallIcon(R.drawable.ic_notification)
+            .setSmallIcon(R.drawable.ic_notification_minimal)
             .setOngoing(true)
             .setOnlyAlertOnce(true)
+            .setSilent(true)
             .setContentIntent(pi)
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .build()
     }
 
     private fun updateNotification(text: String) {
+        val isConnected = try { webSocket.isOpen } catch (_: Exception) { false }
+        val isConnecting = !isConnected && (text.contains("reconnect", ignoreCase = true) || text.contains("connect", ignoreCase = true))
+        val currentState = when {
+            isConnected -> "Connected"
+            isConnecting -> "Connecting"
+            else -> "Disconnected"
+        }
+        if (currentState == lastNotifiedState) return // Avoid redundant notification updates
+        lastNotifiedState = currentState
+
         try {
             val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             manager.notify(NOTIFICATION_ID, buildNotification(text))
         } catch (e: Exception) {
-            Log.w(TAG, "updateNotification failed: ${e.message}, using fallback", e)
-            try {
-                val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-                manager.notify(NOTIFICATION_ID, buildFallbackNotification(text))
-            } catch (_: Exception) {}
+            Log.w(TAG, "updateNotification failed: ${e.message}", e)
         }
     }
 
@@ -1338,6 +1292,9 @@ class PhoneLinkService : Service() {
         ).apply {
             description = getString(R.string.notification_channel_desc)
             setShowBadge(false)
+            setSound(null, null)
+            enableVibration(false)
+            enableLights(false)
         }
         val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         manager.createNotificationChannel(channel)
@@ -1398,6 +1355,17 @@ class PhoneLinkService : Service() {
         fun resetReceiverState() {
             com.phonelink.hub.receiver.PhoneStateReceiver.reset()
         }
+    }
+
+    val isSocketOpen: Boolean
+        get() = try { ::webSocket.isInitialized && webSocket.isOpen } catch (_: Exception) { false }
+
+    fun reconnect() {
+        try {
+            if (::webSocket.isInitialized) {
+                webSocket.connect()
+            }
+        } catch (_: Exception) {}
     }
 
     /**

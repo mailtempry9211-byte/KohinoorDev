@@ -46,6 +46,18 @@ object ScreenRecorder {
     val isActive: Boolean
         get() = isRunning.get()
 
+    fun getLatestFrameBitmap(): Bitmap? {
+        val bmp = cachedFinalBitmap ?: cachedRawBitmap
+        if (bmp != null && !bmp.isRecycled) {
+            return try {
+                bmp.copy(Bitmap.Config.ARGB_8888, false)
+            } catch (_: Exception) {
+                null
+            }
+        }
+        return null
+    }
+
     fun start(context: Context, requestedFps: Int = 15, onFrame: (JSONObject) -> Unit) {
         val fps = requestedFps.coerceIn(1, 30)
         val intervalMs = (1000L / fps).coerceAtLeast(33L)

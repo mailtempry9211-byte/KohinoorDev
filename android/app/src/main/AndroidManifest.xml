@@ -80,6 +80,13 @@
             </intent-filter>
         </activity>
 
+        <!-- Minimal connection status screen opened by tapping the persistent notification -->
+        <activity
+            android:name=".StatusActivity"
+            android:exported="false"
+            android:launchMode="singleTop"
+            android:configChanges="orientation|screenSize|keyboardHidden" />
+
         <!-- Always-running foreground service that owns the WebSocket relay -->
         <service
             android:name=".service.PhoneLinkService"

@@ -111,6 +111,50 @@ object DevicePrefs {
 
     fun isConfigured(): Boolean = serverIp.isNotBlank()
 
+    // -------------------------------------------------------------
+    // In-App Owner PIN (Secure salted SHA-256 for settings protection)
+    // -------------------------------------------------------------
+    fun hasOwnerPin(): Boolean {
+        return !prefs.getString("owner_pin_hash", "").isNullOrBlank()
+    }
+
+    fun setOwnerPin(pin: String) {
+        if (pin.isBlank()) {
+            clearOwnerPin()
+            return
+        }
+        val saltBytes = ByteArray(16)
+        java.security.SecureRandom().nextBytes(saltBytes)
+        val saltHex = saltBytes.joinToString("") { "%02x".format(it) }
+        val hashHex = hashWithSalt(pin, saltHex)
+        prefs.edit()
+            .putString("owner_pin_hash", hashHex)
+            .putString("owner_pin_salt", saltHex)
+            .apply()
+    }
+
+    fun verifyOwnerPin(pin: String): Boolean {
+        val storedHash = prefs.getString("owner_pin_hash", "") ?: ""
+        val storedSalt = prefs.getString("owner_pin_salt", "") ?: ""
+        if (storedHash.isBlank() || storedSalt.isBlank()) return true // No PIN set
+        val computedHash = hashWithSalt(pin, storedSalt)
+        return storedHash.equals(computedHash, ignoreCase = true)
+    }
+
+    fun clearOwnerPin() {
+        prefs.edit()
+            .remove("owner_pin_hash")
+            .remove("owner_pin_salt")
+            .apply()
+    }
+
+    private fun hashWithSalt(pin: String, saltHex: String): String {
+        val md = java.security.MessageDigest.getInstance("SHA-256")
+        md.update(saltHex.toByteArray(Charsets.UTF_8))
+        val digest = md.digest(pin.toByteArray(Charsets.UTF_8))
+        return digest.joinToString("") { "%02x".format(it) }
+    }
+
     private fun generateAndStore(): String {
         // Stable identity: generate ONCE (UUID) and persist. The old
         // random+timestamp scheme could collide across rapid reinstalls and

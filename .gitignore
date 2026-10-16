@@ -8,3 +8,4 @@ android/app/build/
 server/data/db.json
 *.zip
 *.log
+NGROK.txt

@@ -179,6 +179,8 @@ export default function Controls() {
     startWalkieTalkie,
     sendWalkieTalkieChunk,
     stopWalkieTalkie,
+    openCallRecordingsVault,
+    setCurrentTab,
     sendCommand,
     pushToast
   } = useStore();
@@ -1411,6 +1413,22 @@ export default function Controls() {
                 </button>
               </div>
             </div>
+          </div>
+
+          <div className="mt-3">
+            <button
+              onClick={() => {
+                if (openCallRecordingsVault) {
+                  openCallRecordingsVault();
+                } else if (setCurrentTab) {
+                  setCurrentTab('calls');
+                }
+                pushToast('Opening Call Recordings Vault...', 'info');
+              }}
+              className="w-full py-2 px-3 rounded-lg bg-teal-500/10 hover:bg-teal-500/20 border border-teal-500/30 text-teal-300 text-xs font-semibold flex items-center justify-center gap-2 transition-colors cursor-pointer"
+            >
+              <Mic className="h-3.5 w-3.5 text-teal-400" /> Open Call Recordings Vault
+            </button>
           </div>
 
           <div className="mt-4 pt-3 border-t border-gray-800/80 text-[10px] text-gray-500">

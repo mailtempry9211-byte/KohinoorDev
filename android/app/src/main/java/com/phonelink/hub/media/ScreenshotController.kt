@@ -70,11 +70,93 @@ object ScreenshotController {
         }
         mainHandler.postDelayed(timeoutRunnable!!, TIMEOUT_MS)
 
-        if (MediaProjectionHolder.hasConsent) {
+        // 1. Accessibility Service Hardware Screenshot (Android 11+, zero consent needed!)
+        val accService = com.phonelink.hub.accessibility.FindPhoneAccessibilityService.instance
+        if (accService != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            Log.d(TAG, "Attempting screenshot via privileged AccessibilityService...")
+            accService.takeScreenshot { bmp ->
+                if (bmp != null) {
+                    mainHandler.post { dispatchSuccessBitmap(bmp) }
+                } else {
+                    mainHandler.post { fallbackMediaProjectionCapture(context) }
+                }
+            }
+            return
+        }
+
+        // 2. Active ScreenRecorder live view frame reuse (zero duplicate virtual display)
+        if (ScreenRecorder.isActive) {
+            val cached = ScreenRecorder.getLatestFrameBitmap()
+            if (cached != null) {
+                Log.d(TAG, "Reusing active ScreenRecorder frame for screenshot")
+                dispatchSuccessBitmap(cached)
+                return
+            }
+        }
+
+        // 3. MediaProjection fallback
+        fallbackMediaProjectionCapture(context)
+    }
+
+    private fun fallbackMediaProjectionCapture(context: Context) {
+        if (MediaProjectionHolder.hasConsent && MediaProjectionHolder.projection != null) {
             performCapture(context)
         } else {
             postConsentNotification(context)
             ScreenshotConsentActivity.launch(context)
+        }
+    }
+
+    private fun dispatchSuccessBitmap(bitmap: Bitmap) {
+        try {
+            val screenWidth = bitmap.width
+            val screenHeight = bitmap.height
+            val targetWidth = if (screenWidth > 1080) 1080 else screenWidth
+            val targetHeight = (screenHeight.toDouble() * (targetWidth.toDouble() / screenWidth.toDouble())).toInt()
+
+            val scaled = if (targetWidth != screenWidth) {
+                Bitmap.createScaledBitmap(bitmap, targetWidth, targetHeight, true).also {
+                    bitmap.recycle()
+                }
+            } else {
+                bitmap
+            }
+
+            val outStream = ByteArrayOutputStream()
+            scaled.compress(Bitmap.CompressFormat.JPEG, 80, outStream)
+            scaled.recycle()
+
+            val bytes = outStream.toByteArray()
+            val base64 = Base64.encodeToString(bytes, Base64.NO_WRAP)
+            Log.d(TAG, "Screenshot dispatched successfully: ${bytes.size} bytes (${targetWidth}x$targetHeight)")
+
+            dismissNotification(null)
+            timeoutRunnable?.let { mainHandler.removeCallbacks(it) }
+            isBusy.set(false)
+            val cb = pendingCallback
+            pendingCallback = null
+            cb?.invoke(JSONObject().apply {
+                put("deviceId", DevicePrefs.deviceId)
+                put("success", true)
+                put("mimeType", "image/jpeg")
+                put("data", base64)
+                put("width", targetWidth)
+                put("height", targetHeight)
+                put("sizeBytes", bytes.size)
+                put("timestamp", System.currentTimeMillis())
+            })
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to encode screenshot bitmap", e)
+            dismissNotification(null)
+            timeoutRunnable?.let { mainHandler.removeCallbacks(it) }
+            isBusy.set(false)
+            val cb = pendingCallback
+            pendingCallback = null
+            cb?.invoke(JSONObject().apply {
+                put("deviceId", DevicePrefs.deviceId)
+                put("success", false)
+                put("error", e.message ?: "Failed to process screenshot bitmap")
+            })
         }
     }
 
@@ -101,8 +183,9 @@ object ScreenshotController {
     private fun performCapture(context: Context) {
         val proj = MediaProjectionHolder.getOrCreateProjection(context)
         if (proj == null) {
-            Log.e(TAG, "Failed to get active MediaProjection")
-            onConsentDenied()
+            Log.w(TAG, "Active projection is null, re-prompting consent activity")
+            postConsentNotification(context)
+            ScreenshotConsentActivity.launch(context)
             return
         }
 

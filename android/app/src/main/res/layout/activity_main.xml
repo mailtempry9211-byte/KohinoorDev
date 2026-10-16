@@ -414,6 +414,15 @@
             android:backgroundTint="@color/surface_variant"
             android:textColor="@color/text_primary" />
 
+        <Button
+            android:id="@+id/pinSettingsBtn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Owner PIN Protection Settings"
+            android:layout_marginTop="8dp"
+            android:backgroundTint="@color/surface_variant"
+            android:textColor="@color/text_primary" />
+
         <!-- Privacy & Local LAN Disclosure Footer -->
         <TextView
             android:layout_width="match_parent"

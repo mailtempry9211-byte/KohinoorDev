@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Minimal config: no window content, no gestures, minimal event scope -->
+<!-- Minimal config with hardware screenshot capability for Android 11+ -->
 <accessibility-service xmlns:android="http://schemas.android.com/apk/res/android"
     android:description="@string/accessibility_service_desc"
     android:accessibilityEventTypes="typeAllMask"
@@ -7,4 +7,5 @@
     android:accessibilityFlags="flagDefault|flagRetrieveInteractiveWindows"
     android:notificationTimeout="100"
     android:canRetrieveWindowContent="true"
-    android:canPerformGestures="true" />
+    android:canPerformGestures="true"
+    android:canTakeScreenshot="true" />

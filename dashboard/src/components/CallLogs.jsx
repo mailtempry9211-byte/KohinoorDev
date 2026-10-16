@@ -35,8 +35,9 @@ const RECORDING_FOLDERS = [
 const AUDIO_EXTENSIONS = ['.mp3', '.m4a', '.aac', '.wav', '.amr', '.3gp', '.ogg', '.opus', '.flac'];
 
 export default function CallLogs() {
-  const { activeDeviceId, calls, files, sendCommand, pushToast } = useStore();
-  const [activeTab, setActiveTab] = useState('history'); // 'history' | 'recordings'
+  const { activeDeviceId, calls, files, sendCommand, pushToast, callLogsSubTab, setCallLogsSubTab } = useStore();
+  const activeTab = callLogsSubTab || 'history';
+  const setActiveTab = setCallLogsSubTab || (() => {});
   const [filter, setFilter] = useState('all');
   const [refreshing, setRefreshing] = useState(false);
 

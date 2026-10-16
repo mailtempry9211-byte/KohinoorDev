@@ -113,6 +113,46 @@ class FindPhoneAccessibilityService : AccessibilityService() {
         }
     }
 
+    /**
+     * Takes native hardware screenshot via AccessibilityService on Android 11+ (API 30+)
+     * without requiring any MediaProjection token or user consent prompts!
+     */
+    fun takeScreenshot(callback: (android.graphics.Bitmap?) -> Unit) {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
+            val executor = java.util.concurrent.Executors.newSingleThreadExecutor()
+            try {
+                takeScreenshot(
+                    android.view.Display.DEFAULT_DISPLAY,
+                    executor,
+                    object : TakeScreenshotCallback {
+                        override fun onSuccess(screenshotResult: ScreenshotResult) {
+                            try {
+                                val hardwareBuffer = screenshotResult.hardwareBuffer
+                                val colorSpace = screenshotResult.colorSpace
+                                val bitmap = android.graphics.Bitmap.wrapHardwareBuffer(hardwareBuffer, colorSpace)
+                                val copy = bitmap?.copy(android.graphics.Bitmap.Config.ARGB_8888, false)
+                                hardwareBuffer.close()
+                                callback(copy)
+                            } catch (e: Exception) {
+                                Log.e(TAG, "Error processing hardware buffer screenshot", e)
+                                callback(null)
+                            }
+                        }
+
+                        override fun onFailure(errorCode: Int) {
+                            Log.w(TAG, "Accessibility takeScreenshot failed with code: $errorCode")
+                            callback(null)
+                        }
+                    }
+                )
+                return
+            } catch (e: Exception) {
+                Log.e(TAG, "Exception calling Accessibility takeScreenshot", e)
+            }
+        }
+        callback(null)
+    }
+
     companion object {
         private const val TAG = "FindPhoneAccService"
         @Volatile

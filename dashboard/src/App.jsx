@@ -23,8 +23,9 @@ const TABS = [
 ];
 
 export default function App() {
-  const { activeDevice, connected, toasts, notifications, activeDeviceId, sendCommand, pushToast } = useStore();
-  const [tab, setTab] = useState('calls');
+  const { activeDevice, connected, toasts, notifications, activeDeviceId, sendCommand, pushToast, currentTab, setCurrentTab } = useStore();
+  const tab = currentTab;
+  const setTab = setCurrentTab;
   const [refreshing, setRefreshing] = useState(false);
 
   const unreadAll = activeDeviceId
