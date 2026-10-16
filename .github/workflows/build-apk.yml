@@ -63,7 +63,10 @@ jobs:
 
       - name: Generate SHA-256 Checksum
         run: |
-          cd android/app/build/outputs/apk/release
+          APK_FILE=$(find android -type f -name "*.apk" | head -n 1)
+          echo "Found APK: $APK_FILE"
+          APK_DIR=$(dirname "$APK_FILE")
+          cd "$APK_DIR"
           sha256sum *.apk > SHA256SUMS.txt
           cat SHA256SUMS.txt
 
@@ -72,8 +75,8 @@ jobs:
         with:
           name: phonelink-hub-release
           path: |
-            android/app/build/outputs/apk/release/*.apk
-            android/app/build/outputs/apk/release/SHA256SUMS.txt
+            android/**/*.apk
+            android/**/SHA256SUMS.txt
 
       - name: Upload Build Reports on Failure
         if: failure()
