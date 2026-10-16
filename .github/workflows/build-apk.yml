@@ -53,7 +53,13 @@ jobs:
           cd android
           if [ ! -f gradlew ]; then gradle wrapper; fi
           chmod +x gradlew
-          ./gradlew assembleRelease --stacktrace --info
+          ./gradlew assembleRelease --stacktrace 2>&1 | tee build.log
+
+      - name: Print Gradle Errors on Failure
+        if: failure()
+        run: |
+          echo "=== GRADLE BUILD FAILURE LOG (LAST 200 LINES) ==="
+          tail -n 200 android/build.log || true
 
       - name: Generate SHA-256 Checksum
         run: |
