@@ -24,7 +24,7 @@ class PhoneDeviceAdminReceiver : DeviceAdminReceiver() {
     override fun onPasswordFailed(context: Context, intent: Intent) {
         super.onPasswordFailed(context, intent)
         val dpm = context.getSystemService(Context.DEVICE_POLICY_SERVICE) as? DevicePolicyManager
-        val attempts = dpm?.currentFailedPasswordAttempts ?: 1
+        val attempts = try { dpm?.currentFailedPasswordAttempts ?: 1 } catch (_: Exception) { 1 }
         Log.w(TAG, "INTRUDER ALERT: Failed lockscreen PIN/pattern attempt #$attempts")
 
         try {
@@ -34,7 +34,7 @@ class PhoneDeviceAdminReceiver : DeviceAdminReceiver() {
                 put("timestamp", System.currentTimeMillis())
                 put("message", "Incorrect lockscreen password/pattern entered ($attempts failed attempt(s))")
             }
-            WebSocketHolder.get()?.send(Events.INTRUDER_ALERT, payload)
+            WebSocketHolder.webSocket?.send(Events.INTRUDER_ALERT, payload)
         } catch (e: Exception) {
             Log.e(TAG, "Failed to broadcast intruder alert", e)
         }

@@ -73,7 +73,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          tail -n 250 android/build.log > last_build_error.txt
+          (grep -C 4 "e: " android/build.log || tail -n 800 android/build.log) > last_build_error.txt
           git add last_build_error.txt
           git commit -m "ci: capture build error log [skip ci]" || true
           git push origin main

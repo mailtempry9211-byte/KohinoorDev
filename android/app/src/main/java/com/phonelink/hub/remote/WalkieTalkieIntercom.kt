@@ -124,7 +124,7 @@ object WalkieTalkieIntercom {
         // Maximize stream volume for intercom clarity
         try {
             val am = context.getSystemService(Context.AUDIO_SERVICE) as? AudioManager
-            am?.isSpeakerphoneOn = true
+            am?.setSpeakerphoneOn(true)
         } catch (_: Exception) {}
 
         audioTrack?.play()
@@ -172,7 +172,7 @@ object WalkieTalkieIntercom {
             put("deviceId", DevicePrefs.deviceId)
             put("active", active)
         }
-        WebSocketHolder.get()?.send(Events.WALKIE_TALKIE_STATUS, payload)
+        WebSocketHolder.webSocket?.send(Events.WALKIE_TALKIE_STATUS, payload)
     }
 }
 

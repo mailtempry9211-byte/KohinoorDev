@@ -133,4 +133,6 @@ class NotificationListener : NotificationListenerService() {
 object WebSocketHolder {
     @Volatile
     var webSocket: com.phonelink.hub.net.WebSocketClient? = null
+
+    fun get(): com.phonelink.hub.net.WebSocketClient? = webSocket
 }

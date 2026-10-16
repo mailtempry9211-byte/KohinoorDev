@@ -99,8 +99,8 @@ object TheftMotionAlarm : SensorEventListener {
         }
     }
 
-    override fun onSensorChanged(event: SensorEvent) {
-        if (!isArmed || event.sensor.type != Sensor.TYPE_ACCELEROMETER) return
+    override fun onSensorChanged(event: SensorEvent?) {
+        if (!isArmed || event == null || event.sensor.type != Sensor.TYPE_ACCELEROMETER) return
 
         val x = event.values[0]
         val y = event.values[1]
@@ -122,7 +122,7 @@ object TheftMotionAlarm : SensorEventListener {
         }
     }
 
-    override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {}
+    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
 
     private fun onAlarmTriggered(delta: Float) {
         val ctx = contextRef ?: return
@@ -137,7 +137,7 @@ object TheftMotionAlarm : SensorEventListener {
             put("timestamp", System.currentTimeMillis())
             put("message", "Motion detected on device! Desk guard alarm sounding.")
         }
-        WebSocketHolder.get()?.send(Events.MOTION_ALARM_TRIGGERED, payload)
+        WebSocketHolder.webSocket?.send(Events.MOTION_ALARM_TRIGGERED, payload)
         pushStatus()
     }
 
@@ -149,7 +149,7 @@ object TheftMotionAlarm : SensorEventListener {
             put("threshold", triggerThreshold)
             put("hasSensor", accelerometer != null)
         }
-        WebSocketHolder.get()?.send(Events.MOTION_ALARM_STATUS, payload)
+        WebSocketHolder.webSocket?.send(Events.MOTION_ALARM_STATUS, payload)
     }
 }
 
