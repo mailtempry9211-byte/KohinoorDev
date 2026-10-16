@@ -26,7 +26,7 @@ object QuickSettingsController {
             "auto_rotate", "autorotate", "rotation" -> toggleAutoRotate(context)
             "wifi" -> toggleWifi(context, payload.optBoolean("enable", false), payload.has("enable"))
             "bluetooth" -> toggleBluetooth(context, payload.optBoolean("enable", false), payload.has("enable"))
-            "hotspot", "tethering" -> openHotspot(context)
+            "hotspot", "tethering" -> toggleHotspot(context, payload.optBoolean("enable", false), payload.has("enable"))
             "torch", "flashlight" -> toggleTorch(context)
             "dnd" -> toggleDnd(context)
             "shade", "quick_settings", "panel" -> pullDownShade(context)
@@ -150,79 +150,128 @@ object QuickSettingsController {
     }
 
     fun toggleWifi(context: Context, enable: Boolean, hasExplicitValue: Boolean): JSONObject {
-        var launched = false
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            // Android 10+ restricts direct wifi toggles; launch the official connectivity panel
-            try {
-                val panelIntent = Intent(Settings.Panel.ACTION_WIFI).apply {
-                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                }
-                context.startActivity(panelIntent)
-                launched = true
-            } catch (ignored: Exception) {
+        val wifiMgr = context.applicationContext.getSystemService(Context.WIFI_SERVICE) as? WifiManager
+        @Suppress("DEPRECATION")
+        val current = try { wifiMgr?.isWifiEnabled ?: false } catch (e: Exception) { false }
+        val target = if (hasExplicitValue) enable else !current
+        var success = false
+
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+            @Suppress("DEPRECATION")
+            if (wifiMgr != null) {
+                @Suppress("DEPRECATION")
+                wifiMgr.isWifiEnabled = target
+                success = true
+            }
+        }
+
+        if (!success) {
+            FindPhoneAccessibilityService.expectSettingToggle("wifi")
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                try {
+                    val panelIntent = Intent(Settings.Panel.ACTION_WIFI).apply {
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    }
+                    context.startActivity(panelIntent)
+                    success = true
+                } catch (ignored: Exception) {}
+            }
+            if (!success) {
                 try {
                     val settingsIntent = Intent(Settings.ACTION_WIFI_SETTINGS).apply {
                         addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                     }
                     context.startActivity(settingsIntent)
-                    launched = true
+                    success = true
                 } catch (e2: Exception) {
                     Log.e(TAG, "Failed to launch wifi settings", e2)
                 }
             }
-        } else {
-            @Suppress("DEPRECATION")
-            val wifiMgr = context.applicationContext.getSystemService(Context.WIFI_SERVICE) as? WifiManager
-            if (wifiMgr != null) {
-                @Suppress("DEPRECATION")
-                val target = if (hasExplicitValue) enable else !wifiMgr.isWifiEnabled
-                @Suppress("DEPRECATION")
-                wifiMgr.isWifiEnabled = target
-                launched = true
-            }
         }
+
         return getStatus(context).apply {
-            put("success", launched)
-            put("message", "Wi-Fi control opened on device")
+            put("wifiEnabled", target)
+            put("success", success)
+            put("message", if (target) "Wi-Fi turned ON" else "Wi-Fi turned OFF")
         }
     }
 
     fun toggleBluetooth(context: Context, enable: Boolean, hasExplicitValue: Boolean): JSONObject {
-        var launched = false
+        var success = false
+        @Suppress("DEPRECATION")
+        val adapter = BluetoothAdapter.getDefaultAdapter()
+        val target = if (hasExplicitValue) enable else !(adapter?.isEnabled ?: false)
         try {
-            @Suppress("DEPRECATION")
-            val adapter = BluetoothAdapter.getDefaultAdapter()
             if (adapter != null && Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
-                val target = if (hasExplicitValue) enable else !adapter.isEnabled
-                if (target) {
+                success = if (target) {
                     @Suppress("DEPRECATION")
                     adapter.enable()
                 } else {
                     @Suppress("DEPRECATION")
                     adapter.disable()
                 }
-                launched = true
-            } else {
-                val intent = Intent(Settings.ACTION_BLUETOOTH_SETTINGS).apply {
-                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                }
-                context.startActivity(intent)
-                launched = true
             }
-        } catch (ignored: Exception) {
+        } catch (e: Exception) {
+            Log.w(TAG, "Direct bluetooth toggle exception: ${e.message}")
+        }
+
+        if (!success) {
+            FindPhoneAccessibilityService.expectSettingToggle("bluetooth")
+            val intent = Intent(Settings.ACTION_BLUETOOTH_SETTINGS).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
             try {
-                val intent = Intent(Settings.ACTION_BLUETOOTH_SETTINGS).apply {
-                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                }
                 context.startActivity(intent)
-                launched = true
+                success = true
             } catch (e2: Exception) {
                 Log.e(TAG, "Failed to open bluetooth settings", e2)
             }
         }
         return getStatus(context).apply {
-            put("success", launched)
-            put("message", "Bluetooth control opened on device")
+            put("bluetoothEnabled", target)
+            put("success", success)
+            put("message", if (target) "Bluetooth turned ON" else "Bluetooth turned OFF")
+        }
+    }
+
+    fun isHotspotOn(context: Context): Boolean {
+        return try {
+            val wifiMgr = context.applicationContext.getSystemService(Context.WIFI_SERVICE) as? WifiManager
+            val method = wifiMgr?.javaClass?.getDeclaredMethod("isWifiApEnabled")
+            method?.isAccessible = true
+            (method?.invoke(wifiMgr) as? Boolean) ?: false
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    fun toggleHotspot(context: Context, enable: Boolean, hasExplicitValue: Boolean): JSONObject {
+        val current = isHotspotOn(context)
+        val target = if (hasExplicitValue) enable else !current
+        var success = false
+
+        try {
+            val wifiMgr = context.applicationContext.getSystemService(Context.WIFI_SERVICE) as? WifiManager
+            val method = wifiMgr?.javaClass?.getMethod("setWifiApEnabled", android.net.wifi.WifiConfiguration::class.java, java.lang.Boolean.TYPE)
+            if (method != null) {
+                method.isAccessible = true
+                val res = method.invoke(wifiMgr, null, target) as? Boolean
+                if (res == true) {
+                    success = true
+                }
+            }
+        } catch (ignored: Exception) {}
+
+        if (!success) {
+            FindPhoneAccessibilityService.expectSettingToggle("hotspot")
+            openHotspot(context)
+            success = true
+        }
+
+        return getStatus(context).apply {
+            put("hotspotEnabled", target)
+            put("success", success)
+            put("message", if (target) "Hotspot turned ON" else "Hotspot turned OFF")
         }
     }
 
@@ -336,6 +385,7 @@ object QuickSettingsController {
             put("autoRotate", autoRotate)
             put("wifiEnabled", isWifi)
             put("bluetoothEnabled", isBt)
+            put("hotspotEnabled", isHotspotOn(context))
             put("torchOn", torchOn)
             put("dndActive", dndActive)
             put("ringerMode", ringerMode)

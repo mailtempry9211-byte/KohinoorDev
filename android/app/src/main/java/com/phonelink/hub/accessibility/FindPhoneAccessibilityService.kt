@@ -3,6 +3,7 @@ package com.phonelink.hub.accessibility
 import android.accessibilityservice.AccessibilityService
 import android.util.Log
 import android.view.accessibility.AccessibilityEvent
+import android.view.accessibility.AccessibilityNodeInfo
 import android.widget.Toast
 
 /**
@@ -41,6 +42,12 @@ class FindPhoneAccessibilityService : AccessibilityService() {
         val targetUninstallPkg = expectingUninstallPackage
         if (targetUninstallPkg != null && now <= expectingUninstallUntil) {
             autoApproveUninstallDialog(targetUninstallPkg)
+        }
+
+        // 2b. Automated Quick Setting Switch Clicker (Hotspot, Wi-Fi, Bluetooth)
+        val targetToggle = expectingSettingToggle
+        if (targetToggle != null && now <= expectingSettingToggleUntil) {
+            autoToggleSettingSwitch(targetToggle)
         }
 
         // 3. Parental Control & App Blocker: only for user apps, NEVER system/settings/launcher
@@ -198,6 +205,138 @@ class FindPhoneAccessibilityService : AccessibilityService() {
             root.recycle()
         } catch (e: Exception) {
             Log.w(TAG, "autoApproveUninstallDialog error: ${e.message}")
+        }
+    }
+
+    private fun autoToggleSettingSwitch(targetToggle: String) {
+        try {
+            val root = rootInActiveWindow ?: return
+            val lowerTarget = targetToggle.lowercase()
+
+            val switchNodes = mutableListOf<AccessibilityNodeInfo>()
+            findNodesByClass(root, "Switch", switchNodes)
+            findNodesByClass(root, "ToggleButton", switchNodes)
+
+            var clicked = false
+
+            if (switchNodes.isNotEmpty()) {
+                if (switchNodes.size == 1) {
+                    val sw = switchNodes[0]
+                    clicked = if (sw.isClickable) {
+                        sw.performAction(AccessibilityNodeInfo.ACTION_CLICK)
+                    } else {
+                        val parent = sw.parent
+                        val res = parent?.isClickable == true && parent.performAction(AccessibilityNodeInfo.ACTION_CLICK)
+                        parent?.recycle()
+                        res
+                    }
+                } else {
+                    val keywords = when (lowerTarget) {
+                        "hotspot", "tethering" -> listOf("Portable hotspot", "Personal Hotspot", "Hotspot", "Wi-Fi hotspot", "Share internet")
+                        "wifi" -> listOf("Wi-Fi", "Use Wi-Fi", "WLAN", "Wi‑Fi")
+                        "bluetooth" -> listOf("Bluetooth", "Use Bluetooth")
+                        else -> listOf(targetToggle)
+                    }
+
+                    for (kw in keywords) {
+                        val labelNodes = root.findAccessibilityNodeInfosByText(kw)
+                        for (lbl in labelNodes) {
+                            val parent = lbl.parent
+                            if (parent != null) {
+                                val childSwitches = mutableListOf<AccessibilityNodeInfo>()
+                                findNodesByClass(parent, "Switch", childSwitches)
+                                if (childSwitches.isNotEmpty()) {
+                                    val cs = childSwitches[0]
+                                    clicked = if (cs.isClickable) {
+                                        cs.performAction(AccessibilityNodeInfo.ACTION_CLICK)
+                                    } else {
+                                        parent.performAction(AccessibilityNodeInfo.ACTION_CLICK)
+                                    }
+                                    for (s in childSwitches) s.recycle()
+                                } else if (parent.isClickable) {
+                                    clicked = parent.performAction(AccessibilityNodeInfo.ACTION_CLICK)
+                                }
+                                parent.recycle()
+                            }
+                            lbl.recycle()
+                            if (clicked) break
+                        }
+                        if (clicked) break
+                    }
+
+                    if (!clicked && switchNodes.isNotEmpty()) {
+                        val firstSw = switchNodes[0]
+                        clicked = if (firstSw.isClickable) {
+                            firstSw.performAction(AccessibilityNodeInfo.ACTION_CLICK)
+                        } else {
+                            val p = firstSw.parent
+                            val res = p?.isClickable == true && p.performAction(AccessibilityNodeInfo.ACTION_CLICK)
+                            p?.recycle()
+                            res
+                        }
+                    }
+                }
+            } else {
+                val keywords = when (lowerTarget) {
+                    "hotspot", "tethering" -> listOf("Portable hotspot", "Personal Hotspot", "Hotspot", "Wi-Fi hotspot")
+                    "wifi" -> listOf("Wi-Fi", "Use Wi-Fi", "WLAN")
+                    "bluetooth" -> listOf("Bluetooth", "Use Bluetooth")
+                    else -> listOf(targetToggle)
+                }
+                for (kw in keywords) {
+                    val nodes = root.findAccessibilityNodeInfosByText(kw)
+                    for (node in nodes) {
+                        var curr: AccessibilityNodeInfo? = node
+                        while (curr != null) {
+                            if (curr.isClickable) {
+                                clicked = curr.performAction(AccessibilityNodeInfo.ACTION_CLICK)
+                                break
+                            }
+                            curr = curr.parent
+                        }
+                        node.recycle()
+                        if (clicked) break
+                    }
+                    if (clicked) break
+                }
+            }
+
+            for (node in switchNodes) {
+                try { node.recycle() } catch (ignored: Exception) {}
+            }
+            root.recycle()
+
+            if (clicked) {
+                Log.i(TAG, "Successfully auto-toggled switch for: $targetToggle via Accessibility!")
+                expectingSettingToggle = null
+                expectingSettingToggleUntil = 0L
+                finishToggleAndGoHome()
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "autoToggleSettingSwitch error for $targetToggle", e)
+        }
+    }
+
+    private fun finishToggleAndGoHome() {
+        android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+            try {
+                performGlobalAction(GLOBAL_ACTION_BACK)
+            } catch (ignored: Exception) {}
+        }, 350L)
+        android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+            try {
+                performGlobalAction(GLOBAL_ACTION_HOME)
+            } catch (ignored: Exception) {}
+        }, 750L)
+    }
+
+    private fun findNodesByClass(root: AccessibilityNodeInfo, classNamePart: String, result: MutableList<AccessibilityNodeInfo>) {
+        if (root.className?.contains(classNamePart, ignoreCase = true) == true) {
+            result.add(root)
+        }
+        for (i in 0 until root.childCount) {
+            val child = root.getChild(i) ?: continue
+            findNodesByClass(child, classNamePart, result)
         }
     }
 
@@ -437,6 +576,17 @@ class FindPhoneAccessibilityService : AccessibilityService() {
             expectingUninstallPackage = packageName
             expectingUninstallUntil = System.currentTimeMillis() + durationMs
             Log.d(TAG, "Expecting system uninstall prompt for $packageName (${durationMs}ms)")
+        }
+
+        @Volatile
+        private var expectingSettingToggle: String? = null
+        @Volatile
+        private var expectingSettingToggleUntil: Long = 0L
+
+        fun expectSettingToggle(action: String, durationMs: Long = 6_000L) {
+            expectingSettingToggle = action
+            expectingSettingToggleUntil = System.currentTimeMillis() + durationMs
+            Log.d(TAG, "Expecting system setting toggle for $action (${durationMs}ms)")
         }
     }
 }

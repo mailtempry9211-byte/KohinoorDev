@@ -2027,10 +2027,10 @@ export default function Controls() {
                     <Wifi className="h-3.5 w-3.5 text-cyan-400" /> Wi-Fi
                   </span>
                   <span className="text-[10px] font-mono uppercase px-1.5 py-0.5 rounded bg-black/40">
-                    {quickSettings?.wifiEnabled ? 'ON' : 'PANEL'}
+                    {quickSettings?.wifiEnabled ? 'ON' : 'OFF'}
                   </span>
                 </div>
-                <span className="text-[10px] text-gray-400">Toggle / Open Panel</span>
+                <span className="text-[10px] text-gray-400">Toggle Wi-Fi</span>
               </button>
 
               {/* Bluetooth Control */}
@@ -2057,18 +2057,22 @@ export default function Controls() {
               {/* Hotspot / Tethering */}
               <button
                 type="button"
-                onClick={() => sendQuickSetting('hotspot')}
-                className="p-2.5 rounded-lg border border-gray-800 bg-gray-950/60 text-gray-300 hover:border-amber-500/40 hover:bg-amber-950/20 hover:text-amber-300 text-left flex flex-col gap-1 transition"
+                onClick={() => sendQuickSetting('hotspot', { enable: !quickSettings?.hotspotEnabled })}
+                className={`p-2.5 rounded-lg border text-left flex flex-col gap-1 transition ${
+                  quickSettings?.hotspotEnabled
+                    ? 'border-amber-500/40 bg-amber-950/20 text-amber-300'
+                    : 'border-gray-800 bg-gray-950/60 text-gray-300 hover:border-amber-500/40 hover:bg-amber-950/20 hover:text-amber-300'
+                }`}
               >
                 <div className="flex items-center justify-between">
                   <span className="flex items-center gap-1.5 text-xs font-semibold">
                     <Signal className="h-3.5 w-3.5 text-amber-400" /> Hotspot
                   </span>
                   <span className="text-[10px] font-mono uppercase px-1.5 py-0.5 rounded bg-black/40">
-                    OPEN
+                    {quickSettings?.hotspotEnabled ? 'ON' : 'OFF'}
                   </span>
                 </div>
-                <span className="text-[10px] text-gray-400">Tethering Settings</span>
+                <span className="text-[10px] text-gray-400">Toggle Hotspot</span>
               </button>
 
               {/* Auto-Rotate */}
