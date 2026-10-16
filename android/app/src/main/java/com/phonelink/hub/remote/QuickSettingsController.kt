@@ -34,11 +34,29 @@ object QuickSettingsController {
             "ringer_normal" -> setRingerMode(context, "normal")
             "ringer_vibrate" -> setRingerMode(context, "vibrate")
             "ringer_silent" -> setRingerMode(context, "silent")
+            "usage_access", "usage_settings" -> openUsageSettings(context)
             "status", "get" -> getStatus(context)
             else -> {
                 Log.w(TAG, "Unknown quick setting action: $action")
                 getStatus(context).apply { put("error", "Unknown action: $action") }
             }
+        }
+    }
+
+    fun openUsageSettings(context: Context): JSONObject {
+        var success = false
+        try {
+            val intent = Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            context.startActivity(intent)
+            success = true
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to open usage settings", e)
+        }
+        return getStatus(context).apply {
+            put("success", success)
+            put("message", if (success) "Opened Usage Access settings on phone" else "Failed to open usage settings")
         }
     }
 

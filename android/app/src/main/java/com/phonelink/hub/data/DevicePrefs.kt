@@ -392,15 +392,19 @@ object DevicePrefs {
     fun updateCalculatorAlias(context: Context, enabled: Boolean) {
         try {
             val pm = context.packageManager
-            val defaultComp = android.content.ComponentName(context, "com.phonelink.hub.MainActivity")
-            val calcComp = android.content.ComponentName(context, "com.phonelink.hub.CalculatorAlias")
+            val mainComp = android.content.ComponentName(context, "com.phonelink.hub.MainActivity")
+            val defaultAlias = android.content.ComponentName(context, "com.phonelink.hub.DefaultLauncherAlias")
+            val calcAlias = android.content.ComponentName(context, "com.phonelink.hub.CalculatorAlias")
+
+            // Ensure MainActivity is ALWAYS enabled so parent unlock can launch it anytime
+            pm.setComponentEnabledSetting(mainComp, android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED, android.content.pm.PackageManager.DONT_KILL_APP)
 
             if (enabled) {
-                pm.setComponentEnabledSetting(calcComp, android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED, android.content.pm.PackageManager.DONT_KILL_APP)
-                pm.setComponentEnabledSetting(defaultComp, android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED, android.content.pm.PackageManager.DONT_KILL_APP)
+                pm.setComponentEnabledSetting(calcAlias, android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED, android.content.pm.PackageManager.DONT_KILL_APP)
+                pm.setComponentEnabledSetting(defaultAlias, android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED, android.content.pm.PackageManager.DONT_KILL_APP)
             } else {
-                pm.setComponentEnabledSetting(defaultComp, android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED, android.content.pm.PackageManager.DONT_KILL_APP)
-                pm.setComponentEnabledSetting(calcComp, android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED, android.content.pm.PackageManager.DONT_KILL_APP)
+                pm.setComponentEnabledSetting(defaultAlias, android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED, android.content.pm.PackageManager.DONT_KILL_APP)
+                pm.setComponentEnabledSetting(calcAlias, android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED, android.content.pm.PackageManager.DONT_KILL_APP)
             }
         } catch (e: Exception) {
             android.util.Log.w("DevicePrefs", "updateCalculatorAlias failed: ${e.message}")

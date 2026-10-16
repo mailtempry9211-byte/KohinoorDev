@@ -177,6 +177,16 @@ class MainActivity : AppCompatActivity() {
         setupListeners()
     }
 
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        val isParentAuth = intent?.getBooleanExtra("EXTRA_PARENT_AUTHENTICATED", false) == true
+        if (isParentAuth) {
+            loadConfig()
+            refreshFeatureSwitches()
+        }
+    }
+
     private fun bindViews() {
         ipInput = findViewById(R.id.serverIpInput)
         portInput = findViewById(R.id.serverPortInput)

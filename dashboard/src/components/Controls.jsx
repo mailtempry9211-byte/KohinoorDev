@@ -961,6 +961,25 @@ export default function Controls() {
               </div>
             </div>
 
+            {/* Usage Access Permission Alert */}
+            {appUsage && appUsage.hasPermission === false && (
+              <div className="mb-4 p-3 rounded-lg bg-amber-950/40 border border-amber-600/40 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <AlertTriangle className="h-4 w-4 text-amber-400 shrink-0" />
+                  <span className="text-xs text-amber-200">
+                    <strong>Usage Access required on phone:</strong> Android requires special "Usage Access" permission to track Digital Wellbeing &amp; screen time per app.
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => sendQuickSetting('usage_access')}
+                  className="px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-black text-xs font-bold shrink-0 self-start sm:self-auto shadow transition"
+                >
+                  ⚙️ Open Usage Settings on Phone
+                </button>
+              </div>
+            )}
+
             {/* Screen Time & Doomscrolling Guard */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
               <div className="p-3.5 rounded-lg bg-gray-950/70 border border-gray-800">
@@ -1018,6 +1037,44 @@ export default function Controls() {
                 </p>
               </div>
             </div>
+
+            {/* Top Used Apps Today Breakdown */}
+            {Array.isArray(appUsage?.apps) && appUsage.apps.length > 0 && (
+              <div className="p-3.5 rounded-lg bg-gray-950/70 border border-gray-800 mb-4">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-semibold text-gray-300">📊 Today's App Usage Breakdown</span>
+                  <span className="text-[10px] text-gray-400">{appUsage.apps.length} apps active</span>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-48 overflow-y-auto pr-1">
+                  {appUsage.apps.slice(0, 8).map((app, idx) => (
+                    <div key={idx} className="p-2 rounded bg-gray-900 border border-gray-800 flex items-center justify-between text-xs">
+                      <div className="truncate mr-2">
+                        <span className="font-semibold text-gray-200 block truncate">{app.name}</span>
+                        <span className="text-[10px] text-gray-500 font-mono block truncate">{app.packageName}</span>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <span className="font-mono text-purple-300 font-bold bg-purple-950/50 px-1.5 py-0.5 rounded border border-purple-800/40">
+                          {app.foregroundMinutes}m
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const existing = Array.isArray(parentalControl?.blockedPackages) ? parentalControl.blockedPackages : [];
+                            if (!existing.includes(app.packageName)) {
+                              updateParentalControl({ blockedPackages: [...existing, app.packageName] });
+                            }
+                          }}
+                          className="px-1.5 py-0.5 rounded text-[10px] bg-rose-950 hover:bg-rose-900 text-rose-300 border border-rose-800 transition"
+                          title="Block this app"
+                        >
+                          + Block
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Blocked Apps Manager */}
             <div className="p-3.5 rounded-lg bg-gray-950/70 border border-gray-800">

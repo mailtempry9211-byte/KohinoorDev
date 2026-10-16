@@ -88,6 +88,24 @@ object AppsRepository {
             context.getSystemService(Context.USAGE_STATS_SERVICE) as? android.app.usage.UsageStatsManager
         } else null
 
+        val appOps = context.getSystemService(Context.APP_OPS_SERVICE) as? android.app.AppOpsManager
+        val mode = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            appOps?.unsafeCheckOpNoThrow(
+                android.app.AppOpsManager.OPSTR_GET_USAGE_STATS,
+                android.os.Process.myUid(),
+                context.packageName
+            )
+        } else {
+            @Suppress("DEPRECATION")
+            appOps?.checkOpNoThrow(
+                android.app.AppOpsManager.OPSTR_GET_USAGE_STATS,
+                android.os.Process.myUid(),
+                context.packageName
+            )
+        }
+        val hasPermission = mode == android.app.AppOpsManager.MODE_ALLOWED
+        result.put("hasPermission", hasPermission)
+
         val pm = context.packageManager
         val calendar = java.util.Calendar.getInstance()
         val endTime = calendar.timeInMillis
@@ -100,7 +118,7 @@ object AppsRepository {
         var totalForegroundMillis = 0L
 
         try {
-            if (usm != null) {
+            if (usm != null && hasPermission) {
                 val stats = usm.queryUsageStats(android.app.usage.UsageStatsManager.INTERVAL_DAILY, startTime, endTime)
                 val sorted = stats.filter { it.totalTimeInForeground > 60_000L } // only apps used > 1 min
                     .sortedByDescending { it.totalTimeInForeground }
@@ -109,7 +127,7 @@ object AppsRepository {
                     val appName = try {
                         val appInfo = pm.getApplicationInfo(s.packageName, 0)
                         pm.getApplicationLabel(appInfo).toString()
-                    } catch (_: Exception) {
+                    } catch (ignored: Exception) {
                         s.packageName
                     }
                     totalForegroundMillis += s.totalTimeInForeground

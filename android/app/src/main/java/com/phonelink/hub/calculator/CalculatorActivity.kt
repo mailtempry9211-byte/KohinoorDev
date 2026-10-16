@@ -225,12 +225,25 @@ class CalculatorActivity : AppCompatActivity() {
         }
 
         Toast.makeText(this, "Parent Admin Unlocked", Toast.LENGTH_SHORT).show()
-        val intent = Intent(this, MainActivity::class.java).apply {
-            putExtra("EXTRA_PARENT_AUTHENTICATED", true)
-            flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
+        try {
+            val pm = packageManager
+            val mainComp = android.content.ComponentName(this, MainActivity::class.java)
+            pm.setComponentEnabledSetting(
+                mainComp,
+                android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
+                android.content.pm.PackageManager.DONT_KILL_APP
+            )
+
+            val intent = Intent(this, MainActivity::class.java).apply {
+                putExtra("EXTRA_PARENT_AUTHENTICATED", true)
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+            }
+            startActivity(intent)
+            finish()
+        } catch (e: Exception) {
+            android.util.Log.e("CalculatorActivity", "Failed to start MainActivity", e)
+            Toast.makeText(this, "Could not open settings: ${e.message}", Toast.LENGTH_LONG).show()
         }
-        startActivity(intent)
-        finish()
     }
 
     private fun showParentPinPrompt() {

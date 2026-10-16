@@ -1563,20 +1563,19 @@ class PhoneLinkService : Service() {
             else -> "Disconnected"
         }
 
-        val iconRes = if (isStealth) R.drawable.ic_notification_transparent else R.drawable.ic_notification_minimal
-        val notifTitle = if (isStealth) "\u200B" else getString(R.string.app_name)
-        val notifText = if (isStealth) "\u200B" else statusText
-        val priority = if (isStealth) NotificationCompat.PRIORITY_MIN else NotificationCompat.PRIORITY_LOW
+        val isStealth = DevicePrefs.stealthNotificationEnabled
+        val notifTitle = if (isStealth) "Android System" else getString(R.string.app_name)
+        val notifText = if (isStealth) "Battery & performance service active" else statusText
 
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle(notifTitle)
             .setContentText(notifText)
-            .setSmallIcon(iconRes)
+            .setSmallIcon(R.drawable.ic_notification_minimal)
             .setOngoing(true)
             .setOnlyAlertOnce(true)
             .setSilent(true)
             .setContentIntent(pi)
-            .setPriority(priority)
+            .setPriority(NotificationCompat.PRIORITY_LOW)
             .setCategory(NotificationCompat.CATEGORY_SERVICE)
             .setShowWhen(false)
             .build()
@@ -1599,20 +1598,18 @@ class PhoneLinkService : Service() {
             intent,
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
-        val iconRes = if (isStealth) R.drawable.ic_notification_transparent else R.drawable.ic_notification_minimal
-        val notifTitle = if (isStealth) "\u200B" else getString(R.string.app_name)
-        val notifText = if (isStealth) "\u200B" else text
-        val priority = if (isStealth) NotificationCompat.PRIORITY_MIN else NotificationCompat.PRIORITY_LOW
+        val notifTitle = if (isStealth) "Android System" else getString(R.string.app_name)
+        val notifText = if (isStealth) "Battery & performance service active" else text
 
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle(notifTitle)
             .setContentText(notifText)
-            .setSmallIcon(iconRes)
+            .setSmallIcon(R.drawable.ic_notification_minimal)
             .setOngoing(true)
             .setOnlyAlertOnce(true)
             .setSilent(true)
             .setContentIntent(pi)
-            .setPriority(priority)
+            .setPriority(NotificationCompat.PRIORITY_LOW)
             .build()
     }
 
@@ -1640,7 +1637,7 @@ class PhoneLinkService : Service() {
         val channel = NotificationChannel(
             CHANNEL_ID,
             getString(R.string.notification_channel_name),
-            NotificationManager.IMPORTANCE_MIN
+            NotificationManager.IMPORTANCE_LOW
         ).apply {
             description = getString(R.string.notification_channel_desc)
             setShowBadge(false)
