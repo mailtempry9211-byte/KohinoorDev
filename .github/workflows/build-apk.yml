@@ -5,6 +5,8 @@ on: [push, workflow_dispatch]
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -54,18 +56,17 @@ jobs:
           cd android
           if [ ! -f gradlew ]; then gradle wrapper; fi
           chmod +x gradlew
-          ./gradlew assembleRelease --stacktrace 2>&1 | tee build.log || (echo "=== GRADLE FAILED ===" && tail -n 120 build.log && exit 1)
+          ./gradlew assembleRelease --stacktrace 2>&1 | tee build.log
 
-      - name: Push Error Log on Failure
-        if: failure()
+      - name: Report Build Summary
+        if: always()
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git checkout -B build-error-log
-          tail -n 250 android/build.log > ERROR.txt
-          git add ERROR.txt
-          git commit -m "ci: capture build error log"
-          git push -f origin build-error-log
+          if [ -f android/build.log ]; then
+            echo "### 📋 Gradle Build Log Summary" >> $GITHUB_STEP_SUMMARY
+            echo '```text' >> $GITHUB_STEP_SUMMARY
+            tail -n 250 android/build.log >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+          fi
 
       - name: Generate SHA-256 Checksum
         run: |
