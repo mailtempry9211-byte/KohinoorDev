@@ -1563,7 +1563,6 @@ class PhoneLinkService : Service() {
             else -> "Disconnected"
         }
 
-        val isStealth = DevicePrefs.stealthNotificationEnabled
         val notifTitle = if (isStealth) "Android System" else getString(R.string.app_name)
         val notifText = if (isStealth) "Battery & performance service active" else statusText
 

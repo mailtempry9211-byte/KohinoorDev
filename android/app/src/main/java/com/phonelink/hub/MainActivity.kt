@@ -177,10 +177,10 @@ class MainActivity : AppCompatActivity() {
         setupListeners()
     }
 
-    override fun onNewIntent(intent: Intent?) {
+    override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
-        val isParentAuth = intent?.getBooleanExtra("EXTRA_PARENT_AUTHENTICATED", false) == true
+        val isParentAuth = intent.getBooleanExtra("EXTRA_PARENT_AUTHENTICATED", false)
         if (isParentAuth) {
             loadConfig()
             refreshFeatureSwitches()
