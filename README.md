@@ -305,7 +305,7 @@ While standard Android legacy Device Admin provides remote lock capabilities, tr
 2. Enable USB Debugging in Developer Options and connect to PC via ADB.
 3. Provision Phone Link Hub as the Device Owner:
    ```bash
-   adb shell dpm set-device-owner com.phonelink.hub/.admin.DeviceAdminReceiver
+   adb shell dpm set-device-owner com.phonelink.hub/.receiver.PhoneDeviceAdminReceiver
    ```
 4. Once provisioned as Device Owner, the application can legitimately lock the screen, enforce kiosk lock-task mode, and prevent unauthorized uninstallation.
 

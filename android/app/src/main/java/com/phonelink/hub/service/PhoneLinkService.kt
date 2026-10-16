@@ -16,6 +16,7 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 import android.widget.RemoteViews
 import com.phonelink.hub.MainActivity
+import com.phonelink.hub.StatusActivity
 import com.phonelink.hub.R
 import com.phonelink.hub.calls.CallLogRepository
 import com.phonelink.hub.contacts.ContactsRepository
