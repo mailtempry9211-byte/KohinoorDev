@@ -64,6 +64,9 @@ class PhoneLinkService : Service() {
     private lateinit var audioPlayer: AudioPlayer
     private var connectedSinceMs: Long = 0L
 
+    val isConnected: Boolean
+        get() = try { ::webSocket.isInitialized && webSocket.isOpen } catch (e: Exception) { false }
+
     // BUG 2: periodic refresh so calls/SMS stay fresh while the service runs
     // (previously they synced only once inside onOpen/syncAll).
     private var lastLowDataStatusMs: Long = 0L
@@ -1660,6 +1663,9 @@ class PhoneLinkService : Service() {
         @Volatile
         var instance: PhoneLinkService? = null
             private set
+
+        val isSocketConnected: Boolean
+            get() = instance?.isConnected == true
 
         /** Starts the service; safe to call repeatedly. */
         fun start(context: Context) {

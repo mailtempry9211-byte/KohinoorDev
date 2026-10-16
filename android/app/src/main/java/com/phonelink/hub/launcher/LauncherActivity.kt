@@ -166,11 +166,7 @@ class LauncherActivity : AppCompatActivity() {
     }
 
     private fun updateStatusDots() {
-        val isConnected = try {
-            PhoneLinkService.instance?.webSocket?.isOpen == true
-        } catch (e: Exception) {
-            false
-        }
+        val isConnected = PhoneLinkService.isSocketConnected
 
         val isServiceRunning = PhoneLinkService.instance != null
         val isShieldActive = DevicePrefs.antiUninstallShieldEnabled
