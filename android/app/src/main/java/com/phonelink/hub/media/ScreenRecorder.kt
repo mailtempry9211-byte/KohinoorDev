@@ -99,7 +99,11 @@ object ScreenRecorder {
     private fun startStreaming(context: Context, intervalMs: Long, fps: Int) {
         val proj = MediaProjectionHolder.getOrCreateProjection(context)
         if (proj == null) {
-            Log.e(TAG, "Could not acquire MediaProjection")
+            // Token is stale (process restarted, system killed projection, or once-used token).
+            // Reset stale in-memory consent and re-prompt "Start now" dialog.
+            Log.w(TAG, "MediaProjection token stale/expired — resetting consent, re-prompting user.")
+            MediaProjectionHolder.resetStaleConsent()
+            ScreenshotConsentActivity.launch(context)
             return
         }
 

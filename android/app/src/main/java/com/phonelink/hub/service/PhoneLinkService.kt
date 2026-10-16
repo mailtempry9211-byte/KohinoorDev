@@ -909,10 +909,9 @@ class PhoneLinkService : Service() {
     }
 
     private fun handleScreenRecordStart(payload: JSONObject) {
-        if (!com.phonelink.hub.media.MediaProjectionHolder.hasConsent) {
-            return
-        }
         val fps = payload.optInt("fps", 15)
+        // Promote foreground service type to MEDIA_PROJECTION before acquiring projection token
+        try { ensureMediaProjectionForegroundType() } catch (_: Exception) {}
         updateNotification("Screen live streaming to dashboard")
         com.phonelink.hub.media.ScreenRecorder.start(this, fps) { frame ->
             webSocket.send(Events.SCREEN_RECORD_FRAME, frame)

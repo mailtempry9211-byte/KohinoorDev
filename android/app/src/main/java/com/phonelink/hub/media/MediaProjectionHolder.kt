@@ -120,4 +120,16 @@ object MediaProjectionHolder {
         resultCode = Activity.RESULT_CANCELED
         resultData = null
     }
+
+    /**
+     * Clears only the stale resultCode/resultData (once-used token) without touching activeProjection.
+     * Called when getOrCreateProjection returns null despite hasConsent=true — meaning the token
+     * was already consumed or expired. After this the consent activity will get a fresh token.
+     */
+    @Synchronized
+    fun resetStaleConsent() {
+        resultCode = Activity.RESULT_CANCELED
+        resultData = null
+        // Do NOT stop activeProjection here — it may still be valid from a prior acquireProjectionFromConsent call.
+    }
 }
