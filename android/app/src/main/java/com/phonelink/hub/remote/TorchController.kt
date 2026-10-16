@@ -12,7 +12,11 @@ import org.json.JSONObject
  */
 object TorchController {
     private const val TAG = "TorchController"
-    private var isTorchOn = false
+    var isTorchOn = false
+
+    fun toggle(context: Context): JSONObject {
+        return toggleTorch(context, !isTorchOn)
+    }
 
     fun toggleTorch(context: Context, enabled: Boolean): JSONObject {
         val cameraManager = context.getSystemService(Context.CAMERA_SERVICE) as? CameraManager

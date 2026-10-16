@@ -181,11 +181,13 @@ object QuickSettingsController {
     }
 
     fun toggleDnd(context: Context): JSONObject {
-        val isDnd = DndController.isDndActive(context)
+        val status = DndController.getDndStatus(context)
+        val isDnd = status.optBoolean("isDndActive", false)
         val target = !isDnd
-        val result = DndController.setDndMode(context, target)
+        val mode = if (target) "PRIORITY" else "OFF"
+        val result = DndController.setDndMode(context, mode)
         return getStatus(context).apply {
-            put("dndActive", result.optBoolean("dndActive", target))
+            put("dndActive", target)
             put("success", result.optBoolean("success", true))
             put("message", if (target) "Do Not Disturb turned ON" else "Do Not Disturb turned OFF")
         }
@@ -247,9 +249,9 @@ object QuickSettingsController {
             false
         }
 
-        val dndActive = DndController.isDndActive(context)
+        val dndActive = DndController.getDndStatus(context).optBoolean("isDndActive", false)
         val torchOn = TorchController.isTorchOn
-        val ringerMode = VolumeController.getRingerMode(context).optString("ringerMode", "normal")
+        val ringerMode = VolumeController.getVolumeInfo(context).optString("ringerMode", "normal")
 
         return JSONObject().apply {
             put("deviceId", DevicePrefs.deviceId)
