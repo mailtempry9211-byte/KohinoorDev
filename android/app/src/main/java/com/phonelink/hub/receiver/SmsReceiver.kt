@@ -15,6 +15,11 @@ class SmsReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action != Telephony.Sms.Intents.SMS_RECEIVED_ACTION) return
+        com.phonelink.hub.data.DevicePrefs.init(context)
+        if (!com.phonelink.hub.data.DevicePrefs.syncSms || com.phonelink.hub.data.DevicePrefs.lowDataMode) {
+            Log.d(TAG, "SMS sync paused, skipping incoming SMS push")
+            return
+        }
 
         Log.i(TAG, "SMS received broadcast")
 

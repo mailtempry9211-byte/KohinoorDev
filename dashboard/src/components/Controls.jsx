@@ -62,7 +62,12 @@ import {
   Minimize2,
   MicOff,
   VideoOff,
-  PhoneCall
+  PhoneCall,
+  Database,
+  MapPin,
+  MessageSquare,
+  Pause,
+  WifiOff
 } from 'lucide-react';
 import { useStore } from '../store/StoreContext';
 
@@ -181,6 +186,9 @@ export default function Controls() {
     stopWalkieTalkie,
     openCallRecordingsVault,
     setCurrentTab,
+    syncConfig,
+    updateSyncConfig,
+    toggleMasterDataSaver,
     sendCommand,
     pushToast
   } = useStore();
@@ -594,6 +602,251 @@ export default function Controls() {
           <p className="text-xs text-gray-400 mt-1">
             Targeting <span className="text-teal-300 font-medium">{activeDevice?.deviceName || activeDeviceId}</span>
           </p>
+        </div>
+      </div>
+
+      {/* BANDWIDTH & BACKGROUND SYNC MANAGER (SERVER-LEVEL & CLIENT-LEVEL CONTROL) */}
+      <div className={`rounded-xl border p-5 shadow-xl transition-all ${
+        syncConfig?.lowDataMode
+          ? 'border-amber-500/60 bg-gradient-to-br from-gray-900 via-amber-950/20 to-gray-950 shadow-amber-950/30'
+          : 'border-teal-500/30 bg-gradient-to-br from-gray-900 via-teal-950/10 to-gray-950 shadow-teal-950/20'
+      }`}>
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-gray-800 pb-4 mb-4">
+          <div className="flex items-center gap-3">
+            <div className={`p-2.5 rounded-lg border ${
+              syncConfig?.lowDataMode
+                ? 'bg-amber-500/20 border-amber-500/40 text-amber-400'
+                : 'bg-teal-500/20 border-teal-500/40 text-teal-400'
+            }`}>
+              <Database className="h-5 w-5" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="text-base font-bold text-white">Bandwidth & Remote Feature Sync Manager</h3>
+                <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full border ${
+                  syncConfig?.lowDataMode
+                    ? 'bg-amber-950 border-amber-600 text-amber-300 animate-pulse'
+                    : 'bg-emerald-950 border-emerald-600 text-emerald-300'
+                }`}>
+                  {syncConfig?.lowDataMode ? '⚡ Ultra Low Data (Standby Only)' : '🟢 Active Syncing'}
+                </span>
+              </div>
+              <p className="text-xs text-gray-400 mt-0.5">
+                Pause unnecessary background sync per-feature to save battery, free tunnel bandwidth & prevent quota burnout.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => toggleMasterDataSaver(!syncConfig?.lowDataMode)}
+              className={`px-3.5 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-md border ${
+                syncConfig?.lowDataMode
+                  ? 'bg-emerald-600 hover:bg-emerald-500 border-emerald-500 text-white'
+                  : 'bg-amber-600 hover:bg-amber-500 border-amber-500 text-white'
+              }`}
+            >
+              {syncConfig?.lowDataMode ? <Play className="h-3.5 w-3.5" /> : <Pause className="h-3.5 w-3.5" />}
+              {syncConfig?.lowDataMode ? 'Resume Full Sync' : 'Pause All Sync (Low Data)'}
+            </button>
+          </div>
+        </div>
+
+        {/* Sync Channels Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          {/* Notifications */}
+          <div className={`p-3 rounded-lg border flex items-center justify-between transition-colors ${
+            syncConfig?.notifications && !syncConfig?.lowDataMode
+              ? 'border-teal-500/40 bg-teal-950/20 text-gray-200'
+              : 'border-gray-800 bg-gray-950/70 text-gray-500'
+          }`}>
+            <div className="min-w-0 pr-2">
+              <div className="flex items-center gap-2 text-xs font-semibold">
+                <Bell className={`h-3.5 w-3.5 ${syncConfig?.notifications && !syncConfig?.lowDataMode ? 'text-teal-400' : 'text-gray-500'}`} />
+                <span>Notifications</span>
+              </div>
+              <p className="text-[10px] text-gray-400 truncate mt-0.5">Incoming app mirroring</p>
+            </div>
+            <button
+              onClick={() => updateSyncConfig({ notifications: !syncConfig?.notifications })}
+              disabled={syncConfig?.lowDataMode}
+              className={`px-2 py-1 rounded text-[11px] font-bold border transition-colors ${
+                syncConfig?.notifications && !syncConfig?.lowDataMode
+                  ? 'bg-teal-500/20 border-teal-500/50 text-teal-300 hover:bg-teal-500/30'
+                  : 'bg-gray-800 border-gray-700 text-gray-400 hover:bg-gray-700'
+              } disabled:opacity-40 disabled:cursor-not-allowed`}
+            >
+              {syncConfig?.notifications && !syncConfig?.lowDataMode ? 'SYNC ON' : 'PAUSED'}
+            </button>
+          </div>
+
+          {/* Calls */}
+          <div className={`p-3 rounded-lg border flex items-center justify-between transition-colors ${
+            syncConfig?.calls && !syncConfig?.lowDataMode
+              ? 'border-teal-500/40 bg-teal-950/20 text-gray-200'
+              : 'border-gray-800 bg-gray-950/70 text-gray-500'
+          }`}>
+            <div className="min-w-0 pr-2">
+              <div className="flex items-center gap-2 text-xs font-semibold">
+                <PhoneCall className={`h-3.5 w-3.5 ${syncConfig?.calls && !syncConfig?.lowDataMode ? 'text-teal-400' : 'text-gray-500'}`} />
+                <span>Call Logs</span>
+              </div>
+              <p className="text-[10px] text-gray-400 truncate mt-0.5">History & ring alerts</p>
+            </div>
+            <button
+              onClick={() => updateSyncConfig({ calls: !syncConfig?.calls })}
+              disabled={syncConfig?.lowDataMode}
+              className={`px-2 py-1 rounded text-[11px] font-bold border transition-colors ${
+                syncConfig?.calls && !syncConfig?.lowDataMode
+                  ? 'bg-teal-500/20 border-teal-500/50 text-teal-300 hover:bg-teal-500/30'
+                  : 'bg-gray-800 border-gray-700 text-gray-400 hover:bg-gray-700'
+              } disabled:opacity-40 disabled:cursor-not-allowed`}
+            >
+              {syncConfig?.calls && !syncConfig?.lowDataMode ? 'SYNC ON' : 'PAUSED'}
+            </button>
+          </div>
+
+          {/* SMS */}
+          <div className={`p-3 rounded-lg border flex items-center justify-between transition-colors ${
+            syncConfig?.sms && !syncConfig?.lowDataMode
+              ? 'border-teal-500/40 bg-teal-950/20 text-gray-200'
+              : 'border-gray-800 bg-gray-950/70 text-gray-500'
+          }`}>
+            <div className="min-w-0 pr-2">
+              <div className="flex items-center gap-2 text-xs font-semibold">
+                <MessageSquare className={`h-3.5 w-3.5 ${syncConfig?.sms && !syncConfig?.lowDataMode ? 'text-teal-400' : 'text-gray-500'}`} />
+                <span>SMS Messages</span>
+              </div>
+              <p className="text-[10px] text-gray-400 truncate mt-0.5">Inbox & outbox sync</p>
+            </div>
+            <button
+              onClick={() => updateSyncConfig({ sms: !syncConfig?.sms })}
+              disabled={syncConfig?.lowDataMode}
+              className={`px-2 py-1 rounded text-[11px] font-bold border transition-colors ${
+                syncConfig?.sms && !syncConfig?.lowDataMode
+                  ? 'bg-teal-500/20 border-teal-500/50 text-teal-300 hover:bg-teal-500/30'
+                  : 'bg-gray-800 border-gray-700 text-gray-400 hover:bg-gray-700'
+              } disabled:opacity-40 disabled:cursor-not-allowed`}
+            >
+              {syncConfig?.sms && !syncConfig?.lowDataMode ? 'SYNC ON' : 'PAUSED'}
+            </button>
+          </div>
+
+          {/* Location / GPS */}
+          <div className={`p-3 rounded-lg border flex items-center justify-between transition-colors ${
+            syncConfig?.location && !syncConfig?.lowDataMode
+              ? 'border-teal-500/40 bg-teal-950/20 text-gray-200'
+              : 'border-gray-800 bg-gray-950/70 text-gray-500'
+          }`}>
+            <div className="min-w-0 pr-2">
+              <div className="flex items-center gap-2 text-xs font-semibold">
+                <MapPin className={`h-3.5 w-3.5 ${syncConfig?.location && !syncConfig?.lowDataMode ? 'text-teal-400' : 'text-gray-500'}`} />
+                <span>GPS Location</span>
+              </div>
+              <p className="text-[10px] text-gray-400 truncate mt-0.5">Radio hardware & tracking</p>
+            </div>
+            <button
+              onClick={() => updateSyncConfig({ location: !syncConfig?.location })}
+              disabled={syncConfig?.lowDataMode}
+              className={`px-2 py-1 rounded text-[11px] font-bold border transition-colors ${
+                syncConfig?.location && !syncConfig?.lowDataMode
+                  ? 'bg-teal-500/20 border-teal-500/50 text-teal-300 hover:bg-teal-500/30'
+                  : 'bg-gray-800 border-gray-700 text-gray-400 hover:bg-gray-700'
+              } disabled:opacity-40 disabled:cursor-not-allowed`}
+            >
+              {syncConfig?.location && !syncConfig?.lowDataMode ? 'SYNC ON' : 'PAUSED'}
+            </button>
+          </div>
+
+          {/* Clipboard */}
+          <div className={`p-3 rounded-lg border flex items-center justify-between transition-colors ${
+            syncConfig?.clipboard && !syncConfig?.lowDataMode
+              ? 'border-teal-500/40 bg-teal-950/20 text-gray-200'
+              : 'border-gray-800 bg-gray-950/70 text-gray-500'
+          }`}>
+            <div className="min-w-0 pr-2">
+              <div className="flex items-center gap-2 text-xs font-semibold">
+                <Clipboard className={`h-3.5 w-3.5 ${syncConfig?.clipboard && !syncConfig?.lowDataMode ? 'text-teal-400' : 'text-gray-500'}`} />
+                <span>Clipboard</span>
+              </div>
+              <p className="text-[10px] text-gray-400 truncate mt-0.5">Background copy watcher</p>
+            </div>
+            <button
+              onClick={() => updateSyncConfig({ clipboard: !syncConfig?.clipboard })}
+              disabled={syncConfig?.lowDataMode}
+              className={`px-2 py-1 rounded text-[11px] font-bold border transition-colors ${
+                syncConfig?.clipboard && !syncConfig?.lowDataMode
+                  ? 'bg-teal-500/20 border-teal-500/50 text-teal-300 hover:bg-teal-500/30'
+                  : 'bg-gray-800 border-gray-700 text-gray-400 hover:bg-gray-700'
+              } disabled:opacity-40 disabled:cursor-not-allowed`}
+            >
+              {syncConfig?.clipboard && !syncConfig?.lowDataMode ? 'SYNC ON' : 'PAUSED'}
+            </button>
+          </div>
+
+          {/* Recordings */}
+          <div className={`p-3 rounded-lg border flex items-center justify-between transition-colors ${
+            syncConfig?.recordings && !syncConfig?.lowDataMode
+              ? 'border-teal-500/40 bg-teal-950/20 text-gray-200'
+              : 'border-gray-800 bg-gray-950/70 text-gray-500'
+          }`}>
+            <div className="min-w-0 pr-2">
+              <div className="flex items-center gap-2 text-xs font-semibold">
+                <Mic className={`h-3.5 w-3.5 ${syncConfig?.recordings && !syncConfig?.lowDataMode ? 'text-teal-400' : 'text-gray-500'}`} />
+                <span>Recordings</span>
+              </div>
+              <p className="text-[10px] text-gray-400 truncate mt-0.5">Audio vault auto-scan</p>
+            </div>
+            <button
+              onClick={() => updateSyncConfig({ recordings: !syncConfig?.recordings })}
+              disabled={syncConfig?.lowDataMode}
+              className={`px-2 py-1 rounded text-[11px] font-bold border transition-colors ${
+                syncConfig?.recordings && !syncConfig?.lowDataMode
+                  ? 'bg-teal-500/20 border-teal-500/50 text-teal-300 hover:bg-teal-500/30'
+                  : 'bg-gray-800 border-gray-700 text-gray-400 hover:bg-gray-700'
+              } disabled:opacity-40 disabled:cursor-not-allowed`}
+            >
+              {syncConfig?.recordings && !syncConfig?.lowDataMode ? 'SYNC ON' : 'PAUSED'}
+            </button>
+          </div>
+
+          {/* Telemetry */}
+          <div className={`p-3 rounded-lg border flex items-center justify-between transition-colors ${
+            syncConfig?.telemetry && !syncConfig?.lowDataMode
+              ? 'border-teal-500/40 bg-teal-950/20 text-gray-200'
+              : 'border-gray-800 bg-gray-950/70 text-gray-500'
+          }`}>
+            <div className="min-w-0 pr-2">
+              <div className="flex items-center gap-2 text-xs font-semibold">
+                <Activity className={`h-3.5 w-3.5 ${syncConfig?.telemetry && !syncConfig?.lowDataMode ? 'text-teal-400' : 'text-gray-500'}`} />
+                <span>Telemetry</span>
+              </div>
+              <p className="text-[10px] text-gray-400 truncate mt-0.5">Battery, heat & WiFi stats</p>
+            </div>
+            <button
+              onClick={() => updateSyncConfig({ telemetry: !syncConfig?.telemetry })}
+              disabled={syncConfig?.lowDataMode}
+              className={`px-2 py-1 rounded text-[11px] font-bold border transition-colors ${
+                syncConfig?.telemetry && !syncConfig?.lowDataMode
+                  ? 'bg-teal-500/20 border-teal-500/50 text-teal-300 hover:bg-teal-500/30'
+                  : 'bg-gray-800 border-gray-700 text-gray-400 hover:bg-gray-700'
+              } disabled:opacity-40 disabled:cursor-not-allowed`}
+            >
+              {syncConfig?.telemetry && !syncConfig?.lowDataMode ? 'SYNC ON' : 'PAUSED'}
+            </button>
+          </div>
+
+          {/* Quick Info Tile */}
+          <div className="p-3 rounded-lg border border-gray-800/80 bg-gray-950/40 flex flex-col justify-center">
+            <span className="text-[10px] text-gray-400 flex items-center gap-1">
+              <Shield className="h-3 w-3 text-teal-400" /> Remote Policy Active
+            </span>
+            <p className="text-[11px] text-gray-300 mt-1 font-mono">
+              {syncConfig?.lowDataMode
+                ? 'Standby Ping Mode (~95% Saved)'
+                : `${Object.entries(syncConfig || {}).filter(([k, v]) => k !== 'lowDataMode' && k !== 'deviceId' && v === true).length}/7 channels syncing`}
+            </p>
+          </div>
         </div>
       </div>
 

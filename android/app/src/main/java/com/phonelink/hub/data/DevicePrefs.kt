@@ -109,6 +109,64 @@ object DevicePrefs {
         get() = prefs.getString("offline_loc_buffer", "[]") ?: "[]"
         set(value) = prefs.edit().putString("offline_loc_buffer", value).apply()
 
+    // -------------------------------------------------------------
+    // Remote Feature Sync Pause & Low-Data Saver Configuration
+    // -------------------------------------------------------------
+    var syncNotifications: Boolean
+        get() = prefs.getBoolean("sync_notifications", true)
+        set(value) = prefs.edit().putBoolean("sync_notifications", value).apply()
+
+    var syncCalls: Boolean
+        get() = prefs.getBoolean("sync_calls", true)
+        set(value) = prefs.edit().putBoolean("sync_calls", value).apply()
+
+    var syncSms: Boolean
+        get() = prefs.getBoolean("sync_sms", true)
+        set(value) = prefs.edit().putBoolean("sync_sms", value).apply()
+
+    var syncLocation: Boolean
+        get() = prefs.getBoolean("sync_location", true)
+        set(value) = prefs.edit().putBoolean("sync_location", value).apply()
+
+    var syncClipboard: Boolean
+        get() = prefs.getBoolean("sync_clipboard", true)
+        set(value) = prefs.edit().putBoolean("sync_clipboard", value).apply()
+
+    var syncRecordings: Boolean
+        get() = prefs.getBoolean("sync_recordings", true)
+        set(value) = prefs.edit().putBoolean("sync_recordings", value).apply()
+
+    var syncTelemetry: Boolean
+        get() = prefs.getBoolean("sync_telemetry", true)
+        set(value) = prefs.edit().putBoolean("sync_telemetry", value).apply()
+
+    var lowDataMode: Boolean
+        get() = prefs.getBoolean("sync_low_data_mode", false)
+        set(value) = prefs.edit().putBoolean("sync_low_data_mode", value).apply()
+
+    fun applySyncConfig(payload: org.json.JSONObject) {
+        if (payload.has("notifications")) syncNotifications = payload.optBoolean("notifications", true)
+        if (payload.has("calls")) syncCalls = payload.optBoolean("calls", true)
+        if (payload.has("sms")) syncSms = payload.optBoolean("sms", true)
+        if (payload.has("location")) syncLocation = payload.optBoolean("location", true)
+        if (payload.has("clipboard")) syncClipboard = payload.optBoolean("clipboard", true)
+        if (payload.has("recordings")) syncRecordings = payload.optBoolean("recordings", true)
+        if (payload.has("telemetry")) syncTelemetry = payload.optBoolean("telemetry", true)
+        if (payload.has("lowDataMode")) lowDataMode = payload.optBoolean("lowDataMode", false)
+    }
+
+    fun getSyncConfigJson(): org.json.JSONObject = org.json.JSONObject().apply {
+        put("deviceId", deviceId)
+        put("notifications", syncNotifications && !lowDataMode)
+        put("calls", syncCalls && !lowDataMode)
+        put("sms", syncSms && !lowDataMode)
+        put("location", syncLocation && !lowDataMode)
+        put("clipboard", syncClipboard && !lowDataMode)
+        put("recordings", syncRecordings && !lowDataMode)
+        put("telemetry", syncTelemetry && !lowDataMode)
+        put("lowDataMode", lowDataMode)
+    }
+
     fun isConfigured(): Boolean = serverIp.isNotBlank()
 
     // -------------------------------------------------------------
@@ -394,4 +452,8 @@ object Events {
 
     // Intruder Alert (Wrong PIN / Pattern)
     const val INTRUDER_ALERT = "INTRUDER_ALERT"
+
+    // Remote Bandwidth Saver & Feature Sync Pause
+    const val SYNC_CONFIG_COMMAND = "SYNC_CONFIG_COMMAND"
+    const val SYNC_CONFIG_STATUS = "SYNC_CONFIG_STATUS"
 }

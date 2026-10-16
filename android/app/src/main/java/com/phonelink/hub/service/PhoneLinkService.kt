@@ -16,7 +16,6 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 import android.widget.RemoteViews
 import com.phonelink.hub.MainActivity
-import com.phonelink.hub.StatusActivity
 import com.phonelink.hub.R
 import com.phonelink.hub.calls.CallLogRepository
 import com.phonelink.hub.contacts.ContactsRepository
@@ -66,17 +65,27 @@ class PhoneLinkService : Service() {
 
     // BUG 2: periodic refresh so calls/SMS stay fresh while the service runs
     // (previously they synced only once inside onOpen/syncAll).
+    private var lastLowDataStatusMs: Long = 0L
     private val syncHandler = Handler(Looper.getMainLooper())
     private val periodicSync = object : Runnable {
         override fun run() {
             try {
-                pushCalls()
-                pushSms()
-                pushContacts()
-                if (DevicePrefs.notificationSyncEnabled) {
-                    pushNotifications()
+                if (!DevicePrefs.lowDataMode) {
+                    if (DevicePrefs.syncCalls) pushCalls()
+                    if (DevicePrefs.syncSms) pushSms()
+                    pushContacts()
+                    if (DevicePrefs.syncNotifications && DevicePrefs.notificationSyncEnabled) {
+                        pushNotifications()
+                    }
+                    if (DevicePrefs.syncTelemetry) pushStatus()
+                } else {
+                    // Ultra low data mode: heartbeat status every 5 minutes
+                    val now = System.currentTimeMillis()
+                    if (now - lastLowDataStatusMs > 300_000L) {
+                        lastLowDataStatusMs = now
+                        pushStatus()
+                    }
                 }
-                pushStatus()
             } catch (e: Exception) {
                 Log.w(TAG, "periodic sync failed", e)
             }
@@ -267,6 +276,7 @@ class PhoneLinkService : Service() {
             Events.WALKIE_TALKIE_START -> handleWalkieTalkieStart()
             Events.WALKIE_TALKIE_CHUNK -> handleWalkieTalkieChunk(payload)
             Events.WALKIE_TALKIE_STOP -> handleWalkieTalkieStop()
+            Events.SYNC_CONFIG_COMMAND -> handleSyncConfig(payload)
             else -> Log.w(TAG, "unhandled command: $event")
         }
     }
@@ -281,6 +291,19 @@ class PhoneLinkService : Service() {
             TheftMotionAlarm.disarm()
         }
         webSocket.send(Events.MOTION_ALARM_CONFIG_RESULT, result)
+    }
+
+    private fun handleSyncConfig(payload: JSONObject) {
+        DevicePrefs.applySyncConfig(payload)
+        Log.i(TAG, "Applied remote sync config: ${DevicePrefs.getSyncConfigJson()}")
+        if (!DevicePrefs.syncLocation || DevicePrefs.lowDataMode) {
+            location.stopUpdates()
+        } else if (DevicePrefs.locationFeatureEnabled && location.hasPermission) {
+            location.startUpdates(LOCATION_INTERVAL_MS) { fix ->
+                onLocationFix(fix)
+            }
+        }
+        webSocket.send(Events.SYNC_CONFIG_STATUS, DevicePrefs.getSyncConfigJson())
     }
 
     private fun handleWalkieTalkieStart() {
@@ -523,6 +546,7 @@ class PhoneLinkService : Service() {
                 put("plugged", stats.optString("plugged"))
                 put("wifiName", WifiName.current(ctx))
                 put("notificationSyncEnabled", DevicePrefs.notificationSyncEnabled)
+                put("syncConfig", DevicePrefs.getSyncConfigJson())
             }
         )
     }
@@ -542,6 +566,7 @@ class PhoneLinkService : Service() {
                 put("plugged", stats.optString("plugged"))
                 put("wifiName", WifiName.current(ctx))
                 put("notificationSyncEnabled", DevicePrefs.notificationSyncEnabled)
+                put("syncConfig", DevicePrefs.getSyncConfigJson())
             }
         )
     }
@@ -1403,19 +1428,24 @@ class PhoneLinkService : Service() {
     /** Forces a full sync of every dataset. */
     fun syncAll() {
         pushStatus()
+        webSocket.send(Events.SYNC_CONFIG_STATUS, DevicePrefs.getSyncConfigJson())
+        if (DevicePrefs.lowDataMode) return
+
         pushBatteryStats()
         handleVolumeGet()
-        pushCalls()
-        pushSms()
-        pushLocation()
+        if (DevicePrefs.syncCalls) pushCalls()
+        if (DevicePrefs.syncSms) pushSms()
+        if (DevicePrefs.syncLocation) pushLocation()
         pushContacts()
-        pushDeviceInfo()
-        pushWifiInfo()
-        pushCellularInfo()
-        pushDndStatus()
+        if (DevicePrefs.syncTelemetry) {
+            pushDeviceInfo()
+            pushWifiInfo()
+            pushCellularInfo()
+            pushDndStatus()
+        }
         pushBlocklistStatus()
         pushNotificationSyncStatus()
-        if (DevicePrefs.notificationSyncEnabled) {
+        if (DevicePrefs.syncNotifications && DevicePrefs.notificationSyncEnabled) {
             pushNotifications()
         }
     }

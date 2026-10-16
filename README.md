@@ -309,4 +309,36 @@ While standard Android legacy Device Admin provides remote lock capabilities, tr
    ```
 4. Once provisioned as Device Owner, the application can legitimately lock the screen, enforce kiosk lock-task mode, and prevent unauthorized uninstallation.
 
+## Bandwidth & Remote Feature Sync Manager (Online Cloud Optimization)
+
+When hosting Phone Link Hub online (e.g. Render, Railway, ngrok) across multiple devices:
+- **Ultra Low-Data Mode (Standby)**: 1-click master switch that halts all background event streaming (SMS, Call logs, Notifications, GPS polling, audio directory scanning). The device stays connected with an ultra-lightweight WebSocket heartbeat (~95% bandwidth saved).
+- **Granular Sync Channels**: Remotely pause and resume individual features from the dashboard:
+  - 🔕 **Notifications**: WhatsApp & system notification mirroring
+  - 📞 **Call History**: Periodic & state-change call log synchronization
+  - 💬 **SMS Messages**: Real-time & polling SMS database sync
+  - 📍 **GPS Tracking**: Hardware GPS updates (saves battery & location quota)
+  - 📋 **Clipboard**: Remote copy-paste synchronization
+  - 🎙️ **Call Recordings**: Automated scanning of recordings directory
+  - 🔋 **Telemetry**: Battery, thermal, and network stats
+- Any manual on-demand command (taking a screenshot, capturing a camera frame, ringing the phone, placing an outgoing call) still executes immediately even in Standby mode!
+
+## Google Play Protect Sideloading Note
+
+Because Phone Link Hub is an open-source security & device monitoring tool featuring remote lock (Device Admin), hardware screenshot assistance (Accessibility), and SMS/Call mirroring, Google Play Protect may show a warning dialog upon manual APK installation:
+> **"Play Protect doesn't recognise this app's developer"** or **"Blocked by Play Protect"**
+
+**How to Install:**
+1. On the Play Protect dialog, tap **"More details"** (small dropdown arrow).
+2. Tap **"Install anyway"** to complete setup.
+3. Alternatively, on a dedicated security camera phone: Open **Google Play Store** → Tap Profile icon → **Play Protect** → Tap Settings gear ⚙️ → Toggle off **"Scan apps with Play Protect"**.
+
+## Architectural Roadmap: 3 Target Editions
+
+| Edition | Components | Best For | Status |
+| --- | --- | --- | --- |
+| **Edition 1: Windows Desktop All-in-One** | Single `.exe` containing Node relay + embedded Dashboard + APK client | Local offline LAN use, plug-and-play PC control | In Plan |
+| **Edition 2: Online Free-Tier Cloud** | Free Render / Railway / Supabase relay + Vercel Dashboard + APK client | Remote monitoring over the internet without keeping home PC on | Ready (Current architecture supports reverse proxy/tunnel) |
+| **Edition 3: Android-to-Android Controller** | Controller APK (React Native / WebView) + Client APK | Non-technical users / Parents managing devices from their smartphone | In Plan |
+
 For complete permission details, see [PERMISSIONS.md](file:///c:/Users/Kohinoor/Desktop/phone%20managment/PERMISSIONS.md) and [PRIVACY.md](file:///c:/Users/Kohinoor/Desktop/phone%20managment/PRIVACY.md).

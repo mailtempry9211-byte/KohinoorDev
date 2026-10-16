@@ -63,6 +63,7 @@ export function StoreProvider({ children }) {
   const [isScanningJunk, setIsScanningJunk] = useState(false);
   const [motionAlarmState, setMotionAlarmState] = useState({});
   const [walkieTalkieActive, setWalkieTalkieActive] = useState(false);
+  const [deviceSyncConfig, setDeviceSyncConfig] = useState({});
   const ws = useRef(null);
   const alertTimers = useRef({});
   // Mirrors files.downloadBuffer for the stray-terminator guard below
@@ -701,6 +702,16 @@ function titleOrApp(appName, title, text) {
           break;
         }
 
+        case 'SYNC_CONFIG_STATUS': {
+          if (p.deviceId) {
+            setDeviceSyncConfig((prev) => ({
+              ...prev,
+              [p.deviceId]: { ...(prev[p.deviceId] || {}), ...p }
+            }));
+          }
+          break;
+        }
+
         default:
           break;
       }
@@ -798,6 +809,10 @@ function titleOrApp(appName, title, text) {
     fetch(`/api/devices/${activeDeviceId}/dnd`)
       .then((r) => r.json())
       .then((d) => { if (d) setDndStatus((prev) => ({ ...prev, [activeDeviceId]: d })); })
+      .catch(() => {});
+    fetch(`/api/devices/${activeDeviceId}/sync-config`)
+      .then((r) => r.json())
+      .then((cfg) => { if (cfg) setDeviceSyncConfig((prev) => ({ ...prev, [activeDeviceId]: cfg })); })
       .catch(() => {});
     sendCommand('volume-get', { deviceId: activeDeviceId }).catch(() => {});
     sendCommand('battery-stats', { deviceId: activeDeviceId }).catch(() => {});
@@ -1023,6 +1038,56 @@ function titleOrApp(appName, title, text) {
         setCurrentTab('calls');
         setCallLogsSubTab('recordings');
       },
+      // Remote Feature Sync Pause & Low-Data Saver
+      syncConfig: activeDeviceId ? (deviceSyncConfig[activeDeviceId] || {
+        notifications: true,
+        calls: true,
+        sms: true,
+        location: true,
+        clipboard: true,
+        recordings: true,
+        telemetry: true,
+        lowDataMode: false
+      }) : {
+        notifications: true,
+        calls: true,
+        sms: true,
+        location: true,
+        clipboard: true,
+        recordings: true,
+        telemetry: true,
+        lowDataMode: false
+      },
+      updateSyncConfig: (fields) => {
+        if (!activeDeviceId) return;
+        const current = deviceSyncConfig[activeDeviceId] || {
+          notifications: true,
+          calls: true,
+          sms: true,
+          location: true,
+          clipboard: true,
+          recordings: true,
+          telemetry: true,
+          lowDataMode: false
+        };
+        const updated = { ...current, ...fields, deviceId: activeDeviceId };
+        setDeviceSyncConfig((prev) => ({ ...prev, [activeDeviceId]: updated }));
+        sendCommand('sync-config', updated);
+        pushToast('Sync preferences updated', 'info');
+      },
+      toggleMasterDataSaver: (enable) => {
+        if (!activeDeviceId) return;
+        const current = deviceSyncConfig[activeDeviceId] || {};
+        const updated = { ...current, lowDataMode: enable, deviceId: activeDeviceId };
+        setDeviceSyncConfig((prev) => ({ ...prev, [activeDeviceId]: updated }));
+        sendCommand('sync-config', updated);
+        pushToast(
+          enable
+            ? '⚡ Ultra Low-Data / Standby Mode ACTIVE (All sync paused)'
+            : 'Full Live Sync Resumed',
+          enable ? 'warning' : 'success'
+        );
+      },
       removeDevice: async (deviceId) => {
         try {
           const res = await fetch(`/api/devices/${deviceId}`, { method: 'DELETE' });
@@ -1044,7 +1109,7 @@ function titleOrApp(appName, title, text) {
         return false;
       }
     }),
-    [devices, activeDeviceId, currentTab, callLogsSubTab, calls, messages, locations, contacts, files, notifications, connected, incomingCallAlert, smsAlert, toasts, sendCommand, dismissAlert, dismissSmsAlert, pushToast, deviceInfo, installedApps, wifiInfo, clipboardHistory, clipboardCapture, appPermissions, callBlocklist, micRecording, latestMicAudio, cameraCapturing, latestCameraPhoto, screenshotCapturing, latestScreenshot, screenRecording, latestScreenFrame, cameraStreaming, latestCameraFrame, torchOn, liveListening, latestAudioChunk, volumeInfo, batteryStats, lostModeState, galleryPhotos, galleryLoading, cellularInfo, dndStatus, strobeActive, junkScanData, isScanningJunk, motionAlarmState, walkieTalkieActive]
+    [devices, activeDeviceId, currentTab, callLogsSubTab, deviceSyncConfig, calls, messages, locations, contacts, files, notifications, connected, incomingCallAlert, smsAlert, toasts, sendCommand, dismissAlert, dismissSmsAlert, pushToast, deviceInfo, installedApps, wifiInfo, clipboardHistory, clipboardCapture, appPermissions, callBlocklist, micRecording, latestMicAudio, cameraCapturing, latestCameraPhoto, screenshotCapturing, latestScreenshot, screenRecording, latestScreenFrame, cameraStreaming, latestCameraFrame, torchOn, liveListening, latestAudioChunk, volumeInfo, batteryStats, lostModeState, galleryPhotos, galleryLoading, cellularInfo, dndStatus, strobeActive, junkScanData, isScanningJunk, motionAlarmState, walkieTalkieActive]
   );
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;

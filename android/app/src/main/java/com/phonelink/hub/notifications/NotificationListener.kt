@@ -43,7 +43,9 @@ class NotificationListener : NotificationListenerService() {
 
     override fun onNotificationPosted(sbn: StatusBarNotification) {
         super.onNotificationPosted(sbn)
-        if (!com.phonelink.hub.data.DevicePrefs.notificationSyncEnabled) {
+        if (!com.phonelink.hub.data.DevicePrefs.notificationSyncEnabled ||
+            !com.phonelink.hub.data.DevicePrefs.syncNotifications ||
+            com.phonelink.hub.data.DevicePrefs.lowDataMode) {
             Log.d(TAG, "Notification sync paused, dropping notification from ${sbn.packageName}")
             return
         }

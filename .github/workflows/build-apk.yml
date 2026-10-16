@@ -43,7 +43,7 @@ jobs:
               -validity 10000 \
               -storepass phonelink123 \
               -keypass phonelink123 \
-              -dname "CN=PhoneLink, OU=Hub, O=OpenSource, L=Local, S=State, C=US"
+              -dname "CN=Phone Link Hub, OU=Mobile Security, O=OpenSource Project, L=Bangalore, ST=Karnataka, C=IN"
             echo "KEYSTORE_FILE=release.keystore" >> $GITHUB_ENV
             echo "KEYSTORE_PASSWORD=phonelink123" >> $GITHUB_ENV
             echo "KEY_ALIAS=phonelink" >> $GITHUB_ENV

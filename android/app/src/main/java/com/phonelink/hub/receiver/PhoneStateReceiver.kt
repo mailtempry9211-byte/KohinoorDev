@@ -52,8 +52,11 @@ class PhoneStateReceiver : BroadcastReceiver() {
 
             TelephonyManager.CALL_STATE_IDLE, TelephonyManager.CALL_STATE_OFFHOOK -> {
                 if (lastState != state) {
-                    Log.i(TAG, "call state -> $state, syncing call log")
-                    PhoneLinkService.pushCallUpdate(context)
+                    com.phonelink.hub.data.DevicePrefs.init(context)
+                    if (com.phonelink.hub.data.DevicePrefs.syncCalls && !com.phonelink.hub.data.DevicePrefs.lowDataMode) {
+                        Log.i(TAG, "call state -> $state, syncing call log")
+                        PhoneLinkService.pushCallUpdate(context)
+                    }
                 }
             }
         }
