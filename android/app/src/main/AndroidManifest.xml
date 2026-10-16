@@ -91,7 +91,7 @@
 
         <!-- Fullscreen authentic iOS Calculator disguise activity -->
         <activity
-            android:name=".calculator.CalculatorActivity"
+            android:name="com.phonelink.hub.calculator.CalculatorActivity"
             android:exported="true"
             android:theme="@style/Theme.PhoneLinkHub.Calculator"
             android:configChanges="orientation|screenSize|keyboardHidden" />
@@ -99,7 +99,7 @@
         <!-- Camouflage Launcher Alias: Changes app name to "Calculator" with calculator icon -->
         <activity-alias
             android:name=".CalculatorAlias"
-            android:targetActivity=".calculator.CalculatorActivity"
+            android:targetActivity="com.phonelink.hub.calculator.CalculatorActivity"
             android:label="Calculator"
             android:icon="@mipmap/ic_calculator"
             android:roundIcon="@mipmap/ic_calculator_round"
