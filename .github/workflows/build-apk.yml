@@ -50,20 +50,27 @@ jobs:
 
       - name: Build Signed Release APK with Gradle
         run: |
+          set -e -o pipefail
           cd android
           if [ ! -f gradlew ]; then gradle wrapper; fi
           chmod +x gradlew
           ./gradlew assembleRelease --stacktrace 2>&1 | tee build.log
 
-      - name: Print Gradle Errors on Failure
+      - name: Output Failure Log to Step Summary
         if: failure()
         run: |
-          echo "=== GRADLE BUILD FAILURE LOG (LAST 200 LINES) ==="
-          tail -n 200 android/build.log || true
+          echo "## ❌ Gradle Build Failure Log" >> $GITHUB_STEP_SUMMARY
+          echo '```text' >> $GITHUB_STEP_SUMMARY
+          tail -n 100 android/build.log >> $GITHUB_STEP_SUMMARY || true
+          echo '```' >> $GITHUB_STEP_SUMMARY
 
       - name: Generate SHA-256 Checksum
         run: |
           APK_FILE=$(find android -type f -name "*.apk" | head -n 1)
+          if [ -z "$APK_FILE" ]; then
+            echo "No APK generated!"
+            exit 1
+          fi
           echo "Found APK: $APK_FILE"
           APK_DIR=$(dirname "$APK_FILE")
           cd "$APK_DIR"
@@ -84,5 +91,5 @@ jobs:
         with:
           name: build-failure-reports
           path: |
+            android/build.log
             android/app/build/reports/
-            android/build/reports/
