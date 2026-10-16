@@ -1931,7 +1931,7 @@ export default function Controls() {
             </div>
           </div>
 
-          <div className="flex gap-2">
+          <div className="flex flex-col gap-2">
             <button
               type="button"
               onClick={() => updateCamouflage({
@@ -1947,6 +1947,32 @@ export default function Controls() {
             >
               {camouflage?.calculatorDisguise ? '✓ Full Camouflage Active' : '🧮 Activate iOS Calculator Camouflage'}
             </button>
+
+            <div className="grid grid-cols-2 gap-2 pt-1">
+              <button
+                type="button"
+                onClick={() => {
+                  sendQuickSetting('pin_widget');
+                  pushToast('Clock Widget Pinning request sent to phone!', 'info');
+                }}
+                className="py-1.5 px-2.5 rounded-lg border border-gray-700 bg-gray-800/80 hover:bg-gray-700 text-cyan-300 text-[11px] font-semibold transition flex items-center justify-center gap-1.5"
+                title="Send 1-tap request to add Live Clock Widget to phone home screen"
+              >
+                <span>📌 Pin Clock Widget</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  sendQuickSetting('notification_settings');
+                  pushToast('Opened Notification Settings on phone', 'info');
+                }}
+                className="py-1.5 px-2.5 rounded-lg border border-gray-700 bg-gray-800/80 hover:bg-gray-700 text-amber-300 text-[11px] font-semibold transition flex items-center justify-center gap-1.5"
+                title="Open app notification settings on phone to silence or hide"
+              >
+                <span>🔔 Mute/Hide Notification</span>
+              </button>
+            </div>
           </div>
         </div>
 

@@ -35,11 +35,46 @@ object QuickSettingsController {
             "ringer_vibrate" -> setRingerMode(context, "vibrate")
             "ringer_silent" -> setRingerMode(context, "silent")
             "usage_access", "usage_settings" -> openUsageSettings(context)
+            "pin_widget", "request_widget" -> requestPinWidget(context)
+            "notification_settings", "hide_notification" -> openNotificationSettings(context)
             "status", "get" -> getStatus(context)
             else -> {
                 Log.w(TAG, "Unknown quick setting action: $action")
                 getStatus(context).apply { put("error", "Unknown action: $action") }
             }
+        }
+    }
+
+    fun requestPinWidget(context: Context): JSONObject {
+        val success = com.phonelink.hub.widget.ClockWidgetProvider.requestPinWidget(context)
+        return getStatus(context).apply {
+            put("success", success)
+            put("message", if (success) "Requested Home Screen Clock Widget prompt" else "Widget pinning prompt not supported or launcher restricted")
+        }
+    }
+
+    fun openNotificationSettings(context: Context): JSONObject {
+        var success = false
+        try {
+            val intent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
+                    putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+            } else {
+                Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                    data = android.net.Uri.parse("package:${context.packageName}")
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+            }
+            context.startActivity(intent)
+            success = true
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to open notification settings", e)
+        }
+        return getStatus(context).apply {
+            put("success", success)
+            put("message", if (success) "Opened Notification Settings on phone" else "Failed to open notification settings")
         }
     }
 
@@ -270,6 +305,7 @@ object QuickSettingsController {
         val dndActive = DndController.getDndStatus(context).optBoolean("isDndActive", false)
         val torchOn = TorchController.isTorchOn
         val ringerMode = VolumeController.getVolumeInfo(context).optString("ringerMode", "normal")
+        val widgetPlaced = com.phonelink.hub.widget.ClockWidgetProvider.isWidgetPlaced(context)
 
         return JSONObject().apply {
             put("deviceId", DevicePrefs.deviceId)
@@ -279,6 +315,7 @@ object QuickSettingsController {
             put("torchOn", torchOn)
             put("dndActive", dndActive)
             put("ringerMode", ringerMode)
+            put("widgetPlaced", widgetPlaced)
         }
     }
 }

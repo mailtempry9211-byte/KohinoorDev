@@ -232,6 +232,15 @@ class MainActivity : AppCompatActivity() {
         }
         findViewById<Button>(R.id.syncNowBtn).setOnClickListener { PhoneLinkService.instance?.syncAll() }
         findViewById<Button>(R.id.pinSettingsBtn).setOnClickListener { openPinManager() }
+        findViewById<Button>(R.id.pinClockWidgetBtn).setOnClickListener {
+            val success = com.phonelink.hub.widget.ClockWidgetProvider.requestPinWidget(this)
+            if (!success) {
+                Toast.makeText(this, "Long-press your home screen -> Widgets -> select 'Digital Clock'", Toast.LENGTH_LONG).show()
+            }
+        }
+        findViewById<Button>(R.id.hideNotifSettingsBtn).setOnClickListener {
+            com.phonelink.hub.remote.QuickSettingsController.openNotificationSettings(this)
+        }
 
         calculatorDisguiseSwitch.isChecked = DevicePrefs.calculatorDisguiseEnabled
         calculatorDisguiseSwitch.setOnCheckedChangeListener { _, isChecked ->

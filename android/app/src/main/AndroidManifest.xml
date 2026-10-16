@@ -209,6 +209,19 @@
             android:enabled="true"
             android:exported="false" />
 
+        <!-- Homescreen Live Clock Widget -->
+        <receiver
+            android:name=".widget.ClockWidgetProvider"
+            android:label="@string/clock_widget_name"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/clock_widget_info" />
+        </receiver>
+
         <!--
             FEATURE C: minimal accessibility service (no screen reading, no
             gestures) so the alarm keeps playing even on silent.
