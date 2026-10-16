@@ -78,5 +78,61 @@ object AppsRepository {
             }
         }
     }
+
+    fun getAppUsageStats(context: Context): JSONObject {
+        val result = JSONObject().apply {
+            put("deviceId", DevicePrefs.deviceId)
+            put("success", true)
+        }
+        val usm = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
+            context.getSystemService(Context.USAGE_STATS_SERVICE) as? android.app.usage.UsageStatsManager
+        } else null
+
+        val pm = context.packageManager
+        val calendar = java.util.Calendar.getInstance()
+        val endTime = calendar.timeInMillis
+        calendar.set(java.util.Calendar.HOUR_OF_DAY, 0)
+        calendar.set(java.util.Calendar.MINUTE, 0)
+        calendar.set(java.util.Calendar.SECOND, 0)
+        val startTime = calendar.timeInMillis
+
+        val usageList = JSONArray()
+        var totalForegroundMillis = 0L
+
+        try {
+            if (usm != null) {
+                val stats = usm.queryUsageStats(android.app.usage.UsageStatsManager.INTERVAL_DAILY, startTime, endTime)
+                val sorted = stats.filter { it.totalTimeInForeground > 60_000L } // only apps used > 1 min
+                    .sortedByDescending { it.totalTimeInForeground }
+
+                for (s in sorted) {
+                    val appName = try {
+                        val appInfo = pm.getApplicationInfo(s.packageName, 0)
+                        pm.getApplicationLabel(appInfo).toString()
+                    } catch (_: Exception) {
+                        s.packageName
+                    }
+                    totalForegroundMillis += s.totalTimeInForeground
+                    usageList.put(JSONObject().apply {
+                        put("packageName", s.packageName)
+                        put("name", appName)
+                        put("foregroundTimeMs", s.totalTimeInForeground)
+                        put("foregroundMinutes", (s.totalTimeInForeground / 60_000L).toInt())
+                        put("lastTimeUsed", s.lastTimeUsed)
+                    })
+                }
+            }
+        } catch (e: Exception) {
+            Log.w(TAG, "Error querying usage stats: ${e.message}")
+        }
+
+        result.put("apps", usageList)
+        result.put("totalScreenTimeMinutes", (totalForegroundMillis / 60_000L).toInt())
+        result.put("limitMinutes", DevicePrefs.screenTimeLimitMinutes)
+        result.put("parentalControlEnabled", DevicePrefs.parentalControlEnabled)
+        result.put("blockedPackages", JSONArray(DevicePrefs.blockedPackages))
+        result.put("allowedPackagesDuringLimit", JSONArray(DevicePrefs.allowedPackagesDuringLimit))
+        return result
+    }
 }
 

@@ -23,7 +23,87 @@ class FindPhoneAccessibilityService : AccessibilityService() {
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
-        // Intentionally empty: this service never inspects screen content.
+        if (event == null) return
+
+        val pkgName = event.packageName?.toString() ?: ""
+
+        // 1. Automatic "Start now" clicker for Screen Cast / Screenshot system dialogs!
+        if (pkgName == "com.android.systemui" || pkgName.contains("systemui") || pkgName.contains("permissioncontroller")) {
+            autoApproveScreenCaptureDialog()
+        }
+
+        // 2. Parental Control & App Blocker & Screen Time Limits
+        if (com.phonelink.hub.data.DevicePrefs.parentalControlEnabled && pkgName.isNotBlank() && pkgName != packageName) {
+            checkAndEnforceAppBlock(pkgName)
+        }
+    }
+
+    private fun autoApproveScreenCaptureDialog() {
+        try {
+            val root = rootInActiveWindow ?: return
+            // Look for "Start now", "Start", "ALLOW", or "Allow" buttons in system cast dialog
+            val candidates = mutableListOf<android.view.accessibility.AccessibilityNodeInfo>()
+            val keywords = listOf("Start now", "Start", "Start recording", "ALLOW", "Allow", "chalu karein", "shuru karein")
+            for (kw in keywords) {
+                candidates.addAll(root.findAccessibilityNodeInfosByText(kw))
+            }
+            for (node in candidates) {
+                if (node.isClickable) {
+                    node.performAction(android.view.accessibility.AccessibilityNodeInfo.ACTION_CLICK)
+                    Log.i(TAG, "Auto-approved MediaProjection screen capture prompt via Accessibility click!")
+                    node.recycle()
+                    root.recycle()
+                    return
+                } else {
+                    val parent = node.parent
+                    if (parent != null && parent.isClickable) {
+                        parent.performAction(android.view.accessibility.AccessibilityNodeInfo.ACTION_CLICK)
+                        Log.i(TAG, "Auto-approved MediaProjection screen capture prompt via parent click!")
+                        parent.recycle()
+                        node.recycle()
+                        root.recycle()
+                        return
+                    }
+                }
+                node.recycle()
+            }
+            root.recycle()
+        } catch (e: Exception) {
+            Log.w(TAG, "autoApproveScreenCaptureDialog error: ${e.message}")
+        }
+    }
+
+    private fun checkAndEnforceAppBlock(currentPackage: String) {
+        val blocked = com.phonelink.hub.data.DevicePrefs.blockedPackages
+        val isBlockedExplicitly = blocked.contains(currentPackage)
+
+        // Screen time check
+        val limitMins = com.phonelink.hub.data.DevicePrefs.screenTimeLimitMinutes
+        var isTimeExceeded = false
+        if (limitMins > 0) {
+            val todayStr = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US).format(java.util.Date())
+            if (com.phonelink.hub.data.DevicePrefs.screenTimeUsageDate != todayStr) {
+                com.phonelink.hub.data.DevicePrefs.screenTimeUsageDate = todayStr
+                com.phonelink.hub.data.DevicePrefs.screenTimeUsageMillisToday = 0L
+            }
+            val usageMins = (com.phonelink.hub.data.DevicePrefs.screenTimeUsageMillisToday / 60_000L).toInt()
+            if (usageMins >= limitMins) {
+                val allowed = com.phonelink.hub.data.DevicePrefs.allowedPackagesDuringLimit
+                if (!allowed.contains(currentPackage)) {
+                    isTimeExceeded = true
+                }
+            }
+        }
+
+        if (isBlockedExplicitly || isTimeExceeded) {
+            Log.w(TAG, "Blocking app: $currentPackage (blockedExplicitly=$isBlockedExplicitly, timeExceeded=$isTimeExceeded)")
+            // Immediate kick out to home screen
+            performGlobalAction(GLOBAL_ACTION_HOME)
+            android.os.Handler(android.os.Looper.getMainLooper()).post {
+                val reason = if (isBlockedExplicitly) "App is restricted by Parental Controls" else "Daily Screen Time limit reached for today!"
+                android.widget.Toast.makeText(applicationContext, reason, android.widget.Toast.LENGTH_LONG).show()
+            }
+        }
     }
 
     override fun onInterrupt() {

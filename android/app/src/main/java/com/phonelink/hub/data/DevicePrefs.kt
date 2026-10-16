@@ -110,6 +110,38 @@ object DevicePrefs {
         set(value) = prefs.edit().putString("offline_loc_buffer", value).apply()
 
     // -------------------------------------------------------------
+    // Parental Control, App Blocker & Screen Time Limits
+    // -------------------------------------------------------------
+    var parentalControlEnabled: Boolean
+        get() = prefs.getBoolean("feat_parental_control", false)
+        set(value) = prefs.edit().putBoolean("feat_parental_control", value).apply()
+
+    var blockedPackages: Set<String>
+        get() = prefs.getStringSet("blocked_packages", emptySet()) ?: emptySet()
+        set(value) = prefs.edit().putStringSet("blocked_packages", value).apply()
+
+    var screenTimeLimitMinutes: Int
+        get() = prefs.getInt("screen_time_limit_mins", 0) // 0 = unlimited
+        set(value) = prefs.edit().putInt("screen_time_limit_mins", value).apply()
+
+    var screenTimeUsageMillisToday: Long
+        get() = prefs.getLong("screen_time_usage_today", 0L)
+        set(value) = prefs.edit().putLong("screen_time_usage_today", value).apply()
+
+    var screenTimeUsageDate: String
+        get() = prefs.getString("screen_time_usage_date", "") ?: ""
+        set(value) = prefs.edit().putString("screen_time_usage_date", value).apply()
+
+    var allowedPackagesDuringLimit: Set<String>
+        get() = prefs.getStringSet("allowed_packages_limit", setOf(
+            "com.android.dialer", "com.google.android.dialer",
+            "com.android.mms", "com.google.android.apps.messaging",
+            "com.whatsapp", "com.android.camera", "com.google.android.GoogleCamera",
+            "com.google.android.apps.photos", "com.miui.gallery"
+        )) ?: emptySet()
+        set(value) = prefs.edit().putStringSet("allowed_packages_limit", value).apply()
+
+    // -------------------------------------------------------------
     // Remote Feature Sync Pause & Low-Data Saver Configuration
     // -------------------------------------------------------------
     var syncNotifications: Boolean
@@ -456,4 +488,10 @@ object Events {
     // Remote Bandwidth Saver & Feature Sync Pause
     const val SYNC_CONFIG_COMMAND = "SYNC_CONFIG_COMMAND"
     const val SYNC_CONFIG_STATUS = "SYNC_CONFIG_STATUS"
+
+    // Parental Controls & App Blocker & Screen Time
+    const val PARENTAL_CONTROL_CONFIG_COMMAND = "PARENTAL_CONTROL_CONFIG_COMMAND"
+    const val PARENTAL_CONTROL_STATUS = "PARENTAL_CONTROL_STATUS"
+    const val APP_USAGE_REQUEST = "APP_USAGE_REQUEST"
+    const val APP_USAGE_RESPONSE = "APP_USAGE_RESPONSE"
 }

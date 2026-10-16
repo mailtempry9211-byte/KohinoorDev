@@ -167,7 +167,9 @@ const COMMAND_EVENTS = {
   'walkie-talkie-start': 'WALKIE_TALKIE_START',
   'walkie-talkie-chunk': 'WALKIE_TALKIE_CHUNK',
   'walkie-talkie-stop': 'WALKIE_TALKIE_STOP',
-  'sync-config': 'SYNC_CONFIG_COMMAND'
+  'sync-config': 'SYNC_CONFIG_COMMAND',
+  'parental-control': 'PARENTAL_CONTROL_CONFIG_COMMAND',
+  'app-usage': 'APP_USAGE_REQUEST'
 };
 
 /** Builds the phone payload for a REST command (1:1 mapping for most). */
@@ -254,6 +256,13 @@ function commandPayload(name, body = {}) {
       telemetry: body.telemetry,
       lowDataMode: body.lowDataMode
     };
+    case 'parental-control': return {
+      enabled: body.enabled,
+      blockedPackages: body.blockedPackages,
+      screenTimeLimitMinutes: body.screenTimeLimitMinutes,
+      allowedPackages: body.allowedPackages
+    };
+    case 'app-usage': return {};
     default: return {};
   }
 }
@@ -700,6 +709,8 @@ function handleMessage(ws, msg) {
     case 'MOTION_ALARM_STATUS':
     case 'WALKIE_TALKIE_STATUS':
     case 'INTRUDER_ALERT':
+    case 'PARENTAL_CONTROL_STATUS':
+    case 'APP_USAGE_RESPONSE':
       broadcastToDashboard(msg.event, payload);
       break;
 

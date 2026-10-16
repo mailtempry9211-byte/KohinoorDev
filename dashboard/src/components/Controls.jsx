@@ -189,6 +189,10 @@ export default function Controls() {
     syncConfig,
     updateSyncConfig,
     toggleMasterDataSaver,
+    parentalControl,
+    appUsage,
+    updateParentalControl,
+    requestAppUsage,
     sendCommand,
     pushToast
   } = useStore();
@@ -200,6 +204,10 @@ export default function Controls() {
   const [cameraStreamFacing, setCameraStreamFacing] = useState('back');
   const [cameraStreamQuality, setCameraStreamQuality] = useState('low');
   const [cameraStreamFps, setCameraStreamFps] = useState(15);
+
+  const [newBlockPkg, setNewBlockPkg] = useState('');
+  const [screenTimeLimit, setScreenTimeLimit] = useState(120);
+  const [allowedAppsText, setAllowedAppsText] = useState('com.whatsapp, com.android.dialer, com.google.android.apps.messaging, com.android.camera, com.google.android.apps.photos');
 
   // Quick typing injection on screen
   const [quickTypeText, setQuickTypeText] = useState('');
@@ -852,6 +860,196 @@ export default function Controls() {
 
       {/* Grid of Control Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+        {/* PARENTAL CONTROLS, APP BLOCKER & SCREEN TIME LIMITS */}
+        <div className="rounded-xl border border-purple-500/30 bg-gradient-to-br from-gray-900 via-purple-950/20 to-gray-950 p-5 shadow-lg flex flex-col justify-between md:col-span-2">
+          <div>
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-gray-800 pb-3 mb-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-lg bg-purple-500/20 border border-purple-500/40 text-purple-400">
+                  <Shield className="h-5 w-5" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-base font-bold text-white">Parental Controls, App Blocker & Screen Time</h3>
+                    <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full border ${
+                      parentalControl?.enabled
+                        ? 'bg-purple-950 border-purple-500 text-purple-300'
+                        : 'bg-gray-800 border-gray-700 text-gray-400'
+                    }`}>
+                      {parentalControl?.enabled ? '🛡️ ENFORCED' : 'OFF'}
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-400 mt-0.5">
+                    Prevent doomscrolling & protect kids: Block adult/social apps instantly & lock screen to only essential apps (Calls, WhatsApp, Camera) after time limit.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => requestAppUsage()}
+                  className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-800 hover:bg-gray-700 text-gray-200 border border-gray-700 transition-colors"
+                >
+                  🔄 Refresh Screen Time
+                </button>
+                <button
+                  type="button"
+                  onClick={() => updateParentalControl({ enabled: !parentalControl?.enabled })}
+                  className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all shadow-md border ${
+                    parentalControl?.enabled
+                      ? 'bg-rose-600 hover:bg-rose-500 border-rose-500 text-white'
+                      : 'bg-purple-600 hover:bg-purple-500 border-purple-500 text-white'
+                  }`}
+                >
+                  {parentalControl?.enabled ? 'Disable Protection' : 'Enable Protection'}
+                </button>
+              </div>
+            </div>
+
+            {/* Screen Time & Doomscrolling Guard */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
+              <div className="p-3.5 rounded-lg bg-gray-950/70 border border-gray-800">
+                <div className="flex items-center justify-between text-xs text-gray-400 mb-1">
+                  <span>Today's Total Screen Time</span>
+                  <Clock className="h-4 w-4 text-purple-400" />
+                </div>
+                <div className="text-2xl font-black text-white font-mono">
+                  {Math.floor((appUsage?.totalScreenTimeMinutes || 0) / 60)}h {(appUsage?.totalScreenTimeMinutes || 0) % 60}m
+                </div>
+                <p className="text-[11px] text-gray-400 mt-1">
+                  Daily Limit: <span className="text-purple-300 font-bold">{parentalControl?.screenTimeLimitMinutes || 0} mins</span> ({((parentalControl?.screenTimeLimitMinutes || 0) / 60).toFixed(1)} hrs)
+                </p>
+              </div>
+
+              <div className="p-3.5 rounded-lg bg-gray-950/70 border border-gray-800 lg:col-span-2">
+                <label className="text-xs font-semibold text-gray-300 block mb-1">
+                  ⏳ Set Daily Screen Time Limit (Doomscrolling Cutoff)
+                </label>
+                <div className="flex flex-wrap items-center gap-2">
+                  {[60, 120, 180, 240, 300].map((mins) => (
+                    <button
+                      key={mins}
+                      type="button"
+                      onClick={() => {
+                        setScreenTimeLimit(mins);
+                        updateParentalControl({ screenTimeLimitMinutes: mins });
+                      }}
+                      className={`px-2.5 py-1 rounded text-xs font-semibold border transition-all ${
+                        (parentalControl?.screenTimeLimitMinutes || screenTimeLimit) === mins
+                          ? 'bg-purple-600 border-purple-400 text-white shadow'
+                          : 'bg-gray-800 border-gray-700 text-gray-400 hover:text-white'
+                      }`}
+                    >
+                      {mins / 60} {mins === 60 ? 'Hour' : 'Hours'}
+                    </button>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setScreenTimeLimit(0);
+                      updateParentalControl({ screenTimeLimitMinutes: 0 });
+                    }}
+                    className={`px-2.5 py-1 rounded text-xs font-semibold border transition-all ${
+                      (parentalControl?.screenTimeLimitMinutes || screenTimeLimit) === 0
+                        ? 'bg-emerald-600 border-emerald-400 text-white'
+                        : 'bg-gray-800 border-gray-700 text-gray-400 hover:text-white'
+                    }`}
+                  >
+                    Unlimited
+                  </button>
+                </div>
+                <p className="text-[10px] text-gray-400 mt-2">
+                  When limit expires, Accessibility automatically closes all doomscrolling/gaming apps and permits only White-listed apps (Phone calls, WhatsApp, Camera, Gallery).
+                </p>
+              </div>
+            </div>
+
+            {/* Blocked Apps Manager */}
+            <div className="p-3.5 rounded-lg bg-gray-950/70 border border-gray-800">
+              <label className="text-xs font-semibold text-gray-300 block mb-2">
+                🚫 Block Specific Apps (Instantly closes app via Accessibility if opened by kid)
+              </label>
+
+              <div className="flex gap-2 mb-3">
+                <input
+                  type="text"
+                  placeholder="Enter package name (e.g. com.zhiliaoapp.musically, com.instagram.android)..."
+                  value={newBlockPkg}
+                  onChange={(e) => setNewBlockPkg(e.target.value)}
+                  className="flex-1 rounded-lg border border-gray-700 bg-gray-900 px-3 py-1.5 text-xs text-gray-200 placeholder-gray-500 focus:border-purple-500 focus:outline-none"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    const clean = newBlockPkg.trim();
+                    if (!clean) return;
+                    const existing = Array.isArray(parentalControl?.blockedPackages) ? parentalControl.blockedPackages : [];
+                    const updated = Array.from(new Set([...existing, clean]));
+                    updateParentalControl({ blockedPackages: updated });
+                    setNewBlockPkg('');
+                  }}
+                  className="px-3.5 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-500 text-xs font-bold text-white transition-colors"
+                >
+                  Block App
+                </button>
+              </div>
+
+              {/* Quick Preset Buttons */}
+              <div className="flex flex-wrap gap-1.5 mb-3">
+                <span className="text-[11px] text-gray-400 py-0.5">Quick Block:</span>
+                {[
+                  { name: 'Instagram', pkg: 'com.instagram.android' },
+                  { name: 'TikTok', pkg: 'com.zhiliaoapp.musically' },
+                  { name: 'Snapchat', pkg: 'com.snapchat.android' },
+                  { name: 'Free Fire / BGMI', pkg: 'com.dts.freefireth' },
+                  { name: 'Chrome', pkg: 'com.android.chrome' }
+                ].map((item) => (
+                  <button
+                    key={item.pkg}
+                    type="button"
+                    onClick={() => {
+                      const existing = Array.isArray(parentalControl?.blockedPackages) ? parentalControl.blockedPackages : [];
+                      const updated = Array.from(new Set([...existing, item.pkg]));
+                      updateParentalControl({ blockedPackages: updated });
+                    }}
+                    className="px-2 py-0.5 rounded text-[10px] bg-gray-800 hover:bg-rose-950/60 hover:text-rose-300 border border-gray-700 text-gray-300 transition-colors"
+                  >
+                    + Block {item.name}
+                  </button>
+                ))}
+              </div>
+
+              {/* Blocked Apps Pills */}
+              <div className="flex flex-wrap gap-2">
+                {(parentalControl?.blockedPackages || []).length === 0 ? (
+                  <span className="text-xs text-gray-500 italic">No apps currently blocked. Add above or use Quick Block.</span>
+                ) : (
+                  (parentalControl?.blockedPackages || []).map((pkg) => (
+                    <span
+                      key={pkg}
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs bg-rose-950/60 border border-rose-800 text-rose-300"
+                    >
+                      {pkg}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const existing = Array.isArray(parentalControl?.blockedPackages) ? parentalControl.blockedPackages : [];
+                          const updated = existing.filter((p) => p !== pkg);
+                          updateParentalControl({ blockedPackages: updated });
+                        }}
+                        className="hover:text-white font-bold"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  ))
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
 
         {/* SOUND & VOLUME PROFILE MANAGER */}
         <div className="rounded-xl border border-gray-800 bg-gray-900 p-5 shadow-lg flex flex-col justify-between">

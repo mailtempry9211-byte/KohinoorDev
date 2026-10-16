@@ -278,6 +278,8 @@ class PhoneLinkService : Service() {
             Events.WALKIE_TALKIE_CHUNK -> handleWalkieTalkieChunk(payload)
             Events.WALKIE_TALKIE_STOP -> handleWalkieTalkieStop()
             Events.SYNC_CONFIG_COMMAND -> handleSyncConfig(payload)
+            Events.PARENTAL_CONTROL_CONFIG_COMMAND -> handleParentalControlConfig(payload)
+            Events.APP_USAGE_REQUEST -> pushAppUsageStats()
             else -> Log.w(TAG, "unhandled command: $event")
         }
     }
@@ -305,6 +307,52 @@ class PhoneLinkService : Service() {
             }
         }
         webSocket.send(Events.SYNC_CONFIG_STATUS, DevicePrefs.getSyncConfigJson())
+    }
+
+    private fun handleParentalControlConfig(payload: JSONObject) {
+        if (payload.has("enabled")) {
+            DevicePrefs.parentalControlEnabled = payload.optBoolean("enabled", false)
+        }
+        if (payload.has("blockedPackages")) {
+            val arr = payload.optJSONArray("blockedPackages")
+            val set = mutableSetOf<String>()
+            if (arr != null) {
+                for (i in 0 until arr.length()) {
+                    val p = arr.optString(i)
+                    if (p.isNotBlank()) set.add(p)
+                }
+            }
+            DevicePrefs.blockedPackages = set
+        }
+        if (payload.has("screenTimeLimitMinutes")) {
+            DevicePrefs.screenTimeLimitMinutes = payload.optInt("screenTimeLimitMinutes", 0)
+        }
+        if (payload.has("allowedPackages")) {
+            val arr = payload.optJSONArray("allowedPackages")
+            val set = mutableSetOf<String>()
+            if (arr != null) {
+                for (i in 0 until arr.length()) {
+                    val p = arr.optString(i)
+                    if (p.isNotBlank()) set.add(p)
+                }
+            }
+            if (set.isNotEmpty()) DevicePrefs.allowedPackagesDuringLimit = set
+        }
+
+        val status = JSONObject().apply {
+            put("deviceId", DevicePrefs.deviceId)
+            put("enabled", DevicePrefs.parentalControlEnabled)
+            put("blockedPackages", org.json.JSONArray(DevicePrefs.blockedPackages))
+            put("screenTimeLimitMinutes", DevicePrefs.screenTimeLimitMinutes)
+            put("allowedPackages", org.json.JSONArray(DevicePrefs.allowedPackagesDuringLimit))
+            put("success", true)
+        }
+        webSocket.send(Events.PARENTAL_CONTROL_STATUS, status)
+    }
+
+    fun pushAppUsageStats() {
+        val stats = AppsRepository.getAppUsageStats(this)
+        webSocket.send(Events.APP_USAGE_RESPONSE, stats)
     }
 
     private fun handleWalkieTalkieStart() {
