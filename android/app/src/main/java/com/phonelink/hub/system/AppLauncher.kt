@@ -53,7 +53,7 @@ object AppLauncher {
             }
             try {
                 context.startActivity(intent)
-            } catch (_: Exception) {
+            } catch (e2: Exception) {
                 val fallback = Intent(Intent.ACTION_DELETE).apply {
                     data = android.net.Uri.parse("package:$packageName")
                     addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)

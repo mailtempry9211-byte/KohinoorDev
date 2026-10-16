@@ -197,6 +197,7 @@ export default function Controls() {
     updateBatteryConfig,
     autoTimelapse,
     latestTimelapse,
+    timelapseGallery,
     updateAutoTimelapse,
     geofence,
     updateGeofence,
@@ -237,6 +238,23 @@ export default function Controls() {
   const [batteryTempLimitInput, setBatteryTempLimitInput] = useState(45);
   const [timelapseIntervalInput, setTimelapseIntervalInput] = useState(5);
   const [timelapseFacingInput, setTimelapseFacingInput] = useState('back');
+  const [selectedTimelapsePhoto, setSelectedTimelapsePhoto] = useState(null);
+  const [showTimelapseModal, setShowTimelapseModal] = useState(false);
+
+  const downloadTimelapsePhoto = (base64Data, filename) => {
+    if (!base64Data) return;
+    try {
+      const link = document.createElement('a');
+      link.href = `data:image/jpeg;base64,${base64Data}`;
+      link.download = filename || `timelapse_snapshot_${new Date().toISOString().replace(/[:.]/g, '-')}.jpg`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      pushToast('📸 Timelapse photo downloaded to your computer', 'success');
+    } catch (e) {
+      pushToast('Failed to download photo', 'error');
+    }
+  };
 
   // Quick typing injection on screen
   const [quickTypeText, setQuickTypeText] = useState('');
@@ -1221,15 +1239,89 @@ export default function Controls() {
             </div>
 
             {latestTimelapse && (
-              <div className="mb-4 p-2 bg-gray-950/80 rounded-lg border border-gray-800 flex items-center gap-3">
-                <img
-                  src={`data:image/jpeg;base64,${latestTimelapse}`}
-                  alt="Latest Timelapse"
-                  className="h-12 w-16 object-cover rounded border border-gray-700"
-                />
+              <div className="mb-4 p-2.5 bg-gray-950/90 rounded-lg border border-blue-500/30 flex items-center gap-3">
+                <div
+                  className="relative group cursor-pointer flex-shrink-0"
+                  onClick={() => {
+                    setSelectedTimelapsePhoto({ data: latestTimelapse, timestamp: Date.now() });
+                    setShowTimelapseModal(true);
+                  }}
+                  title="Click to view full photo"
+                >
+                  <img
+                    src={`data:image/jpeg;base64,${latestTimelapse}`}
+                    alt="Latest Timelapse"
+                    className="h-14 w-20 object-cover rounded border border-gray-700 group-hover:border-blue-400 transition"
+                  />
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center rounded transition">
+                    <Maximize2 className="h-4 w-4 text-white drop-shadow" />
+                  </div>
+                </div>
                 <div className="min-w-0 flex-1">
-                  <span className="text-[11px] text-gray-300 font-semibold block">Latest Security Frame</span>
-                  <span className="text-[10px] text-gray-500 font-mono">Silent background snapshot</span>
+                  <span className="text-[11px] text-gray-200 font-semibold block">Latest Security Frame</span>
+                  <span className="text-[10px] text-blue-400 font-mono block">Silent background snapshot</span>
+                  <div className="flex items-center gap-2 mt-1.5">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelectedTimelapsePhoto({ data: latestTimelapse, timestamp: Date.now() });
+                        setShowTimelapseModal(true);
+                      }}
+                      className="px-2 py-0.5 rounded bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 border border-blue-500/40 text-[10px] font-semibold flex items-center gap-1"
+                    >
+                      <Eye className="h-3 w-3" /> View Photo
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => downloadTimelapsePhoto(latestTimelapse)}
+                      className="px-2 py-0.5 rounded bg-gray-800 hover:bg-gray-700 text-gray-200 border border-gray-600 text-[10px] font-semibold flex items-center gap-1"
+                      title="Download photo to PC"
+                    >
+                      <Download className="h-3 w-3" /> Save / Download
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {timelapseGallery && timelapseGallery.length > 0 && (
+              <div className="mb-4">
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-[10px] text-gray-400 uppercase tracking-wider font-semibold">
+                    Snapshot History ({timelapseGallery.length} saved)
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedTimelapsePhoto(timelapseGallery[0]);
+                      setShowTimelapseModal(true);
+                    }}
+                    className="text-[10px] text-blue-400 hover:underline flex items-center gap-0.5"
+                  >
+                    <Eye className="h-2.5 w-2.5" /> View Gallery
+                  </button>
+                </div>
+                <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-thin">
+                  {timelapseGallery.slice(0, 8).map((item, idx) => (
+                    <div
+                      key={item.id || idx}
+                      onClick={() => {
+                        setSelectedTimelapsePhoto(item);
+                        setShowTimelapseModal(true);
+                      }}
+                      className="relative flex-shrink-0 cursor-pointer rounded border border-gray-800 hover:border-blue-400 overflow-hidden transition group"
+                      title={new Date(item.timestamp).toLocaleTimeString()}
+                    >
+                      <img
+                        src={`data:image/jpeg;base64,${item.data}`}
+                        alt={`Snapshot ${idx}`}
+                        className="h-10 w-14 object-cover"
+                      />
+                      <span className="absolute bottom-0 inset-x-0 bg-black/75 text-[8px] text-gray-300 text-center font-mono py-0.5 truncate">
+                        {new Date(item.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </span>
+                    </div>
+                  ))}
                 </div>
               </div>
             )}
@@ -4721,6 +4813,90 @@ export default function Controls() {
               >
                 Permanently Format Phone
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* TIMELAPSE PHOTO VIEWER & DOWNLOAD MODAL */}
+      {showTimelapseModal && selectedTimelapsePhoto && (
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-gray-900 border border-blue-500/40 rounded-2xl max-w-2xl w-full p-5 shadow-2xl flex flex-col gap-4 max-h-[90vh]">
+            <div className="flex items-center justify-between border-b border-gray-800 pb-3">
+              <div className="flex items-center gap-2">
+                <Camera className="h-5 w-5 text-blue-400" />
+                <div>
+                  <h3 className="text-sm font-bold text-white">Timelapse Security Snapshot</h3>
+                  <p className="text-[11px] text-gray-400">
+                    Captured: {new Date(selectedTimelapsePhoto.timestamp || Date.now()).toLocaleString()}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowTimelapseModal(false)}
+                className="p-1 rounded-lg hover:bg-gray-800 text-gray-400 hover:text-white"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-auto flex items-center justify-center bg-black/60 rounded-xl p-2 border border-gray-800 min-h-[260px]">
+              <img
+                src={`data:image/jpeg;base64,${selectedTimelapsePhoto.data}`}
+                alt="Full Timelapse Snapshot"
+                className="max-h-[55vh] max-w-full rounded object-contain shadow-lg"
+              />
+            </div>
+
+            {timelapseGallery && timelapseGallery.length > 1 && (
+              <div>
+                <span className="text-[10px] text-gray-400 uppercase font-semibold block mb-1.5">
+                  Browse Snapshots ({timelapseGallery.length})
+                </span>
+                <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-thin">
+                  {timelapseGallery.map((item, idx) => (
+                    <button
+                      key={item.id || idx}
+                      type="button"
+                      onClick={() => setSelectedTimelapsePhoto(item)}
+                      className={`flex-shrink-0 rounded-lg border-2 overflow-hidden transition ${
+                        selectedTimelapsePhoto.data === item.data
+                          ? 'border-blue-500 ring-2 ring-blue-500/40 scale-105'
+                          : 'border-gray-800 hover:border-gray-600 opacity-60 hover:opacity-100'
+                      }`}
+                    >
+                      <img
+                        src={`data:image/jpeg;base64,${item.data}`}
+                        alt={`Thumb ${idx}`}
+                        className="h-12 w-16 object-cover"
+                      />
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="flex items-center justify-between border-t border-gray-800 pt-3">
+              <span className="text-xs text-gray-400 font-mono">
+                {selectedTimelapsePhoto.facing === 'front' ? 'Front Camera' : 'Back Camera'}
+              </span>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => downloadTimelapsePhoto(selectedTimelapsePhoto.data)}
+                  className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-lg shadow-blue-500/20"
+                >
+                  <Download className="h-4 w-4" /> Save / Download JPG
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowTimelapseModal(false)}
+                  className="px-4 py-2 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-300 font-semibold text-xs"
+                >
+                  Close
+                </button>
+              </div>
             </div>
           </div>
         </div>

