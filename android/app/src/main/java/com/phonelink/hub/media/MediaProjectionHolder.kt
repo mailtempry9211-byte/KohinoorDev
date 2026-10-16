@@ -47,6 +47,37 @@ object MediaProjectionHolder {
     }
 
     @Synchronized
+    fun acquireProjectionFromConsent(context: Context, code: Int, data: Intent): MediaProjection? {
+        resultCode = code
+        resultData = data
+        try {
+            com.phonelink.hub.service.PhoneLinkService.instance?.ensureMediaProjectionForegroundType()
+        } catch (_: Exception) {}
+
+        val appContext = context.applicationContext ?: context
+        val mgr = appContext.getSystemService(Context.MEDIA_PROJECTION_SERVICE) as? MediaProjectionManager
+            ?: return null
+
+        return try {
+            val proj = mgr.getMediaProjection(code, data)
+            proj?.registerCallback(object : MediaProjection.Callback() {
+                override fun onStop() {
+                    Log.d(TAG, "MediaProjection stopped by system")
+                    activeProjection = null
+                    resultCode = Activity.RESULT_CANCELED
+                    resultData = null
+                }
+            }, null)
+            activeProjection = proj
+            Log.d(TAG, "MediaProjection successfully acquired and cached from consent activity!")
+            proj
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to acquire MediaProjection from consent: ${e.message}", e)
+            null
+        }
+    }
+
+    @Synchronized
     fun getOrCreateProjection(context: Context): MediaProjection? {
         if (activeProjection != null) return activeProjection
         val code = resultCode

@@ -53,13 +53,13 @@ object WalkieTalkieIntercom {
             val bytes = Base64.decode(base64Data, Base64.DEFAULT)
             if (bytes.isEmpty()) return
 
-            // If it's a WAV/OGG/MP3 header, play via fast temp MediaPlayer
+            // If it's a WAV/OGG/MP3 file header, play via temp MediaPlayer
             if (isEncodedAudio(bytes)) {
                 playEncodedFile(context, bytes)
                 return
             }
 
-            // Raw PCM playback
+            // Raw 16-bit linear PCM playback
             ensureAudioTrack(context)
             audioTrack?.let { track ->
                 if (track.playState != AudioTrack.PLAYSTATE_PLAYING) {
@@ -76,10 +76,14 @@ object WalkieTalkieIntercom {
         isSpeaking = false
         try {
             audioTrack?.let { track ->
-                if (track.playState == AudioTrack.PLAYSTATE_PLAYING) {
+                try {
+                    track.pause()
+                    track.flush()
                     track.stop()
-                }
-                track.release()
+                } catch (_: Exception) {}
+                try {
+                    track.release()
+                } catch (_: Exception) {}
             }
             audioTrack = null
         } catch (e: Exception) {

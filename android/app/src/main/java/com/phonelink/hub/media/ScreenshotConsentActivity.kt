@@ -23,8 +23,6 @@ class ScreenshotConsentActivity : ComponentActivity() {
 
         if (code == Activity.RESULT_OK && data != null) {
             Log.d(TAG, "Screen capture permission granted by user")
-            MediaProjectionHolder.updateConsent(code, data)
-            com.phonelink.hub.data.DevicePrefs.screenMirrorFeatureEnabled = true
             try {
                 if (com.phonelink.hub.service.PhoneLinkService.instance == null) {
                     com.phonelink.hub.service.PhoneLinkService.start(applicationContext)
@@ -33,6 +31,11 @@ class ScreenshotConsentActivity : ComponentActivity() {
             } catch (e: Exception) {
                 Log.w(TAG, "ensureMediaProjectionForegroundType error", e)
             }
+
+            // Immediately acquire projection while Activity is in foreground and token is fresh!
+            val proj = MediaProjectionHolder.acquireProjectionFromConsent(this, code, data)
+            com.phonelink.hub.data.DevicePrefs.screenMirrorFeatureEnabled = (proj != null || MediaProjectionHolder.hasConsent)
+
             try {
                 MediaProjectionHolder.notifyConsentGranted(applicationContext)
             } catch (e: Exception) {

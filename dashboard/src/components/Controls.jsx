@@ -219,46 +219,108 @@ export default function Controls() {
   // Theft Motion Alarm state
   const [motionThreshold, setMotionThreshold] = useState(2.5);
 
-  // Live Push-To-Talk Walkie Talkie Intercom
+  // Live Push-To-Talk Walkie Talkie Intercom (Linear PCM 16kHz)
   const [isPressingWalkieTalkie, setIsPressingWalkieTalkie] = useState(false);
-  const walkieMediaRecorderRef = useRef(null);
+  const walkieAudioCtxRef = useRef(null);
+  const walkieProcessorRef = useRef(null);
   const walkieStreamRef = useRef(null);
 
   const startHoldWalkieTalkie = async () => {
     try {
+      if (isPressingWalkieTalkie) return;
       setIsPressingWalkieTalkie(true);
       if (startWalkieTalkie) startWalkieTalkie();
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          channelCount: 1,
+          sampleRate: 16000,
+          echoCancellation: true,
+          noiseSuppression: true
+        }
+      });
       walkieStreamRef.current = stream;
-      const mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm;codecs=opus' });
-      walkieMediaRecorderRef.current = mediaRecorder;
-      mediaRecorder.ondataavailable = async (e) => {
-        if (e.data && e.data.size > 0) {
-          const reader = new FileReader();
-          reader.onload = () => {
-            const base64 = reader.result.split(',')[1];
-            if (base64 && sendWalkieTalkieChunk) sendWalkieTalkieChunk(base64);
-          };
-          reader.readAsDataURL(e.data);
+
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      const audioCtx = new AudioCtx({ sampleRate: 16000 });
+      walkieAudioCtxRef.current = audioCtx;
+
+      const source = audioCtx.createMediaStreamSource(stream);
+      // 2048 buffer size = 128ms packets at 16kHz
+      const processor = audioCtx.createScriptProcessor(2048, 1, 1);
+      walkieProcessorRef.current = processor;
+
+      processor.onaudioprocess = (e) => {
+        const inputData = e.inputBuffer.getChannelData(0);
+        // Convert Float32Array (-1.0 to 1.0) to 16-bit PCM Int16Array
+        const pcm16 = new Int16Array(inputData.length);
+        for (let i = 0; i < inputData.length; i++) {
+          const s = Math.max(-1, Math.min(1, inputData[i]));
+          pcm16[i] = s < 0 ? s * 0x8000 : s * 0x7FFF;
+        }
+
+        // Convert Int16Array bytes to base64
+        const uint8 = new Uint8Array(pcm16.buffer);
+        let binary = '';
+        const len = uint8.byteLength;
+        for (let i = 0; i < len; i++) {
+          binary += String.fromCharCode(uint8[i]);
+        }
+        const base64 = btoa(binary);
+        if (base64 && sendWalkieTalkieChunk) {
+          sendWalkieTalkieChunk(base64);
         }
       };
-      mediaRecorder.start(250);
+
+      source.connect(processor);
+      processor.connect(audioCtx.destination);
     } catch (err) {
       setIsPressingWalkieTalkie(false);
       pushToast('Microphone access denied: ' + err.message, 'error');
     }
   };
 
+  const [handsFreeIntercom, setHandsFreeIntercom] = useState(false);
+
   const stopHoldWalkieTalkie = () => {
     setIsPressingWalkieTalkie(false);
-    if (walkieMediaRecorderRef.current && walkieMediaRecorderRef.current.state !== 'inactive') {
-      try { walkieMediaRecorderRef.current.stop(); } catch (_) {}
+    setHandsFreeIntercom(false);
+    if (walkieProcessorRef.current) {
+      try {
+        walkieProcessorRef.current.disconnect();
+      } catch (_) {}
+      walkieProcessorRef.current = null;
+    }
+    if (walkieAudioCtxRef.current) {
+      try {
+        walkieAudioCtxRef.current.close();
+      } catch (_) {}
+      walkieAudioCtxRef.current = null;
     }
     if (walkieStreamRef.current) {
-      walkieStreamRef.current.getTracks().forEach((t) => t.stop());
+      try {
+        walkieStreamRef.current.getTracks().forEach((t) => t.stop());
+      } catch (_) {}
       walkieStreamRef.current = null;
     }
     if (stopWalkieTalkie) stopWalkieTalkie();
+  };
+
+  const toggleHandsFreeWalkie = () => {
+    if (isPressingWalkieTalkie) {
+      stopHoldWalkieTalkie();
+    } else {
+      startHoldWalkieTalkie();
+      setHandsFreeIntercom(true);
+    }
+  };
+
+  const forceStopWalkieTalkie = () => {
+    stopHoldWalkieTalkie();
+    try {
+      if (stopWalkieTalkie) stopWalkieTalkie();
+    } catch (_) {}
+    pushToast('Intercom force stopped and phone speaker silenced', 'info');
   };
 
   // Live Screen Touch & Gesture interaction
@@ -3110,30 +3172,55 @@ export default function Controls() {
           )}
         </div>
 
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-gray-950/60 p-4 rounded-xl border border-sky-900/30">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4 bg-gray-950/60 p-4 rounded-xl border border-sky-900/30">
           <div className="text-xs text-gray-300 space-y-1">
             <div className="font-semibold text-sky-300">Push-to-Talk Broadcast</div>
             <div className="text-[11px] text-gray-400">
-              Press and hold the button below to transmit your voice. The phone will instantly play it on full speakerphone.
+              Hold the talk button or toggle hands-free to speak directly through the phone's speakerphone in real time. Use Force Stop if audio ever gets stuck.
             </div>
           </div>
 
-          <button
-            type="button"
-            onMouseDown={startHoldWalkieTalkie}
-            onMouseUp={stopHoldWalkieTalkie}
-            onMouseLeave={stopHoldWalkieTalkie}
-            onTouchStart={startHoldWalkieTalkie}
-            onTouchEnd={stopHoldWalkieTalkie}
-            className={`select-none flex items-center gap-3 px-6 py-3.5 rounded-xl text-sm font-bold transition-all shadow-lg active:scale-95 cursor-pointer ${
-              isPressingWalkieTalkie
-                ? 'bg-rose-600 text-white shadow-rose-600/40 ring-4 ring-rose-500/30 animate-pulse'
-                : 'bg-sky-600 hover:bg-sky-500 text-white shadow-sky-600/30'
-            }`}
-          >
-            <Mic className={`h-5 w-5 ${isPressingWalkieTalkie ? 'animate-bounce' : ''}`} />
-            {isPressingWalkieTalkie ? 'TRANSMITTING VOICE (RELEASE TO STOP)' : 'HOLD TO TALK TO PHONE'}
-          </button>
+          <div className="flex flex-wrap items-center gap-3">
+            <button
+              type="button"
+              onMouseDown={startHoldWalkieTalkie}
+              onMouseUp={stopHoldWalkieTalkie}
+              onMouseLeave={stopHoldWalkieTalkie}
+              onTouchStart={startHoldWalkieTalkie}
+              onTouchEnd={stopHoldWalkieTalkie}
+              className={`select-none flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold transition-all shadow-lg active:scale-95 cursor-pointer ${
+                isPressingWalkieTalkie && !handsFreeIntercom
+                  ? 'bg-rose-600 text-white shadow-rose-600/40 ring-4 ring-rose-500/30 animate-pulse'
+                  : 'bg-sky-600 hover:bg-sky-500 text-white shadow-sky-600/30'
+              }`}
+            >
+              <Mic className={`h-4 w-4 ${isPressingWalkieTalkie && !handsFreeIntercom ? 'animate-bounce' : ''}`} />
+              {isPressingWalkieTalkie && !handsFreeIntercom ? 'TALKING (RELEASE TO STOP)' : 'HOLD TO TALK'}
+            </button>
+
+            <button
+              type="button"
+              onClick={toggleHandsFreeWalkie}
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold transition-all border shadow ${
+                handsFreeIntercom && isPressingWalkieTalkie
+                  ? 'bg-emerald-600 text-white border-emerald-500 ring-2 ring-emerald-400/40 animate-pulse'
+                  : 'bg-gray-800 hover:bg-gray-700 text-gray-200 border-gray-700'
+              }`}
+            >
+              <Mic className="h-4 w-4 text-emerald-400" />
+              {handsFreeIntercom && isPressingWalkieTalkie ? 'MUTE HANDS-FREE' : 'HANDS-FREE ON'}
+            </button>
+
+            <button
+              type="button"
+              onClick={forceStopWalkieTalkie}
+              title="Immediately cut audio track and silence the phone speaker"
+              className="flex items-center gap-1.5 px-3 py-2.5 rounded-xl text-xs font-semibold bg-rose-950/80 hover:bg-rose-900 border border-rose-700/80 text-rose-300 transition-colors shadow"
+            >
+              <MicOff className="h-4 w-4 text-rose-400" />
+              FORCE STOP
+            </button>
+          </div>
         </div>
       </div>
 
