@@ -57,7 +57,16 @@ jobs:
 
       - name: Build Windows Standalone Executables (Setup + Portable)
         run: |
-          npx electron-builder --win --x64
+          npx electron-builder --win --x64 2>&1 | Tee-Object -FilePath build.log
+        shell: pwsh
+
+      - name: Display Build Log
+        if: always()
+        run: |
+          if (Test-Path build.log) {
+            Get-Content build.log -Tail 100
+          }
+        shell: pwsh
 
       - name: Upload PhoneLink Hub Windows Executables
         uses: actions/upload-artifact@v4
