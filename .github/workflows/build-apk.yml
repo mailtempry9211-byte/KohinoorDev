@@ -20,6 +20,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v3
         with:
           gradle-version: '8.7'
+          cache-disabled: true
 
       - name: Prepare Release Keystore
         run: |
@@ -51,21 +52,14 @@ jobs:
           cd android
           if [ ! -f gradlew ]; then gradle wrapper; fi
           chmod +x gradlew
-          ./gradlew assembleRelease --stacktrace 2>&1 | tee build.log
-
-      - name: Output Failure Log on Error
-        if: failure()
-        run: |
-          echo "## ❌ Android Build Failure Log" >> $GITHUB_STEP_SUMMARY
-          echo '```text' >> $GITHUB_STEP_SUMMARY
-          tail -n 120 android/build.log >> $GITHUB_STEP_SUMMARY || true
-          echo '```' >> $GITHUB_STEP_SUMMARY
+          ./gradlew assembleRelease --stacktrace
 
       - name: Collect and Name Output APK
         run: |
           mkdir -p dist_apk
-          find android/app/build/outputs/apk -name "*.apk" -exec cp -v {} dist_apk/PhoneLink-Client-v1.0-Release.apk \;
+          find android/app/build/outputs/apk/release -name "*.apk" -exec cp -v {} dist_apk/PhoneLink-Client-v1.0-Release.apk \;
           cd dist_apk
+          ls -la
           sha256sum *.apk > SHA256SUMS.txt
           cat SHA256SUMS.txt
 

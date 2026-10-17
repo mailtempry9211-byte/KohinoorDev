@@ -324,7 +324,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         findViewById<Button>(R.id.templateChooserBtn).setOnClickListener {
-            val templates = arrayOf(
+            val templates: Array<CharSequence> = arrayOf(
                 "⛅ Weather & Clock Capsule",
                 "🌦️ Weather Radar & Forecast Only",
                 "🕒 Accurate Digital Chronometer",
