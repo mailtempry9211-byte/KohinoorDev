@@ -1,0 +1,53 @@
+name: Build PhoneLink Hub Standalone Windows EXE
+
+on:
+  push:
+    paths:
+      - 'electron/**'
+      - 'server/**'
+      - 'dashboard/**'
+      - 'package.json'
+      - '.github/workflows/build-exe.yml'
+  workflow_dispatch:
+
+jobs:
+  build-windows-exe:
+    name: Build PhoneLink Hub Standalone Windows Executable
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Server Dependencies
+        run: |
+          cd server
+          npm install --no-audit
+
+      - name: Build Dashboard Assets
+        run: |
+          cd dashboard
+          npm install --no-audit
+          npm run build
+
+      - name: Install Electron Packaging Tools
+        run: |
+          npm install --no-audit
+
+      - name: Build Windows Standalone Executables (Setup + Portable)
+        run: |
+          npx electron-builder --win --x64
+
+      - name: Upload PhoneLink Hub Windows Executables
+        uses: actions/upload-artifact@v4
+        with:
+          name: PhoneLink-Hub-Windows-v1.0-EXE
+          path: |
+            dist-electron/*.exe
+          retention-days: 30
+          if-no-files-found: error

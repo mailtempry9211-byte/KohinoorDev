@@ -12,4 +12,5 @@ NGROK.txt
 .mcp.json
 .agents/mcp_config.json
 lawnchair-16-dev/
+dist-electron/
 

@@ -1,24 +1,150 @@
 {
   "devices": [
     {
-      "id": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
+      "id": "android-890b8051-e0e5-434b-918d-da5b95867447",
+      "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447",
       "deviceName": "Xiaomi Mi 10",
-      "battery": 58,
+      "battery": 43,
       "isCharging": false,
       "temperatureC": 31.9,
-      "voltageMv": 3833,
+      "voltageMv": 3777,
       "health": "Good",
       "plugged": "On Battery",
       "wifiName": "suaib’s iPhone",
       "notificationSyncEnabled": true,
-      "lastSeen": 1792161110990,
-      "last_seen": 1792161110990,
-      "online": false,
-      "wsClientId": null
+      "lastSeen": 1792242029849,
+      "last_seen": 1792242029849,
+      "online": true,
+      "wsClientId": "507c1c76-22f1-4a81-b912-df43fa474eb3"
     }
   ],
   "calls": [
+    {
+      "id": "call-28",
+      "number": "112",
+      "name": null,
+      "type": "outgoing",
+      "duration": 0,
+      "timestamp": 1792234171468,
+      "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447"
+    },
+    {
+      "id": "call-27",
+      "number": "112",
+      "name": null,
+      "type": "outgoing",
+      "duration": 0,
+      "timestamp": 1792233925082,
+      "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447"
+    },
+    {
+      "id": "call-26",
+      "number": "112",
+      "name": null,
+      "type": "outgoing",
+      "duration": 0,
+      "timestamp": 1792233877257,
+      "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447"
+    },
+    {
+      "id": "call-25",
+      "number": "112",
+      "name": null,
+      "type": "outgoing",
+      "duration": 0,
+      "timestamp": 1792233859859,
+      "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447"
+    },
+    {
+      "id": "call-24",
+      "number": "108",
+      "name": null,
+      "type": "outgoing",
+      "duration": 0,
+      "timestamp": 1792233855928,
+      "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447"
+    },
+    {
+      "id": "call-23",
+      "number": "112",
+      "name": null,
+      "type": "outgoing",
+      "duration": 0,
+      "timestamp": 1792233849278,
+      "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447"
+    },
+    {
+      "id": "call-22",
+      "number": "112",
+      "name": null,
+      "type": "outgoing",
+      "duration": 0,
+      "timestamp": 1792233818284,
+      "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447"
+    },
+    {
+      "id": "call-21",
+      "number": "8418944572",
+      "name": "suaib",
+      "type": "outgoing",
+      "duration": 0,
+      "timestamp": 1792233805091,
+      "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447"
+    },
+    {
+      "id": "call-20",
+      "number": "*9211",
+      "name": null,
+      "type": "outgoing",
+      "duration": 0,
+      "timestamp": 1792233174756,
+      "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447"
+    },
+    {
+      "id": "call-19",
+      "number": "*9211",
+      "name": null,
+      "type": "outgoing",
+      "duration": 0,
+      "timestamp": 1792233096603,
+      "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447"
+    },
+    {
+      "id": "call-18",
+      "number": "*9211",
+      "name": null,
+      "type": "outgoing",
+      "duration": 0,
+      "timestamp": 1792233085374,
+      "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447"
+    },
+    {
+      "id": "call-17",
+      "number": "*9211",
+      "name": null,
+      "type": "outgoing",
+      "duration": 0,
+      "timestamp": 1792232987626,
+      "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447"
+    },
+    {
+      "id": "call-16",
+      "number": "*9211",
+      "name": null,
+      "type": "outgoing",
+      "duration": 0,
+      "timestamp": 1792232928482,
+      "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447"
+    },
+    {
+      "id": "call-15",
+      "number": "*9211",
+      "name": null,
+      "type": "outgoing",
+      "duration": 0,
+      "timestamp": 1792232916359,
+      "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447"
+    },
     {
       "id": "call-14",
       "number": "9211",
@@ -26,7 +152,7 @@
       "type": "outgoing",
       "duration": 0,
       "timestamp": 1792048702901,
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
+      "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447"
     },
     {
       "id": "call-13",
@@ -35,7 +161,7 @@
       "type": "outgoing",
       "duration": 0,
       "timestamp": 1792048698268,
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
+      "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447"
     },
     {
       "id": "call-12",
@@ -44,7 +170,7 @@
       "type": "outgoing",
       "duration": 0,
       "timestamp": 1791981740153,
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
+      "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447"
     },
     {
       "id": "call-11",
@@ -53,7 +179,7 @@
       "type": "outgoing",
       "duration": 0,
       "timestamp": 1791981736087,
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
+      "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447"
     },
     {
       "id": "call-10",
@@ -62,7 +188,7 @@
       "type": "outgoing",
       "duration": 0,
       "timestamp": 1791981729067,
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
+      "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447"
     },
     {
       "id": "call-9",
@@ -71,7 +197,7 @@
       "type": "outgoing",
       "duration": 0,
       "timestamp": 1791966430650,
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
+      "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447"
     },
     {
       "id": "call-8",
@@ -80,7 +206,7 @@
       "type": "outgoing",
       "duration": 0,
       "timestamp": 1791966425881,
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
+      "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447"
     },
     {
       "id": "call-7",
@@ -89,7 +215,7 @@
       "type": "outgoing",
       "duration": 0,
       "timestamp": 1791965507094,
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
+      "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447"
     },
     {
       "id": "call-6",
@@ -98,7 +224,7 @@
       "type": "outgoing",
       "duration": 0,
       "timestamp": 1791965502711,
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
+      "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447"
     },
     {
       "id": "call-5",
@@ -107,7 +233,7 @@
       "type": "outgoing",
       "duration": 0,
       "timestamp": 1791961551904,
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
+      "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447"
     },
     {
       "id": "call-4",
@@ -116,7 +242,7 @@
       "type": "outgoing",
       "duration": 0,
       "timestamp": 1791961547040,
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
+      "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447"
     },
     {
       "id": "call-3",
@@ -125,7 +251,7 @@
       "type": "outgoing",
       "duration": 0,
       "timestamp": 1791961543729,
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
+      "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447"
     },
     {
       "id": "call-2",
@@ -134,7 +260,7 @@
       "type": "outgoing",
       "duration": 0,
       "timestamp": 1791890023961,
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
+      "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447"
     },
     {
       "id": "call-1",
@@ -143,7 +269,7 @@
       "type": "outgoing",
       "duration": 0,
       "timestamp": 1791890010847,
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
+      "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447"
     }
   ],
   "messages": [],
@@ -1530,35 +1656,13 @@
   ],
   "notifications": [
     {
-      "key": "0|com.miui.fmservice|2131230842|null|10198",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "packageName": "com.miui.fmservice",
-      "appName": "FM Radio Service",
-      "title": "FM Radio Service is running",
-      "text": "Tap for more information or to stop the app.",
-      "postTime": 1792159272213,
-      "ongoing": true,
-      "cleared": false
-    },
-    {
       "key": "0|com.milink.service|110|null|10129",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
+      "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447",
       "packageName": "com.milink.service",
       "appName": "Cast",
       "title": "全场景音乐服务",
       "text": "全场景音乐服务运行中",
-      "postTime": 1792147533701,
-      "ongoing": true,
-      "cleared": false
-    },
-    {
-      "key": "0|com.phonelink.localhub|4201|null|10273",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "packageName": "com.phonelink.localhub",
-      "appName": "Phone Link Hub",
-      "title": "Android System",
-      "text": "Battery & performance service active",
-      "postTime": 1792161157348,
+      "postTime": 1792228893793,
       "ongoing": true,
       "cleared": false
     }
@@ -1571,7 +1675,16 @@
         "8081408020"
       ],
       "photoAvailable": false,
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
+      "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447"
+    },
+    {
+      "id": "contact-5",
+      "name": "joh",
+      "numbers": [
+        "74"
+      ],
+      "photoAvailable": false,
+      "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447"
     },
     {
       "id": "contact-1",
@@ -1580,7 +1693,7 @@
         "97675 484"
       ],
       "photoAvailable": false,
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
+      "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447"
     },
     {
       "id": "contact-2",
@@ -1589,7 +1702,7 @@
         "8418944572"
       ],
       "photoAvailable": false,
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
+      "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447"
     },
     {
       "id": "contact-3",
@@ -1598,1157 +1711,509 @@
         "123"
       ],
       "photoAvailable": false,
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
+      "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447"
     }
   ],
   "clipboardHistory": [],
   "commandQueue": [
     {
-      "id": "458ab485-a278-4849-9a93-56c1a5622cba",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
+      "id": "f926f844-82e0-4712-9531-4234e3fcbf42",
+      "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447",
+      "command": "screen-record-stop",
+      "payload": {
+        "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447"
+      },
+      "timestamp": 1792242210421
+    },
+    {
+      "id": "decabd34-5749-4363-8a5f-6e96235ba40d",
+      "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447",
+      "command": "screen-record-start",
+      "payload": {
+        "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447",
+        "fps": 15
+      },
+      "timestamp": 1792242211071
+    },
+    {
+      "id": "596f36ea-d0f4-4dae-898d-3d29ff6a1c87",
+      "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447",
+      "command": "screen-record-stop",
+      "payload": {
+        "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447"
+      },
+      "timestamp": 1792242217680
+    },
+    {
+      "id": "b5b9f997-0c92-4253-984e-1a852b8bfeac",
+      "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447",
       "command": "volume-get",
       "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
+        "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447"
       },
-      "timestamp": 1792214054036
+      "timestamp": 1792242224474
     },
     {
-      "id": "6413a6a6-fe36-49c4-bf1a-6ec85611188e",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "dnd-get",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
-      },
-      "timestamp": 1792214054242
-    },
-    {
-      "id": "fc46656d-a24a-4f1b-8e33-3c43e20d586b",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
+      "id": "0db5d8c0-33c7-4257-a64a-42d33fd095d8",
+      "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447",
       "command": "battery-stats",
       "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
+        "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447"
       },
-      "timestamp": 1792214054250
+      "timestamp": 1792242224480
     },
     {
-      "id": "e899ea2b-310a-42ad-88d0-35005ddfcb22",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
+      "id": "122b5da0-6c99-4394-bc82-82629238fedc",
+      "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447",
       "command": "cellular-info",
       "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
+        "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447"
       },
-      "timestamp": 1792214054254
+      "timestamp": 1792242224484
     },
     {
-      "id": "b357953c-33bd-4cab-81e6-84dae408910d",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
+      "id": "80f1428b-707b-471c-b529-281e000b8fb5",
+      "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447",
+      "command": "dnd-get",
+      "payload": {
+        "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447"
+      },
+      "timestamp": 1792242224485
+    },
+    {
+      "id": "d1457ca1-2292-44c9-afab-5aeac285997f",
+      "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447",
       "command": "volume-get",
       "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
+        "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447"
       },
-      "timestamp": 1792214056726
+      "timestamp": 1792242224487
     },
     {
-      "id": "58ff13f5-963d-4831-bdfb-0e2dceb3c22b",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
+      "id": "492c5f46-44b9-4c32-b57c-4384714f23c2",
+      "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447",
       "command": "battery-stats",
       "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
+        "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447"
       },
-      "timestamp": 1792214056732
+      "timestamp": 1792242224488
     },
     {
-      "id": "1aa0b144-6e12-44ca-87c2-9ff58332be22",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
+      "id": "d7e6b654-fcd6-433d-b0b4-ea775017abff",
+      "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447",
       "command": "cellular-info",
       "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
+        "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447"
       },
-      "timestamp": 1792214056735
+      "timestamp": 1792242224649
     },
     {
-      "id": "77c70ba5-4ebf-47a7-a36e-631e9c29350a",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
+      "id": "915c1db1-e261-4446-ac55-f16c73ee9d85",
+      "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447",
       "command": "dnd-get",
       "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
+        "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447"
       },
-      "timestamp": 1792214056750
+      "timestamp": 1792242224656
     },
     {
-      "id": "95af4df9-5897-41b5-8597-d23df95315ed",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
+      "id": "81495362-9543-4f81-8a8f-0f7a70dae13d",
+      "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447",
+      "command": "app-usage",
+      "payload": {
+        "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447"
+      },
+      "timestamp": 1792242235458
+    },
+    {
+      "id": "086ddcd5-842a-4fac-ae62-892e75cade34",
+      "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447",
+      "command": "app-usage",
+      "payload": {
+        "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447"
+      },
+      "timestamp": 1792242238563
+    },
+    {
+      "id": "a7f2cb52-d156-4e38-aa32-8c3ad3faae88",
+      "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447",
+      "command": "app-usage",
+      "payload": {
+        "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447"
+      },
+      "timestamp": 1792242239062
+    },
+    {
+      "id": "974d0c51-bd2c-4a51-ae25-86c2b875201d",
+      "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447",
+      "command": "app-usage",
+      "payload": {
+        "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447"
+      },
+      "timestamp": 1792242239260
+    },
+    {
+      "id": "694b97e6-4c40-40ec-9486-e8764b7b97f8",
+      "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447",
+      "command": "app-usage",
+      "payload": {
+        "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447"
+      },
+      "timestamp": 1792242239416
+    },
+    {
+      "id": "aa85c64e-1fc4-436b-8b7f-9757614d6d97",
+      "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447",
+      "command": "app-usage",
+      "payload": {
+        "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447"
+      },
+      "timestamp": 1792242239569
+    },
+    {
+      "id": "ba921fd2-e8d2-4ae1-befd-26b5d80cf505",
+      "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447",
+      "command": "parental-control",
+      "payload": {
+        "enabled": true,
+        "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447"
+      },
+      "timestamp": 1792242247023
+    },
+    {
+      "id": "e532c290-f910-4489-8f65-25949b54c257",
+      "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447",
+      "command": "parental-control",
+      "payload": {
+        "enabled": true,
+        "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447"
+      },
+      "timestamp": 1792242249306
+    },
+    {
+      "id": "c0832d95-e2ac-459e-9e95-28b340ca8c33",
+      "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447",
+      "command": "app-usage",
+      "payload": {
+        "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447"
+      },
+      "timestamp": 1792242250872
+    },
+    {
+      "id": "caa372ed-bf89-4f23-85b3-a035a2f29e6e",
+      "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447",
+      "command": "parental-control",
+      "payload": {
+        "enabled": true,
+        "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447"
+      },
+      "timestamp": 1792242251500
+    },
+    {
+      "id": "46fbf06c-260f-4e6e-9997-a26da065b2ee",
+      "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447",
+      "command": "app-usage",
+      "payload": {
+        "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447"
+      },
+      "timestamp": 1792242252141
+    },
+    {
+      "id": "938337cc-53b5-45d7-ab50-957bd4dd07f6",
+      "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447",
+      "command": "app-usage",
+      "payload": {
+        "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447"
+      },
+      "timestamp": 1792242259000
+    },
+    {
+      "id": "2e55e67c-59bd-48e8-ac5e-ded713655272",
+      "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447",
+      "command": "app-usage",
+      "payload": {
+        "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447"
+      },
+      "timestamp": 1792242259889
+    },
+    {
+      "id": "2ad80017-f302-4131-9a9d-819e225a0f8c",
+      "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447",
+      "command": "app-usage",
+      "payload": {
+        "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447"
+      },
+      "timestamp": 1792242260073
+    },
+    {
+      "id": "67612af5-7da2-40a3-858d-75efecfe71b3",
+      "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447",
+      "command": "app-usage",
+      "payload": {
+        "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447"
+      },
+      "timestamp": 1792242260239
+    },
+    {
+      "id": "9b799549-199e-48e1-ab11-7645630bb587",
+      "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447",
+      "command": "app-usage",
+      "payload": {
+        "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447"
+      },
+      "timestamp": 1792242260428
+    },
+    {
+      "id": "808789a8-595b-4457-bea6-83deb9331a24",
+      "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447",
+      "command": "app-usage",
+      "payload": {
+        "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447"
+      },
+      "timestamp": 1792242260616
+    },
+    {
+      "id": "048dc837-248d-4a5f-991a-28e02705aad5",
+      "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447",
+      "command": "installed-apps",
+      "payload": {
+        "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447"
+      },
+      "timestamp": 1792242281052
+    },
+    {
+      "id": "a50af3e0-380e-4ec2-b598-15479e286edf",
+      "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447",
+      "command": "installed-apps",
+      "payload": {
+        "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447"
+      },
+      "timestamp": 1792242282171
+    },
+    {
+      "id": "c2b238ad-752d-4fb6-b490-a291dd89fef7",
+      "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447",
+      "command": "installed-apps",
+      "payload": {
+        "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447"
+      },
+      "timestamp": 1792242284143
+    },
+    {
+      "id": "92627d8f-ef85-4462-8fb7-269b8d79ff18",
+      "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447",
+      "command": "installed-apps",
+      "payload": {
+        "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447"
+      },
+      "timestamp": 1792242285127
+    },
+    {
+      "id": "dea03edb-f9b9-4a98-9960-5520c1eb3e67",
+      "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447",
+      "command": "installed-apps",
+      "payload": {
+        "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447"
+      },
+      "timestamp": 1792242285856
+    },
+    {
+      "id": "8714a44e-8d55-4608-a692-d34bd87735b2",
+      "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447",
+      "command": "installed-apps",
+      "payload": {
+        "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447"
+      },
+      "timestamp": 1792242286049
+    },
+    {
+      "id": "00add25d-79d2-4913-8132-6feb7a305005",
+      "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447",
+      "command": "installed-apps",
+      "payload": {
+        "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447"
+      },
+      "timestamp": 1792242286210
+    },
+    {
+      "id": "a08b8251-f159-457d-beba-038b90baa2a1",
+      "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447",
+      "command": "installed-apps",
+      "payload": {
+        "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447"
+      },
+      "timestamp": 1792242286366
+    },
+    {
+      "id": "ec6043de-e988-4e54-9b7a-0081016ee729",
+      "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447",
+      "command": "installed-apps",
+      "payload": {
+        "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447"
+      },
+      "timestamp": 1792242286531
+    },
+    {
+      "id": "403eb273-8f84-47b0-a7cd-40bae2b3361e",
+      "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447",
+      "command": "installed-apps",
+      "payload": {
+        "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447"
+      },
+      "timestamp": 1792242286694
+    },
+    {
+      "id": "4d4667b8-15da-47f8-8d93-8091a0fd7af1",
+      "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447",
       "command": "volume-get",
       "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
+        "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447"
       },
-      "timestamp": 1792214056754
+      "timestamp": 1792242292684
     },
     {
-      "id": "117eefbd-e41f-4498-a597-4671f1e5c22a",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
+      "id": "4cb80f06-bcdd-4168-a549-716c49b3d5ea",
+      "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447",
       "command": "battery-stats",
       "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
+        "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447"
       },
-      "timestamp": 1792214056762
+      "timestamp": 1792242292702
     },
     {
-      "id": "33c61ecb-ac5c-4039-adec-35fbbc8c8d08",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
+      "id": "77f7ac6c-4bef-43d8-8c27-204a99607bbb",
+      "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447",
       "command": "cellular-info",
       "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
+        "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447"
       },
-      "timestamp": 1792214056856
+      "timestamp": 1792242292814
     },
     {
-      "id": "de8a9cac-471e-419c-ba22-176129c41a60",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
+      "id": "965d0b3d-ebbc-44c7-bb3f-329597072f60",
+      "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447",
       "command": "dnd-get",
       "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
+        "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447"
       },
-      "timestamp": 1792214056865
+      "timestamp": 1792242292818
     },
     {
-      "id": "f2362fc2-4ba2-4ec3-99a2-df262fe6959a",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
+      "id": "497b4053-a9f5-4248-a5dc-db6f26e31136",
+      "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447",
+      "command": "volume-get",
+      "payload": {
+        "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447"
+      },
+      "timestamp": 1792242301877
+    },
+    {
+      "id": "2d55a5a1-78e2-4fa4-af91-2d5aa09f7cba",
+      "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447",
+      "command": "battery-stats",
+      "payload": {
+        "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447"
+      },
+      "timestamp": 1792242301936
+    },
+    {
+      "id": "2c3f3064-2ebb-496d-b18c-9836d5812bc3",
+      "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447",
+      "command": "cellular-info",
+      "payload": {
+        "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447"
+      },
+      "timestamp": 1792242301942
+    },
+    {
+      "id": "8332b66c-ee6a-43b7-9357-39eed32769c3",
+      "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447",
+      "command": "dnd-get",
+      "payload": {
+        "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447"
+      },
+      "timestamp": 1792242301943
+    },
+    {
+      "id": "a825016d-5c01-479f-a4be-22506354af56",
+      "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447",
+      "command": "volume-get",
+      "payload": {
+        "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447"
+      },
+      "timestamp": 1792242301946
+    },
+    {
+      "id": "383d2c65-f35b-4d42-9c35-f7cf639b1ba4",
+      "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447",
+      "command": "battery-stats",
+      "payload": {
+        "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447"
+      },
+      "timestamp": 1792242301951
+    },
+    {
+      "id": "cb74c944-79c9-4b49-9335-1968577fc686",
+      "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447",
+      "command": "cellular-info",
+      "payload": {
+        "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447"
+      },
+      "timestamp": 1792242301953
+    },
+    {
+      "id": "045470fa-791d-455d-aefc-d8a15ea29fa8",
+      "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447",
+      "command": "dnd-get",
+      "payload": {
+        "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447"
+      },
+      "timestamp": 1792242302033
+    },
+    {
+      "id": "d5ae3b09-cd6c-4cf6-81d1-366df83fb097",
+      "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447",
       "command": "file-list",
       "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
+        "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447",
         "path": "/"
       },
-      "timestamp": 1792214067471
+      "timestamp": 1792242305751
     },
     {
-      "id": "9551e3fb-e3bc-4f92-803e-2e6d33462800",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
+      "id": "1efe1b25-1622-4306-84c9-246a1df90282",
+      "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447",
       "command": "file-list",
       "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
+        "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447",
         "path": "/"
       },
-      "timestamp": 1792214067474
+      "timestamp": 1792242305761
     },
     {
-      "id": "6c4528e9-15fe-4767-91d4-bc78cf0958fd",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "volume-get",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
-      },
-      "timestamp": 1792214200416
-    },
-    {
-      "id": "cd771bb5-be6a-4417-94bf-c7b2dda903cc",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "battery-stats",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
-      },
-      "timestamp": 1792214200464
-    },
-    {
-      "id": "39806891-a508-457e-ade4-8608a693b248",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "cellular-info",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
-      },
-      "timestamp": 1792214200499
-    },
-    {
-      "id": "20f49b52-1aec-4d93-91f6-30c426216585",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "dnd-get",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
-      },
-      "timestamp": 1792214200522
-    },
-    {
-      "id": "fef77b4e-4f75-4bf7-a3d5-100ff65b4323",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "volume-get",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
-      },
-      "timestamp": 1792214226878
-    },
-    {
-      "id": "abb4373d-ae0e-4c1e-ab06-344b05b3f70c",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "battery-stats",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
-      },
-      "timestamp": 1792214226880
-    },
-    {
-      "id": "0a67a0bd-9e57-489b-bfef-79566c3839ed",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "cellular-info",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
-      },
-      "timestamp": 1792214226882
-    },
-    {
-      "id": "833970e4-3fb4-41b7-892e-c5fcb7d68d12",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "dnd-get",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
-      },
-      "timestamp": 1792214226884
-    },
-    {
-      "id": "ac626b55-f237-48c2-94b8-ba814f12fc18",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "volume-get",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
-      },
-      "timestamp": 1792214226897
-    },
-    {
-      "id": "cfc947b5-0182-458d-930c-c97a7d186efc",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "battery-stats",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
-      },
-      "timestamp": 1792214226903
-    },
-    {
-      "id": "f7088631-2707-40e2-9c1c-31f290063745",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "cellular-info",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
-      },
-      "timestamp": 1792214226930
-    },
-    {
-      "id": "3b53e40e-8eb8-4e9e-aecb-0ba6db208f2d",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "dnd-get",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
-      },
-      "timestamp": 1792214226934
-    },
-    {
-      "id": "6315ef69-925a-4aea-aba3-5de45299d1db",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "battery-config",
-      "payload": {
-        "batteryAlertsEnabled": false,
-        "batteryMaxLevelCutoff": 90,
-        "batteryOverheatTempThreshold": 45,
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
-      },
-      "timestamp": 1792214231098
-    },
-    {
-      "id": "eb9a9884-5081-4c93-9d36-ccbaaa2a0ff3",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "battery-config",
-      "payload": {
-        "batteryAlertsEnabled": false,
-        "batteryMaxLevelCutoff": 90,
-        "batteryOverheatTempThreshold": 45,
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
-      },
-      "timestamp": 1792214233022
-    },
-    {
-      "id": "d11174d3-6f26-4e43-91bb-7ca032a5f7f1",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "battery-config",
-      "payload": {
-        "batteryAlertsEnabled": true,
-        "batteryMaxLevelCutoff": 90,
-        "batteryOverheatTempThreshold": 45,
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
-      },
-      "timestamp": 1792214233962
-    },
-    {
-      "id": "514ed522-5c81-4f72-87e7-547f509dfe8c",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "volume-get",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
-      },
-      "timestamp": 1792214739088
-    },
-    {
-      "id": "9fe7b4ab-e5e7-4a2e-9d7a-201a880ce64f",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "battery-stats",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
-      },
-      "timestamp": 1792214739090
-    },
-    {
-      "id": "41822b9c-4a1d-4eef-9c1f-147891b2dc36",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "dnd-get",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
-      },
-      "timestamp": 1792214739099
-    },
-    {
-      "id": "7cbee23a-c0d4-4534-9ba8-afafcbce1e35",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "cellular-info",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
-      },
-      "timestamp": 1792214739101
-    },
-    {
-      "id": "83462a55-a5bb-4fc0-af20-63f7c3ca7354",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "volume-get",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
-      },
-      "timestamp": 1792214739103
-    },
-    {
-      "id": "2c92126f-af1b-48af-bf5a-a4d4bd62b5b3",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "battery-stats",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
-      },
-      "timestamp": 1792214739104
-    },
-    {
-      "id": "9c5ded21-4caf-4990-92ef-e0e6231719db",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "cellular-info",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
-      },
-      "timestamp": 1792214739128
-    },
-    {
-      "id": "a2f353ef-479f-4c19-83a2-df7f644eb322",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "dnd-get",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
-      },
-      "timestamp": 1792214739135
-    },
-    {
-      "id": "8b4bc591-8bc4-4c6e-82cf-f6973c13dc94",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
+      "id": "95725ff6-b26a-4b81-a2ca-6356ca7b78b9",
+      "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447",
       "command": "file-list",
       "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
+        "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447",
         "path": "/"
       },
-      "timestamp": 1792214765069
+      "timestamp": 1792242307165
     },
     {
-      "id": "d9c8584d-a946-42a2-b53c-4bdbf877e99c",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
+      "id": "7ee24a45-526b-4b1e-8fc5-4f29045780ff",
+      "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447",
       "command": "file-list",
       "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
+        "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447",
         "path": "/"
       },
-      "timestamp": 1792214765071
-    },
-    {
-      "id": "a0b46d4b-5876-45cc-bccb-c300e45a3351",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "volume-get",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
-      },
-      "timestamp": 1792215212835
-    },
-    {
-      "id": "89a16e1a-0dc1-4b1a-a1aa-ab7d697aed6a",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "battery-stats",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
-      },
-      "timestamp": 1792215212926
-    },
-    {
-      "id": "3e817693-c738-4fd6-9a3d-2c33975f7a35",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "cellular-info",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
-      },
-      "timestamp": 1792215212930
-    },
-    {
-      "id": "5f4dba59-e43c-4e1e-942c-402c6bb54ec2",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "dnd-get",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
-      },
-      "timestamp": 1792215212932
-    },
-    {
-      "id": "0fe0c6b8-6656-4b3d-96ec-178d9365b6dc",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "volume-get",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
-      },
-      "timestamp": 1792215216260
-    },
-    {
-      "id": "cea1d90f-c25d-4f65-8b8b-6989bfc1f27e",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "battery-stats",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
-      },
-      "timestamp": 1792215216296
-    },
-    {
-      "id": "a61805f0-e88c-4d3a-8981-b70b8f31c900",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "cellular-info",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
-      },
-      "timestamp": 1792215216301
-    },
-    {
-      "id": "50458c22-808e-444f-a73d-69c600cf9935",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "dnd-get",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
-      },
-      "timestamp": 1792215216332
-    },
-    {
-      "id": "62487a5e-5245-47e6-a603-101cf625ca48",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "volume-get",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
-      },
-      "timestamp": 1792215216336
-    },
-    {
-      "id": "3fe40bad-fdf9-4ef8-aa2f-04c597258f6d",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "battery-stats",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
-      },
-      "timestamp": 1792215216340
-    },
-    {
-      "id": "be71c3d5-9f4f-4920-bd1c-293b593f8097",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "cellular-info",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
-      },
-      "timestamp": 1792215216345
-    },
-    {
-      "id": "3bbff257-66a2-4e9a-8508-c98b170b29fe",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "dnd-get",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
-      },
-      "timestamp": 1792215216391
-    },
-    {
-      "id": "84493592-ffe6-4307-971e-e5f002e5aa88",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "file-list",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-        "path": "/"
-      },
-      "timestamp": 1792215240834
-    },
-    {
-      "id": "9ab1002c-0430-4100-bd64-499409fc96c7",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "file-list",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-        "path": "/"
-      },
-      "timestamp": 1792215240839
-    },
-    {
-      "id": "2b19dd12-5279-4834-9622-443acdd6d754",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "volume-get",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
-      },
-      "timestamp": 1792215252076
-    },
-    {
-      "id": "87a7b5a5-7fff-4be8-9cc3-7051483162fe",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "battery-stats",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
-      },
-      "timestamp": 1792215252082
-    },
-    {
-      "id": "a2c70972-eee7-4af1-91f9-cb21786025ea",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "cellular-info",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
-      },
-      "timestamp": 1792215252089
-    },
-    {
-      "id": "c06f2a84-57db-44c5-8f39-0a48c0d2960c",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "dnd-get",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
-      },
-      "timestamp": 1792215252092
-    },
-    {
-      "id": "d3a4881d-2b0b-416f-b539-ba9b6d9535c8",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "volume-get",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
-      },
-      "timestamp": 1792215252094
-    },
-    {
-      "id": "ba6616fc-ccb2-45ff-8864-f9b2a5a2cc37",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "battery-stats",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
-      },
-      "timestamp": 1792215252106
-    },
-    {
-      "id": "457e43bb-b405-4047-9a88-fdc56960f808",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "cellular-info",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
-      },
-      "timestamp": 1792215252146
-    },
-    {
-      "id": "b7141b9d-c7de-4cea-a967-bbb97ca7c6df",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "dnd-get",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
-      },
-      "timestamp": 1792215252175
-    },
-    {
-      "id": "031588ec-17b9-497a-a9e4-569e787784c8",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "file-list",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-        "path": "/"
-      },
-      "timestamp": 1792215255778
-    },
-    {
-      "id": "10c810a0-be99-433d-9c9b-c47a17c65481",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "file-list",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-        "path": "/"
-      },
-      "timestamp": 1792215255788
-    },
-    {
-      "id": "ed28236a-7da6-4ec0-9251-db2ca32989d3",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "volume-get",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
-      },
-      "timestamp": 1792215299742
-    },
-    {
-      "id": "dfbdffb9-b6ff-4480-966b-9896f8a57b64",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "battery-stats",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
-      },
-      "timestamp": 1792215299773
-    },
-    {
-      "id": "29dc3293-0417-4c61-ba28-e4018bb0550f",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "battery-stats",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
-      },
-      "timestamp": 1792215299779
-    },
-    {
-      "id": "53df9e63-ecc2-4dc8-ba6d-44b119ec5702",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "cellular-info",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
-      },
-      "timestamp": 1792215299787
-    },
-    {
-      "id": "57767228-51e6-4952-909e-dd2ef4664fcf",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "dnd-get",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
-      },
-      "timestamp": 1792215299791
-    },
-    {
-      "id": "d278417f-e57f-40e4-89aa-1911f19a13a9",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "volume-get",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
-      },
-      "timestamp": 1792215299804
-    },
-    {
-      "id": "2071b6e1-68d6-4d4c-9825-f5921ea5efe0",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "cellular-info",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
-      },
-      "timestamp": 1792215299840
-    },
-    {
-      "id": "ac4fa0ab-2c78-407b-bc34-c9c3c71aa7e2",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "dnd-get",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
-      },
-      "timestamp": 1792215299845
-    },
-    {
-      "id": "8092d985-6adc-455e-a336-e17a3074fef1",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "file-list",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-        "path": "/"
-      },
-      "timestamp": 1792215300215
-    },
-    {
-      "id": "0ec7a2c4-37ab-4cd0-be4d-2f55955d900f",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "file-list",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-        "path": "/"
-      },
-      "timestamp": 1792215300222
-    },
-    {
-      "id": "f50337ed-2b43-426e-b3ba-db9119be23a6",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "file-list",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-        "path": "/"
-      },
-      "timestamp": 1792215428791
-    },
-    {
-      "id": "95773aab-bb5e-404f-b608-7791ee5c8228",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "file-list",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-        "path": "/"
-      },
-      "timestamp": 1792215428803
-    },
-    {
-      "id": "a3d137e0-40e9-4ae1-8eff-9567bf51e7e4",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "volume-get",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
-      },
-      "timestamp": 1792215429530
-    },
-    {
-      "id": "928c4595-54e4-497b-a3ad-a3400161ed36",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "battery-stats",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
-      },
-      "timestamp": 1792215429537
-    },
-    {
-      "id": "aeae188a-6470-4871-8a39-512ca10367ff",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "cellular-info",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
-      },
-      "timestamp": 1792215429540
-    },
-    {
-      "id": "1bc0ea1d-18f7-4b7b-8188-6c5cced10b26",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "dnd-get",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
-      },
-      "timestamp": 1792215429542
-    },
-    {
-      "id": "1dcc0b07-9bfc-4bb7-a68b-2bb728ba1810",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "volume-get",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
-      },
-      "timestamp": 1792215429546
-    },
-    {
-      "id": "dda08ee5-f9ea-4a24-82c8-0c200f478d8a",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "battery-stats",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
-      },
-      "timestamp": 1792215429552
-    },
-    {
-      "id": "7cd1f46c-c6fe-4afc-b9ec-9611c4cc27ce",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "cellular-info",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
-      },
-      "timestamp": 1792215429612
-    },
-    {
-      "id": "06b7e429-dd91-492f-8160-310b849ef74e",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "dnd-get",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
-      },
-      "timestamp": 1792215429618
-    },
-    {
-      "id": "dde66565-4941-4267-a7d6-b901c21776b8",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "volume-get",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
-      },
-      "timestamp": 1792215431306
-    },
-    {
-      "id": "38b3d2ad-6261-4f9b-b43b-3fdbf30cc3ce",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "battery-stats",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
-      },
-      "timestamp": 1792215431326
-    },
-    {
-      "id": "5c078e15-8910-41f0-b887-7ef40570a795",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "cellular-info",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
-      },
-      "timestamp": 1792215431332
-    },
-    {
-      "id": "03d8f4c6-db42-4fb1-ac31-e92f14503a7d",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "dnd-get",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
-      },
-      "timestamp": 1792215431343
-    },
-    {
-      "id": "bdeaea13-d9c8-4c47-b57c-4c362b1e29e5",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "volume-get",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
-      },
-      "timestamp": 1792215431350
-    },
-    {
-      "id": "ed2ce3b6-6e42-4f62-a6e6-bc765da71c4a",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "battery-stats",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
-      },
-      "timestamp": 1792215431356
-    },
-    {
-      "id": "cb7fb80e-f828-43bf-b031-ff69b1088062",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "cellular-info",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
-      },
-      "timestamp": 1792215431366
-    },
-    {
-      "id": "3967bfe9-5ccb-4516-8c96-c6c17030ac90",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "dnd-get",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
-      },
-      "timestamp": 1792215431406
-    },
-    {
-      "id": "e291ecbc-0447-42b7-9471-405db27abd09",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "volume-get",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
-      },
-      "timestamp": 1792215540262
-    },
-    {
-      "id": "d6c3388c-0d73-48ce-9531-4cf4f5d207ec",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "battery-stats",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
-      },
-      "timestamp": 1792215540277
-    },
-    {
-      "id": "19a537a4-5b35-43b8-b7e8-d6b32c7b02c3",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "cellular-info",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
-      },
-      "timestamp": 1792215540305
-    },
-    {
-      "id": "b5b79983-403b-4908-8487-e48db29df7c7",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "dnd-get",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
-      },
-      "timestamp": 1792215540315
-    },
-    {
-      "id": "048dd174-abf6-457f-8be9-524b168b6ca9",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "volume-get",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
-      },
-      "timestamp": 1792215540318
-    },
-    {
-      "id": "7763defb-e27b-4b4d-8f6b-5bc1ac4280dd",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "battery-stats",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
-      },
-      "timestamp": 1792215540320
-    },
-    {
-      "id": "06f55a89-524e-4256-8667-b978d3554f1e",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "cellular-info",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
-      },
-      "timestamp": 1792215540322
-    },
-    {
-      "id": "8bcf8b7e-837d-45e7-a112-e255f6ce1a26",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "dnd-get",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
-      },
-      "timestamp": 1792215540339
-    },
-    {
-      "id": "83067677-a5a1-412d-b2bc-be306402083f",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "file-list",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-        "path": "/"
-      },
-      "timestamp": 1792215547746
-    },
-    {
-      "id": "a7a96089-9d75-4ec5-b660-eb8acbbc7a59",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "file-list",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-        "path": "/"
-      },
-      "timestamp": 1792215547750
-    },
-    {
-      "id": "447d9e91-f7fb-4e8a-9da2-6ce7125598bc",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "file-list",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-        "path": "/"
-      },
-      "timestamp": 1792215669163
-    },
-    {
-      "id": "cae9693f-8708-44f0-8bea-a7e1d2e6c39f",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "volume-get",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
-      },
-      "timestamp": 1792215786791
-    },
-    {
-      "id": "6a5b04b2-3ff2-469e-b653-f9018bbd411a",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "battery-stats",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
-      },
-      "timestamp": 1792215786815
-    },
-    {
-      "id": "caa0c180-bb57-4e35-a7ba-f76e3c6e0e9a",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "cellular-info",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
-      },
-      "timestamp": 1792215786828
-    },
-    {
-      "id": "ef3c048a-08ec-4f7f-a7d6-d1f4b88eb7ba",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "dnd-get",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
-      },
-      "timestamp": 1792215786850
-    },
-    {
-      "id": "0323ea5d-ba7b-4ab4-8334-bb24764344fc",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "volume-get",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
-      },
-      "timestamp": 1792215786855
-    },
-    {
-      "id": "4e2dae0e-352e-4ca3-a470-95ddd312f8ac",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "battery-stats",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
-      },
-      "timestamp": 1792215786861
-    },
-    {
-      "id": "b785d7f5-c000-4cf8-889e-d7f3f7526b3f",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "cellular-info",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
-      },
-      "timestamp": 1792215786866
-    },
-    {
-      "id": "26745d5b-89a6-4708-a798-d1f06cbde00c",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "dnd-get",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
-      },
-      "timestamp": 1792215786904
-    },
-    {
-      "id": "a18e48fb-b028-46a5-95ff-30d74e6361e4",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "volume-get",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
-      },
-      "timestamp": 1792217291526
-    },
-    {
-      "id": "bfd8700a-c667-4b79-a188-3f06f595e123",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "battery-stats",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
-      },
-      "timestamp": 1792217291591
-    },
-    {
-      "id": "26983784-230d-4c1e-b880-6a888afe57da",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "cellular-info",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
-      },
-      "timestamp": 1792217291638
-    },
-    {
-      "id": "8668a30d-ab65-4a6d-9066-dc9336c6caf7",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "dnd-get",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
-      },
-      "timestamp": 1792217291645
-    },
-    {
-      "id": "7ba4009e-007c-4628-a9e5-87f64900e03a",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "volume-get",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
-      },
-      "timestamp": 1792217293866
-    },
-    {
-      "id": "73a98376-231e-4f30-8862-0ec403c5c695",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "battery-stats",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
-      },
-      "timestamp": 1792217293947
-    },
-    {
-      "id": "f3f5fe77-ca27-495a-a04c-adf5136ba3fb",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "dnd-get",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
-      },
-      "timestamp": 1792217293970
-    },
-    {
-      "id": "dcd69a65-3e4e-4715-b984-cfdf8567802d",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "cellular-info",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
-      },
-      "timestamp": 1792217293983
-    },
-    {
-      "id": "89dc9650-cc3d-4bfb-b41c-50a9673a59d1",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "volume-get",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
-      },
-      "timestamp": 1792217293990
-    },
-    {
-      "id": "089505ab-69a7-441c-8405-43e50ce879e9",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "battery-stats",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
-      },
-      "timestamp": 1792217294000
-    },
-    {
-      "id": "b2affda0-e514-4995-ac73-0b053aebb3f4",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "cellular-info",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
-      },
-      "timestamp": 1792217294004
-    },
-    {
-      "id": "e5e53952-47c2-45f2-ba9f-e835a3305489",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "dnd-get",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
-      },
-      "timestamp": 1792217294047
-    },
-    {
-      "id": "4331e0e3-8230-4bc1-acab-24e108090dca",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "file-list",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-        "path": "/"
-      },
-      "timestamp": 1792217303790
-    },
-    {
-      "id": "ccf15879-760f-417f-9329-1b538db465b7",
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-      "command": "file-list",
-      "payload": {
-        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
-        "path": "/"
-      },
-      "timestamp": 1792217303797
+      "timestamp": 1792242307167
     }
   ],
   "deviceInfo": {
-    "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec": {
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
+    "android-890b8051-e0e5-434b-918d-da5b95867447": {
+      "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447",
       "deviceName": "Xiaomi Mi 10",
       "manufacturer": "Xiaomi",
       "brand": "Redmi",
@@ -2761,20 +2226,20 @@
       "securityPatch": "2022-04-01",
       "bootloader": "unknown",
       "fingerprint": "Redmi/begonia/begonia:11/RP1A.200720.011/V12.5.6.0.RGGIDXM:user/release-keys",
-      "batteryLevel": 59,
+      "batteryLevel": 44,
       "isCharging": false,
-      "uptimeMs": 13423485,
-      "adminActive": false,
+      "uptimeMs": 5220766,
+      "adminActive": true,
       "ram": {
         "totalMem": 5909716992,
-        "availMem": 2568384512,
+        "availMem": 2957717504,
         "lowMemory": false,
         "threshold": 1313656832
       },
       "storage": {
         "totalBytes": 117694369792,
-        "availableBytes": 93500542976,
-        "usedBytes": 24193826816
+        "availableBytes": 93480341504,
+        "usedBytes": 24214028288
       },
       "display": {
         "widthPixels": 1080,
@@ -2784,2201 +2249,52 @@
       }
     }
   },
-  "installedApps": {
-    "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec": [
-      {
-        "packageName": "idm.internet.download.manager.plus",
-        "name": "1DM+",
-        "versionName": "18.1",
-        "versionCode": 30248,
-        "isSystem": false,
-        "firstInstallTime": 1791897032659,
-        "lastUpdateTime": 1791897032659
-      },
-      {
-        "packageName": "com.htetznaing.adbotg",
-        "name": "ADB⚡OTG",
-        "versionName": "1.0.1",
-        "versionCode": 2,
-        "isSystem": false,
-        "firstInstallTime": 1791895275265,
-        "lastUpdateTime": 1791895275265
-      },
-      {
-        "packageName": "com.google.android.verifier",
-        "name": "Android Developer Verifier",
-        "versionName": "1.0.991779013",
-        "versionCode": 77989,
-        "isSystem": false,
-        "firstInstallTime": 1791885168335,
-        "lastUpdateTime": 1791885168335
-      },
-      {
-        "packageName": "com.miui.cleaner",
-        "name": "Cleaner",
-        "versionName": "811.1.250408.release",
-        "versionCode": 100811,
-        "isSystem": false,
-        "firstInstallTime": 1791798359000,
-        "lastUpdateTime": 1791815194038
-      },
-      {
-        "packageName": "com.softwarebakery.drivedroid",
-        "name": "DriveDroid",
-        "versionName": "0.10.50",
-        "versionCode": 105000,
-        "isSystem": false,
-        "firstInstallTime": 1791895284795,
-        "lastUpdateTime": 1791895284795
-      },
-      {
-        "packageName": "com.looker.droidify",
-        "name": "Droid-ify",
-        "versionName": "0.7.8",
-        "versionCode": 780,
-        "isSystem": false,
-        "firstInstallTime": 1791816738354,
-        "lastUpdateTime": 1791816738354
-      },
-      {
-        "packageName": "eu.depau.etchdroid",
-        "name": "EtchDroid",
-        "versionName": "2.1",
-        "versionCode": 26,
-        "isSystem": false,
-        "firstInstallTime": 1791896985567,
-        "lastUpdateTime": 1791896985567
-      },
-      {
-        "packageName": "com.google.android.apps.bard",
-        "name": "Gemini",
-        "versionName": "1.0.971139365",
-        "versionCode": 341,
-        "isSystem": false,
-        "firstInstallTime": 1791948927558,
-        "lastUpdateTime": 1791948927558
-      },
-      {
-        "packageName": "com.xiaomi.mipicks",
-        "name": "GetApps",
-        "versionName": "602-16.6.1.0",
-        "versionCode": 6021661,
-        "isSystem": false,
-        "firstInstallTime": 1791815031970,
-        "lastUpdateTime": 1791815031970
-      },
-      {
-        "packageName": "com.google.android.googlequicksearchbox",
-        "name": "Google",
-        "versionName": "17.64.15.ve.arm64",
-        "versionCode": 301817218,
-        "isSystem": false,
-        "firstInstallTime": 1791948955497,
-        "lastUpdateTime": 1791948955497
-      },
-      {
-        "packageName": "com.google.android.apps.maps",
-        "name": "Maps",
-        "versionName": "26.40.00.989295350",
-        "versionCode": 1068809342,
-        "isSystem": false,
-        "firstInstallTime": 1791959415061,
-        "lastUpdateTime": 1791973351444
-      },
-      {
-        "packageName": "material.hunter",
-        "name": "MaterialHunter",
-        "versionName": "21.05",
-        "versionCode": 202105,
-        "isSystem": false,
-        "firstInstallTime": 1791948872075,
-        "lastUpdateTime": 1791948872075
-      },
-      {
-        "packageName": "com.duokan.phone.remotecontroller",
-        "name": "Mi Remote",
-        "versionName": "7.1.3G",
-        "versionCode": 6383,
-        "isSystem": false,
-        "firstInstallTime": 1791798360000,
-        "lastUpdateTime": 1791813150271
-      },
-      {
-        "packageName": "com.miui.video",
-        "name": "Mi Video",
-        "versionName": "v2025080590(MiVideo-ROM)",
-        "versionCode": 2025080590,
-        "isSystem": false,
-        "firstInstallTime": 1791806821036,
-        "lastUpdateTime": 1791806821036
-      },
-      {
-        "packageName": "app.revanced.android.gms",
-        "name": "MicroG RE",
-        "versionName": "7.2.2-dev.1",
-        "versionCode": 255070221,
-        "isSystem": false,
-        "firstInstallTime": 1791895292764,
-        "lastUpdateTime": 1791896833742
-      },
-      {
-        "packageName": "bin.mt.plus",
-        "name": "MT Manager",
-        "versionName": "2.26.10",
-        "versionCode": 26100997,
-        "isSystem": false,
-        "firstInstallTime": 1791816779288,
-        "lastUpdateTime": 1791816779288
-      },
-      {
-        "packageName": "com.offsec.nhterm",
-        "name": "NetHunter Terminal",
-        "versionName": "2025.4",
-        "versionCode": 2026010400,
-        "isSystem": false,
-        "firstInstallTime": 1791963434280,
-        "lastUpdateTime": 1791963434280
-      },
-      {
-        "packageName": "com.payne.okux",
-        "name": "Ocrustar",
-        "versionName": "7.3.6",
-        "versionCode": 111,
-        "isSystem": false,
-        "firstInstallTime": 1791813161075,
-        "lastUpdateTime": 1791813161075
-      },
-      {
-        "packageName": "com.phonelink.localhub",
-        "name": "Phone Link Hub",
-        "versionName": "1.0",
-        "versionCode": 1,
-        "isSystem": false,
-        "firstInstallTime": 1792160770909,
-        "lastUpdateTime": 1792160770909
-      },
-      {
-        "packageName": "org.frap129.spectrum",
-        "name": "Spectrum",
-        "versionName": "1.5",
-        "versionCode": 5,
-        "isSystem": false,
-        "firstInstallTime": 1791798360000,
-        "lastUpdateTime": 1791798360000
-      },
-      {
-        "packageName": "com.zarz.spotiflac",
-        "name": "SpotiFLAC Mobile",
-        "versionName": "5.1.0",
-        "versionCode": 2160,
-        "isSystem": false,
-        "firstInstallTime": 1791817327826,
-        "lastUpdateTime": 1791817327826
-      },
-      {
-        "packageName": "w.nbx",
-        "name": "SuManger",
-        "versionName": "1.0",
-        "versionCode": 1,
-        "isSystem": false,
-        "firstInstallTime": 1791799737485,
-        "lastUpdateTime": 1791799737485
-      },
-      {
-        "packageName": "org.telegram.messenger.web",
-        "name": "Telegram",
-        "versionName": "12.4.1",
-        "versionCode": 65109,
-        "isSystem": false,
-        "firstInstallTime": 1791897113411,
-        "lastUpdateTime": 1791897113411
-      },
-      {
-        "packageName": "com.termux",
-        "name": "Termux",
-        "versionName": "0.118.3",
-        "versionCode": 1002,
-        "isSystem": false,
-        "firstInstallTime": 1791897548009,
-        "lastUpdateTime": 1791897548009
-      },
-      {
-        "packageName": "us.ultrasurf.mobile.ultrasurf",
-        "name": "Ultrasurf VPN",
-        "versionName": "3.1.7",
-        "versionCode": 317,
-        "isSystem": false,
-        "firstInstallTime": 1791897081401,
-        "lastUpdateTime": 1791897081401
-      },
-      {
-        "packageName": "mark.via.gp",
-        "name": "Via",
-        "versionName": "7.3.3",
-        "versionCode": 20260823,
-        "isSystem": false,
-        "firstInstallTime": 1792148003994,
-        "lastUpdateTime": 1792148003994
-      },
-      {
-        "packageName": "com.pittvandewitt.viperfx",
-        "name": "ViPER4Android FX",
-        "versionName": "2.7.2.1",
-        "versionCode": 2721,
-        "isSystem": false,
-        "firstInstallTime": 1791798359000,
-        "lastUpdateTime": 1791798359000
-      },
-      {
-        "packageName": "org.videolan.vlc",
-        "name": "VLC",
-        "versionName": "3.7.1",
-        "versionCode": 13070109,
-        "isSystem": false,
-        "firstInstallTime": 1791813451892,
-        "lastUpdateTime": 1791813451892
-      },
-      {
-        "packageName": "as.wps.wpatester",
-        "name": "Wps Wpa Tester Premium",
-        "versionName": "5.0.3.13-GMS",
-        "versionCode": 1049,
-        "isSystem": false,
-        "firstInstallTime": 1791816804033,
-        "lastUpdateTime": 1791816804033
-      },
-      {
-        "packageName": "com.themausoft.wpsapppro",
-        "name": "WPSApp Pro",
-        "versionName": "1.6.55",
-        "versionCode": 69,
-        "isSystem": false,
-        "firstInstallTime": 1791816706719,
-        "lastUpdateTime": 1791816706719
-      },
-      {
-        "packageName": "com.lonelycatgames.Xplore",
-        "name": "X-plore",
-        "versionName": "4.32.00",
-        "versionCode": 43200,
-        "isSystem": false,
-        "firstInstallTime": 1791894487190,
-        "lastUpdateTime": 1791894487190
-      },
-      {
-        "packageName": "app.morphe.android.youtube",
-        "name": "YouTube Morphe",
-        "versionName": "21.16.256",
-        "versionCode": 1561068412,
-        "isSystem": false,
-        "firstInstallTime": 1791895352704,
-        "lastUpdateTime": 1791895352704
-      },
-      {
-        "packageName": "app.morphe.android.apps.youtube.music",
-        "name": "YT Music Morphe",
-        "versionName": "9.20.53",
-        "versionCode": 92053240,
-        "isSystem": false,
-        "firstInstallTime": 1791895323002,
-        "lastUpdateTime": 1791895323002
-      },
-      {
-        "packageName": "com.miui.aod",
-        "name": "Always-on display",
-        "versionName": "RELEASE-2.10.838-04241040",
-        "versionCode": 21000838,
-        "isSystem": true,
-        "firstInstallTime": 1652442275000,
-        "lastUpdateTime": 1652442275000
-      },
-      {
-        "packageName": "com.miui.analytics",
-        "name": "Analytics",
-        "versionName": "6.31.0",
-        "versionCode": 2026082100,
-        "isSystem": true,
-        "firstInstallTime": 1661190280000,
-        "lastUpdateTime": 1791956926058
-      },
-      {
-        "packageName": "com.google.android.marvin.talkback",
-        "name": "Android Accessibility Suite",
-        "versionName": "17.0.1.926549743",
-        "versionCode": 60215178,
-        "isSystem": true,
-        "firstInstallTime": 1661190315000,
-        "lastUpdateTime": 1792074643455
-      },
-      {
-        "packageName": "com.google.android.projection.gearhead",
-        "name": "Android Auto",
-        "versionName": "17.8.663874-release",
-        "versionCode": 178663874,
-        "isSystem": true,
-        "firstInstallTime": 1661190316000,
-        "lastUpdateTime": 1792074660922
-      },
-      {
-        "packageName": "com.android.egg",
-        "name": "Android R Easter Egg",
-        "versionName": "1.0",
-        "versionCode": 1,
-        "isSystem": true,
-        "firstInstallTime": 1661190280000,
-        "lastUpdateTime": 1661190280000
-      },
-      {
-        "packageName": "com.google.android.ext.services",
-        "name": "Android Services Library",
-        "versionName": "aml_ext_301800100",
-        "versionCode": 301800100,
-        "isSystem": true,
-        "firstInstallTime": 1661190276000,
-        "lastUpdateTime": 1661190276000
-      },
-      {
-        "packageName": "com.google.android.setupwizard",
-        "name": "Android Setup",
-        "versionName": "230.358105869",
-        "versionCode": 10045,
-        "isSystem": true,
-        "firstInstallTime": 1661190327000,
-        "lastUpdateTime": 1661190327000
-      },
-      {
-        "packageName": "com.google.android.apps.restore",
-        "name": "Android Setup",
-        "versionName": "1.0.334154002",
-        "versionCode": 9568,
-        "isSystem": true,
-        "firstInstallTime": 1661190318000,
-        "lastUpdateTime": 1661190318000
-      },
-      {
-        "packageName": "android",
-        "name": "Android System",
-        "versionName": "11",
-        "versionCode": 30,
-        "isSystem": true,
-        "firstInstallTime": 1662913545000,
-        "lastUpdateTime": 1662913545000
-      },
-      {
-        "packageName": "android.aosp.overlay",
-        "name": "android.aosp.overlay",
-        "versionName": "11",
-        "versionCode": 30,
-        "isSystem": true,
-        "firstInstallTime": 1661190167000,
-        "lastUpdateTime": 1661190167000
-      },
-      {
-        "packageName": "android.miui.overlay",
-        "name": "android.miui.overlay",
-        "versionName": "11",
-        "versionCode": 30,
-        "isSystem": true,
-        "firstInstallTime": 1661190167000,
-        "lastUpdateTime": 1661190167000
-      },
-      {
-        "packageName": "com.miui.personalassistant",
-        "name": "App vault",
-        "versionName": "5.5.0",
-        "versionCode": 50500,
-        "isSystem": true,
-        "firstInstallTime": 1662527878000,
-        "lastUpdateTime": 1662527878000
-      },
-      {
-        "packageName": "com.mi.android.globalminusscreen",
-        "name": "App vault",
-        "versionName": "12.63.1",
-        "versionCode": 20260304,
-        "isSystem": true,
-        "firstInstallTime": 1661190302000,
-        "lastUpdateTime": 1792074721003
-      },
-      {
-        "packageName": "com.mediatek.atci.service",
-        "name": "Atci_service",
-        "versionName": "1.0",
-        "versionCode": 1,
-        "isSystem": true,
-        "firstInstallTime": 1661190301000,
-        "lastUpdateTime": 1661190301000
-      },
-      {
-        "packageName": "com.miui.backup",
-        "name": "Backup",
-        "versionName": "6.4.0.3",
-        "versionCode": 6403,
-        "isSystem": true,
-        "firstInstallTime": 1661190301000,
-        "lastUpdateTime": 1661190301000
-      },
-      {
-        "packageName": "com.miui.powerkeeper",
-        "name": "Battery and performance",
-        "versionName": "4.2.00",
-        "versionCode": 40200,
-        "isSystem": true,
-        "firstInstallTime": 1661190282000,
-        "lastUpdateTime": 1661190282000
-      },
-      {
-        "packageName": "com.android.providers.blockednumber",
-        "name": "Blocked Numbers Storage",
-        "versionName": "11",
-        "versionCode": 30,
-        "isSystem": true,
-        "firstInstallTime": 1661190301000,
-        "lastUpdateTime": 1661190301000
-      },
-      {
-        "packageName": "com.android.bluetooth",
-        "name": "Bluetooth",
-        "versionName": "11",
-        "versionCode": 30,
-        "isSystem": true,
-        "firstInstallTime": 1661190282000,
-        "lastUpdateTime": 1661190282000
-      },
-      {
-        "packageName": "com.android.bluetoothmidiservice",
-        "name": "Bluetooth MIDI Service",
-        "versionName": "11",
-        "versionCode": 30,
-        "isSystem": true,
-        "firstInstallTime": 1661190280000,
-        "lastUpdateTime": 1661190280000
-      },
-      {
-        "packageName": "com.miui.extraphoto",
-        "name": "Bokeh",
-        "versionName": "1.0.0",
-        "versionCode": 1,
-        "isSystem": true,
-        "firstInstallTime": 1661190304000,
-        "lastUpdateTime": 1661190304000
-      },
-      {
-        "packageName": "com.android.calendar",
-        "name": "Calendar",
-        "versionName": "12.24.0.3",
-        "versionCode": 12240003,
-        "isSystem": true,
-        "firstInstallTime": 1653714285000,
-        "lastUpdateTime": 1653714285000
-      },
-      {
-        "packageName": "com.android.providers.calendar",
-        "name": "Calendar storage",
-        "versionName": "10.0.5.0",
-        "versionCode": 10000500,
-        "isSystem": true,
-        "firstInstallTime": 1661190301000,
-        "lastUpdateTime": 1661190301000
-      },
-      {
-        "packageName": "com.android.calllogbackup",
-        "name": "Call Log Backup/Restore",
-        "versionName": "11",
-        "versionCode": 30,
-        "isSystem": true,
-        "firstInstallTime": 1661190301000,
-        "lastUpdateTime": 1661190301000
-      },
-      {
-        "packageName": "com.android.server.telecom",
-        "name": "Call Management",
-        "versionName": "11",
-        "versionCode": 30,
-        "isSystem": true,
-        "firstInstallTime": 1661190307000,
-        "lastUpdateTime": 1661190307000
-      },
-      {
-        "packageName": "com.mediatek.callrecorder",
-        "name": "Call Recorder",
-        "versionName": "11",
-        "versionCode": 30,
-        "isSystem": true,
-        "firstInstallTime": 1661190301000,
-        "lastUpdateTime": 1661190301000
-      },
-      {
-        "packageName": "com.android.camera",
-        "name": "Camera",
-        "versionName": "4.3.000662.0",
-        "versionCode": 430006620,
-        "isSystem": true,
-        "firstInstallTime": 1662910675000,
-        "lastUpdateTime": 1662910675000
-      },
-      {
-        "packageName": "com.xiaomi.cameratools",
-        "name": "CameraTools",
-        "versionName": "1.0",
-        "versionCode": 1,
-        "isSystem": true,
-        "firstInstallTime": 1661190280000,
-        "lastUpdateTime": 1661190280000
-      },
-      {
-        "packageName": "com.milink.service",
-        "name": "Cast",
-        "versionName": "13.1.0.8",
-        "versionCode": 13100008,
-        "isSystem": true,
-        "firstInstallTime": 1662008415000,
-        "lastUpdateTime": 1662008415000
-      },
-      {
-        "packageName": "com.xiaomi.miplay_client",
-        "name": "Casting",
-        "versionName": "0.4.32",
-        "versionCode": 132,
-        "isSystem": true,
-        "firstInstallTime": 1661190281000,
-        "lastUpdateTime": 1661190281000
-      },
-      {
-        "packageName": "com.android.cellbroadcastservice",
-        "name": "Cell Broadcast Service",
-        "versionName": "11",
-        "versionCode": 30,
-        "isSystem": true,
-        "firstInstallTime": 1661190301000,
-        "lastUpdateTime": 1661190301000
-      },
-      {
-        "packageName": "com.android.certinstaller",
-        "name": "Certificate Installer",
-        "versionName": "11",
-        "versionCode": 30,
-        "isSystem": true,
-        "firstInstallTime": 1661190280000,
-        "lastUpdateTime": 1661190280000
-      },
-      {
-        "packageName": "com.android.chrome",
-        "name": "Chrome",
-        "versionName": "154.0.8037.126",
-        "versionCode": 803712604,
-        "isSystem": true,
-        "firstInstallTime": 1661190309000,
-        "lastUpdateTime": 1791817098010
-      },
-      {
-        "packageName": "com.android.theme.icon_pack.circular.themepicker",
-        "name": "Circular",
-        "versionName": "1.0",
-        "versionCode": 1,
-        "isSystem": true,
-        "firstInstallTime": 1661190316000,
-        "lastUpdateTime": 1661190316000
-      },
-      {
-        "packageName": "com.miui.cit",
-        "name": "CIT",
-        "versionName": "1.2.1127.220606.3675b40e",
-        "versionCode": 1021127,
-        "isSystem": true,
-        "firstInstallTime": 1661190280000,
-        "lastUpdateTime": 1661190280000
-      },
-      {
-        "packageName": "com.android.deskclock",
-        "name": "Clock",
-        "versionName": "13.19.1",
-        "versionCode": 130201901,
-        "isSystem": true,
-        "firstInstallTime": 1661190280000,
-        "lastUpdateTime": 1791816469142
-      },
-      {
-        "packageName": "com.miui.cloudbackup",
-        "name": "Cloud backup",
-        "versionName": "1.12.1.6.2",
-        "versionCode": 112010602,
-        "isSystem": true,
-        "firstInstallTime": 1661190301000,
-        "lastUpdateTime": 1791815227896
-      },
-      {
-        "packageName": "com.miui.cloudservice.sysbase",
-        "name": "CloudServiceSysbase",
-        "versionName": "11",
-        "versionCode": 30,
-        "isSystem": true,
-        "firstInstallTime": 1661190301000,
-        "lastUpdateTime": 1661190301000
-      },
-      {
-        "packageName": "com.android.backupconfirm",
-        "name": "com.android.backupconfirm",
-        "versionName": "11",
-        "versionCode": 30,
-        "isSystem": true,
-        "firstInstallTime": 1661190301000,
-        "lastUpdateTime": 1661190301000
-      },
-      {
-        "packageName": "com.android.carrierconfig",
-        "name": "com.android.carrierconfig",
-        "versionName": "1.0.0",
-        "versionCode": 1,
-        "isSystem": true,
-        "firstInstallTime": 1661190325000,
-        "lastUpdateTime": 1661190325000
-      },
-      {
-        "packageName": "com.android.localtransport",
-        "name": "com.android.localtransport",
-        "versionName": "11",
-        "versionCode": 30,
-        "isSystem": true,
-        "firstInstallTime": 1661190302000,
-        "lastUpdateTime": 1661190302000
-      },
-      {
-        "packageName": "com.android.ons",
-        "name": "com.android.ons",
-        "versionName": "11",
-        "versionCode": 30,
-        "isSystem": true,
-        "firstInstallTime": 1661190307000,
-        "lastUpdateTime": 1661190307000
-      },
-      {
-        "packageName": "com.android.overlay.gmstelecomm",
-        "name": "com.android.overlay.gmstelecomm",
-        "versionName": "1.0",
-        "versionCode": 1,
-        "isSystem": true,
-        "firstInstallTime": 1661190316000,
-        "lastUpdateTime": 1661190316000
-      },
-      {
-        "packageName": "com.android.overlay.gmstelephony",
-        "name": "com.android.overlay.gmstelephony",
-        "versionName": "1.0",
-        "versionCode": 1,
-        "isSystem": true,
-        "firstInstallTime": 1661190316000,
-        "lastUpdateTime": 1661190316000
-      },
-      {
-        "packageName": "com.android.providers.media",
-        "name": "com.android.providers.media",
-        "versionName": "11",
-        "versionCode": 1024,
-        "isSystem": true,
-        "firstInstallTime": 1661190302000,
-        "lastUpdateTime": 1661190302000
-      },
-      {
-        "packageName": "com.google.android.networkstack.permissionconfig",
-        "name": "com.android.server.NetworkPermissionConfig",
-        "versionName": "r_aml_301500700",
-        "versionCode": 301500700,
-        "isSystem": true,
-        "firstInstallTime": 1661190307000,
-        "lastUpdateTime": 1661190307000
-      },
-      {
-        "packageName": "com.android.server.telecom.overlay.miui",
-        "name": "com.android.server.telecom.overlay.miui",
-        "versionName": "11",
-        "versionCode": 30,
-        "isSystem": true,
-        "firstInstallTime": 1661190311000,
-        "lastUpdateTime": 1661190311000
-      },
-      {
-        "packageName": "com.android.settings.overlay.miui",
-        "name": "com.android.settings.overlay.miui",
-        "versionName": "11",
-        "versionCode": 30,
-        "isSystem": true,
-        "firstInstallTime": 1661190167000,
-        "lastUpdateTime": 1661190167000
-      },
-      {
-        "packageName": "com.android.sharedstoragebackup",
-        "name": "com.android.sharedstoragebackup",
-        "versionName": "11",
-        "versionCode": 30,
-        "isSystem": true,
-        "firstInstallTime": 1661190308000,
-        "lastUpdateTime": 1661190308000
-      },
-      {
-        "packageName": "com.android.systemui.gesture.line.overlay",
-        "name": "com.android.systemui.gesture.line.overlay",
-        "versionName": "1.0",
-        "versionCode": 1,
-        "isSystem": true,
-        "firstInstallTime": 1661190167000,
-        "lastUpdateTime": 1661190167000
-      },
-      {
-        "packageName": "com.android.systemui.icon.overlay",
-        "name": "com.android.systemui.icon.overlay",
-        "versionName": "1.0",
-        "versionCode": 1,
-        "isSystem": true,
-        "firstInstallTime": 1661190149000,
-        "lastUpdateTime": 1661190149000
-      },
-      {
-        "packageName": "com.android.systemui.miui.optimization.overlay",
-        "name": "com.android.systemui.miui.optimization.overlay",
-        "versionName": "1.0",
-        "versionCode": 1,
-        "isSystem": true,
-        "firstInstallTime": 1661190167000,
-        "lastUpdateTime": 1661190167000
-      },
-      {
-        "packageName": "com.android.systemui.navigation.bar.overlay",
-        "name": "com.android.systemui.navigation.bar.overlay",
-        "versionName": "1.0",
-        "versionCode": 1,
-        "isSystem": true,
-        "firstInstallTime": 1661190167000,
-        "lastUpdateTime": 1661190167000
-      },
-      {
-        "packageName": "com.android.systemui.notch.overlay",
-        "name": "com.android.systemui.notch.overlay",
-        "versionName": "1.0",
-        "versionCode": 1,
-        "isSystem": true,
-        "firstInstallTime": 1661190149000,
-        "lastUpdateTime": 1661190149000
-      },
-      {
-        "packageName": "com.android.systemui.overlay.miui",
-        "name": "com.android.systemui.overlay.miui",
-        "versionName": "11",
-        "versionCode": 30,
-        "isSystem": true,
-        "firstInstallTime": 1661190167000,
-        "lastUpdateTime": 1661190167000
-      },
-      {
-        "packageName": "com.android.wallpaperbackup",
-        "name": "com.android.wallpaperbackup",
-        "versionName": "11",
-        "versionCode": 30,
-        "isSystem": true,
-        "firstInstallTime": 1661190283000,
-        "lastUpdateTime": 1661190283000
-      },
-      {
-        "packageName": "com.android.wallpapercropper",
-        "name": "com.android.wallpapercropper",
-        "versionName": "11",
-        "versionCode": 30,
-        "isSystem": true,
-        "firstInstallTime": 1661190327000,
-        "lastUpdateTime": 1661190327000
-      },
-      {
-        "packageName": "com.android.wifi.resources.overlay",
-        "name": "com.android.wifi.resources.overlay",
-        "versionName": "1.0",
-        "versionCode": 1,
-        "isSystem": true,
-        "firstInstallTime": 1661190167000,
-        "lastUpdateTime": 1661190167000
-      },
-      {
-        "packageName": "com.android.wifi.resources.xiaomi",
-        "name": "com.android.wifi.resources.xiaomi",
-        "versionName": "1.0",
-        "versionCode": 1,
-        "isSystem": true,
-        "firstInstallTime": 1661190167000,
-        "lastUpdateTime": 1661190167000
-      },
-      {
-        "packageName": "com.google.android.cellbroadcastreceiver.overlay.miui",
-        "name": "com.google.android.cellbroadcastreceiver.overlay.miui",
-        "versionName": "11",
-        "versionCode": 30,
-        "isSystem": true,
-        "firstInstallTime": 1661190316000,
-        "lastUpdateTime": 1661190316000
-      },
-      {
-        "packageName": "com.google.android.cellbroadcastservice.overlay.miui",
-        "name": "com.google.android.cellbroadcastservice.overlay.miui",
-        "versionName": "11",
-        "versionCode": 30,
-        "isSystem": true,
-        "firstInstallTime": 1661190316000,
-        "lastUpdateTime": 1661190316000
-      },
-      {
-        "packageName": "com.google.android.overlay.modules.ext.services",
-        "name": "com.google.android.overlay.modules.ext.services",
-        "versionName": "1.0",
-        "versionCode": 1,
-        "isSystem": true,
-        "firstInstallTime": 1661190316000,
-        "lastUpdateTime": 1661190316000
-      },
-      {
-        "packageName": "com.google.android.overlay.modules.modulemetadata.forframework",
-        "name": "com.google.android.overlay.modules.modulemetadata.forframework",
-        "versionName": "1.0",
-        "versionCode": 1,
-        "isSystem": true,
-        "firstInstallTime": 1661190316000,
-        "lastUpdateTime": 1661190316000
-      },
-      {
-        "packageName": "com.google.android.overlay.modules.permissioncontroller.forframework",
-        "name": "com.google.android.overlay.modules.permissioncontroller.forframework",
-        "versionName": "1.0",
-        "versionCode": 1,
-        "isSystem": true,
-        "firstInstallTime": 1661190316000,
-        "lastUpdateTime": 1661190316000
-      },
-      {
-        "packageName": "com.mediatek",
-        "name": "com.mediatek",
-        "versionName": "11",
-        "versionCode": 30,
-        "isSystem": true,
-        "firstInstallTime": 1661190290000,
-        "lastUpdateTime": 1661190290000
-      },
-      {
-        "packageName": "com.mediatek.frameworkresoverlay",
-        "name": "com.mediatek.frameworkresoverlay",
-        "versionName": "11",
-        "versionCode": 30,
-        "isSystem": true,
-        "firstInstallTime": 1661190167000,
-        "lastUpdateTime": 1661190167000
-      },
-      {
-        "packageName": "com.mediatek.ims",
-        "name": "com.mediatek.ims.ImsApp",
-        "versionName": "11",
-        "versionCode": 30,
-        "isSystem": true,
-        "firstInstallTime": 1661190302000,
-        "lastUpdateTime": 1661190302000
-      },
-      {
-        "packageName": "com.mediatek.SettingsProviderResOverlay",
-        "name": "com.mediatek.SettingsProviderResOverlay",
-        "versionName": "11",
-        "versionCode": 30,
-        "isSystem": true,
-        "firstInstallTime": 1661190167000,
-        "lastUpdateTime": 1661190167000
-      },
-      {
-        "packageName": "com.mediatek.systemuiresoverlay",
-        "name": "com.mediatek.systemuiresoverlay",
-        "versionName": "11",
-        "versionCode": 30,
-        "isSystem": true,
-        "firstInstallTime": 1661190167000,
-        "lastUpdateTime": 1661190167000
-      },
-      {
-        "packageName": "com.mediatek.voiceunlock",
-        "name": "com.mediatek.voiceunlock",
-        "versionName": "11",
-        "versionCode": 30,
-        "isSystem": true,
-        "firstInstallTime": 1661190308000,
-        "lastUpdateTime": 1661190308000
-      },
-      {
-        "packageName": "com.miui.face.overlay.miui",
-        "name": "com.miui.face.overlay.miui",
-        "versionName": "11",
-        "versionCode": 30,
-        "isSystem": true,
-        "firstInstallTime": 1661190167000,
-        "lastUpdateTime": 1661190167000
-      },
-      {
-        "packageName": "com.miui.system",
-        "name": "com.miui.internal.app.SystemApplication",
-        "versionName": "1.14.0.0",
-        "versionCode": 1140000,
-        "isSystem": true,
-        "firstInstallTime": 1661190284000,
-        "lastUpdateTime": 1661190284000
-      },
-      {
-        "packageName": "com.miui.rom",
-        "name": "com.miui.rom",
-        "versionName": "1.11.0.0",
-        "versionCode": 1110000,
-        "isSystem": true,
-        "firstInstallTime": 1661190289000,
-        "lastUpdateTime": 1661190289000
-      },
-      {
-        "packageName": "com.miui.systemui.carriers.overlay",
-        "name": "com.miui.systemui.carriers.overlay",
-        "versionName": "1.0",
-        "versionCode": 1,
-        "isSystem": true,
-        "firstInstallTime": 1661190167000,
-        "lastUpdateTime": 1661190167000
-      },
-      {
-        "packageName": "com.miui.systemui.devices.overlay",
-        "name": "com.miui.systemui.devices.overlay",
-        "versionName": "1.0",
-        "versionCode": 1,
-        "isSystem": true,
-        "firstInstallTime": 1661190167000,
-        "lastUpdateTime": 1661190167000
-      },
-      {
-        "packageName": "com.miui.systemui.overlay.devices.android",
-        "name": "com.miui.systemui.overlay.devices.android",
-        "versionName": "1.0",
-        "versionCode": 1,
-        "isSystem": true,
-        "firstInstallTime": 1661190167000,
-        "lastUpdateTime": 1661190167000
-      },
-      {
-        "packageName": "com.modemdebug",
-        "name": "com.modemdebug",
-        "versionName": "3.0",
-        "versionCode": 3,
-        "isSystem": true,
-        "firstInstallTime": 1661190284000,
-        "lastUpdateTime": 1661190284000
-      },
-      {
-        "packageName": "com.xiaomi.bluetooth.overlay",
-        "name": "com.xiaomi.bluetooth.overlay",
-        "versionName": "11",
-        "versionCode": 30,
-        "isSystem": true,
-        "firstInstallTime": 1661190167000,
-        "lastUpdateTime": 1661190167000
-      },
-      {
-        "packageName": "com.xiaomi.micloud.sdk",
-        "name": "com.xiaomi.micloudsdk.SdkApplication",
-        "versionName": "2.0.0.0",
-        "versionCode": 20,
-        "isSystem": true,
-        "firstInstallTime": 1661190307000,
-        "lastUpdateTime": 1661190307000
-      },
-      {
-        "packageName": "com.android.companiondevicemanager",
-        "name": "Companion Device Manager",
-        "versionName": "11",
-        "versionCode": 30,
-        "isSystem": true,
-        "firstInstallTime": 1661190280000,
-        "lastUpdateTime": 1661190280000
-      },
-      {
-        "packageName": "com.android.contacts",
-        "name": "Contacts and dialer",
-        "versionName": "12.2.3.0",
-        "versionCode": 330,
-        "isSystem": true,
-        "firstInstallTime": 1662925647000,
-        "lastUpdateTime": 1662925647000
-      },
-      {
-        "packageName": "com.android.providers.contacts",
-        "name": "Contacts Storage",
-        "versionName": "11",
-        "versionCode": 30,
-        "isSystem": true,
-        "firstInstallTime": 1661190302000,
-        "lastUpdateTime": 1661190302000
-      },
-      {
-        "packageName": "com.debug.loggerui",
-        "name": "DebugLoggerUI",
-        "versionName": "6.0.0",
-        "versionCode": 60000,
-        "isSystem": true,
-        "firstInstallTime": 1661190280000,
-        "lastUpdateTime": 1661190280000
-      },
-      {
-        "packageName": "com.dolby.ds1appUI",
-        "name": "Dolby",
-        "versionName": "1.0",
-        "versionCode": 1,
-        "isSystem": true,
-        "firstInstallTime": 1604328308000,
-        "lastUpdateTime": 1604328308000
-      },
-      {
-        "packageName": "com.dolby",
-        "name": "Dolby",
-        "versionName": "4.4.2-1",
-        "versionCode": 19,
-        "isSystem": true,
-        "firstInstallTime": 1204252426000,
-        "lastUpdateTime": 1204252426000
-      },
-      {
-        "packageName": "com.android.providers.downloads",
-        "name": "Downloads",
-        "versionName": "21.09.30.101",
-        "versionCode": 210930101,
-        "isSystem": true,
-        "firstInstallTime": 1661190302000,
-        "lastUpdateTime": 1661190302000
-      },
-      {
-        "packageName": "com.android.providers.downloads.ui",
-        "name": "Downloads",
-        "versionName": "21.09.30.101",
-        "versionCode": 210930101,
-        "isSystem": true,
-        "firstInstallTime": 1661190302000,
-        "lastUpdateTime": 1661190302000
-      },
-      {
-        "packageName": "com.android.dynsystem",
-        "name": "Dynamic System Updates",
-        "versionName": "11",
-        "versionCode": 30,
-        "isSystem": true,
-        "firstInstallTime": 1661190302000,
-        "lastUpdateTime": 1661190302000
-      },
-      {
-        "packageName": "com.miui.misound",
-        "name": "Earphones",
-        "versionName": "1.0",
-        "versionCode": 210305,
-        "isSystem": true,
-        "firstInstallTime": 1661190281000,
-        "lastUpdateTime": 1661190281000
-      },
-      {
-        "packageName": "com.mediatek.emcamera",
-        "name": "EmCamera",
-        "versionName": "2.0",
-        "versionCode": 2,
-        "isSystem": true,
-        "firstInstallTime": 1661190149000,
-        "lastUpdateTime": 1661190149000
-      },
-      {
-        "packageName": "com.android.emergency",
-        "name": "Emergency information",
-        "versionName": "11",
-        "versionCode": 30,
-        "isSystem": true,
-        "firstInstallTime": 1661190324000,
-        "lastUpdateTime": 1661190324000
-      },
-      {
-        "packageName": "com.mediatek.engineermode",
-        "name": "EngineerMode",
-        "versionName": "1.0",
-        "versionCode": 2,
-        "isSystem": true,
-        "firstInstallTime": 1661190302000,
-        "lastUpdateTime": 1661190302000
-      },
-      {
-        "packageName": "com.android.externalstorage",
-        "name": "External Storage",
-        "versionName": "11",
-        "versionCode": 30,
-        "isSystem": true,
-        "firstInstallTime": 1661190302000,
-        "lastUpdateTime": 1661190302000
-      },
-      {
-        "packageName": "com.fido.asm",
-        "name": "FIDO UAF1.0 ASM",
-        "versionName": "3.2.1.3",
-        "versionCode": 10,
-        "isSystem": true,
-        "firstInstallTime": 1661190280000,
-        "lastUpdateTime": 1661190280000
-      },
-      {
-        "packageName": "com.fido.xiaomi.uafclient",
-        "name": "FIDO UAF1.0 Client",
-        "versionName": "3.6.0",
-        "versionCode": 6,
-        "isSystem": true,
-        "firstInstallTime": 1661190280000,
-        "lastUpdateTime": 1661190280000
-      },
-      {
-        "packageName": "com.android.fileexplorer",
-        "name": "File Manager",
-        "versionName": "4.3.5.4",
-        "versionCode": 4354,
-        "isSystem": true,
-        "firstInstallTime": 1661965533000,
-        "lastUpdateTime": 1661965533000
-      },
-      {
-        "packageName": "com.google.android.documentsui",
-        "name": "Files",
-        "versionName": "aml_doc_301800100",
-        "versionCode": 301800100,
-        "isSystem": true,
-        "firstInstallTime": 1661190302000,
-        "lastUpdateTime": 1661190302000
-      },
-      {
-        "packageName": "com.android.theme.icon_pack.filled.themepicker",
-        "name": "Filled",
-        "versionName": "1.0",
-        "versionCode": 1,
-        "isSystem": true,
-        "firstInstallTime": 1661190316000,
-        "lastUpdateTime": 1661190316000
-      },
-      {
-        "packageName": "com.xiaomi.finddevice",
-        "name": "Find device",
-        "versionName": "11",
-        "versionCode": 30,
-        "isSystem": true,
-        "firstInstallTime": 1661190302000,
-        "lastUpdateTime": 1661190302000
-      },
-      {
-        "packageName": "com.goodix.gftest",
-        "name": "Fingerpirnt test",
-        "versionName": "1.1.01",
-        "versionCode": 11,
-        "isSystem": true,
-        "firstInstallTime": 1661190280000,
-        "lastUpdateTime": 1661190280000
-      },
-      {
-        "packageName": "com.fingerprints.extension.service",
-        "name": "FingerprintExtensionService",
-        "versionName": "1.92",
-        "versionCode": 192,
-        "isSystem": true,
-        "firstInstallTime": 1661190280000,
-        "lastUpdateTime": 1661190280000
-      },
-      {
-        "packageName": "com.miui.freeform",
-        "name": "Floating windows",
-        "versionName": "11",
-        "versionCode": 30,
-        "isSystem": true,
-        "firstInstallTime": 1661190304000,
-        "lastUpdateTime": 1661190304000
-      },
-      {
-        "packageName": "com.miui.fm",
-        "name": "FM Radio",
-        "versionName": "2.15.01.051211i",
-        "versionCode": 1093,
-        "isSystem": true,
-        "firstInstallTime": 1661190281000,
-        "lastUpdateTime": 1791815235829
-      },
-      {
-        "packageName": "com.miui.fmservice",
-        "name": "FM Radio Service",
-        "versionName": "11",
-        "versionCode": 30,
-        "isSystem": true,
-        "firstInstallTime": 1661190322000,
-        "lastUpdateTime": 1661190322000
-      },
-      {
-        "packageName": "com.miui.phrase",
-        "name": "Frequent phrases",
-        "versionName": "3.0.7",
-        "versionCode": 10007,
-        "isSystem": true,
-        "firstInstallTime": 1661190282000,
-        "lastUpdateTime": 1661190282000
-      },
-      {
-        "packageName": "com.android.location.fused",
-        "name": "Fused Location",
-        "versionName": "11",
-        "versionCode": 30,
-        "isSystem": true,
-        "firstInstallTime": 1661190302000,
-        "lastUpdateTime": 1661190302000
-      },
-      {
-        "packageName": "com.miui.gallery",
-        "name": "Gallery",
-        "versionName": "3.5.7.24-global",
-        "versionCode": 403704,
-        "isSystem": true,
-        "firstInstallTime": 1661900621000,
-        "lastUpdateTime": 1791815220914
-      },
-      {
-        "packageName": "com.google.android.inputmethod.latin",
-        "name": "Gboard",
-        "versionName": "18.4.1.985164140-release-arm64-v8a",
-        "versionCode": 176027078,
-        "isSystem": true,
-        "firstInstallTime": 1661190310000,
-        "lastUpdateTime": 1791813166969
-      },
-      {
-        "packageName": "com.goodix.fingerprint",
-        "name": "GFManager",
-        "versionName": "1.0.04",
-        "versionCode": 4,
-        "isSystem": true,
-        "firstInstallTime": 1661190280000,
-        "lastUpdateTime": 1661190280000
-      },
-      {
-        "packageName": "com.google.android.gms",
-        "name": "Google Play services",
-        "versionName": "26.37.37 (150400-994713346)",
-        "versionCode": 263737022,
-        "isSystem": true,
-        "firstInstallTime": 1661190318000,
-        "lastUpdateTime": 1791800066710
-      },
-      {
-        "packageName": "com.android.vending",
-        "name": "Google Play Store",
-        "versionName": "53.5.48-29 [0] [PR] 995634172",
-        "versionCode": 85354820,
-        "isSystem": true,
-        "firstInstallTime": 1661190318000,
-        "lastUpdateTime": 1791958214718
-      },
-      {
-        "packageName": "com.google.android.gsf",
-        "name": "Google Services Framework",
-        "versionName": "11-6684105",
-        "versionCode": 30,
-        "isSystem": true,
-        "firstInstallTime": 1661190325000,
-        "lastUpdateTime": 1661190325000
-      },
-      {
-        "packageName": "com.google.android.networkstack.overlay",
-        "name": "GoogleNetworkStackResOverlay",
-        "versionName": "11",
-        "versionCode": 30,
-        "isSystem": true,
-        "firstInstallTime": 1661190149000,
-        "lastUpdateTime": 1661190149000
-      },
-      {
-        "packageName": "com.xiaomi.bsp.gps.nps",
-        "name": "GPS location",
-        "versionName": "11",
-        "versionCode": 30,
-        "isSystem": true,
-        "firstInstallTime": 1661190280000,
-        "lastUpdateTime": 1661190280000
-      },
-      {
-        "packageName": "com.mi.globallayout",
-        "name": "HomeLayout",
-        "versionName": "2.0.6.1",
-        "versionCode": 2000601,
-        "isSystem": true,
-        "firstInstallTime": 1661190280000,
-        "lastUpdateTime": 1661190280000
-      },
-      {
-        "packageName": "org.ifaa.aidl.manager",
-        "name": "IFAAService",
-        "versionName": "11",
-        "versionCode": 30,
-        "isSystem": true,
-        "firstInstallTime": 1661190281000,
-        "lastUpdateTime": 1661190281000
-      },
-      {
-        "packageName": "com.android.inputdevices",
-        "name": "Input Devices",
-        "versionName": "11",
-        "versionCode": 30,
-        "isSystem": true,
-        "firstInstallTime": 1661190302000,
-        "lastUpdateTime": 1661190302000
-      },
-      {
-        "packageName": "com.xiaomi.joyose",
-        "name": "Joyose",
-        "versionName": "2.1.81",
-        "versionCode": 181,
-        "isSystem": true,
-        "firstInstallTime": 1661190281000,
-        "lastUpdateTime": 1661190281000
-      },
-      {
-        "packageName": "com.miui.audiomonitor",
-        "name": "karaoke",
-        "versionName": "11",
-        "versionCode": 20200610,
-        "isSystem": true,
-        "firstInstallTime": 1661190281000,
-        "lastUpdateTime": 1661190281000
-      },
-      {
-        "packageName": "com.android.keychain",
-        "name": "Key Chain",
-        "versionName": "11",
-        "versionCode": 30,
-        "isSystem": true,
-        "firstInstallTime": 1661190281000,
-        "lastUpdateTime": 1661190281000
-      },
-      {
-        "packageName": "com.android.wallpaper.livepicker",
-        "name": "Live Wallpaper Picker",
-        "versionName": "11",
-        "versionCode": 30,
-        "isSystem": true,
-        "firstInstallTime": 1661190281000,
-        "lastUpdateTime": 1661190281000
-      },
-      {
-        "packageName": "com.mediatek.lbs.em2.ui",
-        "name": "LocationEM2",
-        "versionName": "1.0",
-        "versionCode": 1,
-        "isSystem": true,
-        "firstInstallTime": 1661190281000,
-        "lastUpdateTime": 1661190281000
-      },
-      {
-        "packageName": "com.bsp.catchlog",
-        "name": "Log generator",
-        "versionName": "11",
-        "versionCode": 30,
-        "isSystem": true,
-        "firstInstallTime": 1661190280000,
-        "lastUpdateTime": 1661190280000
-      },
-      {
-        "packageName": "com.mediatek.location.lppe.main",
-        "name": "LPPe Service",
-        "versionName": "1.0",
-        "versionCode": 1,
-        "isSystem": true,
-        "firstInstallTime": 1661190302000,
-        "lastUpdateTime": 1661190302000
-      },
-      {
-        "packageName": "com.android.providers.media.module",
-        "name": "Media Storage",
-        "versionName": "11",
-        "versionCode": 30,
-        "isSystem": true,
-        "firstInstallTime": 1661190277000,
-        "lastUpdateTime": 1661190277000
-      },
-      {
-        "packageName": "com.android.mms",
-        "name": "Messaging",
-        "versionName": "11.0.7.4",
-        "versionCode": 11000704,
-        "isSystem": true,
-        "firstInstallTime": 1661190306000,
-        "lastUpdateTime": 1661190306000
-      },
-      {
-        "packageName": "com.xiaomi.aiasst.service",
-        "name": "Mi AI Call Assistant",
-        "versionName": "5.0.21",
-        "versionCode": 1388,
-        "isSystem": true,
-        "firstInstallTime": 1662927551000,
-        "lastUpdateTime": 1662927551000
-      },
-      {
-        "packageName": "com.xiaomi.mi_connect_service",
-        "name": "Mi Connect",
-        "versionName": "2.2.137",
-        "versionCode": 20,
-        "isSystem": true,
-        "firstInstallTime": 1661190284000,
-        "lastUpdateTime": 1661190284000
-      },
-      {
-        "packageName": "com.miui.micloudsync",
-        "name": "MiCloudSync",
-        "versionName": "11",
-        "versionCode": 30,
-        "isSystem": true,
-        "firstInstallTime": 1661190281000,
-        "lastUpdateTime": 1661190281000
-      },
-      {
-        "packageName": "com.xiaomi.bluetooth",
-        "name": "MIUI Bluetooth",
-        "versionName": "11",
-        "versionCode": 30,
-        "isSystem": true,
-        "firstInstallTime": 1661190281000,
-        "lastUpdateTime": 1661190281000
-      },
-      {
-        "packageName": "com.miui.core",
-        "name": "MIUI SDK",
-        "versionName": "1.20.0.0",
-        "versionCode": 1200099,
-        "isSystem": true,
-        "firstInstallTime": 1661190284000,
-        "lastUpdateTime": 1661190284000
-      },
-      {
-        "packageName": "com.miui.guardprovider",
-        "name": "MIUI security components",
-        "versionName": "1.0.8",
-        "versionCode": 108,
-        "isSystem": true,
-        "firstInstallTime": 1661190280000,
-        "lastUpdateTime": 1661190280000
-      },
-      {
-        "packageName": "com.android.thememanager.module",
-        "name": "miui.external.Application",
-        "versionName": "1.0",
-        "versionCode": 1,
-        "isSystem": true,
-        "firstInstallTime": 1661190283000,
-        "lastUpdateTime": 1661190283000
-      },
-      {
-        "packageName": "com.miui.face",
-        "name": "MiuiBiometric",
-        "versionName": "1.0.0",
-        "versionCode": 1,
-        "isSystem": true,
-        "firstInstallTime": 1661190281000,
-        "lastUpdateTime": 1661190281000
-      },
-      {
-        "packageName": "com.miui.daemon",
-        "name": "MiuiDaemon",
-        "versionName": "2.0",
-        "versionCode": 30,
-        "isSystem": true,
-        "firstInstallTime": 1661190282000,
-        "lastUpdateTime": 1661190282000
-      },
-      {
-        "packageName": "com.android.mms.service",
-        "name": "MmsService",
-        "versionName": "11",
-        "versionCode": 30,
-        "isSystem": true,
-        "firstInstallTime": 1661190306000,
-        "lastUpdateTime": 1661190306000
-      },
-      {
-        "packageName": "com.android.mtp",
-        "name": "MTP Host",
-        "versionName": "11",
-        "versionCode": 30,
-        "isSystem": true,
-        "firstInstallTime": 1661190307000,
-        "lastUpdateTime": 1661190307000
-      },
-      {
-        "packageName": "com.google.android.networkstack",
-        "name": "Network manager",
-        "versionName": "aml_net_301800200",
-        "versionCode": 301800200,
-        "isSystem": true,
-        "firstInstallTime": 1661190307000,
-        "lastUpdateTime": 1661190307000
-      },
-      {
-        "packageName": "com.android.networkstack.inprocess.overlay",
-        "name": "NetworkStackInProcessResOverlay",
-        "versionName": "11",
-        "versionCode": 30,
-        "isSystem": true,
-        "firstInstallTime": 1661190149000,
-        "lastUpdateTime": 1661190149000
-      },
-      {
-        "packageName": "com.android.networkstack.overlay",
-        "name": "NetworkStackOverlay",
-        "versionName": "11",
-        "versionCode": 30,
-        "isSystem": true,
-        "firstInstallTime": 1661190167000,
-        "lastUpdateTime": 1661190167000
-      },
-      {
-        "packageName": "com.android.nfc",
-        "name": "Nfc Service",
-        "versionName": "11",
-        "versionCode": 30,
-        "isSystem": true,
-        "firstInstallTime": 1661190282000,
-        "lastUpdateTime": 1661190282000
-      },
-      {
-        "packageName": "com.miui.notification",
-        "name": "Notifications",
-        "versionName": "1.1.4.39",
-        "versionCode": 1010439,
-        "isSystem": true,
-        "firstInstallTime": 1661190282000,
-        "lastUpdateTime": 1661190282000
-      },
-      {
-        "packageName": "com.mediatek.omacp",
-        "name": "Omacp",
-        "versionName": "11",
-        "versionCode": 30,
-        "isSystem": true,
-        "firstInstallTime": 1661190325000,
-        "lastUpdateTime": 1661190325000
-      },
-      {
-        "packageName": "com.mediatek.op01.telecom",
-        "name": "OP01Telecom",
-        "versionName": "1.0",
-        "versionCode": 1,
-        "isSystem": true,
-        "firstInstallTime": 1661190282000,
-        "lastUpdateTime": 1661190282000
-      },
-      {
-        "packageName": "com.mediatek.op09clib.telecom",
-        "name": "OP09ClibTelecom",
-        "versionName": "1.0",
-        "versionCode": 1,
-        "isSystem": true,
-        "firstInstallTime": 1661190282000,
-        "lastUpdateTime": 1661190282000
-      },
-      {
-        "packageName": "com.mediatek.op01.phone.plugin",
-        "name": "OperatorPlugin",
-        "versionName": "1.0",
-        "versionCode": 1,
-        "isSystem": true,
-        "firstInstallTime": 1661190282000,
-        "lastUpdateTime": 1661190282000
-      },
-      {
-        "packageName": "com.miui.global.packageinstaller",
-        "name": "Package installer",
-        "versionName": "3.9.4",
-        "versionCode": 394,
-        "isSystem": true,
-        "firstInstallTime": 1661190280000,
-        "lastUpdateTime": 1791956390284
-      },
-      {
-        "packageName": "com.google.android.packageinstaller",
-        "name": "Package installer",
-        "versionName": "11-7276604",
-        "versionCode": 30,
-        "isSystem": true,
-        "firstInstallTime": 1661190302000,
-        "lastUpdateTime": 1661190302000
-      },
-      {
-        "packageName": "com.android.pacprocessor",
-        "name": "PacProcessor",
-        "versionName": "11",
-        "versionCode": 30,
-        "isSystem": true,
-        "firstInstallTime": 1661190282000,
-        "lastUpdateTime": 1661190282000
-      },
-      {
-        "packageName": "android.autoinstalls.config.Xiaomi.begonia",
-        "name": "PAI",
-        "versionName": "1",
-        "versionCode": 1,
-        "isSystem": true,
-        "firstInstallTime": 1661190282000,
-        "lastUpdateTime": 1661190282000
-      },
-      {
-        "packageName": "com.google.android.permissioncontroller",
-        "name": "Permission controller",
-        "versionName": "aml_per_301800100",
-        "versionCode": 301800100,
-        "isSystem": true,
-        "firstInstallTime": 1661190277000,
-        "lastUpdateTime": 1661190277000
-      },
-      {
-        "packageName": "com.lbe.security.miui",
-        "name": "Permissions",
-        "versionName": "1.8.0",
-        "versionCode": 180,
-        "isSystem": true,
-        "firstInstallTime": 1663095439000,
-        "lastUpdateTime": 1663095439000
-      },
-      {
-        "packageName": "com.android.providers.telephony",
-        "name": "Phone and Messaging Storage",
-        "versionName": "11",
-        "versionCode": 30,
-        "isSystem": true,
-        "firstInstallTime": 1661190308000,
-        "lastUpdateTime": 1661190308000
-      },
-      {
-        "packageName": "com.android.phone",
-        "name": "Phone Services",
-        "versionName": "11",
-        "versionCode": 30,
-        "isSystem": true,
-        "firstInstallTime": 1661190307000,
-        "lastUpdateTime": 1661190307000
-      },
-      {
-        "packageName": "com.android.dreams.phototable",
-        "name": "Photo Screensavers",
-        "versionName": "11",
-        "versionCode": 30,
-        "isSystem": true,
-        "firstInstallTime": 1661190311000,
-        "lastUpdateTime": 1661190311000
-      },
-      {
-        "packageName": "com.xiaomi.powerchecker",
-        "name": "Power Detector",
-        "versionName": "2.0.00",
-        "versionCode": 20000,
-        "isSystem": true,
-        "firstInstallTime": 1661190282000,
-        "lastUpdateTime": 1661190282000
-      },
-      {
-        "packageName": "com.android.provision",
-        "name": "Provision",
-        "versionName": "11",
-        "versionCode": 30,
-        "isSystem": true,
-        "firstInstallTime": 1661190307000,
-        "lastUpdateTime": 1661190307000
-      },
-      {
-        "packageName": "com.android.proxyhandler",
-        "name": "ProxyHandler",
-        "versionName": "11",
-        "versionCode": 30,
-        "isSystem": true,
-        "firstInstallTime": 1661190307000,
-        "lastUpdateTime": 1661190307000
-      },
-      {
-        "packageName": "com.miui.hybrid",
-        "name": "Quick apps Service Framework",
-        "versionName": "1.6.9.1",
-        "versionCode": 10690171,
-        "isSystem": true,
-        "firstInstallTime": 1661190281000,
-        "lastUpdateTime": 1661190281000
-      },
-      {
-        "packageName": "com.miui.touchassistant",
-        "name": "Quick ball",
-        "versionName": "9.0.1.9",
-        "versionCode": 9000109,
-        "isSystem": true,
-        "firstInstallTime": 1661190283000,
-        "lastUpdateTime": 1661190283000
-      },
-      {
-        "packageName": "com.android.soundrecorder",
-        "name": "Recorder",
-        "versionName": "1.9.80.9",
-        "versionCode": 109809,
-        "isSystem": true,
-        "firstInstallTime": 1662137445000,
-        "lastUpdateTime": 1662137445000
-      },
-      {
-        "packageName": "com.mediatek.capctrl.service",
-        "name": "RilCap",
-        "versionName": "11",
-        "versionCode": 30,
-        "isSystem": true,
-        "firstInstallTime": 1661190306000,
-        "lastUpdateTime": 1661190306000
-      },
-      {
-        "packageName": "com.android.theme.icon_pack.rounded.themepicker",
-        "name": "Rounded",
-        "versionName": "1.0",
-        "versionCode": 1,
-        "isSystem": true,
-        "firstInstallTime": 1661190316000,
-        "lastUpdateTime": 1661190316000
-      },
-      {
-        "packageName": "com.miui.screenrecorder",
-        "name": "Screen Recorder",
-        "versionName": "3.12.5.7.1",
-        "versionCode": 31205071,
-        "isSystem": true,
-        "firstInstallTime": 1662137443000,
-        "lastUpdateTime": 1662137443000
-      },
-      {
-        "packageName": "com.miui.screenshot",
-        "name": "Screenshot",
-        "versionName": "RELEASE-1.2.117-08111448",
-        "versionCode": 10200117,
-        "isSystem": true,
-        "firstInstallTime": 1661190282000,
-        "lastUpdateTime": 1661190282000
-      },
-      {
-        "packageName": "com.android.se",
-        "name": "SecureElementApplication",
-        "versionName": "11",
-        "versionCode": 30,
-        "isSystem": true,
-        "firstInstallTime": 1661190282000,
-        "lastUpdateTime": 1661190282000
-      },
-      {
-        "packageName": "com.miui.securitycenter",
-        "name": "Security",
-        "versionName": "11.1.6-251213.1.1",
-        "versionCode": 40001116,
-        "isSystem": true,
-        "firstInstallTime": 1661110638000,
-        "lastUpdateTime": 1791969762323
-      },
-      {
-        "packageName": "com.miui.securitycore",
-        "name": "Security Core Component",
-        "versionName": "25",
-        "versionCode": 25,
-        "isSystem": true,
-        "firstInstallTime": 1661190282000,
-        "lastUpdateTime": 1661190282000
-      },
-      {
-        "packageName": "com.fingerprints.sensortesttool",
-        "name": "Sensor Test Tool",
-        "versionName": "3.54",
-        "versionCode": 354,
-        "isSystem": true,
-        "firstInstallTime": 1661190282000,
-        "lastUpdateTime": 1661190282000
-      },
-      {
-        "packageName": "com.xiaomi.misettings",
-        "name": "Settings",
-        "versionName": "2.9.5.5",
-        "versionCode": 211011010,
-        "isSystem": true,
-        "firstInstallTime": 1661190303000,
-        "lastUpdateTime": 1661190303000
-      },
-      {
-        "packageName": "com.android.settings",
-        "name": "Settings",
-        "versionName": "11",
-        "versionCode": 30,
-        "isSystem": true,
-        "firstInstallTime": 1663504477000,
-        "lastUpdateTime": 1663504477000
-      },
-      {
-        "packageName": "com.android.providers.settings",
-        "name": "Settings Storage",
-        "versionName": "11",
-        "versionCode": 30,
-        "isSystem": true,
-        "firstInstallTime": 1661190308000,
-        "lastUpdateTime": 1661190308000
-      },
-      {
-        "packageName": "com.android.shell",
-        "name": "Shell",
-        "versionName": "11",
-        "versionCode": 30,
-        "isSystem": true,
-        "firstInstallTime": 1661190308000,
-        "lastUpdateTime": 1661190308000
-      },
-      {
-        "packageName": "com.android.simappdialog",
-        "name": "Sim app dialogue",
-        "versionName": "11",
-        "versionCode": 30,
-        "isSystem": true,
-        "firstInstallTime": 1661190282000,
-        "lastUpdateTime": 1661190282000
-      },
-      {
-        "packageName": "com.android.stk",
-        "name": "SIM Tool Kit",
-        "versionName": "11",
-        "versionCode": 30,
-        "isSystem": true,
-        "firstInstallTime": 1661190308000,
-        "lastUpdateTime": 1661190308000
-      },
-      {
-        "packageName": "com.miui.hybrid.accessory",
-        "name": "Smart Scenes",
-        "versionName": "1.4.3",
-        "versionCode": 1040301,
-        "isSystem": true,
-        "firstInstallTime": 1661190281000,
-        "lastUpdateTime": 1661190281000
-      },
-      {
-        "packageName": "com.tencent.soter.soterserver",
-        "name": "SoterService",
-        "versionName": "11",
-        "versionCode": 30,
-        "isSystem": true,
-        "firstInstallTime": 1661190282000,
-        "lastUpdateTime": 1661190282000
-      },
-      {
-        "packageName": "com.android.soundpicker",
-        "name": "Sounds",
-        "versionName": "11",
-        "versionCode": 30,
-        "isSystem": true,
-        "firstInstallTime": 1661190308000,
-        "lastUpdateTime": 1661190308000
-      },
-      {
-        "packageName": "com.google.android.tts",
-        "name": "Speech Recognition and Synthesis from Google",
-        "versionName": "googletts.google-speech-apk_20260914.02_p2.986315744",
-        "versionCode": 210683481,
-        "isSystem": true,
-        "firstInstallTime": 1661190310000,
-        "lastUpdateTime": 1792074625777
-      },
-      {
-        "packageName": "com.xiaomi.discover",
-        "name": "System apps updater",
-        "versionName": "26.06.24.878",
-        "versionCode": 2000878,
-        "isSystem": true,
-        "firstInstallTime": 1661190282000,
-        "lastUpdateTime": 1791956397560
-      },
-      {
-        "packageName": "com.miui.home",
-        "name": "System launcher",
-        "versionName": "ALPHA-4.39.0.5500-07271657",
-        "versionCode": 439005500,
-        "isSystem": true,
-        "firstInstallTime": 1660447238000,
-        "lastUpdateTime": 1660447238000
-      },
-      {
-        "packageName": "com.miui.securityadd",
-        "name": "System service plugin",
-        "versionName": "9.11.96-251014.1.1",
-        "versionCode": 91196,
-        "isSystem": true,
-        "firstInstallTime": 1662004960000,
-        "lastUpdateTime": 1791816453523
-      },
-      {
-        "packageName": "com.android.traceur",
-        "name": "System Tracing",
-        "versionName": "1.0",
-        "versionCode": 2,
-        "isSystem": true,
-        "firstInstallTime": 1661190283000,
-        "lastUpdateTime": 1661190283000
-      },
-      {
-        "packageName": "com.android.systemui",
-        "name": "System UI",
-        "versionName": "20201109.0",
-        "versionCode": 202011090,
-        "isSystem": true,
-        "firstInstallTime": 1663298614000,
-        "lastUpdateTime": 1663298614000
-      },
-      {
-        "packageName": "miui.systemui.plugin",
-        "name": "System UI Plug-in",
-        "versionName": "13.1.0.63.0",
-        "versionCode": 131006300,
-        "isSystem": true,
-        "firstInstallTime": 1661967112000,
-        "lastUpdateTime": 1661967112000
-      },
-      {
-        "packageName": "com.mediatek.telephony",
-        "name": "Telephony Assist",
-        "versionName": "11",
-        "versionCode": 30,
-        "isSystem": true,
-        "firstInstallTime": 1661190307000,
-        "lastUpdateTime": 1661190307000
-      },
-      {
-        "packageName": "com.android.networkstack.tethering.inprocess",
-        "name": "Tethering",
-        "versionName": "11",
-        "versionCode": 30,
-        "isSystem": true,
-        "firstInstallTime": 1661190277000,
-        "lastUpdateTime": 1661190277000
-      },
-      {
-        "packageName": "com.android.networkstack.tethering.overlay",
-        "name": "TetheringResOverlay",
-        "versionName": "11",
-        "versionCode": 30,
-        "isSystem": true,
-        "firstInstallTime": 1661190149000,
-        "lastUpdateTime": 1661190149000
-      },
-      {
-        "packageName": "com.android.networkstack.tethering.inprocess.overlay",
-        "name": "TetheringResOverlay",
-        "versionName": "11",
-        "versionCode": 30,
-        "isSystem": true,
-        "firstInstallTime": 1661190149000,
-        "lastUpdateTime": 1661190149000
-      },
-      {
-        "packageName": "com.google.android.networkstack.tethering.overlay",
-        "name": "TetheringResOverlay",
-        "versionName": "11",
-        "versionCode": 30,
-        "isSystem": true,
-        "firstInstallTime": 1661190149000,
-        "lastUpdateTime": 1661190149000
-      },
-      {
-        "packageName": "com.android.thememanager",
-        "name": "Themes",
-        "versionName": "2.15.8.5-global",
-        "versionCode": 2150805,
-        "isSystem": true,
-        "firstInstallTime": 1662137445000,
-        "lastUpdateTime": 1791815150145
-      },
-      {
-        "packageName": "com.android.updater",
-        "name": "Updater",
-        "versionName": "7.8.4",
-        "versionCode": 784,
-        "isSystem": true,
-        "firstInstallTime": 1662573200000,
-        "lastUpdateTime": 1662573200000
-      },
-      {
-        "packageName": "com.xiaomi.upnp",
-        "name": "UpnpService",
-        "versionName": "1.0.0",
-        "versionCode": 1,
-        "isSystem": true,
-        "firstInstallTime": 1661190283000,
-        "lastUpdateTime": 1661190283000
-      },
-      {
-        "packageName": "com.android.providers.userdictionary",
-        "name": "User Dictionary",
-        "versionName": "11",
-        "versionCode": 30,
-        "isSystem": true,
-        "firstInstallTime": 1661190308000,
-        "lastUpdateTime": 1661190308000
-      },
-      {
-        "packageName": "com.mediatek.voicecommand",
-        "name": "VoiceCommand",
-        "versionName": "1.0",
-        "versionCode": 1,
-        "isSystem": true,
-        "firstInstallTime": 1661190308000,
-        "lastUpdateTime": 1661190308000
-      },
-      {
-        "packageName": "com.android.vpndialogs",
-        "name": "VpnDialogs",
-        "versionName": "11",
-        "versionCode": 30,
-        "isSystem": true,
-        "firstInstallTime": 1661190308000,
-        "lastUpdateTime": 1661190308000
-      },
-      {
-        "packageName": "com.miui.miwallpaper",
-        "name": "WallPaper",
-        "versionName": "ALPHA-2.6.556-05131746-ogl",
-        "versionCode": 206000556,
-        "isSystem": true,
-        "firstInstallTime": 1661901715000,
-        "lastUpdateTime": 1791815225656
-      },
-      {
-        "packageName": "com.wapi.wapicertmanager",
-        "name": "WAPI certificate",
-        "versionName": "11",
-        "versionCode": 30,
-        "isSystem": true,
-        "firstInstallTime": 1661190308000,
-        "lastUpdateTime": 1661190308000
-      },
-      {
-        "packageName": "com.miui.weather2",
-        "name": "Weather",
-        "versionName": "G-13.0.2.1",
-        "versionCode": 13000201,
-        "isSystem": true,
-        "firstInstallTime": 1661190283000,
-        "lastUpdateTime": 1792074632871
-      },
-      {
-        "packageName": "com.android.cellbroadcastreceiver",
-        "name": "Wireless emergency alerts",
-        "versionName": "11",
-        "versionCode": 30,
-        "isSystem": true,
-        "firstInstallTime": 1661190324000,
-        "lastUpdateTime": 1661190324000
-      },
-      {
-        "packageName": "com.miui.wmsvc",
-        "name": "WMService",
-        "versionName": "1.0.11",
-        "versionCode": 1001102,
-        "isSystem": true,
-        "firstInstallTime": 1661190283000,
-        "lastUpdateTime": 1661190283000
-      },
-      {
-        "packageName": "com.android.managedprovisioning",
-        "name": "Work Setup",
-        "versionName": "11",
-        "versionCode": 30,
-        "isSystem": true,
-        "firstInstallTime": 1661190302000,
-        "lastUpdateTime": 1661190302000
-      },
-      {
-        "packageName": "com.xiaomi.account",
-        "name": "Xiaomi Account",
-        "versionName": "R-23.03.01.02",
-        "versionCode": 323030102,
-        "isSystem": true,
-        "firstInstallTime": 1661190284000,
-        "lastUpdateTime": 1791815214200
-      },
-      {
-        "packageName": "com.miui.cloudservice",
-        "name": "Xiaomi Cloud",
-        "versionName": "1.12.0.2.50",
-        "versionCode": 112000250,
-        "isSystem": true,
-        "firstInstallTime": 1661190280000,
-        "lastUpdateTime": 1791815233552
-      },
-      {
-        "packageName": "com.xiaomi.xmsf",
-        "name": "Xiaomi service framework",
-        "versionName": "6.2.67-G",
-        "versionCode": 60002067,
-        "isSystem": true,
-        "firstInstallTime": 1661190284000,
-        "lastUpdateTime": 1791815229512
-      },
-      {
-        "packageName": "com.xiaomi.xmsfkeeper",
-        "name": "Xiaomi Service Framework Keeper",
-        "versionName": "1.0.1",
-        "versionCode": 10001,
-        "isSystem": true,
-        "firstInstallTime": 1661190283000,
-        "lastUpdateTime": 1661190283000
-      },
-      {
-        "packageName": "com.xiaomi.simactivate.service",
-        "name": "Xiaomi SIM Activation Service",
-        "versionName": "R-23.02.14",
-        "versionCode": 1230214,
-        "isSystem": true,
-        "firstInstallTime": 1661190284000,
-        "lastUpdateTime": 1791815231234
-      },
-      {
-        "packageName": "com.mediatek.ygps",
-        "name": "YGPS",
-        "versionName": "1.1",
-        "versionCode": 2,
-        "isSystem": true,
-        "firstInstallTime": 1661190284000,
-        "lastUpdateTime": 1661190284000
-      }
-    ]
-  },
+  "installedApps": {},
   "wifi": {
-    "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec": {
-      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
+    "android-890b8051-e0e5-434b-918d-da5b95867447": {
+      "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447",
       "enabled": true,
       "connected": true,
       "ssid": "suaib’s iPhone",
-      "bssid": "16:52:53:d2:a1:bf",
-      "rssi": -37,
+      "bssid": "de:66:27:ed:8e:b8",
+      "rssi": -44,
       "linkSpeedMbps": 72,
       "frequencyMHz": 2437,
       "ipAddress": "0.0.0.0",
       "scanResults": [
         {
           "ssid": "suaib’s iPhone",
-          "bssid": "16:52:53:d2:a1:bf",
-          "level": -36,
+          "bssid": "de:66:27:ed:8e:b8",
+          "level": -31,
           "frequency": 2437,
+          "capabilities": "[WPA2-PSK-CCMP][RSN-PSK-CCMP][ESS]"
+        },
+        {
+          "ssid": "Newstar 4g",
+          "bssid": "c0:8f:20:3a:d9:d2",
+          "level": -84,
+          "frequency": 2412,
           "capabilities": "[WPA2-PSK-CCMP][RSN-PSK-CCMP][ESS]"
         },
         {
           "ssid": "Jio_2",
           "bssid": "c2:8f:20:2a:d9:d2",
-          "level": -80,
+          "level": -84,
           "frequency": 2412,
           "capabilities": "[WPA2-PSK-CCMP][RSN-PSK-CCMP][ESS]"
+        },
+        {
+          "ssid": "www.excitel.com",
+          "bssid": "64:fb:92:71:f0:df",
+          "level": -88,
+          "frequency": 2457,
+          "capabilities": "[WPA-PSK-TKIP+CCMP][WPA2-PSK-TKIP+CCMP][RSN-PSK-TKIP+CCMP][ESS]"
         }
       ]
     }
   },
   "callBlocklist": {
-    "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec": {
+    "android-890b8051-e0e5-434b-918d-da5b95867447": {
       "enabled": false,
       "numbers": []
     }
@@ -5035,6 +2351,45 @@
       "networkGen": "Cellular",
       "networkTypeName": "Active",
       "sims": []
+    },
+    "android-0781edad-34ae-4166-a37f-00f55830ae61": {
+      "deviceId": "android-0781edad-34ae-4166-a37f-00f55830ae61",
+      "timestamp": 1792231357242,
+      "networkOperatorName": "",
+      "simOperatorName": "",
+      "networkCountryIso": "in",
+      "isNetworkRoaming": false,
+      "phoneType": "CDMA",
+      "dataState": "DISCONNECTED",
+      "networkGen": "Cellular",
+      "networkTypeName": "Active",
+      "sims": []
+    },
+    "android-0652bbe7-0a74-425c-a47b-21f66bdc6276": {
+      "deviceId": "android-0652bbe7-0a74-425c-a47b-21f66bdc6276",
+      "timestamp": 1792232816914,
+      "networkOperatorName": "",
+      "simOperatorName": "",
+      "networkCountryIso": "in",
+      "isNetworkRoaming": false,
+      "phoneType": "CDMA",
+      "dataState": "DISCONNECTED",
+      "networkGen": "Cellular",
+      "networkTypeName": "Active",
+      "sims": []
+    },
+    "android-890b8051-e0e5-434b-918d-da5b95867447": {
+      "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447",
+      "timestamp": 1792242045818,
+      "networkOperatorName": "",
+      "simOperatorName": "",
+      "networkCountryIso": "in",
+      "isNetworkRoaming": false,
+      "phoneType": "CDMA",
+      "dataState": "DISCONNECTED",
+      "networkGen": "Cellular",
+      "networkTypeName": "Active",
+      "sims": []
     }
   },
   "dnd": {
@@ -5061,6 +2416,27 @@
     },
     "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec": {
       "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
+      "hasPolicyAccess": true,
+      "mode": "OFF",
+      "isDndActive": false,
+      "success": true
+    },
+    "android-0781edad-34ae-4166-a37f-00f55830ae61": {
+      "deviceId": "android-0781edad-34ae-4166-a37f-00f55830ae61",
+      "hasPolicyAccess": true,
+      "mode": "OFF",
+      "isDndActive": false,
+      "success": true
+    },
+    "android-0652bbe7-0a74-425c-a47b-21f66bdc6276": {
+      "deviceId": "android-0652bbe7-0a74-425c-a47b-21f66bdc6276",
+      "hasPolicyAccess": true,
+      "mode": "OFF",
+      "isDndActive": false,
+      "success": true
+    },
+    "android-890b8051-e0e5-434b-918d-da5b95867447": {
+      "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447",
       "hasPolicyAccess": true,
       "mode": "OFF",
       "isDndActive": false,
@@ -5111,6 +2487,40 @@
       "recordings": true,
       "telemetry": true,
       "lowDataMode": false
+    },
+    "android-0781edad-34ae-4166-a37f-00f55830ae61": {
+      "deviceId": "android-0781edad-34ae-4166-a37f-00f55830ae61",
+      "notifications": true,
+      "calls": true,
+      "sms": true,
+      "location": true,
+      "clipboard": true,
+      "recordings": true,
+      "telemetry": true,
+      "lowDataMode": false
+    },
+    "android-0652bbe7-0a74-425c-a47b-21f66bdc6276": {
+      "deviceId": "android-0652bbe7-0a74-425c-a47b-21f66bdc6276",
+      "notifications": true,
+      "calls": true,
+      "sms": true,
+      "location": true,
+      "clipboard": true,
+      "recordings": true,
+      "telemetry": true,
+      "lowDataMode": false
+    },
+    "android-890b8051-e0e5-434b-918d-da5b95867447": {
+      "deviceId": "android-890b8051-e0e5-434b-918d-da5b95867447",
+      "notifications": false,
+      "calls": false,
+      "sms": false,
+      "location": true,
+      "clipboard": false,
+      "recordings": false,
+      "telemetry": false,
+      "lowDataMode": false
     }
-  }
+  },
+  "tunnelConfig": {}
 }

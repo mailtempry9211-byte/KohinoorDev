@@ -12,9 +12,10 @@
     "verify:protocol": "node scripts/verify-protocol-aliases.mjs"
   },
   "dependencies": {
-    "express": "^4.19.2",
-    "ws": "^8.17.1",
+    "@ngrok/ngrok": "^1.7.0",
     "cors": "^2.8.5",
-    "lowdb": "^7.0.1"
+    "express": "^4.19.2",
+    "lowdb": "^7.0.1",
+    "ws": "^8.17.1"
   }
 }
