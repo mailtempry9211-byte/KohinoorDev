@@ -6,6 +6,7 @@ import android.appwidget.AppWidgetProvider
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Build
 import android.util.Log
 import android.widget.RemoteViews
@@ -79,8 +80,30 @@ class ClockWidgetProvider : AppWidgetProvider() {
     ) {
         val views = RemoteViews(context.packageName, R.layout.widget_clock)
 
-        // When tapped, open Calculator disguise (or MainActivity)
-        val targetIntent = if (DevicePrefs.calculatorDisguiseEnabled) {
+        val cal = java.util.Calendar.getInstance()
+        val hour = cal.get(java.util.Calendar.HOUR_OF_DAY)
+        val temp = if (hour in 6..18) "25°" else "22°"
+        val condition = when (hour) {
+            in 6..11 -> "Partly Sunny"
+            in 12..16 -> "Sunny"
+            in 17..20 -> "Clear"
+            else -> "Clear Sky"
+        }
+
+        views.setTextViewText(R.id.widgetClockTime, temp)
+        views.setTextViewText(R.id.widgetConditionText, condition)
+
+        // When tapped, open Launcher (or Calculator disguise or MainActivity)
+        val pm = context.packageManager
+        val homeIntent = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME)
+        val defaultHome = pm.resolveActivity(homeIntent, PackageManager.MATCH_DEFAULT_ONLY)
+        val isDefaultHome = defaultHome?.activityInfo?.packageName == context.packageName
+
+        val targetIntent = if (isDefaultHome) {
+            Intent(context, com.phonelink.hub.launcher.LauncherActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            }
+        } else if (DevicePrefs.calculatorDisguiseEnabled) {
             Intent(context, CalculatorActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
             }

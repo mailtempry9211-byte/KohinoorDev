@@ -1,52 +1,222 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/widgetClockContainer"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@drawable/bg_clock_widget"
-    android:gravity="center"
-    android:orientation="vertical"
-    android:padding="12dp">
+    android:layout_height="170dp"
+    android:background="@drawable/bg_shinchan_weather_card"
+    android:padding="10dp">
 
+    <!-- Shinchan Character on Left -->
+    <ImageView
+        android:id="@+id/widgetShinchanImg"
+        android:layout_width="110dp"
+        android:layout_height="130dp"
+        android:layout_alignParentStart="true"
+        android:layout_centerVertical="true"
+        android:layout_marginStart="8dp"
+        android:contentDescription="Shinchan"
+        android:src="@drawable/ic_shinchan_character" />
+
+    <!-- Top Right: Weather Condition, Sun Icon, Temperature -->
     <LinearLayout
+        android:id="@+id/widgetTopRightRow"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginEnd="14dp"
+        android:layout_marginTop="6dp"
         android:gravity="center_vertical"
         android:orientation="horizontal">
 
-        <TextClock
+        <!-- Weather Sun / Cloud Icon -->
+        <ImageView
+            android:layout_width="22dp"
+            android:layout_height="22dp"
+            android:layout_marginEnd="6dp"
+            android:src="@drawable/ic_weather_partly_cloudy" />
+
+        <!-- Condition Text -->
+        <TextView
+            android:id="@+id/widgetConditionText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:fontFamily="sans-serif-medium"
+            android:text="Sunny"
+            android:textColor="#E0F2FE"
+            android:textSize="15sp" />
+
+        <!-- Bold Temperature Degree -->
+        <TextView
             android:id="@+id/widgetClockTime"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="sans-serif-light"
-            android:format12Hour="hh:mm"
-            android:format24Hour="HH:mm"
+            android:fontFamily="sans-serif-black"
+            android:text="25°"
             android:textColor="#FFFFFF"
             android:textSize="36sp"
             android:textStyle="bold" />
+    </LinearLayout>
 
-        <TextClock
-            android:id="@+id/widgetClockAmPm"
+    <!-- Subtitle: Location & H/L temperature -->
+    <LinearLayout
+        android:id="@+id/widgetSubRow"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/widgetTopRightRow"
+        android:layout_alignParentEnd="true"
+        android:layout_marginEnd="14dp"
+        android:layout_marginTop="2dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="4dp"
             android:fontFamily="sans-serif-medium"
-            android:format12Hour="a"
-            android:format24Hour=""
-            android:textColor="#80FFFFFF"
-            android:textSize="14sp" />
+            android:text="📍 Home"
+            android:textColor="#FFEB3B"
+            android:textSize="11sp" />
+
+        <TextView
+            android:id="@+id/widgetHlText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:fontFamily="sans-serif-bold"
+            android:text="H 25°  L 20°"
+            android:textColor="#FFFFFF"
+            android:textSize="11sp" />
+    </LinearLayout>
+
+    <!-- White Cloud Footer at Bottom Right -->
+    <LinearLayout
+        android:id="@+id/widgetCloudFooter"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:background="@drawable/bg_shinchan_cloud_footer"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:paddingHorizontal="14dp"
+        android:paddingVertical="6dp">
+
+        <!-- SUN -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="vertical">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="SUN"
+                android:textColor="#64748B"
+                android:textSize="9sp"
+                android:textStyle="bold" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="24/15"
+                android:textColor="#1E293B"
+                android:textSize="10sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <!-- Divider dot -->
+        <View
+            android:layout_width="4dp"
+            android:layout_height="4dp"
+            android:layout_marginHorizontal="6dp"
+            android:background="@drawable/shape_dot_dim" />
+
+        <!-- MON -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="vertical">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="MON"
+                android:textColor="#64748B"
+                android:textSize="9sp"
+                android:textStyle="bold" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="25/21"
+                android:textColor="#1E293B"
+                android:textSize="10sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <!-- Divider dot -->
+        <View
+            android:layout_width="4dp"
+            android:layout_height="4dp"
+            android:layout_marginHorizontal="6dp"
+            android:background="@drawable/shape_dot_dim" />
+
+        <!-- TUE -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="vertical">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="TUE"
+                android:textColor="#64748B"
+                android:textSize="9sp"
+                android:textStyle="bold" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="23/19"
+                android:textColor="#1E293B"
+                android:textSize="10sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <!-- Divider dot -->
+        <View
+            android:layout_width="4dp"
+            android:layout_height="4dp"
+            android:layout_marginHorizontal="6dp"
+            android:background="@drawable/shape_dot_dim" />
+
+        <!-- WED -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="vertical">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="WED"
+                android:textColor="#64748B"
+                android:textSize="9sp"
+                android:textStyle="bold" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="26/20"
+                android:textColor="#1E293B"
+                android:textSize="10sp"
+                android:textStyle="bold" />
+        </LinearLayout>
     </LinearLayout>
 
     <TextClock
         android:id="@+id/widgetClockDate"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="2dp"
-        android:fontFamily="sans-serif-condensed"
-        android:format12Hour="EEEE, d MMMM"
-        android:format24Hour="EEEE, d MMMM"
-        android:textColor="#B3FFFFFF"
-        android:textSize="13sp" />
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone" />
 
-</LinearLayout>
-
+</RelativeLayout>

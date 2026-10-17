@@ -52,6 +52,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var deviceAdminSwitch: MaterialSwitch
     private lateinit var callBlockerSwitch: MaterialSwitch
     private lateinit var notifSyncSwitch: MaterialSwitch
+    private lateinit var usageStatsSwitch: MaterialSwitch
 
     // Kids Safety & Camouflage switches
     private lateinit var calculatorDisguiseSwitch: MaterialSwitch
@@ -206,6 +207,7 @@ class MainActivity : AppCompatActivity() {
         deviceAdminSwitch = findViewById(R.id.deviceAdminSwitch)
         callBlockerSwitch = findViewById(R.id.callBlockerSwitch)
         notifSyncSwitch = findViewById(R.id.notifSyncSwitch)
+        usageStatsSwitch = findViewById(R.id.usageStatsSwitch)
 
         calculatorDisguiseSwitch = findViewById(R.id.calculatorDisguiseSwitch)
         stealthNotifSwitch = findViewById(R.id.stealthNotifSwitch)
@@ -516,6 +518,27 @@ class MainActivity : AppCompatActivity() {
                 PhoneLinkService.instance?.pushNotificationSyncStatus()
             }
         }
+
+        // Feature 13: App Usage Access & Screen Time
+        usageStatsSwitch.setOnClickListener {
+            val hasUsage = isUsageAccessGranted()
+            if (usageStatsSwitch.isChecked) {
+                if (hasUsage) {
+                    PhoneLinkService.instance?.pushAppUsageStats()
+                } else {
+                    usageStatsSwitch.isChecked = false
+                    showRationaleDialog(
+                        title = "Enable Screen Time & App Tracking?",
+                        message = "Allows Phone Link Hub to track daily screen time, foreground app usage, and enforce parental limits.\n\n" +
+                                "To enable, tap 'Allow & Proceed' and switch ON 'Phone Link Hub' in Android Usage Access settings."
+                    ) {
+                        openUsageAccessSettings()
+                    }
+                }
+            } else {
+                Toast.makeText(this, "To revoke, toggle off in Android Settings > Usage Access", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
     private fun showRationaleDialog(
@@ -593,6 +616,9 @@ class MainActivity : AppCompatActivity() {
         // Notification Mirroring
         val hasNotif = isNotificationListenerEnabled()
         notifSyncSwitch.isChecked = hasNotif && DevicePrefs.notificationSyncEnabled
+
+        // Screen Time & App Usage Access
+        usageStatsSwitch.isChecked = isUsageAccessGranted()
     }
 
     private fun loadConfig() {
@@ -702,6 +728,35 @@ class MainActivity : AppCompatActivity() {
         val listener = ComponentName(this, NotificationListener::class.java)
         val enabled = Settings.Secure.getString(contentResolver, "enabled_notification_listeners") ?: ""
         return TextUtils.split(enabled, ":").any { ComponentName.unflattenFromString(it) == listener }
+    }
+
+    private fun isUsageAccessGranted(): Boolean {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
+            val appOps = getSystemService(Context.APP_OPS_SERVICE) as? android.app.AppOpsManager
+            val mode = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                appOps?.unsafeCheckOpNoThrow(
+                    android.app.AppOpsManager.OPSTR_GET_USAGE_STATS,
+                    android.os.Process.myUid(),
+                    packageName
+                )
+            } else {
+                @Suppress("DEPRECATION")
+                appOps?.checkOpNoThrow(
+                    android.app.AppOpsManager.OPSTR_GET_USAGE_STATS,
+                    android.os.Process.myUid(),
+                    packageName
+                )
+            }
+            mode == android.app.AppOpsManager.MODE_ALLOWED
+        } else true
+    }
+
+    private fun openUsageAccessSettings() {
+        try {
+            startActivity(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS))
+        } catch (e: Exception) {
+            Toast.makeText(this, "Could not open Usage Access settings", Toast.LENGTH_SHORT).show()
+        }
     }
 
     private fun startStatusRefresh() {

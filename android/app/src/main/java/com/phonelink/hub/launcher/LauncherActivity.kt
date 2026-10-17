@@ -72,6 +72,7 @@ class LauncherActivity : AppCompatActivity() {
         private const val KEY_HOME_ONLY_MODE = "home_only_mode"
         private const val KEY_ICON_SIZE = "icon_size" // "SMALL", "MEDIUM", "LARGE"
         private const val KEY_SHOW_DATE_SEARCH = "show_date_search"
+        private const val KEY_SHOW_SHINCHAN_WIDGET = "show_shinchan_widget"
         private const val KEY_THEME = "launcher_theme" // "SYSTEM", "LIGHT", "DARK"
     }
 
@@ -81,6 +82,7 @@ class LauncherActivity : AppCompatActivity() {
     private lateinit var desktopContainer: View
     private lateinit var appDrawerContainer: View
     private lateinit var atAGlanceSection: View
+    private lateinit var shinchanWidgetContainer: View
     private lateinit var bottomDockSection: View
     private lateinit var searchPillBtn: View
     private lateinit var swipeUpIndicator: View
@@ -88,6 +90,10 @@ class LauncherActivity : AppCompatActivity() {
     private lateinit var pageIndicatorLayout: View
     private lateinit var pageDot1: View
     private lateinit var pageDot2: View
+
+    // Shinchan Widget Views
+    private var tvShinchanTemp: TextView? = null
+    private var tvShinchanCondition: TextView? = null
 
     // At-a-Glance Views
     private lateinit var launcherDate: View
@@ -248,6 +254,13 @@ class LauncherActivity : AppCompatActivity() {
         atAGlanceSection.visibility = if (showDateSearch) View.VISIBLE else View.GONE
         searchPillBtn.visibility = if (showDateSearch) View.VISIBLE else View.GONE
 
+        // Apply Shinchan Anime Live Widget Card
+        shinchanWidgetContainer = findViewById(R.id.shinchanWidgetContainer)
+        tvShinchanTemp = findViewById(R.id.widgetClockTime)
+        tvShinchanCondition = findViewById(R.id.widgetConditionText)
+        val showShinchan = prefs.getBoolean(KEY_SHOW_SHINCHAN_WIDGET, true)
+        shinchanWidgetContainer.visibility = if (showShinchan) View.VISIBLE else View.GONE
+
         // Apply Home-Screen-Only vs App Drawer mode
         val isHomeOnly = prefs.getBoolean(KEY_HOME_ONLY_MODE, false)
         swipeUpIndicator.visibility = if (isHomeOnly) View.GONE else View.VISIBLE
@@ -329,6 +342,19 @@ class LauncherActivity : AppCompatActivity() {
             }
         }
 
+        // Tap on Shinchan Live Weather Widget
+        shinchanWidgetContainer.setOnClickListener {
+            try {
+                startActivity(Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_APP_CALENDAR))
+            } catch (e: Exception) {
+                try {
+                    startActivity(Intent(android.provider.AlarmClock.ACTION_SHOW_ALARMS))
+                } catch (ex: Exception) {
+                    Toast.makeText(this, "⛅ 25°C Sunny • Crayon Shinchan Widget", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+
         // Tap on "Swipe up for all apps" or Search Pill opens App Drawer
         swipeUpIndicator.setOnClickListener { openAppDrawer() }
 
@@ -392,15 +418,21 @@ class LauncherActivity : AppCompatActivity() {
     private fun updateAtAGlanceWeather() {
         val cal = Calendar.getInstance()
         val hour = cal.get(Calendar.HOUR_OF_DAY)
-        val temp = if (hour in 6..18) "28°C" else "22°C"
+        val temp = if (hour in 6..18) "25°C" else "22°C"
         val condition = when (hour) {
             in 6..11 -> "Partly sunny • Good morning"
-            in 12..16 -> "Sunny • 28°C"
-            in 17..20 -> "Clear evening • 25°C"
+            in 12..16 -> "Sunny • 25°C"
+            in 17..20 -> "Clear evening • 23°C"
             else -> "Clear night • Rest well"
         }
         tvWeatherTemp.text = temp
         tvAtAGlanceSubtitle.text = condition
+        tvShinchanTemp?.text = temp
+        tvShinchanCondition?.text = when (hour) {
+            in 6..16 -> "Sunny"
+            in 17..20 -> "Clear"
+            else -> "Clear Sky"
+        }
     }
 
     private fun setCategory(cat: String) {
@@ -585,6 +617,21 @@ class LauncherActivity : AppCompatActivity() {
         }
     }
 
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        // System sent user back to Home (Home button pressed or launcher re-selected)
+        if (Intent.ACTION_MAIN == intent?.action) {
+            if (isDrawerOpen) {
+                closeAppDrawer()
+            }
+            if (::pageDot1.isInitialized && ::pageDot2.isInitialized) {
+                pageDot1.setBackgroundResource(R.drawable.shape_dot_green)
+                pageDot2.setBackgroundResource(R.drawable.shape_dot_dim)
+            }
+        }
+    }
+
     override fun onBackPressed() {
         if (isDrawerOpen) {
             closeAppDrawer()
@@ -683,7 +730,16 @@ class LauncherActivity : AppCompatActivity() {
             searchPillBtn.visibility = if (isChecked) View.VISIBLE else View.GONE
         }
 
-        // 6. Theme Selector
+        // 6. Shinchan Anime Weather Widget Toggle
+        val switchShinchan = view.findViewById<SwitchCompat>(R.id.switchShowShinchanWidget)
+        val showShinchan = prefs.getBoolean(KEY_SHOW_SHINCHAN_WIDGET, true)
+        switchShinchan.isChecked = showShinchan
+        switchShinchan.setOnCheckedChangeListener { _, isChecked ->
+            prefs.edit().putBoolean(KEY_SHOW_SHINCHAN_WIDGET, isChecked).apply()
+            shinchanWidgetContainer.visibility = if (isChecked) View.VISIBLE else View.GONE
+        }
+
+        // 7. Theme Selector
         view.findViewById<View>(R.id.rowTheme).setOnClickListener {
             val themes = arrayOf("Dark (AMOLED)", "Light", "System default")
             AlertDialog.Builder(this, R.style.Theme_PhoneLinkHub)

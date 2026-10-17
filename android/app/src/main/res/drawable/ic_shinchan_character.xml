@@ -1,0 +1,105 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="96dp"
+    android:height="96dp"
+    android:viewportWidth="100"
+    android:viewportHeight="100">
+
+    <!-- Cute Anime Character (Shinchan Style) -->
+    <!-- Head / Face -->
+    <path
+        android:fillColor="#FFDBAC"
+        android:strokeColor="#222222"
+        android:strokeWidth="2.5"
+        android:strokeLineJoin="round"
+        android:pathData="M30,55 C22,45 22,25 45,18 C70,12 85,30 80,50 C78,60 68,68 50,68 C38,68 33,62 30,55 Z" />
+
+    <!-- Chubby Cheek curve -->
+    <path
+        android:fillColor="#FFDBAC"
+        android:strokeColor="#222222"
+        android:strokeWidth="2.5"
+        android:pathData="M25,48 C18,52 20,62 30,64 C38,65 42,60 40,54" />
+
+    <!-- Rosy Cheeks -->
+    <path
+        android:fillColor="#FF9AA2"
+        android:pathData="M26,52 A4,3 0 1,0 34,52 A4,3 0 1,0 26,52 Z" />
+    <path
+        android:fillColor="#FF9AA2"
+        android:pathData="M65,48 A4,3 0 1,0 73,48 A4,3 0 1,0 65,48 Z" />
+
+    <!-- Hair (Black classic buzz/crop) -->
+    <path
+        android:fillColor="#1F1F1F"
+        android:strokeColor="#111111"
+        android:strokeWidth="2"
+        android:pathData="M35,22 C42,16 65,14 78,25 C84,32 82,42 82,42 C82,42 76,26 60,24 C45,22 36,28 35,22 Z" />
+
+    <!-- Iconic Thick Eyebrows -->
+    <path
+        android:fillColor="#111111"
+        android:pathData="M34,28 C38,24 50,26 52,32 C48,32 40,30 34,28 Z" />
+    <path
+        android:fillColor="#111111"
+        android:pathData="M60,27 C68,23 78,27 80,33 C75,32 68,30 60,27 Z" />
+
+    <!-- Big Wide Eyes -->
+    <path
+        android:fillColor="#111111"
+        android:pathData="M40,38 A5,6 0 1,0 50,38 A5,6 0 1,0 40,38 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M43,36 A1.8,2.2 0 1,0 46.6,36 A1.8,2.2 0 1,0 43,36 Z" />
+
+    <path
+        android:fillColor="#111111"
+        android:pathData="M64,36 A5,6 0 1,0 74,36 A5,6 0 1,0 64,36 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M67,34 A1.8,2.2 0 1,0 70.6,34 A1.8,2.2 0 1,0 67,34 Z" />
+
+    <!-- Big Happy Open Mouth -->
+    <path
+        android:fillColor="#E53935"
+        android:strokeColor="#222222"
+        android:strokeWidth="2"
+        android:pathData="M44,52 C46,62 58,62 62,54 C56,54 50,53 44,52 Z" />
+
+    <!-- Body - Iconic Red T-Shirt -->
+    <path
+        android:fillColor="#E53935"
+        android:strokeColor="#222222"
+        android:strokeWidth="2.5"
+        android:pathData="M32,66 L20,72 L24,80 L34,75 L35,88 L65,88 L66,75 L76,80 L80,72 L68,66 Z" />
+
+    <!-- Arms & Hands Raised in Joy -->
+    <path
+        android:fillColor="#FFDBAC"
+        android:strokeColor="#222222"
+        android:strokeWidth="2"
+        android:pathData="M18,70 C14,68 12,74 16,77 C19,79 22,76 20,72 Z" />
+    <path
+        android:fillColor="#FFDBAC"
+        android:strokeColor="#222222"
+        android:strokeWidth="2"
+        android:pathData="M82,70 C86,68 88,74 84,77 C81,79 78,76 80,72 Z" />
+
+    <!-- Iconic Yellow Shorts -->
+    <path
+        android:fillColor="#FFEB3B"
+        android:strokeColor="#222222"
+        android:strokeWidth="2.5"
+        android:pathData="M34,88 L32,97 L48,97 L50,91 L52,97 L68,97 L66,88 Z" />
+
+    <!-- Cute Shoes -->
+    <path
+        android:fillColor="#FFC107"
+        android:strokeColor="#222222"
+        android:strokeWidth="1.5"
+        android:pathData="M28,96 C24,96 24,100 32,100 L44,100 C46,98 44,96 42,96 Z" />
+    <path
+        android:fillColor="#FFC107"
+        android:strokeColor="#222222"
+        android:strokeWidth="1.5"
+        android:pathData="M56,96 C54,96 54,98 56,100 L68,100 C74,100 74,96 70,96 Z" />
+</vector>
