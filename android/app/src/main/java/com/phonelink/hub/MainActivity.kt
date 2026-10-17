@@ -727,6 +727,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun startService() {
         saveConfig()
+        DevicePrefs.serviceEnabled = true
 
         // Request POST_NOTIFICATIONS on Android 13+ so the foreground service notification shows
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -735,12 +736,17 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        // Auto-request battery exemption so system Doze mode never kills the service on restart
+        try { requestBatteryExemption() } catch (_: Exception) {}
+
         PhoneLinkService.resetReceiverState()
         PhoneLinkService.start(this)
+        try { com.phonelink.hub.receiver.KeepAliveWorker.schedule(this) } catch (_: Exception) {}
         statusText.text = "Starting…"
     }
 
     private fun stopService() {
+        DevicePrefs.serviceEnabled = false
         PhoneLinkService.stop(this)
         statusText.text = "Disconnected"
     }

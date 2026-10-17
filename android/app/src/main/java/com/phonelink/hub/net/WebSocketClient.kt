@@ -43,6 +43,15 @@ class WebSocketClient(
         openSocket()
     }
 
+    fun reconnectNow() {
+        if (closedByUser) return
+        Log.i(TAG, "reconnectNow triggered immediately")
+        reconnectPending = false
+        if (socket == null && !connected) {
+            openSocket()
+        }
+    }
+
     fun disconnect() {
         closedByUser = true
         reconnectPending = false

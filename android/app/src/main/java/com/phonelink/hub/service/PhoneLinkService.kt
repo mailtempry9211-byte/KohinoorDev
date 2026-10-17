@@ -187,6 +187,39 @@ class PhoneLinkService : Service() {
         syncHandler.removeCallbacks(periodicSync)
     }
 
+    private var connectivityManager: android.net.ConnectivityManager? = null
+    private var networkCallback: android.net.ConnectivityManager.NetworkCallback? = null
+
+    private fun registerNetworkCallback() {
+        try {
+            connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as? android.net.ConnectivityManager
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                networkCallback = object : android.net.ConnectivityManager.NetworkCallback() {
+                    override fun onAvailable(network: android.net.Network) {
+                        Log.i(TAG, "Network became available! Ensuring WebSocket is connected…")
+                        try {
+                            if (::webSocket.isInitialized && !webSocket.isOpen) {
+                                webSocket.reconnectNow()
+                            }
+                        } catch (e: Exception) {
+                            Log.w(TAG, "reconnect on network available failed", e)
+                        }
+                    }
+                }
+                connectivityManager?.registerDefaultNetworkCallback(networkCallback!!)
+            }
+        } catch (e: Exception) {
+            Log.w(TAG, "Could not register default network callback", e)
+        }
+    }
+
+    private fun unregisterNetworkCallback() {
+        try {
+            networkCallback?.let { connectivityManager?.unregisterNetworkCallback(it) }
+        } catch (_: Exception) {}
+        networkCallback = null
+    }
+
     override fun onCreate() {
         super.onCreate()
         DevicePrefs.init(this)
@@ -195,6 +228,8 @@ class PhoneLinkService : Service() {
         ttsSpeaker = TtsSpeaker(this)
         audioPlayer = AudioPlayer(this)
         TheftMotionAlarm.init(this)
+
+        registerNetworkCallback()
 
         webSocket = WebSocketClient(
             prefsProvider = { Pair(DevicePrefs.serverIp, DevicePrefs.serverPort) },
@@ -271,6 +306,7 @@ class PhoneLinkService : Service() {
         com.phonelink.hub.media.AudioStreamer.stop()
         try { com.phonelink.hub.remote.TorchController.toggleTorch(this, false) } catch (_: Exception) {}
         com.phonelink.hub.media.MediaProjectionHolder.release()
+        unregisterNetworkCallback()
         // The listener is bound by the OS, so stop pointing it at our dead socket.
         WebSocketHolder.webSocket = null
         instance = null
@@ -1760,11 +1796,18 @@ class PhoneLinkService : Service() {
 
         /** Starts the service; safe to call repeatedly. */
         fun start(context: Context) {
-            val intent = Intent(context, PhoneLinkService::class.java)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                context.startForegroundService(intent)
-            } else {
-                context.startService(intent)
+            try {
+                val intent = Intent(context, PhoneLinkService::class.java)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    context.startForegroundService(intent)
+                } else {
+                    context.startService(intent)
+                }
+            } catch (e: Exception) {
+                Log.w(TAG, "Direct startForegroundService failed (background restriction), delegating to KeepAliveWorker", e)
+                try {
+                    com.phonelink.hub.receiver.KeepAliveWorker.scheduleImmediate(context)
+                } catch (_: Exception) {}
             }
         }
 

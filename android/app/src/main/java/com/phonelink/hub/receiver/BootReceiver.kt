@@ -4,19 +4,25 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.util.Log
+import com.phonelink.hub.data.DevicePrefs
 import com.phonelink.hub.service.PhoneLinkService
 
-/** FEATURE D: restart the foreground service after a phone reboot. */
+/** FEATURE D: restart the foreground service after a phone reboot, unlock, or system event. */
 class BootReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent?) {
-        if (intent?.action != Intent.ACTION_BOOT_COMPLETED) return
-        Log.i(TAG, "boot completed — restarting service")
+        val action = intent?.action ?: "UNKNOWN"
+        Log.i(TAG, "system broadcast received: $action — reviving PhoneLinkService")
         try {
-            PhoneLinkService.start(context)
-            KeepAliveWorker.schedule(context)
+            DevicePrefs.init(context)
+            if (DevicePrefs.serviceEnabled && DevicePrefs.serverIp.isNotBlank()) {
+                PhoneLinkService.start(context)
+                KeepAliveWorker.schedule(context)
+            } else {
+                Log.d(TAG, "service not enabled or IP blank, skipping auto-start")
+            }
         } catch (e: Exception) {
-            Log.w(TAG, "could not restart service on boot", e)
+            Log.w(TAG, "could not restart service on $action", e)
         }
     }
 

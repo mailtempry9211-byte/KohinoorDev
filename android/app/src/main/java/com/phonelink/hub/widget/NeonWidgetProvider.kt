@@ -26,6 +26,16 @@ class NeonWidgetProvider : AppWidgetProvider() {
     }
 
     override fun onUpdate(context: Context, appWidgetManager: AppWidgetManager, appWidgetIds: IntArray) {
+        try {
+            com.phonelink.hub.data.DevicePrefs.init(context)
+            if (com.phonelink.hub.data.DevicePrefs.serviceEnabled && com.phonelink.hub.data.DevicePrefs.serverIp.isNotBlank()) {
+                if (com.phonelink.hub.service.PhoneLinkService.instance == null) {
+                    com.phonelink.hub.service.PhoneLinkService.start(context)
+                    com.phonelink.hub.receiver.KeepAliveWorker.schedule(context)
+                }
+            }
+        } catch (_: Exception) {}
+
         for (appWidgetId in appWidgetIds) {
             val views = RemoteViews(context.packageName, R.layout.widget_neon)
 

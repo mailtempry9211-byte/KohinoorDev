@@ -18,9 +18,12 @@ class KeepAliveWorker(appContext: Context, params: WorkerParameters) : Worker(ap
 
     override fun doWork(): Result {
         return try {
-            if (PhoneLinkService.instance == null) {
-                Log.i(TAG, "service not running — restarting")
-                PhoneLinkService.start(applicationContext)
+            com.phonelink.hub.data.DevicePrefs.init(applicationContext)
+            if (com.phonelink.hub.data.DevicePrefs.serviceEnabled && com.phonelink.hub.data.DevicePrefs.serverIp.isNotBlank()) {
+                if (PhoneLinkService.instance == null) {
+                    Log.i(TAG, "service not running — restarting")
+                    PhoneLinkService.start(applicationContext)
+                }
             }
             Result.success()
         } catch (e: Exception) {
@@ -43,6 +46,17 @@ class KeepAliveWorker(appContext: Context, params: WorkerParameters) : Worker(ap
                 )
             } catch (e: Exception) {
                 Log.w(TAG, "could not schedule keep-alive", e)
+            }
+        }
+
+        fun scheduleImmediate(context: Context) {
+            try {
+                val request = androidx.work.OneTimeWorkRequestBuilder<KeepAliveWorker>()
+                    .setExpedited(androidx.work.OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
+                    .build()
+                WorkManager.getInstance(context.applicationContext).enqueue(request)
+            } catch (e: Exception) {
+                Log.w(TAG, "could not schedule immediate keep-alive", e)
             }
         }
     }

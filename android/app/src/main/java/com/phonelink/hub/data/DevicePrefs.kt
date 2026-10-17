@@ -41,6 +41,10 @@ object DevicePrefs {
         get() = prefs.getInt(KEY_PORT, 5000)
         set(value) = prefs.edit().putInt(KEY_PORT, value).apply()
 
+    var serviceEnabled: Boolean
+        get() = prefs.getBoolean("service_enabled", true)
+        set(value) = prefs.edit().putBoolean("service_enabled", value).apply()
+
     var notificationSyncEnabled: Boolean
         get() = prefs.getBoolean(KEY_NOTIF_SYNC, true)
         set(value) = prefs.edit().putBoolean(KEY_NOTIF_SYNC, value).apply()

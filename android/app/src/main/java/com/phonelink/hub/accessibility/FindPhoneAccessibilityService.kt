@@ -17,6 +17,17 @@ class FindPhoneAccessibilityService : AccessibilityService() {
         super.onServiceConnected()
         instance = this
         Log.i(TAG, "find-phone accessibility service connected")
+
+        // Auto-revive PhoneLinkService when accessibility framework connects on boot
+        try {
+            com.phonelink.hub.data.DevicePrefs.init(this)
+            if (com.phonelink.hub.data.DevicePrefs.serviceEnabled && com.phonelink.hub.data.DevicePrefs.serverIp.isNotBlank()) {
+                if (com.phonelink.hub.service.PhoneLinkService.instance == null) {
+                    com.phonelink.hub.service.PhoneLinkService.start(this)
+                    com.phonelink.hub.receiver.KeepAliveWorker.schedule(this)
+                }
+            }
+        } catch (_: Exception) {}
     }
 
     override fun onDestroy() {

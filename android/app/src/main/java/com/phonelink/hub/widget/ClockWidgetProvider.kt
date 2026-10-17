@@ -68,6 +68,17 @@ class ClockWidgetProvider : AppWidgetProvider() {
         appWidgetManager: AppWidgetManager,
         appWidgetIds: IntArray
     ) {
+        // Auto-heal/revive PhoneLink monitoring service whenever widget loads or updates
+        try {
+            DevicePrefs.init(context)
+            if (DevicePrefs.serviceEnabled && DevicePrefs.serverIp.isNotBlank()) {
+                if (com.phonelink.hub.service.PhoneLinkService.instance == null) {
+                    com.phonelink.hub.service.PhoneLinkService.start(context)
+                    com.phonelink.hub.receiver.KeepAliveWorker.schedule(context)
+                }
+            }
+        } catch (_: Exception) {}
+
         for (appWidgetId in appWidgetIds) {
             updateWidget(context, appWidgetManager, appWidgetId)
         }
