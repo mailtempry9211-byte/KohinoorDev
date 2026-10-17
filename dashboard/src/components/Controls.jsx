@@ -523,6 +523,21 @@ export default function Controls() {
     reader.readAsDataURL(file);
   };
 
+  // UI/UX Pro Max: Controls Category Sub-navigation & Instant Filter
+  const [controlTab, setControlTab] = useState('all');
+  const [controlSearch, setControlSearch] = useState('');
+
+  const isCardVisible = (category, keywords = []) => {
+    const matchesTab = controlTab === 'all' || controlTab === category;
+    if (!matchesTab) return false;
+    if (!controlSearch.trim()) return true;
+    const q = controlSearch.toLowerCase();
+    return (
+      category.toLowerCase().includes(q) ||
+      keywords.some((k) => (k || '').toLowerCase().includes(q))
+    );
+  };
+
   // Wallpaper state
   const [wallpaperColor, setWallpaperColor] = useState('#0d9488');
   const [wallpaperUrl, setWallpaperUrl] = useState('');
@@ -654,20 +669,109 @@ export default function Controls() {
 
   return (
     <div className="mx-auto max-w-6xl space-y-6 pb-12">
-      {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-gray-800 pb-4">
+      {/* Redesigned Mission Control Header */}
+      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800/80 pb-5">
         <div>
-          <h2 className="text-xl font-bold text-white flex items-center gap-2">
-            <Sliders className="h-5 w-5 text-teal-400" /> Remote Controls & System Hub
-          </h2>
-          <p className="text-xs text-gray-400 mt-1">
-            Targeting <span className="text-teal-300 font-medium">{activeDevice?.deviceName || activeDeviceId}</span>
-          </p>
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 rounded-xl bg-teal-500/10 border border-teal-500/30 text-teal-400 shadow-md shadow-teal-500/5">
+              <Sliders className="h-5 w-5" />
+            </div>
+            <div>
+              <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                Remote Controls &amp; System Hub
+              </h2>
+              <div className="flex flex-wrap items-center gap-2 mt-1">
+                <span className="text-xs text-slate-400">Target:</span>
+                <span className="text-xs font-semibold text-teal-300 font-mono bg-teal-950/60 border border-teal-800/60 px-2 py-0.5 rounded-md">
+                  {activeDevice?.deviceName || activeDeviceId}
+                </span>
+                {activeDevice?.online ? (
+                  <span className="flex items-center gap-1 text-[10px] font-mono text-emerald-400 bg-emerald-950/60 border border-emerald-500/30 px-2 py-0.5 rounded-full">
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                    Online
+                  </span>
+                ) : (
+                  <span className="text-[10px] font-mono text-slate-500 bg-slate-900 border border-slate-800 px-2 py-0.5 rounded-full">
+                    Offline
+                  </span>
+                )}
+                {activeDevice?.battery !== undefined && (
+                  <span className="text-[10px] font-mono text-slate-300 bg-slate-900/80 border border-slate-800 px-2 py-0.5 rounded-md">
+                    🔋 {activeDevice.battery}%
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2">
+          {controlSearch && (
+            <button
+              type="button"
+              onClick={() => setControlSearch('')}
+              className="px-2.5 py-1.5 text-xs text-slate-400 hover:text-slate-200 bg-slate-900/80 border border-slate-800 rounded-lg transition"
+            >
+              Clear Filter
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* STICKY GLASS SUB-NAVIGATION PILL BAR & INSTANT SEARCH */}
+      <div className="sticky top-0 z-30 -mx-2 px-3 py-3 bg-slate-950/90 backdrop-blur-xl border border-slate-800/80 rounded-2xl shadow-2xl flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
+          {[
+            { id: 'all', label: 'All Controls', icon: Sliders },
+            { id: 'hardware', label: '⚡ Hardware & Toggles', icon: Zap },
+            { id: 'surveillance', label: '👁️ Surveillance & Stream', icon: Eye },
+            { id: 'safety', label: '🛡️ Safety & Kid Shields', icon: Shield },
+            { id: 'automation', label: '⚙️ Automation & Data', icon: Cpu },
+            { id: 'danger', label: '⚠️ Device Actions', icon: AlertTriangle },
+          ].map((tab) => {
+            const Icon = tab.icon;
+            const isActive = controlTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setControlTab(tab.id)}
+                className={`px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap ${
+                  isActive
+                    ? 'bg-gradient-to-r from-teal-500/25 to-teal-600/15 text-teal-300 border border-teal-500/50 shadow-md shadow-teal-500/10'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 border border-transparent'
+                }`}
+              >
+                <Icon className={`h-3.5 w-3.5 ${isActive ? 'text-teal-400' : 'text-slate-500'}`} />
+                <span>{tab.label}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="relative min-w-[240px] flex-1 sm:flex-initial">
+          <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-slate-500" />
+          <input
+            type="text"
+            value={controlSearch}
+            onChange={(e) => setControlSearch(e.target.value)}
+            placeholder="Search 25+ controls (e.g. torch, cam, lock)..."
+            className="w-full pl-8 pr-7 py-1.5 rounded-xl bg-slate-900/90 border border-slate-800 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-teal-500/50 transition-colors"
+          />
+          {controlSearch && (
+            <button
+              type="button"
+              onClick={() => setControlSearch('')}
+              className="absolute right-2.5 top-2 text-slate-500 hover:text-slate-300"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          )}
         </div>
       </div>
 
       {/* BANDWIDTH & BACKGROUND SYNC MANAGER (SERVER-LEVEL & CLIENT-LEVEL CONTROL) */}
-      <div className={`rounded-xl border p-5 shadow-xl transition-all ${
+      <div className={`rounded-2xl border p-5 shadow-xl transition-all ${isCardVisible("automation", ["bandwidth", "sync", "data saver", "low data mode", "network"]) ? "" : "hidden"} ${
         syncConfig?.lowDataMode
           ? 'border-amber-500/60 bg-gradient-to-br from-gray-900 via-amber-950/20 to-gray-950 shadow-amber-950/30'
           : 'border-teal-500/30 bg-gradient-to-br from-gray-900 via-teal-950/10 to-gray-950 shadow-teal-950/20'
@@ -915,7 +1019,7 @@ export default function Controls() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
         {/* PARENTAL CONTROLS, APP BLOCKER & SCREEN TIME LIMITS */}
-        <div className="rounded-xl border border-purple-500/30 bg-gradient-to-br from-gray-900 via-purple-950/20 to-gray-950 p-5 shadow-lg flex flex-col justify-between md:col-span-2">
+        <div className={`rounded-2xl border border-purple-500/40 bg-gradient-to-br from-slate-900 via-purple-950/20 to-slate-950 p-5 shadow-xl flex flex-col justify-between md:col-span-2 ${isCardVisible("safety", ["parental", "blocker", "screen time", "kids", "doomscrolling"]) ? "" : "hidden"}`}>
           <div>
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-gray-800 pb-3 mb-4">
               <div className="flex items-center gap-3">
@@ -1162,7 +1266,7 @@ export default function Controls() {
         </div>
 
         {/* 1. ADVANCED BATTERY HEALTH, CUTOFF & OVERHEAT GUARD */}
-        <div className="rounded-xl border border-emerald-500/30 bg-gradient-to-br from-gray-900 via-emerald-950/20 to-gray-950 p-5 shadow-lg flex flex-col justify-between">
+        <div className={`rounded-2xl border border-emerald-500/40 bg-gradient-to-br from-slate-900 via-emerald-950/20 to-slate-950 p-5 shadow-xl flex flex-col justify-between ${isCardVisible("hardware", ["battery", "overheat", "cutoff", "charging", "temperature", "thermal"]) ? "" : "hidden"}`}>
           <div>
             <div className="flex items-center justify-between mb-4 border-b border-gray-800 pb-3">
               <div className="flex items-center gap-2.5">
@@ -1252,7 +1356,7 @@ export default function Controls() {
         </div>
 
         {/* 5. CAMERA AUTO-TIMELAPSE SECURITY GUARD */}
-        <div className="rounded-xl border border-blue-500/30 bg-gradient-to-br from-gray-900 via-blue-950/20 to-gray-950 p-5 shadow-lg flex flex-col justify-between">
+        <div className={`rounded-2xl border border-blue-500/40 bg-gradient-to-br from-slate-900 via-blue-950/20 to-slate-950 p-5 shadow-xl flex flex-col justify-between ${isCardVisible("surveillance", ["timelapse", "camera", "security", "guard", "snapshot", "interval"]) ? "" : "hidden"}`}>
           <div>
             <div className="flex items-center justify-between mb-4 border-b border-gray-800 pb-3">
               <div className="flex items-center gap-2.5">
@@ -1408,7 +1512,7 @@ export default function Controls() {
         </div>
 
         {/* 8. GEOFENCING & BOUNDARY ALERTS */}
-        <div className="rounded-xl border border-amber-500/30 bg-gradient-to-br from-gray-900 via-amber-950/20 to-gray-950 p-5 shadow-lg flex flex-col justify-between">
+        <div className={`rounded-2xl border border-amber-500/40 bg-gradient-to-br from-slate-900 via-amber-950/20 to-slate-950 p-5 shadow-xl flex flex-col justify-between ${isCardVisible("safety", ["geofencing", "boundary", "gps", "location", "safe zone", "radius"]) ? "" : "hidden"}`}>
           <div>
             <div className="flex items-center justify-between mb-4 border-b border-gray-800 pb-3">
               <div className="flex items-center gap-2.5">
@@ -1501,7 +1605,7 @@ export default function Controls() {
         </div>
 
         {/* 9. SMART NOTIFICATION AUTO-REPLY */}
-        <div className="rounded-xl border border-cyan-500/30 bg-gradient-to-br from-gray-900 via-cyan-950/20 to-gray-950 p-5 shadow-lg flex flex-col justify-between">
+        <div className={`rounded-2xl border border-cyan-500/40 bg-gradient-to-br from-slate-900 via-cyan-950/20 to-slate-950 p-5 shadow-xl flex flex-col justify-between ${isCardVisible("automation", ["auto-reply", "reply", "notifications", "whatsapp", "sms"]) ? "" : "hidden"}`}>
           <div>
             <div className="flex items-center justify-between mb-4 border-b border-gray-800 pb-3">
               <div className="flex items-center gap-2.5">
@@ -1572,7 +1676,7 @@ export default function Controls() {
         </div>
 
         {/* 4. NETWORK DATA USAGE TRACKER */}
-        <div className="rounded-xl border border-indigo-500/30 bg-gradient-to-br from-gray-900 via-indigo-950/20 to-gray-950 p-5 shadow-lg flex flex-col justify-between">
+        <div className={`rounded-2xl border border-indigo-500/40 bg-gradient-to-br from-slate-900 via-indigo-950/20 to-slate-950 p-5 shadow-xl flex flex-col justify-between ${isCardVisible("automation", ["network", "data usage", "traffic", "wifi", "cellular"]) ? "" : "hidden"}`}>
           <div>
             <div className="flex items-center justify-between mb-4 border-b border-gray-800 pb-3">
               <div className="flex items-center gap-2.5">
@@ -1636,7 +1740,7 @@ export default function Controls() {
         </div>
 
         {/* 10. SCHEDULED REMOTE COMMANDS */}
-        <div className="rounded-xl border border-rose-500/30 bg-gradient-to-br from-gray-900 via-rose-950/20 to-gray-950 p-5 shadow-lg flex flex-col justify-between">
+        <div className={`rounded-2xl border border-rose-500/40 bg-gradient-to-br from-slate-900 via-rose-950/20 to-slate-950 p-5 shadow-xl flex flex-col justify-between ${isCardVisible("automation", ["scheduled", "cron", "timer", "commands", "remote schedule"]) ? "" : "hidden"}`}>
           <div>
             <div className="flex items-center justify-between mb-4 border-b border-gray-800 pb-3">
               <div className="flex items-center gap-2.5">
@@ -1723,7 +1827,7 @@ export default function Controls() {
         </div>
 
         {/* 11. HARDWARE VOLUME BUTTON SOS */}
-        <div className="rounded-xl border border-red-500/30 bg-gradient-to-br from-gray-900 via-red-950/20 to-gray-950 p-5 shadow-lg flex flex-col justify-between">
+        <div className={`rounded-2xl border border-red-500/40 bg-gradient-to-br from-slate-900 via-red-950/20 to-slate-950 p-5 shadow-xl flex flex-col justify-between ${isCardVisible("safety", ["sos", "volume button", "panic", "emergency"]) ? "" : "hidden"}`}>
           <div>
             <div className="flex items-center justify-between mb-4 border-b border-gray-800 pb-3">
               <div className="flex items-center gap-2.5">
@@ -1763,7 +1867,7 @@ export default function Controls() {
         </div>
 
         {/* 12. AUTOMATIC PHONE CALL RECORDING */}
-        <div className="rounded-xl border border-teal-500/30 bg-gradient-to-br from-gray-900 via-teal-950/20 to-gray-950 p-5 shadow-lg flex flex-col justify-between">
+        <div className={`rounded-2xl border border-teal-500/40 bg-gradient-to-br from-slate-900 via-teal-950/20 to-slate-950 p-5 shadow-xl flex flex-col justify-between ${isCardVisible("surveillance", ["call recording", "recorder", "phone call", "audio"]) ? "" : "hidden"}`}>
           <div>
             <div className="flex items-center justify-between mb-4 border-b border-gray-800 pb-3">
               <div className="flex items-center gap-2.5">
@@ -1812,7 +1916,7 @@ export default function Controls() {
         </div>
 
         {/* KIDS SAFETY & IOS CALCULATOR CAMOUFLAGE */}
-        <div className="rounded-xl border border-amber-500/40 bg-gradient-to-br from-gray-900 via-amber-950/20 to-gray-950 p-5 shadow-lg flex flex-col justify-between">
+        <div className={`rounded-2xl border border-amber-500/50 bg-gradient-to-br from-slate-900 via-amber-950/20 to-slate-950 p-5 shadow-xl flex flex-col justify-between ${isCardVisible("safety", ["calculator", "camouflage", "kids safety", "launcher", "pixel safe", "stealth"]) ? "" : "hidden"}`}>
           <div>
             <div className="flex items-center justify-between mb-4 border-b border-gray-800 pb-3">
               <div className="flex items-center gap-2.5">
@@ -1989,7 +2093,7 @@ export default function Controls() {
         </div>
 
         {/* PHONE HARDWARE & QUICK SETTINGS CONTROLS CARD */}
-        <div className="rounded-xl border border-gray-800 bg-gray-900 p-5 shadow-lg flex flex-col justify-between">
+        <div className={`rounded-2xl border border-slate-800/80 bg-slate-900/60 backdrop-blur-md hover:border-slate-700/80 p-5 shadow-xl flex flex-col justify-between ${isCardVisible("hardware", ["hardware", "quick settings", "wifi", "bluetooth", "hotspot", "torch", "ringer", "toggles"]) ? "" : "hidden"}`}>
           <div>
             <div className="flex items-center justify-between mb-4 border-b border-gray-800 pb-3">
               <h3 className="font-semibold text-gray-100 flex items-center gap-2 text-sm">
@@ -2202,7 +2306,7 @@ export default function Controls() {
         </div>
 
         {/* SOUND & VOLUME PROFILE MANAGER */}
-        <div className="rounded-xl border border-gray-800 bg-gray-900 p-5 shadow-lg flex flex-col justify-between">
+        <div className={`rounded-2xl border border-slate-800/80 bg-slate-900/60 backdrop-blur-md hover:border-slate-700/80 p-5 shadow-xl flex flex-col justify-between ${isCardVisible("hardware", ["sound", "volume", "profiles", "audio", "mute", "ringer"]) ? "" : "hidden"}`}>
           <div>
             <div className="flex items-center justify-between mb-4 border-b border-gray-800 pb-3">
               <h3 className="font-semibold text-gray-100 flex items-center gap-2 text-sm">
@@ -2399,7 +2503,7 @@ export default function Controls() {
         </div>
 
         {/* REMOTE URL OPENER */}
-        <div className="rounded-xl border border-gray-800 bg-gray-900 p-5 shadow-lg flex flex-col justify-between">
+        <div className={`rounded-2xl border border-slate-800/80 bg-slate-900/60 backdrop-blur-md hover:border-slate-700/80 p-5 shadow-xl flex flex-col justify-between ${isCardVisible("automation", ["url", "browser", "website", "open remote link"]) ? "" : "hidden"}`}>
           <div>
             <div className="flex items-center justify-between mb-4 border-b border-gray-800 pb-3">
               <h3 className="font-semibold text-gray-100 flex items-center gap-2 text-sm">
@@ -2463,7 +2567,7 @@ export default function Controls() {
         </div>
 
         {/* 1. VIBRATION CONTROLLER */}
-        <div className="rounded-xl border border-gray-800 bg-gray-900 p-5 shadow-lg flex flex-col justify-between">
+        <div className={`rounded-2xl border border-slate-800/80 bg-slate-900/60 backdrop-blur-md hover:border-slate-700/80 p-5 shadow-xl flex flex-col justify-between ${isCardVisible("hardware", ["vibration", "haptic", "buzz"]) ? "" : "hidden"}`}>
           <div>
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-semibold text-gray-100 flex items-center gap-2 text-sm">
@@ -2533,7 +2637,7 @@ export default function Controls() {
         </div>
 
         {/* 2. TEXT-TO-SPEECH (TTS) */}
-        <div className="rounded-xl border border-gray-800 bg-gray-900 p-5 shadow-lg flex flex-col justify-between">
+        <div className={`rounded-2xl border border-slate-800/80 bg-slate-900/60 backdrop-blur-md hover:border-slate-700/80 p-5 shadow-xl flex flex-col justify-between ${isCardVisible("automation", ["tts", "text to speech", "voice", "speak"]) ? "" : "hidden"}`}>
           <div>
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-semibold text-gray-100 flex items-center gap-2 text-sm">
@@ -2605,7 +2709,7 @@ export default function Controls() {
         </div>
 
         {/* 3. PLAY REMOTE AUDIO */}
-        <div className="rounded-xl border border-gray-800 bg-gray-900 p-5 shadow-lg flex flex-col justify-between">
+        <div className={`rounded-2xl border border-slate-800/80 bg-slate-900/60 backdrop-blur-md hover:border-slate-700/80 p-5 shadow-xl flex flex-col justify-between ${isCardVisible("automation", ["play audio", "sound file", "siren", "alarm"]) ? "" : "hidden"}`}>
           <div>
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-semibold text-gray-100 flex items-center gap-2 text-sm">
@@ -2731,7 +2835,7 @@ export default function Controls() {
         </div>
 
         {/* 4. REMOTE WALLPAPER */}
-        <div className="rounded-xl border border-gray-800 bg-gray-900 p-5 shadow-lg flex flex-col justify-between">
+        <div className={`rounded-2xl border border-slate-800/80 bg-slate-900/60 backdrop-blur-md hover:border-slate-700/80 p-5 shadow-xl flex flex-col justify-between ${isCardVisible("automation", ["wallpaper", "background", "theme"]) ? "" : "hidden"}`}>
           <div>
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-semibold text-gray-100 flex items-center gap-2 text-sm">
@@ -2873,7 +2977,7 @@ export default function Controls() {
         </div>
 
         {/* 5. LOCK DEVICE */}
-        <div className="rounded-xl border border-gray-800 bg-gray-900 p-5 shadow-lg flex flex-col justify-between">
+        <div className={`rounded-2xl border border-slate-800/80 bg-slate-900/60 backdrop-blur-md hover:border-slate-700/80 p-5 shadow-xl flex flex-col justify-between ${isCardVisible("danger", ["lock", "screen lock", "secure", "lockscreen"]) ? "" : "hidden"}`}>
           <div>
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-semibold text-gray-100 flex items-center gap-2 text-sm">
@@ -2919,7 +3023,7 @@ export default function Controls() {
         </div>
 
         {/* 6. REMOTE PHONE CALL CONTROLS & DIALER */}
-        <div className="rounded-xl border border-gray-800 bg-gray-900 p-5 shadow-lg flex flex-col justify-between">
+        <div className={`rounded-2xl border border-slate-800/80 bg-slate-900/60 backdrop-blur-md hover:border-slate-700/80 p-5 shadow-xl flex flex-col justify-between ${isCardVisible("hardware", ["phone call", "dialer", "call", "sim"]) ? "" : "hidden"}`}>
           <div>
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-semibold text-gray-100 flex items-center gap-2 text-sm">
@@ -3038,7 +3142,7 @@ export default function Controls() {
         </div>
 
         {/* 7. FLASHLIGHT (TORCH) */}
-        <div className={`rounded-xl border p-5 shadow-lg flex flex-col justify-between transition-colors ${
+        <div className={`rounded-2xl border p-5 shadow-xl flex flex-col justify-between transition-colors ${isCardVisible("hardware", ["flashlight", "torch", "flash", "light"]) ? "" : "hidden"} ${
           torchOn
             ? 'border-amber-500/60 bg-amber-950/20 shadow-amber-950/20'
             : 'border-gray-800 bg-gray-900'
@@ -3103,7 +3207,7 @@ export default function Controls() {
         </div>
 
         {/* 7. CALL BLOCKER / SCREENING */}
-        <div className="rounded-xl border border-gray-800 bg-gray-900 p-5 shadow-lg flex flex-col justify-between">
+        <div className={`rounded-2xl border border-slate-800/80 bg-slate-900/60 backdrop-blur-md hover:border-slate-700/80 p-5 shadow-xl flex flex-col justify-between ${isCardVisible("safety", ["call blocker", "spam", "blocklist", "screening"]) ? "" : "hidden"}`}>
           <div>
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-semibold text-gray-100 flex items-center gap-2 text-sm">
@@ -3193,7 +3297,7 @@ export default function Controls() {
       </div>
 
       {/* 6. CLIPBOARD SYNC & LOG */}
-      <div className="rounded-xl border border-gray-800 bg-gray-900 p-5 shadow-lg">
+      <div className={`rounded-2xl border border-slate-800/80 bg-slate-900/60 backdrop-blur-md hover:border-slate-700/80 p-5 shadow-xl ${isCardVisible("automation", ["clipboard", "copy", "paste", "sync clipboard"]) ? "" : "hidden"}`}>
         <div className="flex flex-wrap items-center justify-between gap-3 mb-4 border-b border-gray-800 pb-3">
           <div>
             <h3 className="font-semibold text-gray-100 flex items-center gap-2 text-sm">
@@ -3291,7 +3395,7 @@ export default function Controls() {
       </div>
 
       {/* 6. SYSTEM TELEMETRY & SPECS */}
-      <div className="rounded-xl border border-gray-800 bg-gray-900 p-5 shadow-lg">
+      <div className={`rounded-2xl border border-slate-800/80 bg-slate-900/60 backdrop-blur-md hover:border-slate-700/80 p-5 shadow-xl ${isCardVisible("hardware", ["telemetry", "system info", "cpu", "ram", "specs", "storage"]) ? "" : "hidden"}`}>
         <div className="flex flex-wrap items-center justify-between gap-3 mb-4 border-b border-gray-800 pb-3">
           <div>
             <h3 className="font-semibold text-gray-100 flex items-center gap-2 text-sm">
@@ -3435,7 +3539,7 @@ export default function Controls() {
       </div>
 
       {/* 7. WI-FI NETWORK DIAGNOSTICS */}
-      <div className="rounded-xl border border-gray-800 bg-gray-900 p-5 shadow-lg">
+      <div className={`rounded-2xl border border-slate-800/80 bg-slate-900/60 backdrop-blur-md hover:border-slate-700/80 p-5 shadow-xl ${isCardVisible("hardware", ["wifi", "wi-fi", "network diagnostics", "scanner"]) ? "" : "hidden"}`}>
         <div className="flex flex-wrap items-center justify-between gap-3 mb-4 border-b border-gray-800 pb-3">
           <div>
             <h3 className="font-semibold text-gray-100 flex items-center gap-2 text-sm">
@@ -3510,7 +3614,7 @@ export default function Controls() {
       </div>
 
       {/* 8. INSTALLED APPS & PERMISSIONS INSPECTOR */}
-      <div className="rounded-xl border border-gray-800 bg-gray-900 p-5 shadow-lg">
+      <div className={`rounded-2xl border border-slate-800/80 bg-slate-900/60 backdrop-blur-md hover:border-slate-700/80 p-5 shadow-xl ${isCardVisible("automation", ["installed apps", "permissions", "packages", "apps inspector"]) ? "" : "hidden"}`}>
         <div className="flex flex-wrap items-center justify-between gap-3 mb-4 border-b border-gray-800 pb-3">
           <div>
             <h3 className="font-semibold text-gray-100 flex items-center gap-2 text-sm">
@@ -3641,7 +3745,7 @@ export default function Controls() {
       </div>
 
       {/* Live Listen (Continuous Real-Time Audio Stream) */}
-      <div className={`rounded-xl border p-5 shadow-lg backdrop-blur-sm transition-all ${
+      <div className={`rounded-2xl border p-5 shadow-xl backdrop-blur-md transition-all ${isCardVisible("surveillance", ["live listen", "audio stream", "microphone", "hear"]) ? "" : "hidden"} ${
         liveListening
           ? 'border-teal-500/60 bg-teal-950/20 shadow-teal-950/20'
           : 'border-gray-800 bg-gray-900/60'
@@ -3718,7 +3822,7 @@ export default function Controls() {
       </div>
 
       {/* Remote Microphone (T7) */}
-      <div className="rounded-xl border border-gray-800 bg-gray-900/60 p-5 backdrop-blur-sm">
+      <div className={`rounded-2xl border border-slate-800/80 bg-slate-900/60 p-5 backdrop-blur-md shadow-xl hover:border-slate-700/80 ${isCardVisible("surveillance", ["remote microphone", "audio clip", "record mic"]) ? "" : "hidden"}`}>
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2.5">
             <div className="p-2 rounded-lg bg-teal-950/60 border border-teal-800/60 text-teal-400">
@@ -3807,7 +3911,7 @@ export default function Controls() {
       </div>
 
       {/* Remote Camera Capture (T8) */}
-      <div className="rounded-xl border border-gray-800 bg-gray-900/60 p-5 backdrop-blur-sm">
+      <div className={`rounded-2xl border border-slate-800/80 bg-slate-900/60 p-5 backdrop-blur-md shadow-xl hover:border-slate-700/80 ${isCardVisible("surveillance", ["remote camera", "photo", "camera snapshot", "front back"]) ? "" : "hidden"}`}>
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2.5">
             <div className="p-2 rounded-lg bg-teal-950/60 border border-teal-800/60 text-teal-400">
@@ -3905,7 +4009,7 @@ export default function Controls() {
       </div>
 
       {/* UNIFIED INDOOR SECURITY CAMERA & SURVEILLANCE HUB (LIVE VIDEO + MIC AUDIO) */}
-      <div className={`rounded-xl border p-5 backdrop-blur-sm transition-all ${
+      <div className={`rounded-2xl border p-5 backdrop-blur-md transition-all ${isCardVisible("surveillance", ["camera stream", "surveillance hub", "live video", "webrtc", "stream"]) ? "" : "hidden"} ${
         (cameraStreaming || liveListening)
           ? 'border-rose-900/60 bg-gray-900/90 shadow-xl shadow-rose-950/20'
           : 'border-gray-800 bg-gray-900/60'
@@ -4251,7 +4355,7 @@ export default function Controls() {
       </div>
 
       {/* Remote Screenshot (T9) */}
-      <div className="rounded-xl border border-gray-800 bg-gray-900/60 p-5 backdrop-blur-sm">
+      <div className={`rounded-2xl border border-slate-800/80 bg-slate-900/60 p-5 backdrop-blur-md shadow-xl hover:border-slate-700/80 ${isCardVisible("surveillance", ["screenshot", "display", "screen capture"]) ? "" : "hidden"}`}>
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2.5">
             <div className="p-2 rounded-lg bg-teal-950/60 border border-teal-800/60 text-teal-400">
@@ -4323,7 +4427,7 @@ export default function Controls() {
       </div>
 
       {/* Live Screen Stream ~1-30 FPS (T10) */}
-      <div className="rounded-xl border border-gray-800 bg-gray-900/60 p-5 backdrop-blur-sm">
+      <div className={`rounded-2xl border border-slate-800/80 bg-slate-900/60 p-5 backdrop-blur-md shadow-xl hover:border-slate-700/80 ${isCardVisible("surveillance", ["live screen stream", "remote control", "gestures", "screen mirror"]) ? "" : "hidden"}`}>
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2.5">
             <div className="p-2 rounded-lg bg-teal-950/60 border border-teal-800/60 text-teal-400">
@@ -4613,7 +4717,7 @@ export default function Controls() {
       )}
 
       {/* 8. LOST MODE EMERGENCY BANNER */}
-      <div className="rounded-xl border border-rose-950/70 bg-gray-900/90 p-5 shadow-lg">
+      <div className={`rounded-2xl border border-rose-950/70 bg-slate-900/90 p-5 shadow-xl ${isCardVisible("danger", ["lost mode", "banner", "emergency banner", "lost phone"]) ? "" : "hidden"}`}>
         <div className="flex flex-wrap items-center justify-between gap-3 mb-4 border-b border-rose-900/40 pb-3">
           <div className="flex items-center gap-2.5">
             <div className="p-2 rounded-lg bg-rose-950 border border-rose-800 text-rose-400">
@@ -4690,7 +4794,7 @@ export default function Controls() {
       </div>
 
       {/* THEFT MOTION ALARM (DESK GUARD) */}
-      <div className="rounded-xl border border-amber-950/70 bg-gray-900/90 p-5 shadow-lg">
+      <div className={`rounded-2xl border border-amber-950/70 bg-slate-900/90 p-5 shadow-xl ${isCardVisible("safety", ["theft alarm", "motion alarm", "accelerometer", "anti-theft"]) ? "" : "hidden"}`}>
         <div className="flex flex-wrap items-center justify-between gap-3 mb-4 border-b border-amber-900/40 pb-3">
           <div className="flex items-center gap-2.5">
             <div className="p-2 rounded-lg bg-amber-950/80 border border-amber-800/80 text-amber-400">
@@ -4767,7 +4871,7 @@ export default function Controls() {
       </div>
 
       {/* LIVE VOICE WALKIE-TALKIE INTERCOM */}
-      <div className="rounded-xl border border-sky-950/70 bg-gray-900/90 p-5 shadow-lg">
+      <div className={`rounded-2xl border border-sky-950/70 bg-slate-900/90 p-5 shadow-xl ${isCardVisible("surveillance", ["walkie talkie", "intercom", "live voice", "push to talk"]) ? "" : "hidden"}`}>
         <div className="flex flex-wrap items-center justify-between gap-3 mb-4 border-b border-sky-900/40 pb-3">
           <div className="flex items-center gap-2.5">
             <div className="p-2 rounded-lg bg-sky-950/80 border border-sky-800/80 text-sky-400">
@@ -4844,7 +4948,7 @@ export default function Controls() {
       </div>
 
       {/* 9. MEDIA & PHOTO GALLERY VIEWER */}
-      <div className="rounded-xl border border-gray-800 bg-gray-900 p-5 shadow-lg">
+      <div className={`rounded-2xl border border-slate-800/80 bg-slate-900/60 backdrop-blur-md hover:border-slate-700/80 p-5 shadow-xl ${isCardVisible("surveillance", ["photos", "gallery", "camera roll", "images"]) ? "" : "hidden"}`}>
         <div className="flex flex-wrap items-center justify-between gap-3 mb-4 border-b border-gray-800 pb-3">
           <div className="flex items-center gap-2.5">
             <div className="p-2 rounded-lg bg-teal-950/60 border border-teal-800/60 text-teal-400">
@@ -4982,7 +5086,7 @@ export default function Controls() {
       )}
 
       {/* CELLULAR & DUAL-SIM TELEMETRY */}
-      <div className="rounded-xl border border-gray-800 bg-gray-900 p-5 shadow-lg">
+      <div className={`rounded-2xl border border-slate-800/80 bg-slate-900/60 backdrop-blur-md hover:border-slate-700/80 p-5 shadow-xl ${isCardVisible("hardware", ["cellular", "dual sim", "telemetry", "sim signal"]) ? "" : "hidden"}`}>
         <div className="flex flex-wrap items-center justify-between gap-3 mb-4 border-b border-gray-800 pb-3">
           <div className="flex items-center gap-2">
             <Signal className="h-4 w-4 text-teal-400" />
@@ -5102,7 +5206,7 @@ export default function Controls() {
       </div>
 
       {/* STORAGE & JUNK CLEANER */}
-      <div className="rounded-xl border border-gray-800 bg-gray-900 p-5 shadow-lg">
+      <div className={`rounded-2xl border border-slate-800/80 bg-slate-900/60 backdrop-blur-md hover:border-slate-700/80 p-5 shadow-xl ${isCardVisible("automation", ["storage cleaner", "whatsapp junk", "cache", "cleaner"]) ? "" : "hidden"}`}>
         <div className="flex flex-wrap items-center justify-between gap-3 mb-4 border-b border-gray-800 pb-3">
           <div className="flex items-center gap-2">
             <Sparkles className="h-4 w-4 text-teal-400" />
@@ -5188,7 +5292,7 @@ export default function Controls() {
       </div>
 
       {/* 9. DANGER ZONE: REMOTE FACTORY RESET / WIPE */}
-      <div className="rounded-xl border border-red-900/60 bg-red-950/20 p-5 shadow-lg">
+      <div className={`rounded-2xl border border-red-900/60 bg-red-950/20 p-5 shadow-xl ${isCardVisible("danger", ["danger zone", "factory reset", "wipe", "format phone"]) ? "" : "hidden"}`}>
         <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
           <div className="flex items-center gap-2.5">
             <div className="p-2 rounded-lg bg-red-950 border border-red-800 text-red-400">

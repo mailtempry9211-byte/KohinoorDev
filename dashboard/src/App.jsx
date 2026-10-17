@@ -33,34 +33,42 @@ export default function App() {
     : notifications.filter((n) => !n.read).length;
 
   return (
-    <div className="flex h-screen bg-gray-950 text-gray-100 overflow-hidden">
+    <div className="flex h-screen bg-[#090D16] text-slate-100 overflow-hidden font-sans">
       <Sidebar />
 
-      <div className="flex-1 flex flex-col min-w-0">
-        <header className="flex items-center justify-between gap-4 px-6 py-4 border-b border-gray-800 bg-gray-900">
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-teal-600 shrink-0">
+      <div className="flex-1 flex flex-col min-w-0 bg-gradient-to-b from-[#090D16] via-[#0B0F19] to-[#080B12]">
+        <header className="flex items-center justify-between gap-4 px-6 py-3.5 border-b border-slate-800/80 bg-slate-900/40 backdrop-blur-md">
+          <div className="flex items-center gap-3.5 min-w-0">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-tr from-teal-600 to-cyan-500 shadow-lg shadow-teal-500/20 shrink-0 border border-teal-400/30">
               <Phone className="h-5 w-5 text-white" />
             </div>
             <div className="min-w-0">
-              <h1 className="text-sm font-semibold truncate">
-                {activeDevice ? activeDevice.deviceName : 'No device selected'}
-              </h1>
-              <p className="text-xs text-gray-500">Personal Phone Link Hub</p>
+              <div className="flex items-center gap-2">
+                <h1 className="text-sm font-bold tracking-tight text-white truncate">
+                  {activeDevice ? activeDevice.deviceName : 'No Device Selected'}
+                </h1>
+                {activeDevice && (
+                  <span className="flex h-2 w-2 rounded-full bg-emerald-400 animate-pulse" title="Device Ready" />
+                )}
+              </div>
+              <p className="text-[11px] font-mono text-slate-400 tracking-wide">Phone Link Hub • Operations Center</p>
             </div>
           </div>
 
           {/* Animated Cartoon Thinking Clock */}
           <ThinkingClock compact={true} />
 
-          <div className="flex items-center gap-3">
-            <span
-              className={`shrink-0 rounded-full px-3 py-1 text-xs font-medium ${
-                connected ? 'bg-emerald-500/10 text-emerald-400' : 'bg-red-500/10 text-red-400'
+          <div className="flex items-center gap-2.5">
+            <div
+              className={`flex items-center gap-2 rounded-full px-3 py-1 text-xs font-mono font-medium border transition-colors ${
+                connected
+                  ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'
+                  : 'bg-rose-500/10 border-rose-500/30 text-rose-300'
               }`}
             >
-              {connected ? 'Server connected' : 'Offline'}
-            </span>
+              <span className={`h-1.5 w-1.5 rounded-full ${connected ? 'bg-emerald-400 animate-ping' : 'bg-rose-400'}`} />
+              {connected ? 'Live Sync Active' : 'Offline'}
+            </div>
 
             {/* BUG 5: manual refresh for the selected device. */}
             <button
@@ -73,14 +81,14 @@ export default function App() {
                   sendCommand('request-location', { deviceId: activeDeviceId }),
                   sendCommand('request-contacts', { deviceId: activeDeviceId })
                 ]);
-                pushToast('Refresh requested', 'success');
+                pushToast('Telemetry refreshed from phone', 'success');
                 setRefreshing(false);
               }}
               disabled={!activeDeviceId || refreshing}
-              className="shrink-0 rounded-full p-2 text-gray-500 transition-colors hover:bg-gray-800 hover:text-gray-200 disabled:cursor-not-allowed disabled:opacity-40"
+              className="shrink-0 rounded-lg p-2 text-slate-400 transition-all hover:bg-slate-800/80 hover:text-teal-300 border border-transparent hover:border-slate-700/60 disabled:cursor-not-allowed disabled:opacity-40"
               title="Refresh calls, messages, location and contacts"
             >
-              <RefreshCw className={`h-5 w-5 ${refreshing ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`h-4.5 w-4.5 ${refreshing ? 'animate-spin text-teal-400' : ''}`} />
             </button>
 
             {/* FEATURE C: find-my-phone alarm. */}
@@ -92,20 +100,20 @@ export default function App() {
                 }
               }}
               disabled={!activeDeviceId}
-              className="shrink-0 rounded-full p-2 text-gray-500 transition-colors hover:bg-gray-800 hover:text-gray-200 disabled:cursor-not-allowed disabled:opacity-40"
-              title="Find phone — play loud alert"
+              className="shrink-0 rounded-lg p-2 text-slate-400 transition-all hover:bg-amber-500/10 hover:text-amber-300 hover:border-amber-500/30 border border-transparent disabled:cursor-not-allowed disabled:opacity-40"
+              title="Find Phone (Loud Siren)"
             >
-              <Volume2 className="h-5 w-5" />
+              <Volume2 className="h-4.5 w-4.5" />
             </button>
 
             <button
               onClick={() => setTab('notifications')}
-              className="relative shrink-0 rounded-full p-2 text-gray-500 transition-colors hover:bg-gray-800 hover:text-gray-200"
+              className="relative shrink-0 rounded-lg p-2 text-slate-400 transition-all hover:bg-slate-800/80 hover:text-slate-100 border border-transparent hover:border-slate-700/60"
               title="Notifications"
             >
-              <Bell className="h-5 w-5" />
+              <Bell className="h-4.5 w-4.5" />
               {unreadAll > 0 && (
-                <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-teal-600 text-[10px] font-semibold text-white">
+                <span className="absolute -right-1 -top-1 flex h-4.5 w-4.5 items-center justify-center rounded-full bg-teal-500 text-[10px] font-bold text-slate-950 shadow-md shadow-teal-500/40 animate-pulse">
                   {unreadAll}
                 </span>
               )}
@@ -113,26 +121,29 @@ export default function App() {
           </div>
         </header>
 
-        <nav className="flex gap-1 px-4 pt-3 border-b border-gray-800 bg-gray-900/50 overflow-x-auto scrollbar-thin">
-          {TABS.map(({ id, label, icon: Icon }) => (
-            <button
-              key={id}
-              onClick={() => setTab(id)}
-              className={`flex items-center gap-2 whitespace-nowrap rounded-t-lg px-4 py-2.5 text-sm font-medium transition-colors ${
-                tab === id
-                  ? 'bg-gray-950 text-white border-b-2 border-teal-500'
-                  : 'text-gray-500 hover:text-gray-300'
-              }`}
-            >
-              <Icon className="h-4 w-4" />
-              {label}
-              {id === 'notifications' && unreadAll > 0 && (
-                <span className="ml-1 rounded-full bg-teal-600 px-1.5 py-0.5 text-[10px] font-semibold text-white">
-                  {unreadAll}
-                </span>
-              )}
-            </button>
-          ))}
+        <nav className="flex items-center gap-1.5 px-6 pt-2.5 border-b border-slate-800/70 bg-slate-900/30 backdrop-blur-sm overflow-x-auto scrollbar-thin">
+          {TABS.map(({ id, label, icon: Icon }) => {
+            const isActive = tab === id;
+            return (
+              <button
+                key={id}
+                onClick={() => setTab(id)}
+                className={`flex items-center gap-2 whitespace-nowrap rounded-lg px-3.5 py-2 text-xs font-semibold tracking-wide transition-all ${
+                  isActive
+                    ? 'bg-slate-800/90 text-teal-300 border border-teal-500/40 shadow-sm shadow-teal-950/40'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40 border border-transparent'
+                }`}
+              >
+                <Icon className={`h-4 w-4 ${isActive ? 'text-teal-400' : 'text-slate-500'}`} />
+                {label}
+                {id === 'notifications' && unreadAll > 0 && (
+                  <span className="ml-1 rounded-full bg-teal-500/20 text-teal-300 border border-teal-500/40 px-1.5 py-0.2 text-[10px] font-bold">
+                    {unreadAll}
+                  </span>
+                )}
+              </button>
+            );
+          })}
         </nav>
 
         <main className="flex-1 overflow-y-auto p-6 scrollbar-thin">
