@@ -25,7 +25,8 @@
         "nsis",
         "portable"
       ],
-      "icon": "electron/icon.png"
+      "icon": "electron/icon.ico",
+      "sign": null
     },
     "nsis": {
       "oneClick": false,

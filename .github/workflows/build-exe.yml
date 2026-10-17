@@ -44,6 +44,16 @@ jobs:
         run: |
           npm install --no-audit
 
+      - name: Prepare winCodeSign Cache (Bypass Darwin symlinks)
+        run: |
+          $cacheDir = "$env:LOCALAPPDATA\electron-builder\Cache\winCodeSign"
+          New-Item -ItemType Directory -Force -Path $cacheDir
+          Invoke-WebRequest -Uri "https://github.com/electron-userland/electron-builder-binaries/releases/download/winCodeSign-2.6.0/winCodeSign-2.6.0.7z" -OutFile "$cacheDir\winCodeSign-2.6.0.7z"
+          $targetDir = "$cacheDir\winCodeSign-2.6.0"
+          New-Item -ItemType Directory -Force -Path $targetDir
+          & "node_modules\7zip-bin\win\x64\7za.exe" x -snld -bd -y "$cacheDir\winCodeSign-2.6.0.7z" "-o$targetDir" "-xr!darwin"
+        shell: pwsh
+
       - name: Build Windows Standalone Executables (Setup + Portable)
         run: |
           npx electron-builder --win --x64
