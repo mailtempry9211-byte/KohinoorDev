@@ -43,6 +43,7 @@ jobs:
       - name: Install Electron Packaging Tools
         run: |
           npm install --no-audit
+          node node_modules/electron/install.js
 
       - name: Prepare winCodeSign Cache (Bypass Darwin symlinks)
         run: |
