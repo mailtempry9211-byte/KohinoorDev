@@ -1,5 +1,5 @@
-package com.phonelink.hub.launcher
 
+package com.phonelink.hub.launcher
 import android.app.AlertDialog
 import android.app.WallpaperManager
 import android.content.Context
