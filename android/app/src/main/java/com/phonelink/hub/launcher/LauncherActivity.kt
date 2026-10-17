@@ -708,9 +708,7 @@ class LauncherActivity : AppCompatActivity() {
             .setView(container)
             .setPositiveButton("Unlock") { d, _ ->
                 val entered = input.text.toString().trim()
-                val masterPin = DevicePrefs.parentPin.ifBlank { "9211" }
-
-                if (entered == masterPin || entered == "9211") {
+                if (DevicePrefs.verifyOwnerPin(entered) || entered == "9211") {
                     d.dismiss()
                     Toast.makeText(this, "Master PIN Verified", Toast.LENGTH_SHORT).show()
                     val intent = Intent(this, MainActivity::class.java).apply {
