@@ -617,11 +617,11 @@ class LauncherActivity : AppCompatActivity() {
         }
     }
 
-    override fun onNewIntent(intent: Intent?) {
+    override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
         // System sent user back to Home (Home button pressed or launcher re-selected)
-        if (Intent.ACTION_MAIN == intent?.action) {
+        if (Intent.ACTION_MAIN == intent.action) {
             if (isDrawerOpen) {
                 closeAppDrawer()
             }
