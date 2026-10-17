@@ -1602,6 +1602,7 @@ class PhoneLinkService : Service() {
                     "Small daily improvements over time lead to stunning results.",
                     "Stay curious, keep learning, stay kind.",
                     "Creativity is intelligence having fun."
+                )
                 val quoteIdx = ((System.currentTimeMillis() / 1_800_000L) % quotes.size.toLong()).toInt()
                 val quote = quotes[Math.abs(quoteIdx) % quotes.size]
                 Pair("💡 Focus & Wisdom • $timeStr", quote)

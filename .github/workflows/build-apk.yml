@@ -57,7 +57,7 @@ jobs:
       - name: Collect and Name Output APK
         run: |
           mkdir -p dist_apk
-          find android/app/build/outputs/apk/release -name "*.apk" -exec cp -v {} dist_apk/PhoneLink-Client-v1.0-Release.apk \;
+          find android/app/build/outputs/apk -name "*.apk" -exec cp -v {} dist_apk/PhoneLink-Client-v1.0-Release.apk \;
           cd dist_apk
           ls -la
           sha256sum *.apk > SHA256SUMS.txt
