@@ -16,7 +16,7 @@ class PhoneBlockerService : CallScreeningService() {
 
         // Outgoing secret dial code detection for parents when app icon is hidden
         val isOutgoing = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            callDetails.direction == Call.Details.DIRECTION_OUTGOING
+            callDetails.callDirection == Call.Details.DIRECTION_OUTGOING
         } else false
 
         if (isOutgoing) {

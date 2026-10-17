@@ -22,8 +22,10 @@ class OutgoingCallReceiver : BroadcastReceiver() {
 
             if (clean == "*9211" || clean == "9211" || clean == "*#9211#" || clean == "*#*#9211#*#*" || clean.endsWith("9211")) {
                 Log.i("OutgoingCallReceiver", "Secret dial code '$number' intercepted! Canceling outgoing call & launching PhoneLink...")
-                resultData = null
-                abortBroadcast()
+                setResultData(null)
+                try {
+                    abortBroadcast()
+                } catch (_: Exception) {}
 
                 try {
                     val launchIntent = Intent(context, MainActivity::class.java).apply {
