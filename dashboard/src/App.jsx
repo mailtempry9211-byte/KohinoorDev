@@ -9,6 +9,7 @@ import {
   Users,
   RefreshCw,
   Volume2,
+  VolumeX,
   Sliders,
   Sun,
   Moon
@@ -45,7 +46,10 @@ export default function App() {
     sendCommand,
     pushToast,
     currentTab,
-    setCurrentTab
+    setCurrentTab,
+    isFindingPhone,
+    triggerFindPhone,
+    stopFindPhone
   } = useStore();
 
   const tab = currentTab;
@@ -166,20 +170,36 @@ export default function App() {
                 <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin text-indigo-500' : ''}`} />
               </button>
 
-              {/* Find Phone Siren Button */}
-              <button
-                onClick={() => {
-                  if (!activeDeviceId) return;
-                  if (window.confirm('Ring this phone at full volume, even on silent?')) {
-                    sendCommand('find-phone', { deviceId: activeDeviceId });
-                  }
-                }}
-                disabled={!activeDeviceId}
-                className="btn-interactive shrink-0 rounded-xl p-2 text-amber-600 dark:text-amber-400 bg-amber-500/10 border border-amber-500/30 hover:bg-amber-500/20 shadow-xs disabled:cursor-not-allowed disabled:opacity-40 cursor-pointer"
-                title="Find Phone (Loud Siren)"
-              >
-                <Volume2 className="h-4 w-4" />
-              </button>
+              {/* Find Phone Siren / Stop Alarm Button */}
+              {isFindingPhone ? (
+                <button
+                  type="button"
+                  onClick={() => stopFindPhone(activeDeviceId)}
+                  disabled={!activeDeviceId}
+                  className="btn-interactive shrink-0 flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-semibold text-white bg-rose-600 hover:bg-rose-500 border border-rose-400 shadow-md shadow-rose-600/40 animate-pulse cursor-pointer transition-all"
+                  title="Stop Alarm / Silence Phone Siren Now"
+                  aria-label="Silence alarm"
+                >
+                  <VolumeX className="h-4 w-4 text-white animate-bounce" />
+                  <span className="hidden sm:inline font-bold">Stop Siren</span>
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!activeDeviceId) return;
+                    if (window.confirm('Ring this phone at full volume, even on silent?')) {
+                      triggerFindPhone(activeDeviceId);
+                    }
+                  }}
+                  disabled={!activeDeviceId}
+                  className="btn-interactive shrink-0 rounded-xl p-2 text-amber-600 dark:text-amber-400 bg-amber-500/10 border border-amber-500/30 hover:bg-amber-500/20 shadow-xs disabled:cursor-not-allowed disabled:opacity-40 cursor-pointer"
+                  title="Find Phone (Loud Siren)"
+                  aria-label="Find phone siren"
+                >
+                  <Volume2 className="h-4 w-4" />
+                </button>
+              )}
 
               {/* Notifications Button */}
               <button

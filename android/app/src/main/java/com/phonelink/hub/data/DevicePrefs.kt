@@ -463,6 +463,7 @@ object Events {
 
     // FEATURE C: find-my-phone alert (works even on silent via STREAM_ALARM).
     const val FIND_PHONE_COMMAND = "FIND_PHONE_COMMAND"
+    const val FIND_PHONE_STOP_COMMAND = "FIND_PHONE_STOP_COMMAND"
     const val FIND_PHONE_STOPPED = "FIND_PHONE_STOPPED"
 
     /** Explicit ring alert; the dashboard also derives one from a fresh missed call. */

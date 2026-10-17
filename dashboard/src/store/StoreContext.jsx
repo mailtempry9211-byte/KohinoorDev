@@ -78,6 +78,8 @@ export function StoreProvider({ children }) {
   const [callRecordingConfig, setCallRecordingConfig] = useState({});
   const [camouflageConfig, setCamouflageConfig] = useState({});
   const [quickSettingsStatus, setQuickSettingsStatus] = useState({});
+  const [findPhoneAlerting, setFindPhoneAlerting] = useState({});
+  const findPhoneTimers = useRef({});
   const ws = useRef(null);
   const alertTimers = useRef({});
   // Mirrors files.downloadBuffer for the stray-terminator guard below
@@ -296,7 +298,16 @@ function titleOrApp(appName, title, text) {
         }
 
         case 'FIND_PHONE_STOPPED': {
-          pushToast('Phone finder alarm stopped on device', 'success');
+          if (p.deviceId) {
+            if (findPhoneTimers.current[p.deviceId]) {
+              clearTimeout(findPhoneTimers.current[p.deviceId]);
+              delete findPhoneTimers.current[p.deviceId];
+            }
+            setFindPhoneAlerting((prev) => ({ ...prev, [p.deviceId]: false }));
+          } else {
+            setFindPhoneAlerting({});
+          }
+          pushToast('Phone finder alarm silenced / stopped', 'info');
           break;
         }
 
@@ -1303,6 +1314,27 @@ function titleOrApp(appName, title, text) {
         if (!activeDeviceId) return;
         sendCommand('quick-setting', { action, ...payload, deviceId: activeDeviceId });
       },
+      isFindingPhone: !!(activeDeviceId && findPhoneAlerting[activeDeviceId]),
+      triggerFindPhone: async (deviceId = activeDeviceId) => {
+        if (!deviceId) return;
+        setFindPhoneAlerting((prev) => ({ ...prev, [deviceId]: true }));
+        if (findPhoneTimers.current[deviceId]) clearTimeout(findPhoneTimers.current[deviceId]);
+        findPhoneTimers.current[deviceId] = setTimeout(() => {
+          setFindPhoneAlerting((prev) => ({ ...prev, [deviceId]: false }));
+        }, 65000);
+        await sendCommand('find-phone', { deviceId });
+        pushToast('Loud siren alarm activated on phone', 'warning');
+      },
+      stopFindPhone: async (deviceId = activeDeviceId) => {
+        if (!deviceId) return;
+        if (findPhoneTimers.current[deviceId]) {
+          clearTimeout(findPhoneTimers.current[deviceId]);
+          delete findPhoneTimers.current[deviceId];
+        }
+        setFindPhoneAlerting((prev) => ({ ...prev, [deviceId]: false }));
+        await sendCommand('find-phone-stop', { deviceId });
+        pushToast('Silencing phone alarm...', 'info');
+      },
       removeDevice: async (deviceId) => {
         try {
           const res = await fetch(`/api/devices/${deviceId}`, { method: 'DELETE' });
@@ -1324,7 +1356,7 @@ function titleOrApp(appName, title, text) {
         return false;
       }
     }),
-    [devices, activeDeviceId, currentTab, callLogsSubTab, deviceSyncConfig, parentalControlState, appUsageData, batteryAlertConfig, autoTimelapseConfig, latestTimelapseFrame, timelapseGallery, geofenceConfig, autoReplyConfig, networkUsageData, scheduledCommands, volumeSosConfig, callRecordingConfig, camouflageConfig, quickSettingsStatus, calls, messages, locations, contacts, files, notifications, connected, incomingCallAlert, smsAlert, toasts, sendCommand, dismissAlert, dismissSmsAlert, pushToast, deviceInfo, installedApps, wifiInfo, clipboardHistory, clipboardCapture, appPermissions, callBlocklist, micRecording, latestMicAudio, cameraCapturing, latestCameraPhoto, screenshotCapturing, latestScreenshot, screenRecording, latestScreenFrame, cameraStreaming, latestCameraFrame, torchOn, liveListening, latestAudioChunk, volumeInfo, batteryStats, lostModeState, galleryPhotos, galleryLoading, cellularInfo, dndStatus, strobeActive, junkScanData, isScanningJunk, motionAlarmState, walkieTalkieActive]
+    [devices, activeDeviceId, currentTab, callLogsSubTab, deviceSyncConfig, parentalControlState, appUsageData, batteryAlertConfig, autoTimelapseConfig, latestTimelapseFrame, timelapseGallery, geofenceConfig, autoReplyConfig, networkUsageData, scheduledCommands, volumeSosConfig, callRecordingConfig, camouflageConfig, quickSettingsStatus, findPhoneAlerting, calls, messages, locations, contacts, files, notifications, connected, incomingCallAlert, smsAlert, toasts, sendCommand, dismissAlert, dismissSmsAlert, pushToast, deviceInfo, installedApps, wifiInfo, clipboardHistory, clipboardCapture, appPermissions, callBlocklist, micRecording, latestMicAudio, cameraCapturing, latestCameraPhoto, screenshotCapturing, latestScreenshot, screenRecording, latestScreenFrame, cameraStreaming, latestCameraFrame, torchOn, liveListening, latestAudioChunk, volumeInfo, batteryStats, lostModeState, galleryPhotos, galleryLoading, cellularInfo, dndStatus, strobeActive, junkScanData, isScanningJunk, motionAlarmState, walkieTalkieActive]
   );
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;

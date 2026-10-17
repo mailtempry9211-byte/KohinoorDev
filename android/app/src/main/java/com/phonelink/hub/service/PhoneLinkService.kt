@@ -303,6 +303,7 @@ class PhoneLinkService : Service() {
             Events.ADD_CONTACT_COMMAND -> handleAddContact(payload)
             // FEATURE C: loud alarm even on silent.
             Events.FIND_PHONE_COMMAND -> FindPhoneManager.start(this)
+            Events.FIND_PHONE_STOP_COMMAND -> FindPhoneManager.stop(this)
             Events.NOTIFICATION_DISMISS_COMMAND -> handleNotificationDismiss(payload)
             Events.NOTIFICATION_CLEAR_ALL_COMMAND -> handleNotificationClearAll(payload)
             // Round 3 remote controls & telemetry

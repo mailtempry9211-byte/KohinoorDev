@@ -1280,15 +1280,15 @@ export default function Controls() {
               </div>
               <span className={`text-[10px] font-bold px-2 py-0.5 rounded border ${
                 batteryConfig?.batteryAlertsEnabled !== false
-                  ? 'border-emerald-500/60 bg-emerald-950 text-emerald-300'
-                  : 'border-gray-700 bg-gray-800 text-slate-500 dark:text-slate-400'
+                  ? 'border-emerald-300 dark:border-emerald-500/60 bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300'
+                  : 'border-slate-300 dark:border-gray-700 bg-slate-100 dark:bg-gray-800 text-slate-600 dark:text-slate-400'
               }`}>
                 {batteryConfig?.batteryAlertsEnabled !== false ? 'GUARD ACTIVE' : 'MUTED'}
               </span>
             </div>
 
             <div className="grid grid-cols-2 gap-3 mb-4">
-              <div className="p-2.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/70/80">
+              <div className="p-2.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/70">
                 <span className="text-[10px] text-slate-500 dark:text-slate-400 block mb-1">Max Charge Cutoff</span>
                 <div className="flex items-center gap-2">
                   <input
@@ -1297,12 +1297,12 @@ export default function Controls() {
                     max="100"
                     value={batteryCutoffInput}
                     onChange={(e) => setBatteryCutoffInput(Number(e.target.value))}
-                    className="w-16 bg-gray-900 border border-gray-700 rounded px-2 py-0.5 text-xs text-white text-center font-mono"
+                    className="w-16 bg-white dark:bg-gray-900 border border-slate-300 dark:border-gray-700 rounded px-2 py-0.5 text-xs text-slate-900 dark:text-white text-center font-mono shadow-inner"
                   />
-                  <span className="text-xs text-emerald-400 font-bold">% cutoff</span>
+                  <span className="text-xs text-emerald-700 dark:text-emerald-400 font-bold">% cutoff</span>
                 </div>
               </div>
-              <div className="p-2.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/70/80">
+              <div className="p-2.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/70">
                 <span className="text-[10px] text-slate-500 dark:text-slate-400 block mb-1">Overheat Temp Alert</span>
                 <div className="flex items-center gap-2">
                   <input
@@ -1311,14 +1311,14 @@ export default function Controls() {
                     max="60"
                     value={batteryTempLimitInput}
                     onChange={(e) => setBatteryTempLimitInput(Number(e.target.value))}
-                    className="w-16 bg-gray-900 border border-gray-700 rounded px-2 py-0.5 text-xs text-white text-center font-mono"
+                    className="w-16 bg-white dark:bg-gray-900 border border-slate-300 dark:border-gray-700 rounded px-2 py-0.5 text-xs text-slate-900 dark:text-white text-center font-mono shadow-inner"
                   />
-                  <span className="text-xs text-amber-400 font-bold">°C alert</span>
+                  <span className="text-xs text-amber-700 dark:text-amber-400 font-bold">°C alert</span>
                 </div>
               </div>
             </div>
 
-            <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 mb-4 bg-slate-50 dark:bg-slate-950/40 p-2.5 rounded-lg border border-slate-200/80 dark:border-slate-800/60 font-mono">
+            <div className="flex items-center justify-between text-xs text-slate-600 dark:text-slate-400 mb-4 bg-slate-50 dark:bg-slate-950/40 p-2.5 rounded-lg border border-slate-200/80 dark:border-slate-800/60 font-mono">
               <span>Status: {activeDevice?.isCharging ? '⚡ Charging' : 'Discharging'}</span>
               <span>Temp: {activeDevice?.temperatureC ? `${activeDevice.temperatureC}°C` : 'Normal'}</span>
               <span>Health: {activeDevice?.health || 'Good'}</span>
@@ -1333,10 +1333,10 @@ export default function Controls() {
                 batteryMaxLevelCutoff: batteryCutoffInput,
                 batteryOverheatTempThreshold: batteryTempLimitInput
               })}
-              className={`flex-1 py-2 px-3 rounded-lg text-xs font-bold transition-all border ${
+              className={`flex-1 py-2 px-3 rounded-lg text-xs font-bold transition-all border cursor-pointer ${
                 batteryConfig?.batteryAlertsEnabled !== false
-                  ? 'border-emerald-500/50 bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30'
-                  : 'border-gray-700 bg-gray-800 text-slate-700 dark:text-slate-300 hover:bg-gray-700'
+                  ? 'border-emerald-300 dark:border-emerald-500/50 bg-emerald-100 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 hover:bg-emerald-200 dark:hover:bg-emerald-500/30'
+                  : 'border-slate-300 dark:border-gray-700 bg-slate-100 hover:bg-slate-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-slate-700 dark:text-slate-300'
               }`}
             >
               {batteryConfig?.batteryAlertsEnabled !== false ? '✓ Battery Protection ON' : 'Turn ON Protection'}
@@ -1348,7 +1348,7 @@ export default function Controls() {
                 batteryMaxLevelCutoff: batteryCutoffInput,
                 batteryOverheatTempThreshold: batteryTempLimitInput
               })}
-              className="py-2 px-3 rounded-lg text-xs font-semibold bg-gray-800 hover:bg-gray-700 border border-gray-700 text-slate-700 dark:text-slate-300"
+              className="py-2 px-3 rounded-lg text-xs font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-gray-800 dark:hover:bg-gray-700 border border-slate-300 dark:border-gray-700 text-slate-700 dark:text-slate-300 cursor-pointer transition-colors"
             >
               Save Settings
             </button>
@@ -1383,7 +1383,7 @@ export default function Controls() {
                 <select
                   value={timelapseIntervalInput}
                   onChange={(e) => setTimelapseIntervalInput(Number(e.target.value))}
-                  className="w-full bg-slate-50 dark:bg-slate-950 border border-gray-700 rounded-lg p-2 text-xs text-white"
+                  className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg p-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none"
                 >
                   <option value={1}>Every 1 Minute</option>
                   <option value={2}>Every 2 Minutes</option>
@@ -1397,7 +1397,7 @@ export default function Controls() {
                 <select
                   value={timelapseFacingInput}
                   onChange={(e) => setTimelapseFacingInput(e.target.value)}
-                  className="w-full bg-slate-50 dark:bg-slate-950 border border-gray-700 rounded-lg p-2 text-xs text-white"
+                  className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg p-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none"
                 >
                   <option value="back">Back Camera</option>
                   <option value="front">Front Camera</option>
@@ -1441,7 +1441,7 @@ export default function Controls() {
                     <button
                       type="button"
                       onClick={() => downloadTimelapsePhoto(latestTimelapse)}
-                      className="px-2 py-0.5 rounded bg-gray-800 hover:bg-gray-700 text-slate-800 dark:text-slate-200 border border-gray-600 text-[10px] font-semibold flex items-center gap-1"
+                      className="px-2 py-0.5 rounded bg-slate-100 hover:bg-slate-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-gray-600 text-[10px] font-semibold flex items-center gap-1"
                       title="Download photo to PC"
                     >
                       <Download className="h-3 w-3" /> Save / Download
@@ -1504,7 +1504,7 @@ export default function Controls() {
             className={`w-full py-2 px-3 rounded-lg text-xs font-bold transition-all border ${
               autoTimelapse?.enabled
                 ? 'border-blue-500/50 bg-blue-500/20 text-blue-300 hover:bg-blue-500/30'
-                : 'border-gray-700 bg-gray-800 text-slate-700 dark:text-slate-300 hover:bg-gray-700'
+                : 'border-slate-300 dark:border-gray-700 bg-slate-100 hover:bg-slate-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-slate-700 dark:text-slate-300'
             }`}
           >
             {autoTimelapse?.enabled ? '⏹ Stop Timelapse Guard' : '▶ Start Auto-Timelapse Guard'}
@@ -1527,7 +1527,7 @@ export default function Controls() {
               <span className={`text-[10px] font-bold px-2 py-0.5 rounded border ${
                 geofence?.enabled
                   ? 'border-amber-500/60 bg-amber-950 text-amber-300'
-                  : 'border-gray-700 bg-gray-800 text-slate-500 dark:text-slate-400'
+                  : 'border-slate-300 dark:border-gray-700 bg-slate-100 dark:bg-gray-800 text-slate-600 dark:text-slate-400'
               }`}>
                 {geofence?.enabled ? 'BOUNDARY ARMED' : 'OFF'}
               </span>
@@ -1541,7 +1541,7 @@ export default function Controls() {
                   value={geofenceNameInput}
                   onChange={(e) => setGeofenceNameInput(e.target.value)}
                   placeholder="e.g. Home, Office"
-                  className="w-full bg-slate-50 dark:bg-slate-950 border border-gray-700 rounded-lg p-2 text-xs text-white"
+                  className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg p-2 text-xs text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none"
                 />
               </div>
               <div>
@@ -1549,7 +1549,7 @@ export default function Controls() {
                 <select
                   value={geofenceRadiusInput}
                   onChange={(e) => setGeofenceRadiusInput(Number(e.target.value))}
-                  className="w-full bg-slate-50 dark:bg-slate-950 border border-gray-700 rounded-lg p-2 text-xs text-white"
+                  className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg p-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none"
                 >
                   <option value={100}>100 meters (Tight)</option>
                   <option value={300}>300 meters (Standard)</option>
@@ -1579,9 +1579,9 @@ export default function Controls() {
                     pushToast('No current location available. Request location first.', 'error');
                   }
                 }}
-                className="w-full py-1.5 px-3 rounded-lg text-xs font-semibold bg-gray-800 hover:bg-gray-700 text-slate-800 dark:text-slate-200 border border-gray-700 transition-colors flex items-center justify-center gap-1.5"
+                className="w-full py-1.5 px-3 rounded-lg text-xs font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-gray-700 transition-colors flex items-center justify-center gap-1.5"
               >
-                <MapPin className="h-3.5 w-3.5 text-amber-400" />
+                <MapPin className="h-3.5 w-3.5 text-amber-500 dark:text-amber-400" />
                 Set Current Phone GPS as Safe Center
               </button>
             </div>
@@ -1597,7 +1597,7 @@ export default function Controls() {
             className={`w-full py-2 px-3 rounded-lg text-xs font-bold transition-all border ${
               geofence?.enabled
                 ? 'border-amber-500/50 bg-amber-500/20 text-amber-300 hover:bg-amber-500/30'
-                : 'border-gray-700 bg-gray-800 text-slate-700 dark:text-slate-300 hover:bg-gray-700'
+                : 'border-slate-300 dark:border-gray-700 bg-slate-100 hover:bg-slate-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-slate-700 dark:text-slate-300'
             }`}
           >
             {geofence?.enabled ? '🛡️ Geofence Active (Click to Disarm)' : 'Arm Geofence Boundary Alert'}
@@ -1620,7 +1620,7 @@ export default function Controls() {
               <span className={`text-[10px] font-bold px-2 py-0.5 rounded border ${
                 autoReply?.enabled
                   ? 'border-cyan-500/60 bg-cyan-950 text-cyan-300'
-                  : 'border-gray-700 bg-gray-800 text-slate-500 dark:text-slate-400'
+                  : 'border-slate-300 dark:border-gray-700 bg-slate-100 dark:bg-gray-800 text-slate-600 dark:text-slate-400'
               }`}>
                 {autoReply?.enabled ? 'AUTO-RESPOND ON' : 'OFF'}
               </span>
@@ -1633,15 +1633,15 @@ export default function Controls() {
                 value={autoReplyMsgInput}
                 onChange={(e) => setAutoReplyMsgInput(e.target.value)}
                 placeholder="Message sent automatically to incoming messages..."
-                className="w-full bg-slate-50 dark:bg-slate-950 border border-gray-700 rounded-lg p-2 text-xs text-white"
+                className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg p-2 text-xs text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none"
               />
             </div>
 
             <div className="flex flex-wrap gap-1.5 mb-4">
               <span className="text-[10px] text-slate-500 dark:text-slate-400 py-0.5">Supported:</span>
-              <span className="px-2 py-0.5 rounded text-[10px] bg-emerald-950 border border-emerald-800 text-emerald-300">WhatsApp</span>
-              <span className="px-2 py-0.5 rounded text-[10px] bg-blue-950 border border-blue-800 text-blue-300">Google Messages</span>
-              <span className="px-2 py-0.5 rounded text-[10px] bg-purple-950 border border-purple-800 text-purple-300">SMS / MMS</span>
+              <span className="px-2 py-0.5 rounded text-[10px] bg-emerald-100 dark:bg-emerald-950 border border-emerald-300 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 font-semibold">WhatsApp</span>
+              <span className="px-2 py-0.5 rounded text-[10px] bg-blue-100 dark:bg-blue-950 border border-blue-300 dark:border-blue-800 text-blue-800 dark:text-blue-300 font-semibold">Google Messages</span>
+              <span className="px-2 py-0.5 rounded text-[10px] bg-purple-100 dark:bg-purple-950 border border-purple-300 dark:border-purple-800 text-purple-800 dark:text-purple-300 font-semibold">SMS / MMS</span>
             </div>
           </div>
 
@@ -1656,7 +1656,7 @@ export default function Controls() {
               className={`flex-1 py-2 px-3 rounded-lg text-xs font-bold transition-all border ${
                 autoReply?.enabled
                   ? 'border-cyan-500/50 bg-cyan-500/20 text-cyan-300 hover:bg-cyan-500/30'
-                  : 'border-gray-700 bg-gray-800 text-slate-700 dark:text-slate-300 hover:bg-gray-700'
+                  : 'border-slate-300 dark:border-gray-700 bg-slate-100 hover:bg-slate-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-slate-700 dark:text-slate-300'
               }`}
             >
               {autoReply?.enabled ? '✓ Auto-Responder Active' : 'Enable Auto-Reply'}
@@ -1668,7 +1668,7 @@ export default function Controls() {
                 message: autoReplyMsgInput,
                 packages: ['com.whatsapp', 'com.google.android.apps.messaging', 'com.android.mms']
               })}
-              className="py-2 px-3 rounded-lg text-xs font-semibold bg-gray-800 hover:bg-gray-700 border border-gray-700 text-slate-700 dark:text-slate-300"
+              className="py-2 px-3 rounded-lg text-xs font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-gray-800 dark:hover:bg-gray-700 border border-slate-300 dark:border-gray-700 text-slate-700 dark:text-slate-300"
             >
               Save Text
             </button>
@@ -1691,7 +1691,7 @@ export default function Controls() {
               <button
                 type="button"
                 onClick={() => requestNetworkUsage()}
-                className="px-2.5 py-1 rounded text-xs font-semibold bg-gray-800 hover:bg-gray-700 text-slate-800 dark:text-slate-200 border border-gray-700 transition-colors"
+                className="px-2.5 py-1 rounded text-xs font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-gray-700 transition-colors"
               >
                 🔄 Refresh
               </button>
@@ -1700,7 +1700,7 @@ export default function Controls() {
             <div className="grid grid-cols-3 gap-2 mb-4 text-center">
               <div className="p-2 bg-slate-50 dark:bg-slate-950 rounded-lg border border-slate-200/80 dark:border-slate-800">
                 <span className="text-[10px] text-slate-500 dark:text-slate-400 block">Total</span>
-                <span className="text-xs font-bold text-white font-mono">
+                <span className="text-xs font-bold text-slate-900 dark:text-white font-mono">
                   {((networkUsage?.summary?.totalBytes || 0) / (1024 * 1024)).toFixed(1)} MB
                 </span>
               </div>
@@ -1760,7 +1760,7 @@ export default function Controls() {
                 <select
                   value={schedCommand}
                   onChange={(e) => setSchedCommand(e.target.value)}
-                  className="w-full bg-slate-50 dark:bg-slate-950 border border-gray-700 rounded-lg p-2 text-xs text-white"
+                  className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg p-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none"
                 >
                   <option value="LOCK_COMMAND">Screen Lock</option>
                   <option value="FIND_PHONE_COMMAND">Loud Alarm</option>
@@ -1773,7 +1773,7 @@ export default function Controls() {
                 <select
                   value={schedMinutes}
                   onChange={(e) => setSchedMinutes(Number(e.target.value))}
-                  className="w-full bg-slate-50 dark:bg-slate-950 border border-gray-700 rounded-lg p-2 text-xs text-white"
+                  className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg p-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none"
                 >
                   <option value={5}>5 Minutes</option>
                   <option value={15}>15 Minutes</option>
@@ -1930,8 +1930,8 @@ export default function Controls() {
               </div>
               <span className={`text-[10px] font-bold px-2 py-0.5 rounded border ${
                 camouflage?.calculatorDisguise
-                  ? 'border-amber-500/60 bg-amber-950 text-amber-300'
-                  : 'border-gray-700 bg-gray-800 text-slate-500 dark:text-slate-400'
+                  ? 'border-amber-300 dark:border-amber-500/60 bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300'
+                  : 'border-slate-300 dark:border-gray-700 bg-slate-100 dark:bg-gray-800 text-slate-600 dark:text-slate-400'
               }`}>
                 {camouflage?.calculatorDisguise ? '🧮 CALCULATOR ACTIVE' : 'STANDARD ICON'}
               </span>
@@ -1952,10 +1952,10 @@ export default function Controls() {
                   onClick={() => updateCamouflage({
                     calculatorDisguise: !camouflage?.calculatorDisguise
                   })}
-                  className={`px-3 py-1 rounded-md text-xs font-bold transition ${
+                  className={`px-3 py-1 rounded-md text-xs font-bold transition cursor-pointer ${
                     camouflage?.calculatorDisguise
-                      ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
-                      : 'bg-gray-800 text-slate-500 dark:text-slate-400 border border-gray-700'
+                      ? 'bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-500/40'
+                      : 'bg-slate-100 hover:bg-slate-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-slate-600 dark:text-slate-400 border border-slate-300 dark:border-gray-700'
                   }`}
                 >
                   {camouflage?.calculatorDisguise ? 'ENABLED' : 'OFF'}
@@ -1972,10 +1972,10 @@ export default function Controls() {
                   onClick={() => updateCamouflage({
                     stealthNotification: camouflage?.stealthNotification === false ? true : false
                   })}
-                  className={`px-3 py-1 rounded-md text-xs font-bold transition ${
+                  className={`px-3 py-1 rounded-md text-xs font-bold transition cursor-pointer ${
                     camouflage?.stealthNotification !== false
-                      ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
-                      : 'bg-gray-800 text-slate-500 dark:text-slate-400 border border-gray-700'
+                      ? 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-500/40'
+                      : 'bg-slate-100 hover:bg-slate-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-slate-600 dark:text-slate-400 border border-slate-300 dark:border-gray-700'
                   }`}
                 >
                   {camouflage?.stealthNotification !== false ? 'INVISIBLE' : 'VISIBLE'}
@@ -1992,10 +1992,10 @@ export default function Controls() {
                   onClick={() => updateCamouflage({
                     antiTamper: camouflage?.antiTamper === false ? true : false
                   })}
-                  className={`px-3 py-1 rounded-md text-xs font-bold transition ${
+                  className={`px-3 py-1 rounded-md text-xs font-bold transition cursor-pointer ${
                     camouflage?.antiTamper !== false
-                      ? 'bg-red-500/20 text-red-300 border border-red-500/40'
-                      : 'bg-gray-800 text-slate-500 dark:text-slate-400 border border-gray-700'
+                      ? 'bg-rose-100 dark:bg-red-500/20 text-rose-800 dark:text-red-300 border border-rose-300 dark:border-red-500/40'
+                      : 'bg-slate-100 hover:bg-slate-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-slate-600 dark:text-slate-400 border border-slate-300 dark:border-gray-700'
                   }`}
                 >
                   {camouflage?.antiTamper !== false ? 'PROTECTED' : 'OFF'}
@@ -2014,7 +2014,7 @@ export default function Controls() {
                     value={disguisePinInput}
                     onChange={(e) => setDisguisePinInput(e.target.value)}
                     placeholder="9211"
-                    className="w-20 bg-gray-900 border border-gray-700 rounded px-2.5 py-1 text-xs text-center text-white font-mono"
+                    className="w-20 bg-white dark:bg-gray-900 border border-slate-300 dark:border-gray-700 rounded px-2.5 py-1 text-xs text-center text-slate-900 dark:text-white font-mono shadow-inner"
                   />
                   <button
                     type="button"
@@ -2026,7 +2026,7 @@ export default function Controls() {
                       updateCamouflage({ ownerPin: disguisePinInput });
                       pushToast('Secret Parent PIN updated on phone!', 'success');
                     }}
-                    className="px-2.5 py-1 rounded bg-amber-600 hover:bg-amber-500 text-black font-bold text-xs shadow"
+                    className="px-2.5 py-1 rounded bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs shadow-xs cursor-pointer transition"
                   >
                     Set PIN
                   </button>
@@ -2043,10 +2043,10 @@ export default function Controls() {
                 stealthNotification: true,
                 antiTamper: true
               })}
-              className={`w-full py-2 px-3 rounded-lg text-xs font-bold transition-all border ${
+              className={`w-full py-2.5 px-3 rounded-xl text-xs font-bold transition-all border cursor-pointer ${
                 camouflage?.calculatorDisguise
-                  ? 'border-amber-500/50 bg-amber-500/20 text-amber-300 hover:bg-amber-500/30'
-                  : 'border-gray-700 bg-gray-800 text-slate-700 dark:text-slate-300 hover:bg-gray-700'
+                  ? 'border-amber-400 bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-amber-500/30'
+                  : 'border-indigo-400/50 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white shadow-md shadow-indigo-500/20'
               }`}
             >
               {camouflage?.calculatorDisguise ? '✓ Full Camouflage Active' : '🧮 Activate iOS Calculator Camouflage'}
@@ -2059,7 +2059,7 @@ export default function Controls() {
                   sendQuickSetting('pin_widget');
                   pushToast('Clock Widget Pinning request sent to phone!', 'info');
                 }}
-                className="py-1.5 px-2.5 rounded-lg border border-gray-700 bg-gray-800/80 hover:bg-gray-700 text-cyan-300 text-[11px] font-semibold transition flex items-center justify-center gap-1.5"
+                className="py-2 px-2.5 rounded-lg border border-cyan-200 dark:border-gray-700 bg-cyan-50 dark:bg-gray-800/80 hover:bg-cyan-100 dark:hover:bg-gray-700 text-cyan-800 dark:text-cyan-300 text-[11px] font-semibold transition flex items-center justify-center gap-1.5 cursor-pointer"
                 title="Send 1-tap request to add Live Clock Widget to phone home screen"
               >
                 <span>📌 Pin Clock Widget</span>
@@ -2071,7 +2071,7 @@ export default function Controls() {
                   sendQuickSetting('notification_settings');
                   pushToast('Opened Notification Settings on phone', 'info');
                 }}
-                className="py-1.5 px-2.5 rounded-lg border border-gray-700 bg-gray-800/80 hover:bg-gray-700 text-amber-300 text-[11px] font-semibold transition flex items-center justify-center gap-1.5"
+                className="py-2 px-2.5 rounded-lg border border-amber-200 dark:border-gray-700 bg-amber-50 dark:bg-gray-800/80 hover:bg-amber-100 dark:hover:bg-gray-700 text-amber-800 dark:text-amber-300 text-[11px] font-semibold transition flex items-center justify-center gap-1.5 cursor-pointer"
                 title="Open app notification settings on phone to silence or hide"
               >
                 <span>🔔 Mute/Hide Notification</span>
@@ -2084,7 +2084,7 @@ export default function Controls() {
                 sendQuickSetting('home_settings');
                 pushToast('Opened Home Launcher Settings on phone', 'info');
               }}
-              className="w-full py-1.5 px-2.5 rounded-lg border border-cyan-500/40 bg-cyan-950/20 hover:bg-cyan-900/30 text-cyan-300 text-[11px] font-semibold transition flex items-center justify-center gap-1.5 mt-1"
+              className="w-full py-2 px-2.5 rounded-lg border border-slate-300 dark:border-cyan-500/40 bg-slate-100 dark:bg-cyan-950/20 hover:bg-slate-200 dark:hover:bg-cyan-900/30 text-slate-700 dark:text-cyan-300 text-[11px] font-semibold transition flex items-center justify-center gap-1.5 mt-1 cursor-pointer"
               title="Open phone settings to set Pixel Safe Launcher as default Home"
             >
               <span>🏠 Set Pixel Safe Launcher as Default Home</span>
@@ -2122,15 +2122,19 @@ export default function Controls() {
                 onClick={() => sendQuickSetting('wifi', { enable: !quickSettings?.wifiEnabled })}
                 className={`p-2.5 rounded-lg border text-left flex flex-col gap-1 transition ${
                   quickSettings?.wifiEnabled
-                    ? 'border-cyan-500/40 bg-cyan-950/20 text-cyan-300'
-                    : 'border-slate-200/80 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-950/60 text-slate-700 dark:text-slate-300 hover:border-gray-700'
+                    ? 'border-cyan-500/40 bg-cyan-500/10 dark:bg-cyan-950/20 text-cyan-700 dark:text-cyan-300'
+                    : 'border-slate-200/80 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-950/60 text-slate-700 dark:text-slate-300 hover:border-cyan-400/40'
                 }`}
               >
                 <div className="flex items-center justify-between">
                   <span className="flex items-center gap-1.5 text-xs font-semibold">
-                    <Wifi className="h-3.5 w-3.5 text-cyan-400" /> Wi-Fi
+                    <Wifi className="h-3.5 w-3.5 text-cyan-500 dark:text-cyan-400" /> Wi-Fi
                   </span>
-                  <span className="text-[10px] font-mono uppercase px-1.5 py-0.5 rounded bg-black/40">
+                  <span className={`text-[10px] font-mono uppercase px-1.5 py-0.5 rounded font-bold ${
+                    quickSettings?.wifiEnabled
+                      ? 'bg-cyan-100 dark:bg-cyan-950/80 text-cyan-800 dark:text-cyan-300 border border-cyan-200 dark:border-cyan-800'
+                      : 'bg-slate-200/80 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
+                  }`}>
                     {quickSettings?.wifiEnabled ? 'ON' : 'OFF'}
                   </span>
                 </div>
@@ -2143,15 +2147,19 @@ export default function Controls() {
                 onClick={() => sendQuickSetting('bluetooth', { enable: !quickSettings?.bluetoothEnabled })}
                 className={`p-2.5 rounded-lg border text-left flex flex-col gap-1 transition ${
                   quickSettings?.bluetoothEnabled
-                    ? 'border-indigo-500/40 bg-indigo-950/20 text-indigo-300'
-                    : 'border-slate-200/80 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-950/60 text-slate-700 dark:text-slate-300 hover:border-gray-700'
+                    ? 'border-indigo-500/40 bg-indigo-500/10 dark:bg-indigo-950/20 text-indigo-700 dark:text-indigo-300'
+                    : 'border-slate-200/80 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-950/60 text-slate-700 dark:text-slate-300 hover:border-indigo-400/40'
                 }`}
               >
                 <div className="flex items-center justify-between">
                   <span className="flex items-center gap-1.5 text-xs font-semibold">
-                    <Radio className="h-3.5 w-3.5 text-indigo-400" /> Bluetooth
+                    <Radio className="h-3.5 w-3.5 text-indigo-500 dark:text-indigo-400" /> Bluetooth
                   </span>
-                  <span className="text-[10px] font-mono uppercase px-1.5 py-0.5 rounded bg-black/40">
+                  <span className={`text-[10px] font-mono uppercase px-1.5 py-0.5 rounded font-bold ${
+                    quickSettings?.bluetoothEnabled
+                      ? 'bg-indigo-100 dark:bg-indigo-950/80 text-indigo-800 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800'
+                      : 'bg-slate-200/80 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
+                  }`}>
                     {quickSettings?.bluetoothEnabled ? 'ON' : 'OFF'}
                   </span>
                 </div>
@@ -2164,15 +2172,19 @@ export default function Controls() {
                 onClick={() => sendQuickSetting('hotspot', { enable: !quickSettings?.hotspotEnabled })}
                 className={`p-2.5 rounded-lg border text-left flex flex-col gap-1 transition ${
                   quickSettings?.hotspotEnabled
-                    ? 'border-amber-500/40 bg-amber-950/20 text-amber-300'
-                    : 'border-slate-200/80 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-950/60 text-slate-700 dark:text-slate-300 hover:border-amber-500/40 hover:bg-amber-950/20 hover:text-amber-300'
+                    ? 'border-amber-500/40 bg-amber-500/10 dark:bg-amber-950/20 text-amber-700 dark:text-amber-300'
+                    : 'border-slate-200/80 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-950/60 text-slate-700 dark:text-slate-300 hover:border-amber-400/40'
                 }`}
               >
                 <div className="flex items-center justify-between">
                   <span className="flex items-center gap-1.5 text-xs font-semibold">
-                    <Signal className="h-3.5 w-3.5 text-amber-400" /> Hotspot
+                    <Signal className="h-3.5 w-3.5 text-amber-500 dark:text-amber-400" /> Hotspot
                   </span>
-                  <span className="text-[10px] font-mono uppercase px-1.5 py-0.5 rounded bg-black/40">
+                  <span className={`text-[10px] font-mono uppercase px-1.5 py-0.5 rounded font-bold ${
+                    quickSettings?.hotspotEnabled
+                      ? 'bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800'
+                      : 'bg-slate-200/80 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
+                  }`}>
                     {quickSettings?.hotspotEnabled ? 'ON' : 'OFF'}
                   </span>
                 </div>
@@ -2185,15 +2197,19 @@ export default function Controls() {
                 onClick={() => sendQuickSetting('auto_rotate')}
                 className={`p-2.5 rounded-lg border text-left flex flex-col gap-1 transition ${
                   quickSettings?.autoRotate
-                    ? 'border-emerald-500/40 bg-emerald-950/20 text-emerald-300'
-                    : 'border-slate-200/80 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-950/60 text-slate-700 dark:text-slate-300 hover:border-gray-700'
+                    ? 'border-emerald-500/40 bg-emerald-500/10 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-300'
+                    : 'border-slate-200/80 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-950/60 text-slate-700 dark:text-slate-300 hover:border-emerald-400/40'
                 }`}
               >
                 <div className="flex items-center justify-between">
                   <span className="flex items-center gap-1.5 text-xs font-semibold">
-                    <RotateCw className="h-3.5 w-3.5 text-emerald-400" /> Auto-Rotate
+                    <RotateCw className="h-3.5 w-3.5 text-emerald-500 dark:text-emerald-400" /> Auto-Rotate
                   </span>
-                  <span className="text-[10px] font-mono uppercase px-1.5 py-0.5 rounded bg-black/40">
+                  <span className={`text-[10px] font-mono uppercase px-1.5 py-0.5 rounded font-bold ${
+                    quickSettings?.autoRotate
+                      ? 'bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800'
+                      : 'bg-slate-200/80 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
+                  }`}>
                     {quickSettings?.autoRotate ? 'ON' : 'LOCKED'}
                   </span>
                 </div>
@@ -2206,15 +2222,19 @@ export default function Controls() {
                 onClick={() => sendQuickSetting('torch')}
                 className={`p-2.5 rounded-lg border text-left flex flex-col gap-1 transition ${
                   quickSettings?.torchOn || torchOn
-                    ? 'border-yellow-500/40 bg-yellow-950/20 text-yellow-300'
-                    : 'border-slate-200/80 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-950/60 text-slate-700 dark:text-slate-300 hover:border-gray-700'
+                    ? 'border-amber-500/40 bg-amber-500/10 dark:bg-yellow-950/20 text-amber-700 dark:text-yellow-300'
+                    : 'border-slate-200/80 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-950/60 text-slate-700 dark:text-slate-300 hover:border-amber-400/40'
                 }`}
               >
                 <div className="flex items-center justify-between">
                   <span className="flex items-center gap-1.5 text-xs font-semibold">
-                    <Zap className="h-3.5 w-3.5 text-yellow-400" /> Flashlight
+                    <Zap className="h-3.5 w-3.5 text-amber-500 dark:text-yellow-400" /> Flashlight
                   </span>
-                  <span className="text-[10px] font-mono uppercase px-1.5 py-0.5 rounded bg-black/40">
+                  <span className={`text-[10px] font-mono uppercase px-1.5 py-0.5 rounded font-bold ${
+                    quickSettings?.torchOn || torchOn
+                      ? 'bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800'
+                      : 'bg-slate-200/80 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
+                  }`}>
                     {quickSettings?.torchOn || torchOn ? 'ON' : 'OFF'}
                   </span>
                 </div>
@@ -2227,15 +2247,19 @@ export default function Controls() {
                 onClick={() => sendQuickSetting('dnd')}
                 className={`p-2.5 rounded-lg border text-left flex flex-col gap-1 transition ${
                   quickSettings?.dndActive || dndStatus
-                    ? 'border-purple-500/40 bg-purple-950/20 text-purple-300'
-                    : 'border-slate-200/80 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-950/60 text-slate-700 dark:text-slate-300 hover:border-gray-700'
+                    ? 'border-purple-500/40 bg-purple-500/10 dark:bg-purple-950/20 text-purple-700 dark:text-purple-300'
+                    : 'border-slate-200/80 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-950/60 text-slate-700 dark:text-slate-300 hover:border-purple-400/40'
                 }`}
               >
                 <div className="flex items-center justify-between">
                   <span className="flex items-center gap-1.5 text-xs font-semibold">
-                    <BellOff className="h-3.5 w-3.5 text-purple-400" /> DND Mode
+                    <BellOff className="h-3.5 w-3.5 text-purple-500 dark:text-purple-400" /> DND Mode
                   </span>
-                  <span className="text-[10px] font-mono uppercase px-1.5 py-0.5 rounded bg-black/40">
+                  <span className={`text-[10px] font-mono uppercase px-1.5 py-0.5 rounded font-bold ${
+                    quickSettings?.dndActive || dndStatus
+                      ? 'bg-purple-100 dark:bg-purple-950/80 text-purple-800 dark:text-purple-300 border border-purple-200 dark:border-purple-800'
+                      : 'bg-slate-200/80 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
+                  }`}>
                     {quickSettings?.dndActive || dndStatus ? 'ON' : 'OFF'}
                   </span>
                 </div>
@@ -2248,33 +2272,33 @@ export default function Controls() {
               <button
                 type="button"
                 onClick={() => sendQuickSetting('shade')}
-                className="py-1.5 px-2.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/70/70 hover:bg-gray-800 text-slate-700 dark:text-slate-300 text-[11px] font-medium transition flex items-center justify-center gap-1.5"
+                className="py-1.5 px-2.5 rounded-lg border border-slate-300 dark:border-slate-800 bg-slate-100 hover:bg-slate-200 dark:bg-slate-950/70 dark:hover:bg-gray-800 text-slate-700 dark:text-slate-300 text-[11px] font-medium transition flex items-center justify-center gap-1.5 cursor-pointer"
                 title="Pull down the Android Quick Settings tile shade"
               >
-                <Sliders className="h-3 w-3 text-cyan-400" /> Pull Down Tiles
+                <Sliders className="h-3 w-3 text-cyan-600 dark:text-cyan-400" /> Pull Down Tiles
               </button>
               <button
                 type="button"
                 onClick={() => sendQuickSetting('notifications_shade')}
-                className="py-1.5 px-2.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/70/70 hover:bg-gray-800 text-slate-700 dark:text-slate-300 text-[11px] font-medium transition flex items-center justify-center gap-1.5"
+                className="py-1.5 px-2.5 rounded-lg border border-slate-300 dark:border-slate-800 bg-slate-100 hover:bg-slate-200 dark:bg-slate-950/70 dark:hover:bg-gray-800 text-slate-700 dark:text-slate-300 text-[11px] font-medium transition flex items-center justify-center gap-1.5 cursor-pointer"
                 title="Pull down notification shade"
               >
-                <Bell className="h-3 w-3 text-emerald-400" /> Pull Notifications
+                <Bell className="h-3 w-3 text-emerald-600 dark:text-emerald-400" /> Pull Notifications
               </button>
             </div>
           </div>
 
           {/* Ringer Quick Switch */}
           <div className="mt-3 pt-3 border-t border-slate-200/80 dark:border-slate-800/80 flex items-center justify-between">
-            <span className="text-[11px] text-slate-500 dark:text-slate-400">Ringer Profile:</span>
+            <span className="text-[11px] font-medium text-slate-600 dark:text-slate-400">Ringer Profile:</span>
             <div className="flex gap-1.5">
               <button
                 type="button"
                 onClick={() => sendQuickSetting('ringer_normal')}
-                className={`px-2 py-0.5 rounded text-[10px] font-bold transition border ${
+                className={`px-2.5 py-1 rounded text-[10px] font-bold transition border cursor-pointer ${
                   quickSettings?.ringerMode === 'normal' || volumeInfo?.ringerMode?.toLowerCase() === 'normal'
-                    ? 'border-emerald-500/50 bg-emerald-500/20 text-emerald-300'
-                    : 'border-slate-200/80 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:text-slate-200'
+                    ? 'border-emerald-300 dark:border-emerald-500/50 bg-emerald-100 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300'
+                    : 'border-slate-300 dark:border-slate-800 bg-slate-100 hover:bg-slate-200 dark:bg-slate-950 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
                 }`}
               >
                 Normal
@@ -2282,10 +2306,10 @@ export default function Controls() {
               <button
                 type="button"
                 onClick={() => sendQuickSetting('ringer_vibrate')}
-                className={`px-2 py-0.5 rounded text-[10px] font-bold transition border ${
+                className={`px-2.5 py-1 rounded text-[10px] font-bold transition border cursor-pointer ${
                   quickSettings?.ringerMode === 'vibrate' || volumeInfo?.ringerMode?.toLowerCase() === 'vibrate'
-                    ? 'border-amber-500/50 bg-amber-500/20 text-amber-300'
-                    : 'border-slate-200/80 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:text-slate-200'
+                    ? 'border-amber-300 dark:border-amber-500/50 bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300'
+                    : 'border-slate-300 dark:border-slate-800 bg-slate-100 hover:bg-slate-200 dark:bg-slate-950 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
                 }`}
               >
                 Vibrate
@@ -2293,10 +2317,10 @@ export default function Controls() {
               <button
                 type="button"
                 onClick={() => sendQuickSetting('ringer_silent')}
-                className={`px-2 py-0.5 rounded text-[10px] font-bold transition border ${
+                className={`px-2.5 py-1 rounded text-[10px] font-bold transition border cursor-pointer ${
                   quickSettings?.ringerMode === 'silent' || volumeInfo?.ringerMode?.toLowerCase() === 'silent'
-                    ? 'border-rose-500/50 bg-rose-500/20 text-rose-300'
-                    : 'border-slate-200/80 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:text-slate-200'
+                    ? 'border-rose-300 dark:border-rose-500/50 bg-rose-100 dark:bg-rose-500/20 text-rose-800 dark:text-rose-300'
+                    : 'border-slate-300 dark:border-slate-800 bg-slate-100 hover:bg-slate-200 dark:bg-slate-950 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
                 }`}
               >
                 Silent
@@ -2984,10 +3008,10 @@ export default function Controls() {
                 <Lock className="h-4 w-4 text-teal-400" /> Remote Screen Lock
               </h3>
               <span
-                className={`text-[11px] font-medium px-2 py-0.5 rounded border ${
+                className={`text-[11px] font-semibold px-2 py-0.5 rounded border ${
                   deviceInfo?.adminActive
-                    ? 'bg-emerald-950/60 border-emerald-800 text-emerald-400'
-                    : 'bg-amber-950/60 border-amber-800 text-amber-300'
+                    ? 'bg-emerald-100 dark:bg-emerald-950/60 border-emerald-300 dark:border-emerald-800 text-emerald-800 dark:text-emerald-400'
+                    : 'bg-amber-100 dark:bg-amber-950/60 border-amber-300 dark:border-amber-800 text-amber-800 dark:text-amber-300'
                 }`}
               >
                 {deviceInfo?.adminActive ? 'Admin Active' : 'Admin Setup Req'}
@@ -3000,9 +3024,9 @@ export default function Controls() {
 
             <div className="rounded-lg bg-slate-50 dark:bg-slate-950 p-3 border border-slate-200/80 dark:border-slate-800/80 text-xs text-slate-500 dark:text-slate-400 space-y-1.5">
               <div className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300 font-medium">
-                <Shield className="h-3.5 w-3.5 text-teal-400" /> Device Admin Security
+                <Shield className="h-3.5 w-3.5 text-teal-600 dark:text-teal-400" /> Device Admin Security
               </div>
-              <p className="text-[11px] text-gray-500 leading-relaxed">
+              <p className="text-[11px] text-slate-500 dark:text-gray-500 leading-relaxed">
                 Requires the app to be activated as a Device Administrator on phone. If not active, tap &quot;Enable Remote Screen Lock&quot; in the mobile app.
               </p>
             </div>
@@ -3015,7 +3039,7 @@ export default function Controls() {
                   lockDevice();
                 }
               }}
-              className="w-full flex items-center justify-center gap-2 rounded-lg bg-red-950/80 border border-red-800/80 px-4 py-2.5 text-sm font-medium text-red-200 hover:bg-red-900 transition-colors shadow-md"
+              className="w-full flex items-center justify-center gap-2 rounded-lg bg-rose-50 hover:bg-rose-100 dark:bg-red-950/80 dark:hover:bg-red-900 border border-rose-300 dark:border-red-800/80 px-4 py-2.5 text-sm font-semibold text-rose-800 dark:text-red-200 transition-colors shadow-xs cursor-pointer"
             >
               <Lock className="h-4 w-4" /> Lock Device Screen Now
             </button>
@@ -3027,9 +3051,9 @@ export default function Controls() {
           <div>
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2 text-sm">
-                <PhoneCall className="h-4 w-4 text-emerald-400" /> Phone Calls & Dialer
+                <PhoneCall className="h-4 w-4 text-emerald-600 dark:text-emerald-400" /> Phone Calls &amp; Dialer
               </h3>
-              <span className="text-xs font-mono text-emerald-400 bg-emerald-950/60 border border-emerald-800 px-2 py-0.5 rounded">
+              <span className="text-xs font-mono text-emerald-800 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-800 px-2 py-0.5 rounded font-semibold">
                 Live Telecom
               </span>
             </div>
@@ -3069,12 +3093,12 @@ export default function Controls() {
               </div>
             ) : (
               <div className="mb-3 rounded-lg bg-slate-50 dark:bg-slate-950 p-2.5 border border-slate-200/80 dark:border-slate-800/80 text-xs text-slate-500 dark:text-slate-400 flex items-center justify-between">
-                <span>Call Actions:</span>
+                <span className="font-medium text-slate-600 dark:text-slate-400">Call Actions:</span>
                 <div className="flex gap-1.5">
                   <button
                     type="button"
                     onClick={() => answerCall(true)}
-                    className="px-2.5 py-1 bg-emerald-950 border border-emerald-700 text-emerald-300 hover:bg-emerald-900 rounded text-xs font-medium cursor-pointer"
+                    className="px-2.5 py-1 bg-emerald-100 hover:bg-emerald-200 dark:bg-emerald-950 dark:hover:bg-emerald-900 border border-emerald-300 dark:border-emerald-700 text-emerald-800 dark:text-emerald-300 rounded text-xs font-semibold cursor-pointer transition-colors"
                     title="Accept ringing call in speaker mode"
                   >
                     📞 Answer
@@ -3082,7 +3106,7 @@ export default function Controls() {
                   <button
                     type="button"
                     onClick={() => declineCall()}
-                    className="px-2.5 py-1 bg-rose-950 border border-rose-800 text-rose-300 hover:bg-rose-900 rounded text-xs font-medium cursor-pointer"
+                    className="px-2.5 py-1 bg-rose-100 hover:bg-rose-200 dark:bg-rose-950 dark:hover:bg-rose-900 border border-rose-300 dark:border-rose-800 text-rose-800 dark:text-rose-300 rounded text-xs font-semibold cursor-pointer transition-colors"
                     title="Hang up or reject active call"
                   >
                     ❌ Decline
@@ -3130,13 +3154,13 @@ export default function Controls() {
                 }
                 pushToast('Opening Call Recordings Vault...', 'info');
               }}
-              className="w-full py-2 px-3 rounded-lg bg-teal-500/10 hover:bg-teal-500/20 border border-teal-500/30 text-teal-300 text-xs font-semibold flex items-center justify-center gap-2 transition-colors cursor-pointer"
+              className="w-full py-2 px-3 rounded-lg bg-teal-50 hover:bg-teal-100 dark:bg-teal-500/10 dark:hover:bg-teal-500/20 border border-teal-300 dark:border-teal-500/30 text-teal-800 dark:text-teal-300 text-xs font-semibold flex items-center justify-center gap-2 transition-colors cursor-pointer"
             >
-              <Mic className="h-3.5 w-3.5 text-teal-400" /> Open Call Recordings Vault
+              <Mic className="h-3.5 w-3.5 text-teal-600 dark:text-teal-400" /> Open Call Recordings Vault
             </button>
           </div>
 
-          <div className="mt-4 pt-3 border-t border-slate-200/80 dark:border-slate-800/80 text-[10px] text-gray-500">
+          <div className="mt-4 pt-3 border-t border-slate-200/80 dark:border-slate-800/80 text-[10px] text-slate-500 dark:text-gray-500">
             Telecom permission active · Speaker mode automatically enabled on answer
           </div>
         </div>
@@ -3144,19 +3168,19 @@ export default function Controls() {
         {/* 7. FLASHLIGHT (TORCH) */}
         <div className={`rounded-2xl border p-5 shadow-xl flex flex-col justify-between transition-colors ${isCardVisible("hardware", ["flashlight", "torch", "flash", "light"]) ? "" : "hidden"} ${
           torchOn
-            ? 'border-amber-500/60 bg-amber-950/20 shadow-amber-950/20'
-            : 'border-slate-200/80 dark:border-slate-800 bg-gray-900'
+            ? 'border-amber-500/60 bg-amber-500/10 dark:bg-amber-950/20 shadow-amber-500/10'
+            : 'border-slate-200/90 dark:border-white/10 bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl'
         }`}>
           <div>
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2 text-sm">
-                <Zap className={`h-4 w-4 ${torchOn ? 'text-amber-400' : 'text-teal-400'}`} /> Flashlight (Torch)
+                <Zap className={`h-4 w-4 ${torchOn ? 'text-amber-500 dark:text-amber-400' : 'text-teal-600 dark:text-teal-400'}`} /> Flashlight (Torch)
               </h3>
               <span
-                className={`text-[11px] font-medium px-2 py-0.5 rounded border ${
+                className={`text-[11px] font-semibold px-2 py-0.5 rounded border ${
                   torchOn
-                    ? 'bg-amber-950/80 border-amber-600 text-amber-300'
-                    : 'bg-slate-50 dark:bg-slate-950 border-slate-200/80 dark:border-slate-800 text-slate-500 dark:text-slate-400'
+                    ? 'bg-amber-100 dark:bg-amber-950/80 border-amber-300 dark:border-amber-600 text-amber-800 dark:text-amber-300'
+                    : 'bg-slate-100 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400'
                 }`}
               >
                 {torchOn ? 'LIGHT ON' : 'OFF'}
@@ -3171,8 +3195,8 @@ export default function Controls() {
               <div
                 className={`h-16 w-16 rounded-full flex items-center justify-center border-2 transition-all ${
                   torchOn
-                    ? 'border-amber-400 bg-amber-500/20 shadow-[0_0_25px_rgba(245,158,11,0.5)] text-amber-300 scale-105'
-                    : 'border-gray-700 bg-slate-50 dark:bg-slate-950 text-gray-600'
+                    ? 'border-amber-400 bg-amber-500/20 shadow-[0_0_25px_rgba(245,158,11,0.5)] text-amber-500 dark:text-amber-300 scale-105'
+                    : 'border-slate-300 dark:border-slate-800 bg-slate-100 dark:bg-slate-950 text-slate-400 dark:text-gray-600'
                 }`}
               >
                 <Zap className={`h-8 w-8 ${torchOn ? 'animate-pulse' : ''}`} />
@@ -3185,8 +3209,8 @@ export default function Controls() {
               onClick={() => toggleTorch(!torchOn)}
               className={`w-full flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-xs font-semibold transition-all cursor-pointer ${
                 torchOn
-                  ? 'bg-amber-500 text-black hover:bg-amber-400 shadow-md shadow-amber-950'
-                  : 'bg-gray-800 text-slate-800 dark:text-slate-200 hover:bg-gray-700 border border-gray-700'
+                  ? 'bg-amber-500 text-slate-950 hover:bg-amber-400 shadow-md shadow-amber-500/30'
+                  : 'bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-700'
               }`}
             >
               <Zap className="h-4 w-4" />
@@ -3197,7 +3221,7 @@ export default function Controls() {
               className={`w-full flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-xs font-semibold transition-all cursor-pointer ${
                 strobeActive
                   ? 'bg-rose-600 text-white hover:bg-rose-500 shadow-lg shadow-rose-950 animate-pulse'
-                  : 'bg-slate-50 dark:bg-slate-950 text-amber-300 hover:bg-amber-950/40 border border-amber-800/60'
+                  : 'bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 dark:bg-slate-950 dark:hover:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800/60'
               }`}
             >
               <Activity className="h-4 w-4" />
@@ -3407,7 +3431,7 @@ export default function Controls() {
           </div>
           <button
             onClick={() => refreshDeviceInfo()}
-            className="flex items-center gap-1.5 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200/80 dark:border-slate-800 px-3 py-1.5 text-xs text-slate-700 dark:text-slate-300 hover:bg-gray-800 hover:text-white transition-colors"
+            className="flex items-center gap-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-950 dark:hover:bg-slate-800 border border-slate-300 dark:border-slate-800 px-3 py-1.5 text-xs text-slate-700 dark:text-slate-300 transition-colors cursor-pointer"
           >
             <RefreshCw className="h-3.5 w-3.5" /> Refresh Info
           </button>
@@ -3551,7 +3575,7 @@ export default function Controls() {
           </div>
           <button
             onClick={() => refreshWifiInfo()}
-            className="flex items-center gap-1.5 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200/80 dark:border-slate-800 px-3 py-1.5 text-xs text-slate-700 dark:text-slate-300 hover:bg-gray-800 hover:text-white transition-colors"
+            className="flex items-center gap-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-950 dark:hover:bg-slate-800 border border-slate-300 dark:border-slate-800 px-3 py-1.5 text-xs text-slate-700 dark:text-slate-300 transition-colors cursor-pointer"
           >
             <RefreshCw className="h-3.5 w-3.5" /> Scan Wi-Fi
           </button>
@@ -3561,11 +3585,11 @@ export default function Controls() {
           <div className="space-y-4">
             <div className="bg-slate-50 dark:bg-slate-950/70 p-4 rounded-xl border border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-4">
               <div className="flex items-center gap-3">
-                <div className={`p-2.5 rounded-full ${wifiInfo.connected ? 'bg-teal-950 text-teal-400 border border-teal-800' : 'bg-gray-900 text-gray-500'}`}>
+                <div className={`p-2.5 rounded-full ${wifiInfo.connected ? 'bg-teal-100 dark:bg-teal-950 text-teal-700 dark:text-teal-400 border border-teal-300 dark:border-teal-800' : 'bg-slate-200 dark:bg-gray-900 text-slate-500 dark:text-gray-500'}`}>
                   <Wifi className="h-5 w-5" />
                 </div>
                 <div>
-                  <h4 className="font-semibold text-sm text-gray-100">{wifiInfo.ssid || 'Disconnected'}</h4>
+                  <h4 className="font-semibold text-sm text-slate-900 dark:text-gray-100">{wifiInfo.ssid || 'Disconnected'}</h4>
                   <p className="text-xs text-slate-500 dark:text-slate-400 font-mono mt-0.5">
                     BSSID: {wifiInfo.bssid || 'N/A'} · IP: {wifiInfo.ipAddress || '0.0.0.0'}
                   </p>
@@ -3626,7 +3650,7 @@ export default function Controls() {
           </div>
           <button
             onClick={() => refreshInstalledApps()}
-            className="flex items-center gap-1.5 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200/80 dark:border-slate-800 px-3 py-1.5 text-xs text-slate-700 dark:text-slate-300 hover:bg-gray-800 hover:text-white transition-colors"
+            className="flex items-center gap-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-950 dark:hover:bg-slate-800 border border-slate-300 dark:border-slate-800 px-3 py-1.5 text-xs text-slate-700 dark:text-slate-300 transition-colors cursor-pointer"
           >
             <RefreshCw className="h-3.5 w-3.5" /> Refresh Apps
           </button>
@@ -3664,8 +3688,8 @@ export default function Controls() {
             </button>
             <button
               onClick={() => setAppFilter('all')}
-              className={`px-3 py-1 rounded font-medium transition-colors ${
-                appFilter === 'all' ? 'bg-teal-600 text-white' : 'text-slate-500 dark:text-slate-400 hover:text-white'
+              className={`px-3 py-1 rounded font-medium transition-colors cursor-pointer ${
+                appFilter === 'all' ? 'bg-teal-600 text-white shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
               All ({installedApps?.length || 0})
@@ -3675,7 +3699,7 @@ export default function Controls() {
 
         {/* Apps List */}
         {filteredApps.length === 0 ? (
-          <div className="py-8 text-center text-gray-500 text-xs">
+          <div className="py-8 text-center text-slate-500 dark:text-gray-500 text-xs">
             {installedApps?.length === 0
               ? 'Click "Refresh Apps" to load the installed applications from phone.'
               : 'No applications match your filter.'}
@@ -3689,31 +3713,31 @@ export default function Controls() {
                   setInspectApp(app);
                   fetchAppPerms(app.packageName);
                 }}
-                className="group cursor-pointer rounded-lg border border-slate-200/80 dark:border-slate-800/80 bg-slate-50 dark:bg-slate-950 p-3 hover:border-teal-500/60 hover:bg-gray-900/80 transition-all text-xs flex flex-col justify-between"
+                className="group cursor-pointer rounded-xl border border-slate-200/90 dark:border-slate-800/80 bg-white/80 dark:bg-slate-950/80 p-3 hover:border-teal-500/60 hover:bg-teal-50/20 dark:hover:bg-slate-900/60 shadow-xs transition-all text-xs flex flex-col justify-between"
               >
                 <div>
                   <div className="flex items-center justify-between mb-1">
-                    <span className="font-semibold text-slate-800 dark:text-slate-200 group-hover:text-teal-300 truncate">
+                    <span className="font-semibold text-slate-900 dark:text-slate-100 group-hover:text-teal-600 dark:group-hover:text-teal-300 truncate">
                       {app.name}
                     </span>
                     {app.isSystem && (
-                      <span className="text-[9px] bg-gray-900 border border-gray-700 text-slate-500 dark:text-slate-400 px-1.5 py-0.5 rounded">
+                      <span className="text-[9px] bg-slate-100 dark:bg-gray-900 border border-slate-200 dark:border-gray-700 text-slate-600 dark:text-slate-400 px-1.5 py-0.5 rounded font-medium">
                         System
                       </span>
                     )}
                   </div>
-                  <p className="font-mono text-[10px] text-gray-500 truncate">{app.packageName}</p>
+                  <p className="font-mono text-[10px] text-slate-500 dark:text-slate-400 truncate">{app.packageName}</p>
                 </div>
-                <div className="flex justify-between items-center text-[10px] text-gray-500 mt-2 pt-2 border-t border-gray-900">
+                <div className="flex justify-between items-center text-[10px] text-slate-500 dark:text-slate-400 mt-2.5 pt-2 border-t border-slate-200/80 dark:border-slate-800">
                   <span>v{app.versionName || app.versionCode}</span>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1.5">
                     <button
                       type="button"
                       onClick={(e) => {
                         e.stopPropagation();
                         launchRemoteApp(app.packageName);
                       }}
-                      className="px-2 py-0.5 rounded bg-teal-950 border border-teal-800 text-teal-300 hover:bg-teal-900 transition-colors flex items-center gap-1 text-[10px]"
+                      className="px-2 py-0.5 rounded bg-teal-50 hover:bg-teal-100 dark:bg-teal-950/80 dark:hover:bg-teal-900 border border-teal-300 dark:border-teal-800 text-teal-800 dark:text-teal-300 transition-colors flex items-center gap-1 text-[10px] font-semibold cursor-pointer"
                       title="Launch app on phone"
                     >
                       <Play className="h-2.5 w-2.5 fill-current" /> Launch
@@ -3727,13 +3751,13 @@ export default function Controls() {
                             uninstallApp(app.packageName);
                           }
                         }}
-                        className="px-2 py-0.5 rounded bg-rose-950 border border-rose-800 text-rose-300 hover:bg-rose-900 transition-colors flex items-center gap-1 text-[10px]"
+                        className="px-2 py-0.5 rounded bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/80 dark:hover:bg-rose-900 border border-rose-300 dark:border-rose-800 text-rose-800 dark:text-rose-300 transition-colors flex items-center gap-1 text-[10px] font-semibold cursor-pointer"
                         title="Uninstall this app from device"
                       >
                         <Trash2 className="h-2.5 w-2.5" /> Uninstall
                       </button>
                     )}
-                    <span className="text-teal-500 group-hover:underline flex items-center gap-1">
+                    <span className="text-teal-600 dark:text-teal-400 group-hover:underline flex items-center gap-0.5 font-medium ml-0.5">
                       <Shield className="h-3 w-3" /> Permissions
                     </span>
                   </div>
@@ -3745,17 +3769,17 @@ export default function Controls() {
       </div>
 
       {/* Live Listen (Continuous Real-Time Audio Stream) */}
-      <div className={`rounded-2xl border p-5 shadow-xl backdrop-blur-md transition-all ${isCardVisible("surveillance", ["live listen", "audio stream", "microphone", "hear"]) ? "" : "hidden"} ${
+      <div className={`rounded-2xl border p-5 shadow-xl backdrop-blur-xl transition-all ${isCardVisible("surveillance", ["live listen", "audio stream", "microphone", "hear"]) ? "" : "hidden"} ${
         liveListening
-          ? 'border-teal-500/60 bg-teal-950/20 shadow-teal-950/20'
-          : 'border-slate-200/80 dark:border-slate-800 bg-gray-900/60'
+          ? 'border-teal-500/60 bg-teal-500/10 dark:bg-teal-950/20 shadow-teal-500/10'
+          : 'border-slate-200/90 dark:border-white/10 bg-white/70 dark:bg-slate-900/60'
       }`}>
         <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
           <div className="flex items-center gap-2.5">
             <div className={`p-2 rounded-lg border transition-colors ${
               liveListening
-                ? 'bg-teal-500 text-black border-teal-400 shadow-[0_0_15px_rgba(20,184,166,0.5)]'
-                : 'bg-teal-950/60 border-teal-800/60 text-teal-400'
+                ? 'bg-teal-500 text-white border-teal-400 shadow-[0_0_15px_rgba(20,184,166,0.5)]'
+                : 'bg-teal-50 dark:bg-teal-950/60 border border-teal-200 dark:border-teal-800/60 text-teal-600 dark:text-teal-400'
             }`}>
               <Headphones className="h-5 w-5" />
             </div>
@@ -3822,10 +3846,10 @@ export default function Controls() {
       </div>
 
       {/* Remote Microphone (T7) */}
-      <div className={`rounded-2xl border border-slate-800/80 bg-slate-900/60 p-5 backdrop-blur-md shadow-xl hover:border-slate-700/80 ${isCardVisible("surveillance", ["remote microphone", "audio clip", "record mic"]) ? "" : "hidden"}`}>
+      <div className={`rounded-2xl border border-slate-200/90 dark:border-white/10 bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl p-5 shadow-xl hover:-translate-y-1 hover:shadow-2xl transition-all duration-300 ${isCardVisible("surveillance", ["remote microphone", "audio clip", "record mic"]) ? "" : "hidden"}`}>
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-lg bg-teal-950/60 border border-teal-800/60 text-teal-400">
+            <div className="p-2 rounded-lg bg-teal-50 dark:bg-teal-950/60 border border-teal-200 dark:border-teal-800/60 text-teal-600 dark:text-teal-400">
               <Mic className="h-4 w-4" />
             </div>
             <div>
@@ -3834,7 +3858,7 @@ export default function Controls() {
             </div>
           </div>
           {micRecording && (
-            <span className="flex items-center gap-1.5 text-xs text-amber-400 font-medium bg-amber-950/40 border border-amber-800/50 px-2.5 py-1 rounded-full animate-pulse">
+            <span className="flex items-center gap-1.5 text-xs text-amber-500 dark:text-amber-400 font-medium bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/50 px-2.5 py-1 rounded-full animate-pulse">
               <span className="h-2 w-2 rounded-full bg-amber-400 animate-ping" />
               Recording phone mic...
             </span>
@@ -3845,7 +3869,7 @@ export default function Controls() {
           <div>
             <div className="flex justify-between text-xs text-slate-500 dark:text-slate-400 mb-1.5">
               <span>Clip Duration</span>
-              <span className="font-mono text-teal-400">{micDuration} seconds</span>
+              <span className="font-mono text-teal-600 dark:text-teal-400 font-semibold">{micDuration} seconds</span>
             </div>
             <input
               type="range"
@@ -3855,7 +3879,7 @@ export default function Controls() {
               value={micDuration}
               onChange={(e) => setMicDuration(Number(e.target.value))}
               disabled={micRecording}
-              className="w-full accent-teal-500 bg-gray-800 rounded-lg h-2"
+              className="w-full accent-teal-500 bg-slate-200 dark:bg-gray-800 rounded-lg h-2"
             />
             <div className="flex justify-between text-[10px] text-gray-600 mt-1">
               <span>5s (quick check)</span>
@@ -3911,10 +3935,10 @@ export default function Controls() {
       </div>
 
       {/* Remote Camera Capture (T8) */}
-      <div className={`rounded-2xl border border-slate-800/80 bg-slate-900/60 p-5 backdrop-blur-md shadow-xl hover:border-slate-700/80 ${isCardVisible("surveillance", ["remote camera", "photo", "camera snapshot", "front back"]) ? "" : "hidden"}`}>
+      <div className={`rounded-2xl border border-slate-200/90 dark:border-white/10 bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl p-5 shadow-xl hover:-translate-y-1 hover:shadow-2xl transition-all duration-300 ${isCardVisible("surveillance", ["remote camera", "photo", "camera snapshot", "front back"]) ? "" : "hidden"}`}>
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-lg bg-teal-950/60 border border-teal-800/60 text-teal-400">
+            <div className="p-2 rounded-lg bg-teal-50 dark:bg-teal-950/60 border border-teal-200 dark:border-teal-800/60 text-teal-600 dark:text-teal-400">
               <Camera className="h-4 w-4" />
             </div>
             <div>
@@ -3923,7 +3947,7 @@ export default function Controls() {
             </div>
           </div>
           {cameraCapturing && (
-            <span className="flex items-center gap-1.5 text-xs text-amber-400 font-medium bg-amber-950/40 border border-amber-800/50 px-2.5 py-1 rounded-full animate-pulse">
+            <span className="flex items-center gap-1.5 text-xs text-amber-500 dark:text-amber-400 font-medium bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/50 px-2.5 py-1 rounded-full animate-pulse">
               <span className="h-2 w-2 rounded-full bg-amber-400 animate-ping" />
               Opening camera & snapping...
             </span>
@@ -3932,16 +3956,16 @@ export default function Controls() {
 
         <div className="space-y-4">
           <div>
-            <label className="text-xs text-slate-500 dark:text-slate-400 block mb-1.5">Camera Facing</label>
+            <label className="text-xs text-slate-500 dark:text-slate-400 block mb-1.5 font-medium">Camera Facing</label>
             <div className="grid grid-cols-2 gap-2">
               <button
                 type="button"
                 onClick={() => setCameraFacing('back')}
                 disabled={cameraCapturing}
-                className={`py-2 px-3 rounded-lg border text-xs font-medium transition-all ${
+                className={`py-2 px-3 rounded-lg border text-xs font-semibold transition-all cursor-pointer ${
                   cameraFacing === 'back'
-                    ? 'border-teal-500 bg-teal-950/40 text-teal-300'
-                    : 'border-slate-200/80 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-500 dark:text-slate-400 hover:text-white'
+                    ? 'border-teal-500 bg-teal-50 dark:bg-teal-950/40 text-teal-700 dark:text-teal-300 shadow-xs'
+                    : 'border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
                 }`}
               >
                 Back Camera (Main)
@@ -3950,10 +3974,10 @@ export default function Controls() {
                 type="button"
                 onClick={() => setCameraFacing('front')}
                 disabled={cameraCapturing}
-                className={`py-2 px-3 rounded-lg border text-xs font-medium transition-all ${
+                className={`py-2 px-3 rounded-lg border text-xs font-semibold transition-all cursor-pointer ${
                   cameraFacing === 'front'
-                    ? 'border-teal-500 bg-teal-950/40 text-teal-300'
-                    : 'border-slate-200/80 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-500 dark:text-slate-400 hover:text-white'
+                    ? 'border-teal-500 bg-teal-50 dark:bg-teal-950/40 text-teal-700 dark:text-teal-300 shadow-xs'
+                    : 'border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
                 }`}
               >
                 Front Camera (Selfie)
@@ -4009,17 +4033,17 @@ export default function Controls() {
       </div>
 
       {/* UNIFIED INDOOR SECURITY CAMERA & SURVEILLANCE HUB (LIVE VIDEO + MIC AUDIO) */}
-      <div className={`rounded-2xl border p-5 backdrop-blur-md transition-all ${isCardVisible("surveillance", ["camera stream", "surveillance hub", "live video", "webrtc", "stream"]) ? "" : "hidden"} ${
+      <div className={`rounded-2xl border p-5 backdrop-blur-xl transition-all ${isCardVisible("surveillance", ["camera stream", "surveillance hub", "live video", "webrtc", "stream"]) ? "" : "hidden"} ${
         (cameraStreaming || liveListening)
-          ? 'border-rose-900/60 bg-gray-900/90 shadow-xl shadow-rose-950/20'
-          : 'border-slate-200/80 dark:border-slate-800 bg-gray-900/60'
+          ? 'border-rose-500/50 bg-rose-500/10 dark:bg-gray-900/90 shadow-xl shadow-rose-500/10'
+          : 'border-slate-200/90 dark:border-white/10 bg-white/70 dark:bg-slate-900/60'
       }`}>
         <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
           <div className="flex items-center gap-2.5">
             <div className={`p-2 rounded-lg border ${
               (cameraStreaming || liveListening)
-                ? 'bg-rose-950/70 border-rose-800/80 text-rose-400 animate-pulse'
-                : 'bg-teal-950/60 border-teal-800/60 text-teal-400'
+                ? 'bg-rose-500/20 border-rose-500/40 text-rose-500 animate-pulse'
+                : 'bg-teal-50 dark:bg-teal-950/60 border border-teal-200 dark:border-teal-800/60 text-teal-600 dark:text-teal-400'
             }`}>
               <Eye className="h-4 w-4" />
             </div>
@@ -4355,10 +4379,10 @@ export default function Controls() {
       </div>
 
       {/* Remote Screenshot (T9) */}
-      <div className={`rounded-2xl border border-slate-800/80 bg-slate-900/60 p-5 backdrop-blur-md shadow-xl hover:border-slate-700/80 ${isCardVisible("surveillance", ["screenshot", "display", "screen capture"]) ? "" : "hidden"}`}>
+      <div className={`rounded-2xl border border-slate-200/90 dark:border-white/10 bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl p-5 shadow-xl hover:-translate-y-1 hover:shadow-2xl transition-all duration-300 ${isCardVisible("surveillance", ["screenshot", "display", "screen capture"]) ? "" : "hidden"}`}>
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-lg bg-teal-950/60 border border-teal-800/60 text-teal-400">
+            <div className="p-2 rounded-lg bg-teal-50 dark:bg-teal-950/60 border border-teal-200 dark:border-teal-800/60 text-teal-600 dark:text-teal-400">
               <Monitor className="h-4 w-4" />
             </div>
             <div>
@@ -4427,10 +4451,10 @@ export default function Controls() {
       </div>
 
       {/* Live Screen Stream ~1-30 FPS (T10) */}
-      <div className={`rounded-2xl border border-slate-800/80 bg-slate-900/60 p-5 backdrop-blur-md shadow-xl hover:border-slate-700/80 ${isCardVisible("surveillance", ["live screen stream", "remote control", "gestures", "screen mirror"]) ? "" : "hidden"}`}>
+      <div className={`rounded-2xl border border-slate-200/90 dark:border-white/10 bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl p-5 shadow-xl hover:-translate-y-1 hover:shadow-2xl transition-all duration-300 ${isCardVisible("surveillance", ["live screen stream", "remote control", "gestures", "screen mirror"]) ? "" : "hidden"}`}>
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-lg bg-teal-950/60 border border-teal-800/60 text-teal-400">
+            <div className="p-2 rounded-lg bg-teal-50 dark:bg-teal-950/60 border border-teal-200 dark:border-teal-800/60 text-teal-600 dark:text-teal-400">
               <Video className="h-4 w-4" />
             </div>
             <div>
@@ -4532,11 +4556,11 @@ export default function Controls() {
                   </div>
 
                   {/* Virtual Navigation Bar & System Keys */}
-                  <div className="mt-3 p-2 rounded-lg bg-gray-900 border border-slate-200/80 dark:border-slate-800 flex flex-wrap items-center justify-center gap-2">
+                  <div className="mt-3 p-2.5 rounded-xl bg-slate-100 dark:bg-gray-900 border border-slate-300 dark:border-slate-800 flex flex-wrap items-center justify-center gap-2">
                     <button
                       type="button"
                       onClick={() => sendInputKey('back')}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-gray-800 hover:bg-teal-600 hover:text-white text-slate-800 dark:text-slate-200 text-xs font-medium transition-colors"
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white hover:bg-teal-50 dark:bg-gray-800 dark:hover:bg-teal-600 hover:text-teal-700 dark:hover:text-white text-slate-700 dark:text-slate-200 text-xs font-semibold border border-slate-300 dark:border-transparent transition-colors shadow-sm"
                       title="Back Key"
                     >
                       <CornerDownLeft className="h-3.5 w-3.5" /> Back
@@ -4544,7 +4568,7 @@ export default function Controls() {
                     <button
                       type="button"
                       onClick={() => sendInputKey('home')}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-gray-800 hover:bg-teal-600 hover:text-white text-slate-800 dark:text-slate-200 text-xs font-medium transition-colors"
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white hover:bg-teal-50 dark:bg-gray-800 dark:hover:bg-teal-600 hover:text-teal-700 dark:hover:text-white text-slate-700 dark:text-slate-200 text-xs font-semibold border border-slate-300 dark:border-transparent transition-colors shadow-sm"
                       title="Home Screen"
                     >
                       <Home className="h-3.5 w-3.5" /> Home
@@ -4552,7 +4576,7 @@ export default function Controls() {
                     <button
                       type="button"
                       onClick={() => sendInputKey('recents')}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-gray-800 hover:bg-teal-600 hover:text-white text-slate-800 dark:text-slate-200 text-xs font-medium transition-colors"
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white hover:bg-teal-50 dark:bg-gray-800 dark:hover:bg-teal-600 hover:text-teal-700 dark:hover:text-white text-slate-700 dark:text-slate-200 text-xs font-semibold border border-slate-300 dark:border-transparent transition-colors shadow-sm"
                       title="Recent Applications"
                     >
                       <Menu className="h-3.5 w-3.5" /> Recents
@@ -4560,7 +4584,7 @@ export default function Controls() {
                     <button
                       type="button"
                       onClick={() => sendInputKey('notifications')}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-gray-800 hover:bg-teal-600 hover:text-white text-slate-800 dark:text-slate-200 text-xs font-medium transition-colors"
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white hover:bg-teal-50 dark:bg-gray-800 dark:hover:bg-teal-600 hover:text-teal-700 dark:hover:text-white text-slate-700 dark:text-slate-200 text-xs font-semibold border border-slate-300 dark:border-transparent transition-colors shadow-sm"
                       title="Pull Down Notification Shade"
                     >
                       <Bell className="h-3.5 w-3.5" /> Notifications
@@ -4568,7 +4592,7 @@ export default function Controls() {
                     <button
                       type="button"
                       onClick={() => sendInputKey('quick_settings')}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-gray-800 hover:bg-teal-600 hover:text-white text-slate-800 dark:text-slate-200 text-xs font-medium transition-colors"
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white hover:bg-teal-50 dark:bg-gray-800 dark:hover:bg-teal-600 hover:text-teal-700 dark:hover:text-white text-slate-700 dark:text-slate-200 text-xs font-semibold border border-slate-300 dark:border-transparent transition-colors shadow-sm"
                       title="Quick Settings Panel"
                     >
                       <Settings className="h-3.5 w-3.5" /> Quick Settings
@@ -4576,7 +4600,7 @@ export default function Controls() {
                     <button
                       type="button"
                       onClick={() => sendInputKey('power_dialog')}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-gray-800 hover:bg-rose-600 hover:text-white text-slate-800 dark:text-slate-200 text-xs font-medium transition-colors"
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white hover:bg-rose-50 dark:bg-gray-800 dark:hover:bg-rose-600 hover:text-rose-700 dark:hover:text-white text-slate-700 dark:text-slate-200 text-xs font-semibold border border-slate-300 dark:border-transparent transition-colors shadow-sm"
                       title="Power Off / Restart Dialog"
                     >
                       <Power className="h-3.5 w-3.5" /> Power
@@ -4584,7 +4608,7 @@ export default function Controls() {
                     <button
                       type="button"
                       onClick={() => sendInputKey('lock_screen')}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-gray-800 hover:bg-amber-600 hover:text-white text-slate-800 dark:text-slate-200 text-xs font-medium transition-colors"
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white hover:bg-amber-50 dark:bg-gray-800 dark:hover:bg-amber-600 hover:text-amber-700 dark:hover:text-white text-slate-700 dark:text-slate-200 text-xs font-semibold border border-slate-300 dark:border-transparent transition-colors shadow-sm"
                       title="Lock Device Screen"
                     >
                       <Lock className="h-3.5 w-3.5" /> Lock Screen
@@ -4592,18 +4616,18 @@ export default function Controls() {
                     <button
                       type="button"
                       onClick={() => wakeScreen()}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-gray-800 hover:bg-emerald-600 hover:text-white text-slate-800 dark:text-slate-200 text-xs font-medium transition-colors cursor-pointer"
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white hover:bg-emerald-50 dark:bg-gray-800 dark:hover:bg-emerald-600 hover:text-emerald-700 dark:hover:text-white text-slate-700 dark:text-slate-200 text-xs font-semibold border border-slate-300 dark:border-transparent transition-colors cursor-pointer shadow-sm"
                       title="Wake Up Dark Phone Screen via WakeLock"
                     >
-                      <Sun className="h-3.5 w-3.5 text-amber-400" /> Wake Screen
+                      <Sun className="h-3.5 w-3.5 text-amber-500" /> Wake Screen
                     </button>
                   </div>
 
                   {/* Remote Keyboard Quick Typing Injection */}
-                  <div className="mt-3 p-3 rounded-lg bg-gray-900 border border-slate-200/80 dark:border-slate-800">
+                  <div className="mt-3 p-3 rounded-xl bg-slate-100 dark:bg-gray-900 border border-slate-300 dark:border-slate-800">
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-xs font-semibold text-teal-300 flex items-center gap-1.5">
-                        <Keyboard className="h-4 w-4 text-teal-400" /> Remote Typing Injection (PC Keyboard → Phone Screen)
+                      <span className="text-xs font-bold text-teal-800 dark:text-teal-300 flex items-center gap-1.5">
+                        <Keyboard className="h-4 w-4 text-teal-600 dark:text-teal-400" /> Remote Typing Injection (PC Keyboard → Phone Screen)
                       </span>
                       <span className="text-[10px] text-slate-500 dark:text-slate-400">Injects into active text field</span>
                     </div>
@@ -4707,7 +4731,7 @@ export default function Controls() {
               </button>
               <button
                 onClick={() => setInspectApp(null)}
-                className="rounded-lg bg-gray-800 px-4 py-2 text-xs font-medium text-slate-800 dark:text-slate-200 hover:bg-gray-700"
+                className="rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-gray-800 dark:hover:bg-gray-700 px-4 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-gray-700"
               >
                 Close
               </button>
@@ -4800,29 +4824,29 @@ export default function Controls() {
 
       {/* THEFT MOTION ALARM (DESK GUARD) */}
       <div className={`rounded-2xl border border-amber-500/30 dark:border-amber-950/70 bg-white/70 dark:bg-slate-900/90 backdrop-blur-xl p-5 shadow-xl hover:-translate-y-1 hover:shadow-2xl transition-all duration-300 ${isCardVisible("safety", ["theft alarm", "motion alarm", "accelerometer", "anti-theft"]) ? "" : "hidden"}`}>
-        <div className="flex flex-wrap items-center justify-between gap-3 mb-4 border-b border-amber-900/40 pb-3">
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-4 border-b border-amber-200 dark:border-amber-900/40 pb-3">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-lg bg-amber-950/80 border border-amber-800/80 text-amber-400">
+            <div className="p-2 rounded-lg bg-amber-100 dark:bg-amber-950/80 border border-amber-300 dark:border-amber-800/80 text-amber-700 dark:text-amber-400">
               <ShieldAlert className="h-4 w-4" />
             </div>
             <div>
-              <h3 className="font-semibold text-amber-200 text-sm">Theft Motion Alarm ("Don't Touch My Phone")</h3>
-              <p className="text-xs text-amber-200/70">Sounds a loud siren on phone and alerts PC if device is moved or picked up from desk</p>
+              <h3 className="font-bold text-amber-900 dark:text-amber-200 text-sm">Theft Motion Alarm ("Don't Touch My Phone")</h3>
+              <p className="text-xs text-amber-800/80 dark:text-amber-200/70">Sounds a loud siren on phone and alerts PC if device is moved or picked up from desk</p>
             </div>
           </div>
 
           {motionAlarm?.triggered ? (
-            <span className="text-[10px] font-semibold text-rose-300 bg-rose-950 border border-rose-800 px-3 py-1 rounded-full animate-bounce flex items-center gap-1.5 shadow-[0_0_12px_rgba(244,63,94,0.6)]">
-              <AlertTriangle className="h-3.5 w-3.5 text-rose-400" />
+            <span className="text-[10px] font-semibold text-rose-700 dark:text-rose-300 bg-rose-100 dark:bg-rose-950 border border-rose-300 dark:border-rose-800 px-3 py-1 rounded-full animate-bounce flex items-center gap-1.5 shadow-[0_0_12px_rgba(244,63,94,0.6)]">
+              <AlertTriangle className="h-3.5 w-3.5 text-rose-600 dark:text-rose-400" />
               MOTION DETECTED · SIREN SOUNDING
             </span>
           ) : motionAlarm?.armed ? (
-            <span className="text-[10px] font-semibold text-emerald-300 bg-emerald-950 border border-emerald-800 px-2.5 py-1 rounded-full flex items-center gap-1.5 animate-pulse">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+            <span className="text-[10px] font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-950 border border-emerald-300 dark:border-emerald-800 px-2.5 py-1 rounded-full flex items-center gap-1.5 animate-pulse">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-ping" />
               ARMED & GUARDING DESK
             </span>
           ) : (
-            <span className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-950 border border-slate-200/80 dark:border-slate-800 px-2.5 py-1 rounded-full">
+            <span className="text-[10px] font-semibold text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 px-2.5 py-1 rounded-full">
               DISARMED
             </span>
           )}
@@ -4833,7 +4857,7 @@ export default function Controls() {
             <div className="flex-1 min-w-[200px]">
               <div className="flex justify-between text-xs text-slate-700 dark:text-slate-300 mb-1">
                 <span>Motion Sensitivity Threshold</span>
-                <span className="font-mono text-amber-400">{motionThreshold} m/s²</span>
+                <span className="font-mono text-amber-700 dark:text-amber-400 font-semibold">{motionThreshold} m/s²</span>
               </div>
               <input
                 type="range"
@@ -4843,7 +4867,7 @@ export default function Controls() {
                 value={motionThreshold}
                 onChange={(e) => setMotionThreshold(parseFloat(e.target.value))}
                 disabled={motionAlarm?.armed}
-                className="w-full h-1.5 bg-gray-800 rounded-lg appearance-none cursor-pointer accent-amber-500 disabled:opacity-40"
+                className="w-full h-1.5 bg-slate-200 dark:bg-gray-800 rounded-lg appearance-none cursor-pointer accent-amber-500 disabled:opacity-40"
               />
               <div className="flex justify-between text-[10px] text-gray-500 mt-1">
                 <span>High Sensitivity (1.0)</span>
@@ -4877,32 +4901,32 @@ export default function Controls() {
 
       {/* LIVE VOICE WALKIE-TALKIE INTERCOM */}
       <div className={`rounded-2xl border border-sky-500/30 dark:border-sky-950/70 bg-white/70 dark:bg-slate-900/90 backdrop-blur-xl p-5 shadow-xl hover:-translate-y-1 hover:shadow-2xl transition-all duration-300 ${isCardVisible("surveillance", ["walkie talkie", "intercom", "live voice", "push to talk"]) ? "" : "hidden"}`}>
-        <div className="flex flex-wrap items-center justify-between gap-3 mb-4 border-b border-sky-900/40 pb-3">
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-4 border-b border-sky-200 dark:border-sky-900/40 pb-3">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-lg bg-sky-950/80 border border-sky-800/80 text-sky-400">
+            <div className="p-2 rounded-lg bg-sky-100 dark:bg-sky-950/80 border border-sky-300 dark:border-sky-800/80 text-sky-700 dark:text-sky-400">
               <Radio className="h-4 w-4" />
             </div>
             <div>
-              <h3 className="font-semibold text-sky-200 text-sm">Live Voice Walkie-Talkie (Intercom)</h3>
-              <p className="text-xs text-sky-200/70">Hold to speak from PC microphone directly through the phone's speakerphone in real time</p>
+              <h3 className="font-bold text-sky-900 dark:text-sky-200 text-sm">Live Voice Walkie-Talkie (Intercom)</h3>
+              <p className="text-xs text-sky-800/80 dark:text-sky-200/70">Hold to speak from PC microphone directly through the phone's speakerphone in real time</p>
             </div>
           </div>
 
           {isPressingWalkieTalkie || walkieTalkieActive ? (
-            <span className="text-[10px] font-semibold text-emerald-300 bg-emerald-950 border border-emerald-800 px-3 py-1 rounded-full animate-pulse flex items-center gap-1.5 shadow-[0_0_12px_rgba(16,185,129,0.5)]">
-              <span className="h-2 w-2 rounded-full bg-emerald-400 animate-ping" />
+            <span className="text-[10px] font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-950 border border-emerald-300 dark:border-emerald-800 px-3 py-1 rounded-full animate-pulse flex items-center gap-1.5 shadow-[0_0_12px_rgba(16,185,129,0.5)]">
+              <span className="h-2 w-2 rounded-full bg-emerald-500 animate-ping" />
               BROADCASTING LIVE TO PHONE SPEAKER
             </span>
           ) : (
-            <span className="text-[10px] font-semibold text-sky-400 bg-sky-950 border border-sky-800 px-2.5 py-1 rounded-full">
+            <span className="text-[10px] font-semibold text-sky-700 dark:text-sky-400 bg-sky-100 dark:bg-sky-950 border border-sky-300 dark:border-sky-800 px-2.5 py-1 rounded-full">
               INTERCOM READY
             </span>
           )}
         </div>
 
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4 bg-slate-50/80 dark:bg-slate-950/60 p-4 rounded-xl border border-sky-900/30">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4 bg-slate-50/80 dark:bg-slate-950/60 p-4 rounded-xl border border-slate-200/80 dark:border-sky-900/30">
           <div className="text-xs text-slate-700 dark:text-slate-300 space-y-1">
-            <div className="font-semibold text-sky-300">Push-to-Talk Broadcast</div>
+            <div className="font-bold text-sky-800 dark:text-sky-300">Push-to-Talk Broadcast</div>
             <div className="text-[11px] text-slate-500 dark:text-slate-400">
               Hold the talk button or toggle hands-free to speak directly through the phone's speakerphone in real time. Use Force Stop if audio ever gets stuck.
             </div>
@@ -4932,10 +4956,10 @@ export default function Controls() {
               className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold transition-all border shadow ${
                 handsFreeIntercom && isPressingWalkieTalkie
                   ? 'bg-emerald-600 text-white border-emerald-500 ring-2 ring-emerald-400/40 animate-pulse'
-                  : 'bg-gray-800 hover:bg-gray-700 text-slate-800 dark:text-slate-200 border-gray-700'
+                  : 'bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:hover:bg-gray-700 dark:text-slate-200 border-slate-300 dark:border-gray-700'
               }`}
             >
-              <Mic className="h-4 w-4 text-emerald-400" />
+              <Mic className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
               {handsFreeIntercom && isPressingWalkieTalkie ? 'MUTE HANDS-FREE' : 'HANDS-FREE ON'}
             </button>
 
@@ -4943,9 +4967,9 @@ export default function Controls() {
               type="button"
               onClick={forceStopWalkieTalkie}
               title="Immediately cut audio track and silence the phone speaker"
-              className="flex items-center gap-1.5 px-3 py-2.5 rounded-xl text-xs font-semibold bg-rose-950/80 hover:bg-rose-900 border border-rose-700/80 text-rose-300 transition-colors shadow"
+              className="flex items-center gap-1.5 px-3 py-2.5 rounded-xl text-xs font-semibold bg-rose-50 hover:bg-rose-100 border border-rose-300 text-rose-700 dark:bg-rose-950/80 dark:hover:bg-rose-900 dark:border-rose-700/80 dark:text-rose-300 transition-colors shadow"
             >
-              <MicOff className="h-4 w-4 text-rose-400" />
+              <MicOff className="h-4 w-4 text-rose-600 dark:text-rose-400" />
               FORCE STOP
             </button>
           </div>
@@ -4968,7 +4992,7 @@ export default function Controls() {
             type="button"
             onClick={() => fetchGallery(36)}
             disabled={galleryLoading}
-            className="flex items-center gap-1.5 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200/80 dark:border-slate-800 px-3 py-1.5 text-xs text-slate-700 dark:text-slate-300 hover:bg-gray-800 hover:text-white transition-colors disabled:opacity-50"
+            className="flex items-center gap-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-950 dark:hover:bg-slate-800 border border-slate-300 dark:border-slate-800 px-3 py-1.5 text-xs text-slate-700 dark:text-slate-300 transition-colors disabled:opacity-50 cursor-pointer"
           >
             <RefreshCw className={`h-3.5 w-3.5 ${galleryLoading ? 'animate-spin text-teal-400' : ''}`} />
             {galleryLoading ? 'Loading Photos...' : 'Refresh Gallery'}
@@ -5081,7 +5105,7 @@ export default function Controls() {
                   sendCommand('file-download', { deviceId: activeDeviceId, path: selectedPhoto.path, name: selectedPhoto.name, mimeType: 'image/jpeg' });
                   pushToast('Full resolution download requested from phone', 'info');
                 }}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-800 text-teal-300 text-xs font-medium hover:bg-gray-700 border border-teal-800/60"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-teal-50 hover:bg-teal-100 dark:bg-gray-800 dark:hover:bg-gray-700 text-teal-700 dark:text-teal-300 text-xs font-semibold border border-teal-300 dark:border-teal-800/60"
               >
                 <Download className="h-3.5 w-3.5" /> Download Full Res
               </button>
@@ -5100,7 +5124,7 @@ export default function Controls() {
           <button
             type="button"
             onClick={fetchCellularInfo}
-            className="flex items-center gap-1.5 px-3 py-1 text-xs rounded bg-gray-800 border border-gray-700 text-slate-700 dark:text-slate-300 hover:text-white hover:bg-gray-700 transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1 text-xs rounded bg-slate-100 hover:bg-slate-200 dark:bg-gray-800 dark:hover:bg-gray-700 border border-slate-300 dark:border-gray-700 text-slate-700 dark:text-slate-300 transition-colors"
           >
             <RefreshCw className="h-3 w-3" /> Refresh Telemetry
           </button>
@@ -5123,14 +5147,14 @@ export default function Controls() {
                         key={bar}
                         className={`w-1 rounded-sm ${
                           (cellularInfo.signalLevel ?? 0) >= bar
-                            ? 'bg-emerald-400'
-                            : 'bg-gray-700'
+                            ? 'bg-emerald-500'
+                            : 'bg-slate-300 dark:bg-gray-700'
                         }`}
                         style={{ height: `${bar * 25}%` }}
                       />
                     ))}
                   </div>
-                  <span className="text-xs font-mono font-semibold text-white">
+                  <span className="text-xs font-mono font-semibold text-slate-900 dark:text-white">
                     {cellularInfo.signalLevel != null ? `${cellularInfo.signalLevel}/4 Bars` : 'Active'}
                   </span>
                 </div>
@@ -5138,7 +5162,7 @@ export default function Controls() {
 
               <div className="bg-slate-50 dark:bg-slate-950/70 p-3 rounded-xl border border-slate-200 dark:border-slate-800">
                 <span className="text-[11px] text-slate-500 dark:text-slate-400 block mb-1">Network Gen</span>
-                <span className="text-xs font-mono font-bold text-teal-300 px-2 py-0.5 rounded bg-teal-950/60 border border-teal-800/80 inline-block">
+                <span className="text-xs font-mono font-bold text-teal-700 dark:text-teal-300 px-2 py-0.5 rounded bg-teal-100 dark:bg-teal-950/60 border border-teal-300 dark:border-teal-800/80 inline-block">
                   {cellularInfo.networkGen || 'Cellular'}
                 </span>
                 <span className="text-[10px] text-slate-500 dark:text-slate-400 block mt-0.5 truncate">
@@ -5149,7 +5173,7 @@ export default function Controls() {
               <div className="bg-slate-50 dark:bg-slate-950/70 p-3 rounded-xl border border-slate-200 dark:border-slate-800">
                 <span className="text-[11px] text-slate-500 dark:text-slate-400 block mb-1">Data State</span>
                 <span className={`text-xs font-mono font-semibold uppercase ${
-                  cellularInfo.dataState === 'CONNECTED' ? 'text-emerald-400' : 'text-slate-500 dark:text-slate-400'
+                  cellularInfo.dataState === 'CONNECTED' ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-500 dark:text-slate-400'
                 }`}>
                   {cellularInfo.dataState || 'UNKNOWN'}
                 </span>
@@ -5158,7 +5182,7 @@ export default function Controls() {
               <div className="bg-slate-50 dark:bg-slate-950/70 p-3 rounded-xl border border-slate-200 dark:border-slate-800">
                 <span className="text-[11px] text-slate-500 dark:text-slate-400 block mb-1">Roaming</span>
                 <span className={`text-xs font-mono font-semibold ${
-                  cellularInfo.isNetworkRoaming ? 'text-amber-400' : 'text-slate-500 dark:text-slate-400'
+                  cellularInfo.isNetworkRoaming ? 'text-amber-600 dark:text-amber-400' : 'text-slate-500 dark:text-slate-400'
                 }`}>
                   {cellularInfo.isNetworkRoaming ? 'Roaming ON' : 'Domestic / Home'}
                 </span>
@@ -5173,15 +5197,15 @@ export default function Controls() {
                   {cellularInfo.sims.map((sim, idx) => (
                     <div key={idx} className="bg-slate-50 dark:bg-slate-950/70 p-3 rounded-xl border border-slate-200 dark:border-slate-800 flex items-center justify-between">
                       <div className="flex items-center gap-2.5">
-                        <div className="p-2 rounded bg-teal-950/50 border border-teal-800/60 text-teal-400">
+                        <div className="p-2 rounded bg-teal-100 dark:bg-teal-950/50 border border-teal-300 dark:border-teal-800/60 text-teal-600 dark:text-teal-400">
                           <Smartphone className="h-4 w-4" />
                         </div>
                         <div>
-                          <p className="text-xs font-bold text-white">{sim.carrierName || sim.displayName || 'SIM ' + (idx + 1)}</p>
+                          <p className="text-xs font-bold text-slate-900 dark:text-white">{sim.carrierName || sim.displayName || 'SIM ' + (idx + 1)}</p>
                           <p className="text-[11px] text-slate-500 dark:text-slate-400 font-mono">{sim.simSlot} • {sim.countryIso ? sim.countryIso.toUpperCase() : 'IN'}</p>
                         </div>
                       </div>
-                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-950/60 text-emerald-300 border border-emerald-800">
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800">
                         ACTIVE
                       </span>
                     </div>
@@ -5190,7 +5214,7 @@ export default function Controls() {
               </div>
             ) : (
               <div className="bg-slate-50 dark:bg-slate-950/70 p-3 rounded-xl border border-slate-200 dark:border-slate-800 text-xs text-slate-500 dark:text-slate-400 flex items-center justify-between">
-                <span>Carrier: <strong className="text-white">{cellularInfo.networkOperatorName || cellularInfo.simOperatorName || 'Cellular Service'}</strong></span>
+                <span>Carrier: <strong className="text-slate-900 dark:text-white">{cellularInfo.networkOperatorName || cellularInfo.simOperatorName || 'Cellular Service'}</strong></span>
                 <span className="font-mono text-gray-500">{cellularInfo.phoneType || 'GSM'}</span>
               </div>
             )}
@@ -5202,7 +5226,7 @@ export default function Controls() {
             <button
               type="button"
               onClick={fetchCellularInfo}
-              className="mt-2 text-xs text-teal-400 hover:text-teal-300 underline"
+              className="mt-2 text-xs text-teal-600 dark:text-teal-400 hover:underline"
             >
               Fetch SIM & Cellular Status
             </button>
@@ -5235,10 +5259,10 @@ export default function Controls() {
         {junkScanData ? (
           <div className="space-y-4">
             {/* Total Junk Banner */}
-            <div className="flex flex-wrap items-center justify-between bg-teal-950/30 border border-teal-800/60 rounded-lg p-3.5 gap-3">
+            <div className="flex flex-wrap items-center justify-between bg-teal-50 dark:bg-teal-950/30 border border-teal-200 dark:border-teal-800/60 rounded-xl p-3.5 gap-3">
               <div>
-                <span className="text-[11px] text-teal-300 block">Total Junk Found</span>
-                <span className="text-xl font-bold font-mono text-white">
+                <span className="text-[11px] text-teal-800 dark:text-teal-300 font-semibold block">Total Junk Found</span>
+                <span className="text-xl font-bold font-mono text-slate-900 dark:text-white">
                   {(junkScanData.totalBytes / (1024 * 1024)).toFixed(1)} MB
                 </span>
                 <span className="text-xs text-slate-500 dark:text-slate-400 ml-2">
@@ -5262,7 +5286,7 @@ export default function Controls() {
                   <div>
                     <div className="flex items-center justify-between mb-1">
                       <span className="text-xs font-bold text-slate-800 dark:text-slate-200">{cat.title}</span>
-                      <span className="text-xs font-mono text-teal-400 font-semibold">
+                      <span className="text-xs font-mono text-teal-600 dark:text-teal-400 font-semibold">
                         {(cat.totalBytes / (1024 * 1024)).toFixed(1)} MB
                       </span>
                     </div>
@@ -5272,9 +5296,9 @@ export default function Controls() {
                     type="button"
                     onClick={() => cleanJunk(cat.id)}
                     disabled={cat.count === 0}
-                    className="flex items-center justify-center gap-1.5 w-full py-1.5 rounded bg-gray-800 hover:bg-gray-700 text-slate-700 dark:text-slate-300 hover:text-white text-xs font-medium border border-gray-700 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                    className="flex items-center justify-center gap-1.5 w-full py-1.5 rounded bg-slate-100 hover:bg-slate-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-slate-700 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white text-xs font-medium border border-slate-300 dark:border-gray-700 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                   >
-                    <Trash2 className="h-3 w-3 text-red-400" /> Clean This Category
+                    <Trash2 className="h-3 w-3 text-red-500 dark:text-red-400" /> Clean This Category
                   </button>
                 </div>
               ))}
@@ -5359,7 +5383,7 @@ export default function Controls() {
                   setShowWipeModal(false);
                   setWipeConfirmText('');
                 }}
-                className="rounded-lg bg-gray-800 px-4 py-2 text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-gray-700"
+                className="rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-gray-800 dark:hover:bg-gray-700 px-4 py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-gray-700"
               >
                 Cancel
               </button>
@@ -5454,7 +5478,7 @@ export default function Controls() {
                 <button
                   type="button"
                   onClick={() => setShowTimelapseModal(false)}
-                  className="px-4 py-2 rounded-xl bg-gray-800 hover:bg-gray-700 text-slate-700 dark:text-slate-300 font-semibold text-xs"
+                  className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-slate-700 dark:text-slate-300 font-semibold text-xs border border-slate-300 dark:border-gray-700"
                 >
                   Close
                 </button>

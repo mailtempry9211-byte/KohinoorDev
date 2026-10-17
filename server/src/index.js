@@ -106,6 +106,7 @@ const COMMAND_EVENTS = {
   'request-contacts': 'CONTACTS_REQUEST',
   'add-contact': 'ADD_CONTACT_COMMAND',
   'find-phone': 'FIND_PHONE_COMMAND',
+  'find-phone-stop': 'FIND_PHONE_STOP_COMMAND',
   'notification-dismiss': 'NOTIFICATION_DISMISS_COMMAND',
   'notification-clear-all': 'NOTIFICATION_CLEAR_ALL_COMMAND',
   'vibrate': 'VIBRATE_COMMAND',
@@ -227,6 +228,7 @@ function commandPayload(name, body = {}) {
       y2Ratio: body.y2Ratio !== undefined && body.y2Ratio !== null ? Number(body.y2Ratio) : null,
       duration: Number(body.duration) || 300
     };
+    case 'find-phone-stop': return {};
     case 'volume-get': return {};
     case 'volume-set': return { stream: body.stream, level: body.level, ringerMode: body.ringerMode };
     case 'clipboard-write': return { text: body.text || '' };
