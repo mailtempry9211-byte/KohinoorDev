@@ -84,8 +84,16 @@ jobs:
       - name: Collect and Rename Output APK
         run: |
           mkdir -p release_output
-          find lawnchair-source/build/outputs -type f -name "*.apk" -exec cp {} release_output/Lawnchair-PhoneLink-16-Release.apk \;
+          echo "=== Searching for generated APKs in lawnchair-source ==="
+          find lawnchair-source -type f -name "*.apk"
+          find lawnchair-source -type f -name "*.apk" -exec cp -v {} release_output/ \;
           cd release_output
+          RELEASE_APK=$(ls Lawnchair*release*.apk 2>/dev/null | head -n 1)
+          if [ -z "$RELEASE_APK" ]; then
+            RELEASE_APK=$(ls *.apk | head -n 1)
+          fi
+          echo "Selected APK: $RELEASE_APK"
+          cp "$RELEASE_APK" Lawnchair-PhoneLink-16-Release.apk
           sha256sum *.apk > SHA256SUMS.txt
           cat SHA256SUMS.txt
 
@@ -143,6 +151,7 @@ jobs:
       - name: Build Standalone APK
         run: |
           cd android
+          if [ ! -f gradlew ]; then gradle wrapper; fi
           chmod +x gradlew
           ./gradlew assembleRelease --stacktrace
 
