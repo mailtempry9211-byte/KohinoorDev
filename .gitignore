@@ -9,3 +9,5 @@ server/data/db.json
 *.zip
 *.log
 NGROK.txt
+.mcp.json
+.agents/mcp_config.json
