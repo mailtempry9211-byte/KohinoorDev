@@ -60,3 +60,4 @@ class CapsuleWidgetProvider : AppWidgetProvider() {
         }
     }
 }
+
