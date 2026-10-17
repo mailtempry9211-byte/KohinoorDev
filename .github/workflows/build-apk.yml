@@ -26,7 +26,7 @@ jobs:
           mkdir -p android/app
           if [ -n "${{ secrets.KEYSTORE_BASE64 }}" ]; then
             echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > android/app/release.keystore
-            echo "KEYSTORE_FILE=release.keystore" >> $GITHUB_ENV
+            echo "KEYSTORE_FILE=$GITHUB_WORKSPACE/android/app/release.keystore" >> $GITHUB_ENV
             echo "KEYSTORE_PASSWORD=${{ secrets.KEYSTORE_PASSWORD }}" >> $GITHUB_ENV
             echo "KEY_ALIAS=${{ secrets.KEY_ALIAS }}" >> $GITHUB_ENV
             echo "KEY_PASSWORD=${{ secrets.KEY_PASSWORD }}" >> $GITHUB_ENV
@@ -40,7 +40,7 @@ jobs:
               -storepass phonelink123 \
               -keypass phonelink123 \
               -dname "CN=PhoneLink, OU=Hub, O=OpenSource, L=Local, S=State, C=US"
-            echo "KEYSTORE_FILE=release.keystore" >> $GITHUB_ENV
+            echo "KEYSTORE_FILE=$GITHUB_WORKSPACE/android/app/release.keystore" >> $GITHUB_ENV
             echo "KEYSTORE_PASSWORD=phonelink123" >> $GITHUB_ENV
             echo "KEY_ALIAS=phonelink" >> $GITHUB_ENV
             echo "KEY_PASSWORD=phonelink123" >> $GITHUB_ENV
@@ -51,7 +51,15 @@ jobs:
           cd android
           if [ ! -f gradlew ]; then gradle wrapper; fi
           chmod +x gradlew
-          ./gradlew assembleRelease --stacktrace
+          ./gradlew assembleRelease --stacktrace 2>&1 | tee build.log
+
+      - name: Output Failure Log on Error
+        if: failure()
+        run: |
+          echo "## ❌ Android Build Failure Log" >> $GITHUB_STEP_SUMMARY
+          echo '```text' >> $GITHUB_STEP_SUMMARY
+          tail -n 120 android/build.log >> $GITHUB_STEP_SUMMARY || true
+          echo '```' >> $GITHUB_STEP_SUMMARY
 
       - name: Collect and Name Output APK
         run: |
