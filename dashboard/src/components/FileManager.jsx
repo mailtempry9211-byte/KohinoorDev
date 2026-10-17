@@ -61,7 +61,7 @@ export default function FileManager() {
 
   if (!activeDeviceId) {
     return (
-      <div className="flex h-full items-center justify-center text-gray-500">
+      <div className="flex h-full items-center justify-center text-slate-500 dark:text-slate-400">
         <div className="text-center">
           <HardDrive className="mx-auto h-10 w-10 opacity-40" />
           <p className="mt-3 text-sm">Select a device to browse storage</p>
@@ -77,7 +77,7 @@ export default function FileManager() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 className="text-lg font-semibold">File Explorer</h2>
-          <p className="text-xs text-gray-500">Internal storage</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400">Internal storage</p>
         </div>
         <div className="flex items-center gap-2">
           <button
@@ -85,7 +85,7 @@ export default function FileManager() {
               setNewFolderName('');
               setNewFolderOpen(true);
             }}
-            className="flex items-center gap-1.5 rounded-lg bg-gray-800 px-3 py-2 text-xs text-gray-200 transition-colors hover:bg-gray-700 border border-gray-700 shadow-sm"
+            className="flex items-center gap-1.5 rounded-lg bg-gray-800 px-3 py-2 text-xs text-slate-800 dark:text-slate-200 font-semibold transition-colors hover:bg-gray-700 border border-gray-700 shadow-sm"
             title="Create a new folder in this directory"
           >
             <FolderPlus className="h-3.5 w-3.5 text-teal-400" />
@@ -101,7 +101,7 @@ export default function FileManager() {
           </button>
           <button
             onClick={() => setUploadOpen(true)}
-            className="flex items-center gap-2 rounded-lg bg-teal-600 px-3.5 py-2 text-sm font-medium text-white transition-colors hover:bg-teal-500 shadow"
+            className="flex items-center gap-2 rounded-lg btn-interactive bg-gradient-to-r from-indigo-600 to-violet-600 px-4 py-2 text-xs font-bold text-white shadow-md shadow-indigo-500/25 hover:from-indigo-500 hover:to-violet-500 rounded-xl cursor-pointer"
           >
             <Upload className="h-4 w-4" />
             Upload
@@ -109,8 +109,8 @@ export default function FileManager() {
         </div>
       </div>
 
-      <nav className="flex flex-wrap items-center gap-1 rounded-lg bg-gray-900 px-3 py-2 text-sm">
-        <button onClick={() => openFolder('/')} className="text-gray-400 hover:text-white">
+      <nav className="flex flex-wrap items-center gap-1 rounded-xl bg-slate-100 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 px-3.5 py-2 text-sm">
+        <button onClick={() => openFolder('/')} className="text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-white font-medium">
           storage
         </button>
         {segments.map((segment, index) => (
@@ -118,7 +118,7 @@ export default function FileManager() {
             <ChevronRight className="h-3.5 w-3.5 text-gray-600" />
             <button
               onClick={() => openFolder('/' + segments.slice(0, index + 1).join('/'))}
-              className="text-gray-400 hover:text-white"
+              className="text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-white font-medium"
             >
               {segment}
             </button>
@@ -142,9 +142,9 @@ export default function FileManager() {
         </button>
       )}
 
-      <div className="overflow-x-auto rounded-lg border border-gray-800 bg-gray-900/50">
+      <div className="overflow-x-auto rounded-2xl border border-slate-200/90 dark:border-white/10 bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl shadow-xl overflow-hidden">
         <table className="w-full table-fixed text-left text-sm">
-          <thead className="border-b border-gray-800 text-xs uppercase tracking-wide text-gray-500">
+          <thead className="border-b border-slate-200 dark:border-slate-800 text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-950/60">
             <tr>
               <th className="px-4 py-2.5 font-medium w-auto">Name</th>
               <th className="hidden px-4 py-2.5 font-medium sm:table-cell w-24">Size</th>
@@ -152,10 +152,10 @@ export default function FileManager() {
               <th className="px-4 py-2.5 text-right font-medium w-28 sm:w-32">Action</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-800/70">
+          <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
             {files.entries.length === 0 && (
               <tr>
-                <td colSpan={4} className="px-4 py-10 text-center text-sm text-gray-500">
+                <td colSpan={4} className="px-4 py-10 text-center text-sm text-slate-500 dark:text-slate-400">
                   This folder is empty or permission was denied.
                 </td>
               </tr>
@@ -163,7 +163,7 @@ export default function FileManager() {
             {files.entries.map((entry) => {
               const isDir = Boolean(entry.isDirectory === true || entry.isDirectory === 'true' || entry.isDirectory === 1);
               return (
-                <tr key={entry.path} className="transition-colors hover:bg-gray-800/40">
+                <tr key={entry.path} className="transition-colors hover:bg-indigo-50/50 dark:hover:bg-slate-800/40 transition-colors">
                   <td className="px-4 py-2.5 max-w-0">
                     <div className="flex items-center gap-3 min-w-0">
                       {isDir ? (
@@ -173,16 +173,16 @@ export default function FileManager() {
                         </button>
                       ) : (
                         <div className="flex min-w-0 items-center gap-3">
-                          <FileIcon className="h-4 w-4 shrink-0 text-gray-500" />
-                          <span className="truncate text-gray-200" title={entry.name}>{entry.name}</span>
+                          <FileIcon className="h-4 w-4 shrink-0 text-slate-500 dark:text-slate-400" />
+                          <span className="truncate text-slate-800 dark:text-slate-200 font-semibold" title={entry.name}>{entry.name}</span>
                         </div>
                       )}
                     </div>
                   </td>
-                  <td className="hidden px-4 py-2.5 text-gray-500 sm:table-cell truncate">
+                  <td className="hidden px-4 py-2.5 text-slate-500 dark:text-slate-400 sm:table-cell truncate">
                     {isDir ? '—' : formatSize(entry.size)}
                   </td>
-                  <td className="hidden px-4 py-2.5 text-gray-500 md:table-cell truncate">
+                  <td className="hidden px-4 py-2.5 text-slate-500 dark:text-slate-400 md:table-cell truncate">
                     {entry.lastModified ? new Date(entry.lastModified).toLocaleString() : '—'}
                   </td>
                   <td className="px-4 py-2 text-right whitespace-nowrap">
@@ -228,7 +228,7 @@ export default function FileManager() {
           <div className="w-full max-w-sm rounded-xl border border-gray-800 bg-gray-900 p-5 shadow-2xl">
             <h3 className="text-sm font-semibold">Download ready</h3>
             <p className="mt-1.5 text-xs text-gray-400">
-              Your browser will save <span className="text-gray-200">{downloaded.name}</span>.
+              Your browser will save <span className="text-slate-800 dark:text-slate-200 font-semibold">{downloaded.name}</span>.
             </p>
             <div className="mt-4 flex gap-2">
               <a
@@ -426,7 +426,7 @@ function UploadModal({ currentPath, onClose, onPickTarget, uploadTarget, onUploa
           className="mt-1 block w-full text-sm text-gray-300 file:mr-3 file:rounded-lg file:border-0 file:bg-teal-600 file:px-3 file:py-2 file:text-sm file:text-white hover:file:bg-teal-500"
         />
 
-        <p className="mt-3 rounded-lg bg-gray-800/60 px-3 py-2 text-[11px] text-gray-500">
+        <p className="mt-3 rounded-lg bg-gray-800/60 px-3 py-2 text-[11px] text-slate-500 dark:text-slate-400">
           Large files are base64-encoded through the relay. Keep uploads modest in local mode.
         </p>
 

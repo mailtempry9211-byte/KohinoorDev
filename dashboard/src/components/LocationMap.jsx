@@ -490,7 +490,7 @@ export default function LocationMap() {
 
   if (!activeDeviceId) {
     return (
-      <div className="flex h-full items-center justify-center text-gray-500">
+      <div className="flex h-full items-center justify-center text-slate-500 dark:text-slate-400">
         <div className="text-center">
           <Navigation className="mx-auto h-10 w-10 opacity-40" />
           <p className="mt-3 text-sm">Select a device to track location</p>
@@ -507,7 +507,7 @@ export default function LocationMap() {
       {/* Top Header */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-teal-600/20 text-teal-400">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-600 dark:text-indigo-400">
             <Navigation className="h-5 w-5" />
           </div>
           <div>
@@ -520,7 +520,7 @@ export default function LocationMap() {
                 </span>
               )}
             </div>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-slate-500 dark:text-slate-400">
               {activeDevice?.online ? 'Real-time GPS updates & route history' : 'Last known position'}
             </p>
           </div>
@@ -541,19 +541,19 @@ export default function LocationMap() {
               }
             }}
             disabled={!activeDeviceId || locRefreshing}
-            className="flex items-center gap-1.5 rounded-lg bg-teal-600/20 border border-teal-500/30 px-3 py-1.5 text-xs font-medium text-teal-300 transition-colors hover:bg-teal-600/30 disabled:opacity-40"
+            className="flex items-center gap-1.5 rounded-lg btn-interactive bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-3.5 py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 shadow-xs rounded-xl cursor-pointer disabled:opacity-40"
             title="Request fresh GPS fix from the phone"
           >
             <RefreshCw className={`h-3.5 w-3.5 ${locRefreshing ? 'animate-spin' : ''}`} />
             Refresh GPS
           </button>
 
-          <label className="flex items-center gap-2 text-xs text-gray-400 cursor-pointer">
+          <label className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 cursor-pointer">
             <input
               type="checkbox"
               checked={autoCenter}
               onChange={(e) => setAutoCenter(e.target.checked)}
-              className="h-3.5 w-3.5 rounded border-gray-600 bg-gray-800 accent-teal-500"
+              className="h-3.5 w-3.5 rounded border-gray-600 bg-slate-100 dark:bg-slate-800 accent-teal-500"
             />
             Auto-center
           </label>
@@ -573,9 +573,9 @@ export default function LocationMap() {
       {/* Geofence & Route Tracking Control Bar */}
       <div className="grid gap-3 md:grid-cols-2">
         {/* Geofence / Safe Zone Box */}
-        <div className="rounded-lg border border-gray-800 bg-gray-900/60 p-3">
-          <div className="flex items-center justify-between pb-2 border-b border-gray-800">
-            <div className="flex items-center gap-2 text-xs font-semibold text-gray-200">
+        <div className="rounded-2xl border border-slate-200/90 dark:border-white/10 bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl shadow-xl p-4">
+          <div className="flex items-center justify-between pb-2 border-b border-slate-200/80 dark:border-slate-800">
+            <div className="flex items-center gap-2 text-xs font-semibold text-slate-800 dark:text-slate-200">
               <Shield className="h-4 w-4 text-amber-400" />
               <span>Safe Zone Geofence</span>
             </div>
@@ -595,9 +595,9 @@ export default function LocationMap() {
             </label>
           </div>
 
-          <div className="mt-2.5 space-y-2 text-xs text-gray-400">
+          <div className="mt-2.5 space-y-2 text-xs text-slate-500 dark:text-slate-400">
             <div className="flex items-center justify-between">
-              <span>Radius: <strong className="text-gray-200">{safeZoneRadius} meters</strong></span>
+              <span>Radius: <strong className="text-slate-800 dark:text-slate-200">{safeZoneRadius} meters</strong></span>
               {distanceToSafeZoneCenter != null && (
                 <span className={`px-2 py-0.5 rounded text-[11px] font-medium ${isInsideGeofence ? 'bg-emerald-950 text-emerald-300 border border-emerald-800' : 'bg-red-950 text-red-300 border border-red-800 animate-pulse'}`}>
                   {isInsideGeofence ? 'Inside Safe Zone' : 'Outside Safe Zone!'}
@@ -623,13 +623,13 @@ export default function LocationMap() {
                   }
                 }}
                 disabled={!hasFix}
-                className="flex items-center gap-1 rounded bg-gray-800 px-2 py-1 text-[11px] text-gray-300 hover:bg-gray-700 disabled:opacity-40"
+                className="flex items-center gap-1 rounded bg-slate-100 dark:bg-slate-800 px-2 py-1 text-[11px] text-slate-700 dark:text-slate-300 hover:bg-gray-700 disabled:opacity-40"
               >
                 <MapPin className="h-3 w-3 text-amber-400" />
                 Set Center at Current Fix
               </button>
               {safeZoneCenter && (
-                <span className="text-[10px] text-gray-500">
+                <span className="text-[10px] text-slate-500 dark:text-slate-400">
                   Center: {safeZoneCenter.lat.toFixed(4)}, {safeZoneCenter.lng.toFixed(4)}
                 </span>
               )}
@@ -638,9 +638,9 @@ export default function LocationMap() {
         </div>
 
         {/* Route Tracking Box */}
-        <div className="rounded-lg border border-gray-800 bg-gray-900/60 p-3">
-          <div className="flex items-center justify-between pb-2 border-b border-gray-800">
-            <div className="flex items-center gap-2 text-xs font-semibold text-gray-200">
+        <div className="rounded-2xl border border-slate-200/90 dark:border-white/10 bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl shadow-xl p-4">
+          <div className="flex items-center justify-between pb-2 border-b border-slate-200/80 dark:border-slate-800">
+            <div className="flex items-center gap-2 text-xs font-semibold text-slate-800 dark:text-slate-200">
               <Route className="h-4 w-4 text-blue-400" />
               <span>Route Mapping & History</span>
             </div>
@@ -649,7 +649,7 @@ export default function LocationMap() {
                 type="button"
                 onClick={handleExportRouteJSON}
                 disabled={routePoints.length === 0}
-                className="flex items-center gap-1 rounded bg-gray-800 px-2 py-0.5 text-[11px] text-gray-300 hover:bg-gray-700 disabled:opacity-40"
+                className="flex items-center gap-1 rounded bg-slate-100 dark:bg-slate-800 px-2 py-0.5 text-[11px] text-slate-700 dark:text-slate-300 hover:bg-gray-700 disabled:opacity-40"
                 title="Download route data (JSON)"
               >
                 <Download className="h-3 w-3" />
@@ -664,7 +664,7 @@ export default function LocationMap() {
                   }
                 }}
                 disabled={routePoints.length === 0}
-                className="rounded bg-gray-800 p-1 text-gray-400 hover:text-red-400 disabled:opacity-40"
+                className="rounded bg-slate-100 dark:bg-slate-800 p-1 text-slate-500 dark:text-slate-400 hover:text-red-400 disabled:opacity-40"
                 title="Clear route"
               >
                 <Trash2 className="h-3 w-3" />
@@ -673,16 +673,16 @@ export default function LocationMap() {
           </div>
 
           <div className="mt-2.5 grid grid-cols-3 gap-2 text-xs">
-            <div className="bg-gray-800/60 rounded p-1.5 text-center">
-              <div className="text-[10px] text-gray-400">Traveled</div>
+            <div className="bg-slate-100 dark:bg-slate-800/60 rounded p-1.5 text-center">
+              <div className="text-[10px] text-slate-500 dark:text-slate-400">Traveled</div>
               <div className="text-xs font-bold text-gray-100">{totalDistanceKm.toFixed(2)} km</div>
             </div>
-            <div className="bg-gray-800/60 rounded p-1.5 text-center">
-              <div className="text-[10px] text-gray-400">Waypoints</div>
+            <div className="bg-slate-100 dark:bg-slate-800/60 rounded p-1.5 text-center">
+              <div className="text-[10px] text-slate-500 dark:text-slate-400">Waypoints</div>
               <div className="text-xs font-bold text-blue-400">{routePoints.length}</div>
             </div>
-            <div className="bg-gray-800/60 rounded p-1.5 text-center">
-              <div className="text-[10px] text-gray-400">Live Speed</div>
+            <div className="bg-slate-100 dark:bg-slate-800/60 rounded p-1.5 text-center">
+              <div className="text-[10px] text-slate-500 dark:text-slate-400">Live Speed</div>
               <div className="text-xs font-bold text-teal-400">
                 {location?.speed != null && location.speed > 0
                   ? `${(location.speed * 3.6).toFixed(1)} km/h`
@@ -691,16 +691,16 @@ export default function LocationMap() {
             </div>
           </div>
 
-          <div className="mt-2.5 pt-2 border-t border-gray-800 space-y-2">
+          <div className="mt-2.5 pt-2 border-t border-slate-200 dark:border-slate-800 space-y-2">
             <div className="flex items-center justify-between text-[11px]">
               <label className="flex items-center gap-2 cursor-pointer select-none">
                 <input
                   type="checkbox"
                   checked={routeTrackingEnabled}
                   onChange={(e) => handleToggleRouteTracking(e.target.checked)}
-                  className="h-4 w-4 rounded border-gray-600 bg-gray-800 accent-blue-500 cursor-pointer"
+                  className="h-4 w-4 rounded border-gray-600 bg-slate-100 dark:bg-slate-800 accent-blue-500 cursor-pointer"
                 />
-                <span className={routeTrackingEnabled ? 'text-blue-300 font-semibold flex items-center gap-1.5' : 'text-gray-400'}>
+                <span className={routeTrackingEnabled ? 'text-blue-300 font-semibold flex items-center gap-1.5' : 'text-slate-500 dark:text-slate-400'}>
                   {routeTrackingEnabled && <span className="h-1.5 w-1.5 rounded-full bg-blue-400 animate-ping" />}
                   Record Trip & Timeline
                 </span>
@@ -710,7 +710,7 @@ export default function LocationMap() {
                 <button
                   type="button"
                   onClick={() => setShowTripSettings(!showTripSettings)}
-                  className="px-2 py-0.5 rounded bg-gray-800 hover:bg-gray-700 text-gray-300 text-[10px] flex items-center gap-1 transition-colors"
+                  className="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 hover:bg-gray-700 text-slate-700 dark:text-slate-300 text-[10px] flex items-center gap-1 transition-colors"
                   title="Configure idle movement radius & stay dwell time"
                 >
                   <Activity className="h-3 w-3 text-blue-400" />
@@ -718,7 +718,7 @@ export default function LocationMap() {
                 </button>
                 <button
                   onClick={() => setShowRouteTimeline(!showRouteTimeline)}
-                  className="flex items-center gap-1 text-[11px] text-gray-400 hover:text-gray-200"
+                  className="flex items-center gap-1 text-[11px] text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:text-slate-200"
                 >
                   Timeline {showRouteTimeline ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
                 </button>
@@ -727,9 +727,9 @@ export default function LocationMap() {
 
             {/* Expandable Smart Trip & Idle Filter Settings */}
             {showTripSettings && (
-              <div className="rounded-lg bg-gray-950/90 border border-gray-800 p-2.5 space-y-2 text-[11px] text-gray-300 animate-in fade-in">
+              <div className="rounded-lg bg-slate-50 dark:bg-slate-950/90 border border-slate-200 dark:border-slate-800 p-2.5 space-y-2 text-[11px] text-slate-700 dark:text-slate-300 animate-in fade-in">
                 <div className="flex items-center justify-between">
-                  <span className="text-gray-400">Idle Radius Threshold:</span>
+                  <span className="text-slate-500 dark:text-slate-400">Idle Radius Threshold:</span>
                   <div className="flex gap-1">
                     {[50, 100, 200, 500, 1000].map((r) => (
                       <button
@@ -739,7 +739,7 @@ export default function LocationMap() {
                         className={`px-1.5 py-0.5 rounded text-[10px] ${
                           idleRadius === r
                             ? 'bg-blue-600 text-white font-bold'
-                            : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+                            : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-gray-700'
                         }`}
                       >
                         {r >= 1000 ? `${r / 1000}km` : `${r}m`}
@@ -749,7 +749,7 @@ export default function LocationMap() {
                 </div>
 
                 <div className="flex items-center justify-between">
-                  <span className="text-gray-400">Min Stay Dwell Time:</span>
+                  <span className="text-slate-500 dark:text-slate-400">Min Stay Dwell Time:</span>
                   <div className="flex gap-1">
                     {[1, 3, 5, 10, 15].map((d) => (
                       <button
@@ -759,7 +759,7 @@ export default function LocationMap() {
                         className={`px-1.5 py-0.5 rounded text-[10px] ${
                           dwellMinutes === d
                             ? 'bg-blue-600 text-white font-bold'
-                            : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+                            : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-gray-700'
                         }`}
                       >
                         {d}m
@@ -768,7 +768,7 @@ export default function LocationMap() {
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between pt-1 border-t border-gray-900 text-[10px] text-gray-500">
+                <div className="flex items-center justify-between pt-1 border-t border-gray-900 text-[10px] text-slate-500 dark:text-slate-400">
                   <span>⚡ Offline Buffer: GPS saved locally when disconnected & synced on reconnect</span>
                   <button
                     type="button"
@@ -827,7 +827,7 @@ export default function LocationMap() {
           </div>
 
           {/* Interactive Map */}
-          <div className="h-[460px] overflow-hidden rounded-lg border border-gray-800 relative">
+          <div className="h-[460px] overflow-hidden rounded-lg border border-slate-200 dark:border-slate-800 relative">
             <MapContainer
               center={[location.latitude, location.longitude]}
               zoom={16}
@@ -909,8 +909,8 @@ export default function LocationMap() {
 
           {/* Rich Visual Route Timeline & Location Reports */}
           {showRouteTimeline && routePoints.length > 0 && (
-            <div className="rounded-xl border border-gray-800 bg-gray-900/80 p-4 shadow-xl">
-              <div className="flex flex-wrap items-center justify-between gap-3 mb-3 border-b border-gray-800 pb-3">
+            <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/80 p-4 shadow-xl">
+              <div className="flex flex-wrap items-center justify-between gap-3 mb-3 border-b border-slate-200/80 dark:border-slate-800 pb-3">
                 <div className="flex items-center gap-2">
                   <Route className="h-4 w-4 text-blue-400" />
                   <h3 className="text-sm font-bold text-gray-100">
@@ -928,7 +928,7 @@ export default function LocationMap() {
                     className={`px-2.5 py-1 text-xs rounded font-medium transition-colors cursor-pointer ${
                       timelineViewMode === 'grouped'
                         ? 'bg-blue-600 text-white shadow'
-                        : 'bg-gray-800 text-gray-400 hover:text-white'
+                        : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-white'
                     }`}
                   >
                     📍 Stops & Stays (Clean View)
@@ -939,7 +939,7 @@ export default function LocationMap() {
                     className={`px-2.5 py-1 text-xs rounded font-medium transition-colors cursor-pointer ${
                       timelineViewMode === 'raw'
                         ? 'bg-blue-600 text-white shadow'
-                        : 'bg-gray-800 text-gray-400 hover:text-white'
+                        : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-white'
                     }`}
                   >
                     📋 All GPS Points
@@ -969,8 +969,8 @@ export default function LocationMap() {
                         key={seg.startTime + '-' + idx}
                         className={`flex flex-wrap items-center justify-between p-3 rounded-lg border transition-all ${
                           isStay
-                            ? 'bg-gray-950/70 border-emerald-900/40 hover:border-emerald-700/60'
-                            : 'bg-gray-950/70 border-blue-900/40 hover:border-blue-700/60'
+                            ? 'bg-slate-50 dark:bg-slate-950/70 border-emerald-900/40 hover:border-emerald-700/60'
+                            : 'bg-slate-50 dark:bg-slate-950/70 border-blue-900/40 hover:border-blue-700/60'
                         }`}
                       >
                         <div className="flex items-start gap-3 min-w-0">
@@ -989,10 +989,10 @@ export default function LocationMap() {
                               }`}>
                                 {isStay ? 'Stationary Stay' : 'In Transit / Moving'}
                               </span>
-                              <span className="text-[11px] text-gray-500 font-mono">
+                              <span className="text-[11px] text-slate-500 dark:text-slate-400 font-mono">
                                 {startStr}{startStr !== endStr ? ` → ${endStr} (${durationMins}m)` : ''}
                               </span>
-                              <span className="text-[10px] text-gray-500">
+                              <span className="text-[10px] text-slate-500 dark:text-slate-400">
                                 ({seg.pointCount} fixes)
                               </span>
                             </div>
@@ -1002,7 +1002,7 @@ export default function LocationMap() {
                             </p>
 
                             <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-                              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-gray-900 text-gray-400 border border-gray-800">
+                              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-800">
                                 {seg.lat.toFixed(5)}, {seg.lng.toFixed(5)}
                               </span>
                               <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded border ${
@@ -1012,7 +1012,7 @@ export default function LocationMap() {
                               }`}>
                                 {isStay ? 'Stationary (0 km/h)' : `Speed: ${seg.speed.toFixed(1)} km/h`}
                               </span>
-                              <span className="text-[10px] text-gray-500 font-mono">
+                              <span className="text-[10px] text-slate-500 dark:text-slate-400 font-mono">
                                 ±{Math.round(seg.accuracy)}m accuracy
                               </span>
                             </div>
@@ -1022,7 +1022,7 @@ export default function LocationMap() {
                         <button
                           type="button"
                           onClick={() => setMapFocus({ position: [seg.lat, seg.lng], zoom: 17, timestamp: Date.now() })}
-                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-teal-300 hover:text-teal-200 text-xs font-medium border border-gray-700 transition-colors shrink-0 shadow mt-2 sm:mt-0 cursor-pointer"
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-gray-700 text-teal-300 hover:text-teal-200 text-xs font-medium border border-gray-700 transition-colors shrink-0 shadow mt-2 sm:mt-0 cursor-pointer"
                         >
                           <Locate className="h-3.5 w-3.5" /> Locate
                         </button>
@@ -1044,7 +1044,7 @@ export default function LocationMap() {
                       return (
                         <div
                           key={p.timestamp + '-' + idx}
-                          className="flex flex-wrap items-center justify-between py-1.5 px-3 rounded-lg bg-gray-950/60 border border-gray-800/80 text-xs text-gray-300 gap-2 hover:bg-gray-900/80 transition-colors"
+                          className="flex flex-wrap items-center justify-between py-1.5 px-3 rounded-lg bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800/80 text-xs text-slate-700 dark:text-slate-300 gap-2 hover:bg-white dark:bg-slate-900/80 transition-colors"
                         >
                           <div className="flex items-center gap-2 min-w-0">
                             <span className="font-mono text-[11px] text-teal-400 shrink-0">
@@ -1056,14 +1056,14 @@ export default function LocationMap() {
                           </div>
 
                           <div className="flex items-center gap-2 shrink-0">
-                            <span className="text-gray-500 font-mono text-[11px]">±{Math.round(p.accuracy || 0)}m</span>
+                            <span className="text-slate-500 dark:text-slate-400 font-mono text-[11px]">±{Math.round(p.accuracy || 0)}m</span>
                             <span className="text-teal-300 font-mono text-[11px]">
                               {p.speed ? `${(p.speed * 3.6).toFixed(0)} km/h` : '0 km/h'}
                             </span>
                             <button
                               type="button"
                               onClick={() => setMapFocus({ position: [p.lat, p.lng], zoom: 17, timestamp: Date.now() })}
-                              className="p-1 rounded bg-gray-800 text-gray-400 hover:text-white"
+                              className="p-1 rounded bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-white"
                               title="Locate on map"
                             >
                               <Locate className="h-3 w-3" />
@@ -1078,10 +1078,10 @@ export default function LocationMap() {
           )}
         </>
       ) : (
-        <div className="flex flex-col h-[400px] items-center justify-center rounded-lg border border-dashed border-gray-700 p-6 text-center text-gray-400">
+        <div className="flex flex-col h-[400px] items-center justify-center rounded-lg border border-dashed border-gray-700 p-6 text-center text-slate-500 dark:text-slate-400">
           <Navigation className="h-10 w-10 text-gray-600 mb-3 animate-pulse" />
-          <p className="text-sm font-medium text-gray-300">Waiting for GPS fix from phone…</p>
-          <p className="mt-1 text-xs text-gray-500 max-w-md">
+          <p className="text-sm font-medium text-slate-700 dark:text-slate-300">Waiting for GPS fix from phone…</p>
+          <p className="mt-1 text-xs text-slate-500 dark:text-slate-400 max-w-md">
             Make sure Location is turned ON in phone system settings and granted in the app. Click "Refresh GPS" above to query fresh coordinates.
           </p>
         </div>
@@ -1092,12 +1092,12 @@ export default function LocationMap() {
 
 function Stat({ label, value, icon: Icon }) {
   return (
-    <div className="rounded-lg border border-gray-800 bg-gray-900/50 px-3 py-2.5">
-      <p className="flex items-center gap-1.5 text-xs text-gray-500">
+    <div className="rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 px-3 py-2.5">
+      <p className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
         {Icon && <Icon className="h-3.5 w-3.5" />}
         {label}
       </p>
-      <p className="mt-1 truncate text-xs sm:text-sm font-semibold text-gray-200">{value}</p>
+      <p className="mt-1 truncate text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-200">{value}</p>
     </div>
   );
 }
