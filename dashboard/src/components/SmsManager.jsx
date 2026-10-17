@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect, useRef } from 'react';
-import { Send, MessageSquare, User, RefreshCw } from 'lucide-react';
+import { Send, MessageSquare, User, RefreshCw, ArrowLeft } from 'lucide-react';
 import { useStore } from '../store/StoreContext';
 
 export default function SmsManager() {
@@ -7,7 +7,6 @@ export default function SmsManager() {
   const [conversations, setConversations] = useState([]);
   const [openThread, setOpenThread] = useState(null);
   const [draft, setDraft] = useState('');
-  // FEATURE B: free-text recipient for starting a new conversation.
   const [newNumber, setNewNumber] = useState('');
   const [smsRefreshing, setSmsRefreshing] = useState(false);
   const [mobileShowThread, setMobileShowThread] = useState(false);
@@ -31,8 +30,11 @@ export default function SmsManager() {
       }
       if (msg.type === 1 && msg.date > Date.now() - 60_000) byAddress[key].unread += 1;
     }
-    setConversations(Object.values(byAddress).sort((a, b) => b.lastDate - a.lastDate));
-    if (!openThread && Object.keys(byAddress).length > 0) setOpenThread(Object.values(byAddress).sort((a, b) => b.lastDate - a.lastDate)[0].address);
+    const sorted = Object.values(byAddress).sort((a, b) => b.lastDate - a.lastDate);
+    setConversations(sorted);
+    if (!openThread && sorted.length > 0) {
+      setOpenThread(sorted[0].address);
+    }
   }, [all, openThread]);
 
   useEffect(() => {
@@ -41,10 +43,10 @@ export default function SmsManager() {
 
   if (!activeDeviceId) {
     return (
-      <div className="flex h-full items-center justify-center text-gray-500">
+      <div className="flex h-full items-center justify-center text-slate-400">
         <div className="text-center">
-          <MessageSquare className="mx-auto h-10 w-10 opacity-40" />
-          <p className="mt-3 text-sm">Select a device to view messages</p>
+          <MessageSquare className="mx-auto h-12 w-12 opacity-30 text-indigo-500 animate-pulse" />
+          <p className="mt-3 text-sm font-semibold">Select a device to view SMS messages</p>
         </div>
       </div>
     );
@@ -52,7 +54,6 @@ export default function SmsManager() {
 
   const thread = openThread
     ? conversations.find((c) => c.address === openThread) ||
-      // FEATURE B: fresh number — empty thread so the compose box shows at once.
       { address: openThread, messages: [], lastDate: Date.now(), lastBody: '', type: 2, unread: 0 }
     : null;
 
@@ -73,21 +74,25 @@ export default function SmsManager() {
       if (exists) {
         return list.map((c) => (c.address === openThread ? { ...c, messages: [...c.messages, optimistic], lastBody: optimistic.body, lastDate: optimistic.date } : c));
       }
-      // FEATURE B: new number with no history yet — show it immediately.
       return [...list, { address: openThread, messages: [optimistic], lastDate: optimistic.date, lastBody: optimistic.body, type: 2, unread: 0 }];
     });
+    const messageToSend = draft.trim();
     setDraft('');
-    await sendCommand('send-sms', { deviceId: activeDeviceId, recipient: openThread, message: optimistic.body });
+    await sendCommand('send-sms', { deviceId: activeDeviceId, recipient: openThread, message: messageToSend });
   };
 
   return (
-    <div className="mx-auto flex h-full max-w-6xl gap-4">
-      <div className={`${mobileShowThread ? 'hidden' : 'flex'} w-full flex-col overflow-hidden rounded-lg border border-gray-800 bg-gray-900/50 md:flex md:w-80 md:shrink-0`}>
-        <div className="border-b border-gray-800 px-4 py-3">
+    <div className="mx-auto flex h-[calc(100vh-145px)] max-w-6xl gap-4">
+      {/* Sidebar: Conversation Threads */}
+      <div className={`${mobileShowThread ? 'hidden' : 'flex'} w-full flex-col overflow-hidden rounded-2xl border border-slate-200/90 dark:border-white/10 bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl shadow-xl md:flex md:w-80 md:shrink-0`}>
+        <div className="border-b border-slate-200/80 dark:border-slate-800 p-4">
           <div className="flex items-center justify-between gap-2">
             <div>
-              <h2 className="text-sm font-semibold">Conversations</h2>
-              <p className="text-xs text-gray-500">{conversations.length} threads</p>
+              <h2 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                <MessageSquare className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+                Conversations
+              </h2>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 font-mono">{conversations.length} threads</p>
             </div>
             <button
               onClick={async () => {
@@ -97,14 +102,15 @@ export default function SmsManager() {
                 setSmsRefreshing(false);
               }}
               disabled={!activeDeviceId || smsRefreshing}
-              className="flex items-center gap-1.5 rounded-lg bg-gray-800 px-2.5 py-1.5 text-xs text-gray-400 transition-colors hover:bg-gray-700 hover:text-gray-200 disabled:opacity-40"
+              className="btn-interactive flex items-center gap-1 rounded-xl bg-white dark:bg-slate-800 px-2.5 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-40 shadow-xs cursor-pointer"
               title="Request fresh SMS list from the phone"
             >
-              <RefreshCw className={`h-3.5 w-3.5 ${smsRefreshing ? 'animate-spin' : ''}`} />
-              Refresh
+              <RefreshCw className={`h-3.5 w-3.5 text-indigo-500 ${smsRefreshing ? 'animate-spin' : ''}`} />
+              Sync
             </button>
           </div>
-          {/* FEATURE B: start a new conversation by typing any number. */}
+
+          {/* New message recipient input */}
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -112,89 +118,118 @@ export default function SmsManager() {
               setOpenThread(newNumber.trim());
               setMobileShowThread(true);
             }}
-            className="mt-2 flex items-center gap-1.5"
+            className="mt-3 flex items-center gap-2"
           >
             <input
               value={newNumber}
               onChange={(e) => setNewNumber(e.target.value)}
-              placeholder="New number…"
-              className="min-w-0 flex-1 rounded-lg bg-gray-800 px-3 py-1.5 text-xs outline-none placeholder:text-gray-600 focus:ring-1 focus:ring-teal-500"
+              placeholder="New number or contact…"
+              className="min-w-0 flex-1 rounded-xl bg-white dark:bg-slate-950/80 border border-slate-300 dark:border-slate-800 px-3 py-1.5 text-xs text-slate-900 dark:text-slate-100 placeholder-slate-400 outline-none focus:border-indigo-500 shadow-xs font-mono"
             />
-            <button type="submit" disabled={!newNumber.trim()} className="shrink-0 rounded-lg bg-teal-600 px-2.5 py-1.5 text-xs text-white hover:bg-teal-500 disabled:opacity-40">
+            <button
+              type="submit"
+              disabled={!newNumber.trim()}
+              className="btn-interactive shrink-0 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 px-3 py-1.5 text-xs font-bold text-white shadow-xs disabled:opacity-40 cursor-pointer"
+            >
               Chat
             </button>
           </form>
         </div>
-        <div className="flex-1 overflow-y-auto divide-y divide-gray-800/70 scrollbar-thin">
+
+        {/* Conversation List */}
+        <div className="flex-1 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800/60 p-2 scrollbar-thin">
           {conversations.length === 0 && (
-            <div className="px-4 py-8 text-center text-xs text-gray-500">No messages yet.</div>
+            <div className="px-4 py-12 text-center text-xs text-slate-400">No messages found.</div>
           )}
-          {conversations.map((conv) => (
-            <button
-              key={conv.address}
-              onClick={() => {
-                setOpenThread(conv.address);
-                setMobileShowThread(true);
-              }}
-              className={`w-full px-4 py-3 text-left transition-colors ${openThread === conv.address ? 'bg-gray-800' : 'hover:bg-gray-800/50'}`}
-            >
-              <div className="flex items-center gap-3">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-teal-600/20 text-teal-400">
-                  <User className="h-4 w-4" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-baseline justify-between gap-2">
-                    <p className="truncate text-sm font-medium">{conv.address}</p>
-                    <span className="shrink-0 text-[10px] text-gray-500">{formatDay(conv.lastDate)}</span>
+          {conversations.map((conv) => {
+            const isActive = openThread === conv.address;
+            return (
+              <button
+                key={conv.address}
+                onClick={() => {
+                  setOpenThread(conv.address);
+                  setMobileShowThread(true);
+                }}
+                className={`w-full p-3 rounded-xl text-left transition-all cursor-pointer ${
+                  isActive
+                    ? 'bg-gradient-to-r from-indigo-500/15 to-violet-500/10 border border-indigo-500/30 shadow-xs'
+                    : 'hover:bg-slate-100/70 dark:hover:bg-slate-800/40 border border-transparent'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <div
+                    className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl font-bold text-xs ${
+                      isActive
+                        ? 'bg-indigo-600 text-white shadow-xs'
+                        : 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20'
+                    }`}
+                  >
+                    <User className="h-4 w-4" />
                   </div>
-                  <p className="truncate text-xs text-gray-500">
-                    {conv.type === 2 ? 'You: ' : ''}
-                    {conv.lastBody}
-                  </p>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-baseline justify-between gap-2">
+                      <p className="truncate text-xs font-bold text-slate-900 dark:text-slate-100">{conv.address}</p>
+                      <span className="shrink-0 text-[10px] font-mono text-slate-400">{formatDay(conv.lastDate)}</span>
+                    </div>
+                    <p className="truncate text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                      {conv.type === 2 ? 'You: ' : ''}
+                      {conv.lastBody}
+                    </p>
+                  </div>
+                  {conv.unread > 0 && (
+                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-indigo-600 text-[10px] font-bold text-white shadow-xs">
+                      {conv.unread}
+                    </span>
+                  )}
                 </div>
-                {conv.unread > 0 && (
-                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-teal-600 text-[10px] font-bold">
-                    {conv.unread}
-                  </span>
-                )}
-              </div>
-            </button>
-          ))}
+              </button>
+            );
+          })}
         </div>
       </div>
 
-      <div className={`${mobileShowThread ? 'flex' : 'hidden'} min-w-0 flex-1 flex-col overflow-hidden rounded-lg border border-gray-800 bg-gray-900/50 md:flex`}>
+      {/* Main Chat Thread Area */}
+      <div className={`${mobileShowThread ? 'flex' : 'hidden'} min-w-0 flex-1 flex-col overflow-hidden rounded-2xl border border-slate-200/90 dark:border-white/10 bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl shadow-xl md:flex`}>
         {thread ? (
           <>
-            <div className="flex items-center gap-3 border-b border-gray-800 px-4 py-3">
-              <button onClick={() => setMobileShowThread(false)} className="text-gray-400 hover:text-white md:hidden">
-                ←
+            {/* Thread Header */}
+            <div className="flex items-center gap-3 border-b border-slate-200/80 dark:border-slate-800 p-4 bg-white/40 dark:bg-slate-900/40">
+              <button
+                type="button"
+                onClick={() => setMobileShowThread(false)}
+                className="btn-interactive text-slate-400 hover:text-slate-700 dark:hover:text-white p-1 rounded-lg md:hidden"
+              >
+                <ArrowLeft className="h-5 w-5" />
               </button>
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-teal-600/20 text-teal-400">
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-600 text-white shadow-xs shrink-0">
                 <User className="h-4 w-4" />
               </div>
-              <p className="text-sm font-medium">{thread.address}</p>
+              <div className="min-w-0">
+                <p className="text-sm font-bold text-slate-900 dark:text-white truncate">{thread.address}</p>
+                <p className="text-[10px] font-mono text-slate-400">Direct SMS Carrier Tunnel</p>
+              </div>
               {!activeDevice?.online && (
-                <span className="ml-auto rounded-full bg-yellow-500/10 px-2 py-0.5 text-[10px] text-yellow-400">
-                  Offline — will send on reconnect
+                <span className="ml-auto rounded-full bg-amber-500/10 border border-amber-500/30 px-3 py-1 text-[10px] font-semibold text-amber-600 dark:text-amber-400">
+                  Offline — Queueing for reconnect
                 </span>
               )}
             </div>
 
-            <div className="flex-1 space-y-2 overflow-y-auto p-4 scrollbar-thin">
+            {/* Chat Bubble Scroll Area */}
+            <div className="flex-1 space-y-3 overflow-y-auto p-4 scrollbar-thin">
               {thread.messages.map((msg) => (
                 <div key={msg.id} className={`flex ${msg.type === 2 ? 'justify-end' : 'justify-start'}`}>
                   <div
-                    className={`max-w-[75%] rounded-2xl px-3.5 py-2 text-sm ${
+                    className={`max-w-[75%] rounded-2xl p-3.5 text-xs leading-relaxed transition-all ${
                       msg.type === 2
-                        ? 'rounded-br-sm bg-teal-600 text-white'
-                        : 'rounded-bl-sm bg-gray-800 text-gray-100'
-                    } ${msg.pending ? 'opacity-60' : ''}`}
+                        ? 'rounded-br-xs bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-md shadow-indigo-500/20'
+                        : 'rounded-bl-xs bg-white dark:bg-slate-800/90 text-slate-900 dark:text-slate-100 border border-slate-200/80 dark:border-slate-700/80 shadow-xs'
+                    } ${msg.pending ? 'opacity-70' : ''}`}
                   >
                     <p className="whitespace-pre-wrap break-words">{msg.body}</p>
-                    <p className={`mt-1 text-[10px] ${msg.type === 2 ? 'text-teal-100' : 'text-gray-500'}`}>
+                    <p className={`mt-1.5 text-[9px] font-mono ${msg.type === 2 ? 'text-indigo-200' : 'text-slate-400'}`}>
                       {new Date(msg.date).toLocaleString([], { hour: '2-digit', minute: '2-digit', day: '2-digit', month: 'short' })}
-                      {msg.pending ? ' · sending…' : ''}
+                      {msg.pending ? ' • sending…' : ''}
                     </p>
                   </div>
                 </div>
@@ -202,25 +237,26 @@ export default function SmsManager() {
               <div ref={bottomRef} />
             </div>
 
-            <form onSubmit={handleSend} className="flex items-center gap-2 border-t border-gray-800 p-3">
+            {/* Message Compose Form */}
+            <form onSubmit={handleSend} className="flex items-center gap-2 border-t border-slate-200/80 dark:border-slate-800 p-3 bg-white/40 dark:bg-slate-900/40">
               <input
                 value={draft}
                 onChange={(e) => setDraft(e.target.value)}
-                placeholder="Type a message…"
-                className="min-w-0 flex-1 rounded-full bg-gray-800 px-4 py-2.5 text-sm outline-none placeholder:text-gray-500 focus:ring-2 focus:ring-teal-500"
+                placeholder="Type an SMS to push through phone…"
+                className="min-w-0 flex-1 rounded-xl bg-white dark:bg-slate-950/80 border border-slate-300 dark:border-slate-800 px-4 py-2.5 text-xs text-slate-900 dark:text-slate-100 placeholder-slate-400 outline-none focus:border-indigo-500 shadow-xs"
               />
               <button
                 type="submit"
                 disabled={!draft.trim()}
-                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-teal-600 text-white transition-colors hover:bg-teal-500 disabled:cursor-not-allowed disabled:opacity-40"
+                className="btn-interactive flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-md shadow-indigo-500/25 disabled:cursor-not-allowed disabled:opacity-40 cursor-pointer"
               >
                 <Send className="h-4 w-4" />
               </button>
             </form>
           </>
         ) : (
-          <div className="flex h-full items-center justify-center text-sm text-gray-500">
-            Select a conversation
+          <div className="flex h-full items-center justify-center text-xs text-slate-400">
+            Select a conversation thread on the left
           </div>
         )}
       </div>

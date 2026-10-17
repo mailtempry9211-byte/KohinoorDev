@@ -92,44 +92,44 @@ export default function ThinkingClock({ compact = false }) {
         <button
           type="button"
           onClick={() => setExpanded(!expanded)}
-          className="flex items-center gap-2.5 rounded-full border border-teal-800/60 bg-gray-950/80 px-3 py-1.5 shadow-md hover:border-teal-500/80 hover:bg-gray-900 transition-all cursor-pointer group"
+          className="btn-interactive flex items-center gap-2.5 rounded-full border border-slate-200 dark:border-slate-800 bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl px-3.5 py-1.5 shadow-xs hover:border-indigo-400 dark:hover:border-indigo-500/80 hover:bg-white dark:hover:bg-slate-900 transition-all cursor-pointer group"
           title="Click to view Animated Thinking Clock mascot"
         >
           {/* Mini Cartoon Clock Face */}
-          <div className="relative h-6 w-6 shrink-0 rounded-full border-2 border-teal-400 bg-teal-950/80 flex items-center justify-center shadow-[0_0_8px_rgba(20,184,166,0.4)]">
+          <div className="relative h-6 w-6 shrink-0 rounded-full border border-indigo-400/50 bg-gradient-to-tr from-indigo-600 via-indigo-500 to-violet-500 flex items-center justify-center shadow-xs">
             {/* Clock bells */}
-            <div className="absolute -top-1 -left-0.5 h-1.5 w-1.5 rounded-full bg-teal-400" />
-            <div className="absolute -top-1 -right-0.5 h-1.5 w-1.5 rounded-full bg-teal-400" />
+            <div className="absolute -top-1 -left-0.5 h-1.5 w-1.5 rounded-full bg-indigo-300 dark:bg-indigo-400" />
+            <div className="absolute -top-1 -right-0.5 h-1.5 w-1.5 rounded-full bg-indigo-300 dark:bg-indigo-400" />
 
             {/* Cartoon Eyes */}
             <div className="flex gap-1 items-center justify-center">
               {/* Left Eye */}
               <div className={`h-1.5 w-1.5 rounded-full bg-white flex items-center justify-center transition-all ${isBlinking || wink ? 'scale-y-[0.1]' : ''}`}>
                 <div
-                  className="h-1 w-1 rounded-full bg-teal-950 transition-transform"
+                  className="h-1 w-1 rounded-full bg-indigo-950 transition-transform"
                   style={{ transform: `translate(${pupilOffset.x / 4}px, ${pupilOffset.y / 4}px)` }}
                 />
               </div>
               {/* Right Eye */}
               <div className={`h-1.5 w-1.5 rounded-full bg-white flex items-center justify-center transition-all ${isBlinking ? 'scale-y-[0.1]' : ''}`}>
                 <div
-                  className="h-1 w-1 rounded-full bg-teal-950 transition-transform"
+                  className="h-1 w-1 rounded-full bg-indigo-950 transition-transform"
                   style={{ transform: `translate(${pupilOffset.x / 4}px, ${pupilOffset.y / 4}px)` }}
                 />
               </div>
             </div>
 
             {/* Small smiling mouth */}
-            <div className="absolute bottom-1 h-0.5 w-1.5 border-b border-teal-300 rounded-full" />
+            <div className="absolute bottom-1 h-0.5 w-1.5 border-b border-indigo-200 rounded-full" />
           </div>
 
           {/* Time & Quick Thought */}
           <div className="flex items-center gap-2 text-left">
-            <span className="font-mono text-xs font-bold text-teal-300 tracking-tight">
+            <span className="font-mono text-xs font-bold text-indigo-600 dark:text-indigo-400 tracking-tight">
               {formattedDigital}
             </span>
-            <span className="hidden md:inline-flex items-center gap-1 text-[11px] text-gray-400 group-hover:text-teal-300 transition-colors">
-              <span className="h-1.5 w-1.5 rounded-full bg-teal-400 animate-pulse" />
+            <span className="hidden md:inline-flex items-center gap-1 text-[11px] text-slate-500 dark:text-slate-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-300 transition-colors">
+              <span className="h-1.5 w-1.5 rounded-full bg-indigo-500 animate-pulse" />
               Thinking: {currentThought.text.slice(0, 32)}…
             </span>
           </div>
@@ -137,15 +137,15 @@ export default function ThinkingClock({ compact = false }) {
 
         {/* Expanded Popover Modal */}
         {expanded && (
-          <div className="absolute right-0 top-11 z-50 w-80 rounded-2xl border border-teal-700/80 bg-gray-950/95 p-4 shadow-2xl backdrop-blur-md animate-in fade-in zoom-in-95">
-            <div className="flex items-center justify-between border-b border-gray-800 pb-2 mb-3">
-              <span className="text-xs font-bold text-teal-300 flex items-center gap-1.5">
+          <div className="absolute right-0 top-12 z-50 w-80 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-slate-950/95 p-5 shadow-2xl backdrop-blur-2xl animate-in fade-in zoom-in-95">
+            <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-2 mb-3">
+              <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400 flex items-center gap-1.5">
                 <Sparkles className="h-3.5 w-3.5" /> Tik-Tik • Sochne Wali Ghadi
               </span>
               <button
                 type="button"
                 onClick={() => setExpanded(false)}
-                className="text-gray-400 hover:text-white p-1 rounded-md"
+                className="text-slate-400 hover:text-slate-700 dark:hover:text-white p-1 rounded-lg cursor-pointer"
               >
                 <X className="h-4 w-4" />
               </button>

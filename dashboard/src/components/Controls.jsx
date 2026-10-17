@@ -669,34 +669,34 @@ export default function Controls() {
 
   return (
     <div className="mx-auto max-w-6xl space-y-6 pb-12">
-      {/* Redesigned Mission Control Header */}
-      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800/80 pb-5">
+      {/* Redesigned Glassmorphic Mission Control Header */}
+      <div className="flex flex-wrap items-center justify-between gap-4 p-5 rounded-2xl bg-white/70 dark:bg-slate-900/60 backdrop-blur-2xl border border-slate-200/90 dark:border-white/10 shadow-xl shadow-slate-200/20 dark:shadow-black/30">
         <div>
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-teal-500/10 border border-teal-500/30 text-teal-400 shadow-md shadow-teal-500/5">
+          <div className="flex items-center gap-3.5">
+            <div className="p-3 rounded-2xl bg-gradient-to-tr from-indigo-600 to-violet-600 text-white shadow-lg shadow-indigo-500/30 border border-indigo-400/30">
               <Sliders className="h-5 w-5" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-white flex items-center gap-2">
+              <h2 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
                 Remote Controls &amp; System Hub
               </h2>
               <div className="flex flex-wrap items-center gap-2 mt-1">
-                <span className="text-xs text-slate-400">Target:</span>
-                <span className="text-xs font-semibold text-teal-300 font-mono bg-teal-950/60 border border-teal-800/60 px-2 py-0.5 rounded-md">
+                <span className="text-xs text-slate-500 dark:text-slate-400">Target Device:</span>
+                <span className="text-xs font-bold text-indigo-700 dark:text-indigo-300 font-mono bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800/80 px-2.5 py-0.5 rounded-lg">
                   {activeDevice?.deviceName || activeDeviceId}
                 </span>
                 {activeDevice?.online ? (
-                  <span className="flex items-center gap-1 text-[10px] font-mono text-emerald-400 bg-emerald-950/60 border border-emerald-500/30 px-2 py-0.5 rounded-full">
-                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  <span className="flex items-center gap-1 text-[10px] font-mono font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-500/30 px-2 py-0.5 rounded-full">
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
                     Online
                   </span>
                 ) : (
-                  <span className="text-[10px] font-mono text-slate-500 bg-slate-900 border border-slate-800 px-2 py-0.5 rounded-full">
+                  <span className="text-[10px] font-mono text-slate-500 bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-2 py-0.5 rounded-full">
                     Offline
                   </span>
                 )}
                 {activeDevice?.battery !== undefined && (
-                  <span className="text-[10px] font-mono text-slate-300 bg-slate-900/80 border border-slate-800 px-2 py-0.5 rounded-md">
+                  <span className="text-[10px] font-mono text-slate-700 dark:text-slate-300 bg-white/80 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 px-2 py-0.5 rounded-lg shadow-xs">
                     🔋 {activeDevice.battery}%
                   </span>
                 )}
@@ -710,16 +710,16 @@ export default function Controls() {
             <button
               type="button"
               onClick={() => setControlSearch('')}
-              className="px-2.5 py-1.5 text-xs text-slate-400 hover:text-slate-200 bg-slate-900/80 border border-slate-800 rounded-lg transition"
+              className="btn-interactive px-3 py-1.5 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl transition cursor-pointer"
             >
-              Clear Filter
+              Reset Search
             </button>
           )}
         </div>
       </div>
 
       {/* STICKY GLASS SUB-NAVIGATION PILL BAR & INSTANT SEARCH */}
-      <div className="sticky top-0 z-30 -mx-2 px-3 py-3 bg-slate-950/90 backdrop-blur-xl border border-slate-800/80 rounded-2xl shadow-2xl flex flex-wrap items-center justify-between gap-3">
+      <div className="sticky top-0 z-30 -mx-2 px-3 py-3 bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl border border-slate-200/90 dark:border-white/10 rounded-2xl shadow-2xl shadow-slate-200/40 dark:shadow-black/50 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
           {[
             { id: 'all', label: 'All Controls', icon: Sliders },
@@ -736,13 +736,13 @@ export default function Controls() {
                 key={tab.id}
                 type="button"
                 onClick={() => setControlTab(tab.id)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap ${
+                className={`btn-interactive px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap ${
                   isActive
-                    ? 'bg-gradient-to-r from-teal-500/25 to-teal-600/15 text-teal-300 border border-teal-500/50 shadow-md shadow-teal-500/10'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 border border-transparent'
+                    ? 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-md shadow-indigo-500/25 border border-indigo-400/30'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60 border border-transparent'
                 }`}
               >
-                <Icon className={`h-3.5 w-3.5 ${isActive ? 'text-teal-400' : 'text-slate-500'}`} />
+                <Icon className={`h-3.5 w-3.5 ${isActive ? 'text-white' : 'text-slate-400 dark:text-slate-500'}`} />
                 <span>{tab.label}</span>
               </button>
             );
@@ -750,21 +750,21 @@ export default function Controls() {
         </div>
 
         <div className="relative min-w-[240px] flex-1 sm:flex-initial">
-          <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-slate-500" />
+          <Search className="absolute left-3.5 top-3 h-3.5 w-3.5 text-slate-400" />
           <input
             type="text"
             value={controlSearch}
             onChange={(e) => setControlSearch(e.target.value)}
             placeholder="Search 25+ controls (e.g. torch, cam, lock)..."
-            className="w-full pl-8 pr-7 py-1.5 rounded-xl bg-slate-900/90 border border-slate-800 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-teal-500/50 transition-colors"
+            className="w-full pl-9 pr-8 py-2 rounded-xl bg-white/90 dark:bg-slate-950/80 border border-slate-300 dark:border-slate-800 text-xs font-medium text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 shadow-xs transition-all"
           />
           {controlSearch && (
             <button
               type="button"
               onClick={() => setControlSearch('')}
-              className="absolute right-2.5 top-2 text-slate-500 hover:text-slate-300"
+              className="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
             >
-              <X className="h-3.5 w-3.5" />
+              <X className="h-4 w-4" />
             </button>
           )}
         </div>
@@ -787,7 +787,7 @@ export default function Controls() {
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="text-base font-bold text-white">Bandwidth & Remote Feature Sync Manager</h3>
+                <h3 className="text-base font-bold text-slate-900 dark:text-white">Bandwidth & Remote Feature Sync Manager</h3>
                 <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full border ${
                   syncConfig?.lowDataMode
                     ? 'bg-amber-950 border-amber-600 text-amber-300 animate-pulse'
@@ -1028,7 +1028,7 @@ export default function Controls() {
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <h3 className="text-base font-bold text-white">Parental Controls, App Blocker & Screen Time</h3>
+                    <h3 className="text-base font-bold text-slate-900 dark:text-white">Parental Controls, App Blocker & Screen Time</h3>
                     <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full border ${
                       parentalControl?.enabled
                         ? 'bg-purple-950 border-purple-500 text-purple-300'
@@ -1274,7 +1274,7 @@ export default function Controls() {
                   <BatteryCharging className="h-4 w-4" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-gray-100 text-sm">Battery Cutoff & Overheat Guard</h3>
+                  <h3 className="font-bold text-slate-900 dark:text-slate-100 text-sm">Battery Cutoff & Overheat Guard</h3>
                   <p className="text-[11px] text-gray-400">90% charge alarm & 45°C thermal protect</p>
                 </div>
               </div>
@@ -1364,7 +1364,7 @@ export default function Controls() {
                   <Camera className="h-4 w-4" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-gray-100 text-sm">Camera Auto-Timelapse Guard</h3>
+                  <h3 className="font-bold text-slate-900 dark:text-slate-100 text-sm">Camera Auto-Timelapse Guard</h3>
                   <p className="text-[11px] text-gray-400">Periodic silent background photo sync</p>
                 </div>
               </div>
@@ -1520,7 +1520,7 @@ export default function Controls() {
                   <MapPin className="h-4 w-4" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-gray-100 text-sm">Geofencing & Boundary Alerts</h3>
+                  <h3 className="font-bold text-slate-900 dark:text-slate-100 text-sm">Geofencing & Boundary Alerts</h3>
                   <p className="text-[11px] text-gray-400">Instant alert when phone leaves safe area</p>
                 </div>
               </div>
@@ -1613,7 +1613,7 @@ export default function Controls() {
                   <MessageSquare className="h-4 w-4" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-gray-100 text-sm">Smart Notification Auto-Reply</h3>
+                  <h3 className="font-bold text-slate-900 dark:text-slate-100 text-sm">Smart Notification Auto-Reply</h3>
                   <p className="text-[11px] text-gray-400">Auto-respond to WhatsApp, SMS & Messages</p>
                 </div>
               </div>
@@ -1684,7 +1684,7 @@ export default function Controls() {
                   <Wifi className="h-4 w-4" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-gray-100 text-sm">Network Data Usage Tracker</h3>
+                  <h3 className="font-bold text-slate-900 dark:text-slate-100 text-sm">Network Data Usage Tracker</h3>
                   <p className="text-[11px] text-gray-400">Per-app mobile vs Wi-Fi consumption</p>
                 </div>
               </div>
@@ -1748,7 +1748,7 @@ export default function Controls() {
                   <Clock className="h-4 w-4" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-gray-100 text-sm">Scheduled Remote Commands</h3>
+                  <h3 className="font-bold text-slate-900 dark:text-slate-100 text-sm">Scheduled Remote Commands</h3>
                   <p className="text-[11px] text-gray-400">Trigger remote actions at a future time</p>
                 </div>
               </div>
@@ -1835,7 +1835,7 @@ export default function Controls() {
                   <ShieldAlert className="h-4 w-4" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-gray-100 text-sm">Volume Button 5x SOS Alert</h3>
+                  <h3 className="font-bold text-slate-900 dark:text-slate-100 text-sm">Volume Button 5x SOS Alert</h3>
                   <p className="text-[11px] text-gray-400">Hardware key distress trigger + live GPS</p>
                 </div>
               </div>
@@ -1875,7 +1875,7 @@ export default function Controls() {
                   <Mic className="h-4 w-4" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-gray-100 text-sm">Automatic Phone Call Recording</h3>
+                  <h3 className="font-bold text-slate-900 dark:text-slate-100 text-sm">Automatic Phone Call Recording</h3>
                   <p className="text-[11px] text-gray-400">Background call audio record & vault save</p>
                 </div>
               </div>
@@ -1924,7 +1924,7 @@ export default function Controls() {
                   <Shield className="h-4 w-4" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-gray-100 text-sm">Kids Safety &amp; iOS Calculator Camouflage</h3>
+                  <h3 className="font-bold text-slate-900 dark:text-slate-100 text-sm">Kids Safety &amp; iOS Calculator Camouflage</h3>
                   <p className="text-[11px] text-gray-400">Stealth app disguise, invisible notification &amp; anti-tamper</p>
                 </div>
               </div>
@@ -2093,10 +2093,10 @@ export default function Controls() {
         </div>
 
         {/* PHONE HARDWARE & QUICK SETTINGS CONTROLS CARD */}
-        <div className={`rounded-2xl border border-slate-800/80 bg-slate-900/60 backdrop-blur-md hover:border-slate-700/80 p-5 shadow-xl flex flex-col justify-between ${isCardVisible("hardware", ["hardware", "quick settings", "wifi", "bluetooth", "hotspot", "torch", "ringer", "toggles"]) ? "" : "hidden"}`}>
+        <div className={`rounded-2xl border border-slate-200/90 dark:border-white/10 bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl hover:border-indigo-500/40 dark:hover:border-indigo-500/40 p-5 shadow-xl hover:-translate-y-1 hover:shadow-2xl transition-all duration-300 flex flex-col justify-between ${isCardVisible("hardware", ["hardware", "quick settings", "wifi", "bluetooth", "hotspot", "torch", "ringer", "toggles"]) ? "" : "hidden"}`}>
           <div>
             <div className="flex items-center justify-between mb-4 border-b border-gray-800 pb-3">
-              <h3 className="font-semibold text-gray-100 flex items-center gap-2 text-sm">
+              <h3 className="font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2 text-sm">
                 <Sliders className="h-4 w-4 text-cyan-400" /> Phone Hardware &amp; Quick Settings
               </h3>
               <div className="flex items-center gap-2">
@@ -2306,10 +2306,10 @@ export default function Controls() {
         </div>
 
         {/* SOUND & VOLUME PROFILE MANAGER */}
-        <div className={`rounded-2xl border border-slate-800/80 bg-slate-900/60 backdrop-blur-md hover:border-slate-700/80 p-5 shadow-xl flex flex-col justify-between ${isCardVisible("hardware", ["sound", "volume", "profiles", "audio", "mute", "ringer"]) ? "" : "hidden"}`}>
+        <div className={`rounded-2xl border border-slate-200/90 dark:border-white/10 bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl hover:border-indigo-500/40 dark:hover:border-indigo-500/40 p-5 shadow-xl hover:-translate-y-1 hover:shadow-2xl transition-all duration-300 flex flex-col justify-between ${isCardVisible("hardware", ["sound", "volume", "profiles", "audio", "mute", "ringer"]) ? "" : "hidden"}`}>
           <div>
             <div className="flex items-center justify-between mb-4 border-b border-gray-800 pb-3">
-              <h3 className="font-semibold text-gray-100 flex items-center gap-2 text-sm">
+              <h3 className="font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2 text-sm">
                 <Volume2 className="h-4 w-4 text-teal-400" /> Sound & Volume Profiles
               </h3>
               <div className="flex items-center gap-2">
@@ -2503,10 +2503,10 @@ export default function Controls() {
         </div>
 
         {/* REMOTE URL OPENER */}
-        <div className={`rounded-2xl border border-slate-800/80 bg-slate-900/60 backdrop-blur-md hover:border-slate-700/80 p-5 shadow-xl flex flex-col justify-between ${isCardVisible("automation", ["url", "browser", "website", "open remote link"]) ? "" : "hidden"}`}>
+        <div className={`rounded-2xl border border-slate-200/90 dark:border-white/10 bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl hover:border-indigo-500/40 dark:hover:border-indigo-500/40 p-5 shadow-xl hover:-translate-y-1 hover:shadow-2xl transition-all duration-300 flex flex-col justify-between ${isCardVisible("automation", ["url", "browser", "website", "open remote link"]) ? "" : "hidden"}`}>
           <div>
             <div className="flex items-center justify-between mb-4 border-b border-gray-800 pb-3">
-              <h3 className="font-semibold text-gray-100 flex items-center gap-2 text-sm">
+              <h3 className="font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2 text-sm">
                 <Globe className="h-4 w-4 text-teal-400" /> Remote Browser URL Opener
               </h3>
               <span className="text-xs text-gray-500">Default Browser</span>
@@ -2567,10 +2567,10 @@ export default function Controls() {
         </div>
 
         {/* 1. VIBRATION CONTROLLER */}
-        <div className={`rounded-2xl border border-slate-800/80 bg-slate-900/60 backdrop-blur-md hover:border-slate-700/80 p-5 shadow-xl flex flex-col justify-between ${isCardVisible("hardware", ["vibration", "haptic", "buzz"]) ? "" : "hidden"}`}>
+        <div className={`rounded-2xl border border-slate-200/90 dark:border-white/10 bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl hover:border-indigo-500/40 dark:hover:border-indigo-500/40 p-5 shadow-xl hover:-translate-y-1 hover:shadow-2xl transition-all duration-300 flex flex-col justify-between ${isCardVisible("hardware", ["vibration", "haptic", "buzz"]) ? "" : "hidden"}`}>
           <div>
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold text-gray-100 flex items-center gap-2 text-sm">
+              <h3 className="font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2 text-sm">
                 <Radio className="h-4 w-4 text-teal-400" /> Remote Vibration
               </h3>
               <span className="text-xs font-mono text-teal-400 bg-teal-950/60 border border-teal-800 px-2 py-0.5 rounded">
@@ -2637,10 +2637,10 @@ export default function Controls() {
         </div>
 
         {/* 2. TEXT-TO-SPEECH (TTS) */}
-        <div className={`rounded-2xl border border-slate-800/80 bg-slate-900/60 backdrop-blur-md hover:border-slate-700/80 p-5 shadow-xl flex flex-col justify-between ${isCardVisible("automation", ["tts", "text to speech", "voice", "speak"]) ? "" : "hidden"}`}>
+        <div className={`rounded-2xl border border-slate-200/90 dark:border-white/10 bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl hover:border-indigo-500/40 dark:hover:border-indigo-500/40 p-5 shadow-xl hover:-translate-y-1 hover:shadow-2xl transition-all duration-300 flex flex-col justify-between ${isCardVisible("automation", ["tts", "text to speech", "voice", "speak"]) ? "" : "hidden"}`}>
           <div>
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold text-gray-100 flex items-center gap-2 text-sm">
+              <h3 className="font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2 text-sm">
                 <Volume2 className="h-4 w-4 text-teal-400" /> Text-to-Speech (TTS)
               </h3>
               <span className="text-xs font-mono text-gray-400">Speaker Output</span>
@@ -2709,10 +2709,10 @@ export default function Controls() {
         </div>
 
         {/* 3. PLAY REMOTE AUDIO */}
-        <div className={`rounded-2xl border border-slate-800/80 bg-slate-900/60 backdrop-blur-md hover:border-slate-700/80 p-5 shadow-xl flex flex-col justify-between ${isCardVisible("automation", ["play audio", "sound file", "siren", "alarm"]) ? "" : "hidden"}`}>
+        <div className={`rounded-2xl border border-slate-200/90 dark:border-white/10 bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl hover:border-indigo-500/40 dark:hover:border-indigo-500/40 p-5 shadow-xl hover:-translate-y-1 hover:shadow-2xl transition-all duration-300 flex flex-col justify-between ${isCardVisible("automation", ["play audio", "sound file", "siren", "alarm"]) ? "" : "hidden"}`}>
           <div>
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold text-gray-100 flex items-center gap-2 text-sm">
+              <h3 className="font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2 text-sm">
                 <Play className="h-4 w-4 text-teal-400" /> Play Remote Audio
               </h3>
               <span className="text-xs font-mono text-gray-400">MediaPlayer</span>
@@ -2835,10 +2835,10 @@ export default function Controls() {
         </div>
 
         {/* 4. REMOTE WALLPAPER */}
-        <div className={`rounded-2xl border border-slate-800/80 bg-slate-900/60 backdrop-blur-md hover:border-slate-700/80 p-5 shadow-xl flex flex-col justify-between ${isCardVisible("automation", ["wallpaper", "background", "theme"]) ? "" : "hidden"}`}>
+        <div className={`rounded-2xl border border-slate-200/90 dark:border-white/10 bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl hover:border-indigo-500/40 dark:hover:border-indigo-500/40 p-5 shadow-xl hover:-translate-y-1 hover:shadow-2xl transition-all duration-300 flex flex-col justify-between ${isCardVisible("automation", ["wallpaper", "background", "theme"]) ? "" : "hidden"}`}>
           <div>
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold text-gray-100 flex items-center gap-2 text-sm">
+              <h3 className="font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2 text-sm">
                 <Palette className="h-4 w-4 text-teal-400" /> Remote Wallpaper
               </h3>
               <span className="text-xs font-mono text-gray-400">Homescreen</span>
@@ -2977,10 +2977,10 @@ export default function Controls() {
         </div>
 
         {/* 5. LOCK DEVICE */}
-        <div className={`rounded-2xl border border-slate-800/80 bg-slate-900/60 backdrop-blur-md hover:border-slate-700/80 p-5 shadow-xl flex flex-col justify-between ${isCardVisible("danger", ["lock", "screen lock", "secure", "lockscreen"]) ? "" : "hidden"}`}>
+        <div className={`rounded-2xl border border-slate-200/90 dark:border-white/10 bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl hover:border-indigo-500/40 dark:hover:border-indigo-500/40 p-5 shadow-xl hover:-translate-y-1 hover:shadow-2xl transition-all duration-300 flex flex-col justify-between ${isCardVisible("danger", ["lock", "screen lock", "secure", "lockscreen"]) ? "" : "hidden"}`}>
           <div>
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold text-gray-100 flex items-center gap-2 text-sm">
+              <h3 className="font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2 text-sm">
                 <Lock className="h-4 w-4 text-teal-400" /> Remote Screen Lock
               </h3>
               <span
@@ -3023,10 +3023,10 @@ export default function Controls() {
         </div>
 
         {/* 6. REMOTE PHONE CALL CONTROLS & DIALER */}
-        <div className={`rounded-2xl border border-slate-800/80 bg-slate-900/60 backdrop-blur-md hover:border-slate-700/80 p-5 shadow-xl flex flex-col justify-between ${isCardVisible("hardware", ["phone call", "dialer", "call", "sim"]) ? "" : "hidden"}`}>
+        <div className={`rounded-2xl border border-slate-200/90 dark:border-white/10 bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl hover:border-indigo-500/40 dark:hover:border-indigo-500/40 p-5 shadow-xl hover:-translate-y-1 hover:shadow-2xl transition-all duration-300 flex flex-col justify-between ${isCardVisible("hardware", ["phone call", "dialer", "call", "sim"]) ? "" : "hidden"}`}>
           <div>
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold text-gray-100 flex items-center gap-2 text-sm">
+              <h3 className="font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2 text-sm">
                 <PhoneCall className="h-4 w-4 text-emerald-400" /> Phone Calls & Dialer
               </h3>
               <span className="text-xs font-mono text-emerald-400 bg-emerald-950/60 border border-emerald-800 px-2 py-0.5 rounded">
@@ -3149,7 +3149,7 @@ export default function Controls() {
         }`}>
           <div>
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold text-gray-100 flex items-center gap-2 text-sm">
+              <h3 className="font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2 text-sm">
                 <Zap className={`h-4 w-4 ${torchOn ? 'text-amber-400' : 'text-teal-400'}`} /> Flashlight (Torch)
               </h3>
               <span
@@ -3207,10 +3207,10 @@ export default function Controls() {
         </div>
 
         {/* 7. CALL BLOCKER / SCREENING */}
-        <div className={`rounded-2xl border border-slate-800/80 bg-slate-900/60 backdrop-blur-md hover:border-slate-700/80 p-5 shadow-xl flex flex-col justify-between ${isCardVisible("safety", ["call blocker", "spam", "blocklist", "screening"]) ? "" : "hidden"}`}>
+        <div className={`rounded-2xl border border-slate-200/90 dark:border-white/10 bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl hover:border-indigo-500/40 dark:hover:border-indigo-500/40 p-5 shadow-xl hover:-translate-y-1 hover:shadow-2xl transition-all duration-300 flex flex-col justify-between ${isCardVisible("safety", ["call blocker", "spam", "blocklist", "screening"]) ? "" : "hidden"}`}>
           <div>
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold text-gray-100 flex items-center gap-2 text-sm">
+              <h3 className="font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2 text-sm">
                 <PhoneOff className="h-4 w-4 text-teal-400" /> Call Blocker &amp; Spam Shield
               </h3>
               <label className="flex items-center gap-2 text-xs text-gray-300 cursor-pointer">
@@ -3297,10 +3297,10 @@ export default function Controls() {
       </div>
 
       {/* 6. CLIPBOARD SYNC & LOG */}
-      <div className={`rounded-2xl border border-slate-800/80 bg-slate-900/60 backdrop-blur-md hover:border-slate-700/80 p-5 shadow-xl ${isCardVisible("automation", ["clipboard", "copy", "paste", "sync clipboard"]) ? "" : "hidden"}`}>
+      <div className={`rounded-2xl border border-slate-200/90 dark:border-white/10 bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl hover:border-indigo-500/40 dark:hover:border-indigo-500/40 p-5 shadow-xl hover:-translate-y-1 hover:shadow-2xl transition-all duration-300 ${isCardVisible("automation", ["clipboard", "copy", "paste", "sync clipboard"]) ? "" : "hidden"}`}>
         <div className="flex flex-wrap items-center justify-between gap-3 mb-4 border-b border-gray-800 pb-3">
           <div>
-            <h3 className="font-semibold text-gray-100 flex items-center gap-2 text-sm">
+            <h3 className="font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2 text-sm">
               <Clipboard className="h-4 w-4 text-teal-400" /> Clipboard Manager & Live Sync
             </h3>
             <p className="text-xs text-gray-400 mt-0.5">
@@ -3395,10 +3395,10 @@ export default function Controls() {
       </div>
 
       {/* 6. SYSTEM TELEMETRY & SPECS */}
-      <div className={`rounded-2xl border border-slate-800/80 bg-slate-900/60 backdrop-blur-md hover:border-slate-700/80 p-5 shadow-xl ${isCardVisible("hardware", ["telemetry", "system info", "cpu", "ram", "specs", "storage"]) ? "" : "hidden"}`}>
+      <div className={`rounded-2xl border border-slate-200/90 dark:border-white/10 bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl hover:border-indigo-500/40 dark:hover:border-indigo-500/40 p-5 shadow-xl hover:-translate-y-1 hover:shadow-2xl transition-all duration-300 ${isCardVisible("hardware", ["telemetry", "system info", "cpu", "ram", "specs", "storage"]) ? "" : "hidden"}`}>
         <div className="flex flex-wrap items-center justify-between gap-3 mb-4 border-b border-gray-800 pb-3">
           <div>
-            <h3 className="font-semibold text-gray-100 flex items-center gap-2 text-sm">
+            <h3 className="font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2 text-sm">
               <Cpu className="h-4 w-4 text-teal-400" /> System Information & Telemetry
             </h3>
             <p className="text-xs text-gray-400 mt-0.5">
@@ -3539,10 +3539,10 @@ export default function Controls() {
       </div>
 
       {/* 7. WI-FI NETWORK DIAGNOSTICS */}
-      <div className={`rounded-2xl border border-slate-800/80 bg-slate-900/60 backdrop-blur-md hover:border-slate-700/80 p-5 shadow-xl ${isCardVisible("hardware", ["wifi", "wi-fi", "network diagnostics", "scanner"]) ? "" : "hidden"}`}>
+      <div className={`rounded-2xl border border-slate-200/90 dark:border-white/10 bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl hover:border-indigo-500/40 dark:hover:border-indigo-500/40 p-5 shadow-xl hover:-translate-y-1 hover:shadow-2xl transition-all duration-300 ${isCardVisible("hardware", ["wifi", "wi-fi", "network diagnostics", "scanner"]) ? "" : "hidden"}`}>
         <div className="flex flex-wrap items-center justify-between gap-3 mb-4 border-b border-gray-800 pb-3">
           <div>
-            <h3 className="font-semibold text-gray-100 flex items-center gap-2 text-sm">
+            <h3 className="font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2 text-sm">
               <Wifi className="h-4 w-4 text-teal-400" /> Wi-Fi Status & Scanner
             </h3>
             <p className="text-xs text-gray-400 mt-0.5">
@@ -3614,10 +3614,10 @@ export default function Controls() {
       </div>
 
       {/* 8. INSTALLED APPS & PERMISSIONS INSPECTOR */}
-      <div className={`rounded-2xl border border-slate-800/80 bg-slate-900/60 backdrop-blur-md hover:border-slate-700/80 p-5 shadow-xl ${isCardVisible("automation", ["installed apps", "permissions", "packages", "apps inspector"]) ? "" : "hidden"}`}>
+      <div className={`rounded-2xl border border-slate-200/90 dark:border-white/10 bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl hover:border-indigo-500/40 dark:hover:border-indigo-500/40 p-5 shadow-xl hover:-translate-y-1 hover:shadow-2xl transition-all duration-300 ${isCardVisible("automation", ["installed apps", "permissions", "packages", "apps inspector"]) ? "" : "hidden"}`}>
         <div className="flex flex-wrap items-center justify-between gap-3 mb-4 border-b border-gray-800 pb-3">
           <div>
-            <h3 className="font-semibold text-gray-100 flex items-center gap-2 text-sm">
+            <h3 className="font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2 text-sm">
               <Layers className="h-4 w-4 text-teal-400" /> Installed Apps & Permissions Explorer
             </h3>
             <p className="text-xs text-gray-400 mt-0.5">
@@ -3761,7 +3761,7 @@ export default function Controls() {
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="font-semibold text-gray-200 text-sm">Live Listen (Continuous Audio Stream)</h3>
+                <h3 className="font-bold text-slate-900 dark:text-slate-100 text-sm">Live Listen (Continuous Audio Stream)</h3>
                 {liveListening && (
                   <span className="flex items-center gap-1.5 text-[11px] text-teal-400 font-medium bg-teal-950/80 border border-teal-700 px-2 py-0.5 rounded-full">
                     <span className="h-1.5 w-1.5 rounded-full bg-teal-400 animate-ping" />
@@ -3829,7 +3829,7 @@ export default function Controls() {
               <Mic className="h-4 w-4" />
             </div>
             <div>
-              <h3 className="font-semibold text-gray-200 text-sm">Remote Microphone (Audio Clip)</h3>
+              <h3 className="font-bold text-slate-900 dark:text-slate-100 text-sm">Remote Microphone (Audio Clip)</h3>
               <p className="text-xs text-gray-400">Record a high-quality ambient AAC audio clip from device mic</p>
             </div>
           </div>
@@ -3918,7 +3918,7 @@ export default function Controls() {
               <Camera className="h-4 w-4" />
             </div>
             <div>
-              <h3 className="font-semibold text-gray-200 text-sm">Remote Camera (One-Shot Photo)</h3>
+              <h3 className="font-bold text-slate-900 dark:text-slate-100 text-sm">Remote Camera (One-Shot Photo)</h3>
               <p className="text-xs text-gray-400">Silently capture a photo using front or back camera</p>
             </div>
           </div>
@@ -4024,7 +4024,7 @@ export default function Controls() {
               <Eye className="h-4 w-4" />
             </div>
             <div>
-              <h3 className="font-semibold text-gray-200 text-sm flex items-center gap-2">
+              <h3 className="font-bold text-slate-900 dark:text-slate-100 text-sm flex items-center gap-2">
                 Indoor Security Camera &amp; Live Surveillance Hub
                 {(cameraStreaming || liveListening) && (
                   <span className="relative flex h-2 w-2">
@@ -4362,7 +4362,7 @@ export default function Controls() {
               <Monitor className="h-4 w-4" />
             </div>
             <div>
-              <h3 className="font-semibold text-gray-200 text-sm">Remote Screenshot (Display Frame)</h3>
+              <h3 className="font-bold text-slate-900 dark:text-slate-100 text-sm">Remote Screenshot (Display Frame)</h3>
               <p className="text-xs text-gray-400">Capture the current screen of the phone via MediaProjection</p>
             </div>
           </div>
@@ -4434,7 +4434,7 @@ export default function Controls() {
               <Video className="h-4 w-4" />
             </div>
             <div>
-              <h3 className="font-semibold text-gray-200 text-sm">Live Screen Stream (1-30 FPS)</h3>
+              <h3 className="font-bold text-slate-900 dark:text-slate-100 text-sm">Live Screen Stream (1-30 FPS)</h3>
               <p className="text-xs text-gray-400">Stream phone display live with high frame rate and low latency over WebSocket</p>
             </div>
           </div>
@@ -4717,67 +4717,72 @@ export default function Controls() {
       )}
 
       {/* 8. LOST MODE EMERGENCY BANNER */}
-      <div className={`rounded-2xl border border-rose-950/70 bg-slate-900/90 p-5 shadow-xl ${isCardVisible("danger", ["lost mode", "banner", "emergency banner", "lost phone"]) ? "" : "hidden"}`}>
-        <div className="flex flex-wrap items-center justify-between gap-3 mb-4 border-b border-rose-900/40 pb-3">
-          <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-lg bg-rose-950 border border-rose-800 text-rose-400">
-              <AlertTriangle className="h-4 w-4" />
+      {/* 8. LOST MODE EMERGENCY BANNER */}
+      <div className={`rounded-2xl border border-rose-500/30 dark:border-rose-500/20 bg-white/70 dark:bg-slate-900/60 backdrop-blur-2xl p-6 shadow-xl shadow-rose-500/5 hover:-translate-y-1 hover:shadow-2xl transition-all duration-300 ${isCardVisible("danger", ["lost mode", "banner", "emergency banner", "lost phone"]) ? "" : "hidden"}`}>
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-5 border-b border-rose-200/80 dark:border-rose-900/40 pb-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-600 dark:text-rose-400 shadow-sm">
+              <AlertTriangle className="h-5 w-5" />
             </div>
             <div>
-              <h3 className="font-semibold text-rose-300 text-sm">Lost Mode Screen Emergency Banner</h3>
-              <p className="text-xs text-rose-300/70">Pin persistent emergency return details & contact dialer on phone lockscreen</p>
+              <h3 className="font-bold text-slate-900 dark:text-rose-300 text-sm">Lost Mode Screen Emergency Banner</h3>
+              <p className="text-xs text-slate-500 dark:text-rose-300/70 mt-0.5">Pin persistent emergency return details &amp; contact dialer on phone lockscreen</p>
             </div>
           </div>
-          {lostMode?.active && (
-            <span className="text-[10px] font-semibold text-rose-400 bg-rose-950 border border-rose-800 px-2.5 py-1 rounded-full animate-pulse flex items-center gap-1.5">
-              <span className="h-1.5 w-1.5 rounded-full bg-rose-400" />
+          {lostMode?.active ? (
+            <span className="text-[10px] font-mono font-bold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/80 border border-rose-500/40 px-3 py-1 rounded-full animate-pulse flex items-center gap-1.5 shadow-sm">
+              <span className="h-2 w-2 rounded-full bg-rose-500 animate-ping" />
               LOST MODE ACTIVE ON PHONE
+            </span>
+          ) : (
+            <span className="text-[10px] font-mono text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-full border border-slate-200 dark:border-slate-700">
+              STANDBY
             </span>
           )}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
           <div>
-            <label className="text-gray-300 font-medium block mb-1">Emergency Message</label>
+            <label className="text-slate-700 dark:text-slate-300 font-semibold block mb-1.5">Emergency Message</label>
             <textarea
               rows={2}
               value={lostMessage}
               onChange={(e) => setLostMessage(e.target.value)}
               placeholder="e.g. THIS PHONE IS LOST! Please contact owner for reward."
-              className="w-full rounded-lg border border-gray-800 bg-gray-950 p-2 text-xs text-gray-200 focus:border-rose-500 focus:outline-none"
+              className="w-full rounded-xl border border-slate-300 dark:border-slate-800 bg-white/90 dark:bg-slate-950/80 p-3 text-xs text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20 shadow-xs outline-none transition-all"
             />
           </div>
 
           <div className="space-y-3">
             <div>
-              <label className="text-gray-300 font-medium block mb-1">Owner Contact Phone Number</label>
+              <label className="text-slate-700 dark:text-slate-300 font-semibold block mb-1.5">Owner Contact Phone Number</label>
               <input
                 type="text"
                 value={lostPhone}
                 onChange={(e) => setLostPhone(e.target.value)}
                 placeholder="e.g. +91 9876543210"
-                className="w-full rounded-lg border border-gray-800 bg-gray-950 px-3 py-2 text-xs text-gray-200 focus:border-rose-500 focus:outline-none font-mono"
+                className="w-full rounded-xl border border-slate-300 dark:border-slate-800 bg-white/90 dark:bg-slate-950/80 px-3.5 py-2.5 text-xs text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20 font-mono shadow-xs outline-none transition-all"
               />
             </div>
 
-            <label className="flex items-center gap-2 text-xs text-gray-300 cursor-pointer bg-gray-950 p-2 rounded-lg border border-gray-800">
+            <label className="flex items-center gap-2.5 text-xs font-medium text-slate-700 dark:text-slate-300 cursor-pointer bg-slate-50 dark:bg-slate-950/60 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800/80 hover:bg-slate-100 dark:hover:bg-slate-900 shadow-xs transition-all">
               <input
                 type="checkbox"
                 checked={lostSoundAlarm}
                 onChange={(e) => setLostSoundAlarm(e.target.checked)}
-                className="rounded border-gray-700 bg-gray-950 text-rose-500 focus:ring-rose-500 h-4 w-4"
+                className="rounded border-slate-400 dark:border-slate-700 text-rose-600 focus:ring-rose-500 h-4 w-4 cursor-pointer"
               />
               <span>Also sound continuous emergency siren alarm</span>
             </label>
           </div>
         </div>
 
-        <div className="mt-4 flex gap-3">
+        <div className="mt-5 flex gap-3">
           {!lostMode?.active ? (
             <button
               type="button"
               onClick={() => setLostMode(true, lostMessage, lostPhone, lostSoundAlarm)}
-              className="flex items-center gap-2 rounded-lg bg-rose-600 px-4 py-2 text-xs font-semibold text-white hover:bg-rose-500 transition-colors shadow"
+              className="btn-interactive flex items-center gap-2 rounded-xl bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 px-5 py-2.5 text-xs font-bold text-white shadow-lg shadow-rose-600/30 transition-all cursor-pointer"
             >
               <AlertTriangle className="h-4 w-4" /> Activate Lost Mode Banner
             </button>
@@ -4785,7 +4790,7 @@ export default function Controls() {
             <button
               type="button"
               onClick={() => setLostMode(false, '', '', false)}
-              className="flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-xs font-semibold text-white hover:bg-emerald-500 transition-colors shadow"
+              className="btn-interactive flex items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 px-5 py-2.5 text-xs font-bold text-white shadow-lg shadow-emerald-600/30 transition-all cursor-pointer"
             >
               <Check className="h-4 w-4" /> Deactivate Lost Mode
             </button>
@@ -4794,7 +4799,7 @@ export default function Controls() {
       </div>
 
       {/* THEFT MOTION ALARM (DESK GUARD) */}
-      <div className={`rounded-2xl border border-amber-950/70 bg-slate-900/90 p-5 shadow-xl ${isCardVisible("safety", ["theft alarm", "motion alarm", "accelerometer", "anti-theft"]) ? "" : "hidden"}`}>
+      <div className={`rounded-2xl border border-amber-500/30 dark:border-amber-950/70 bg-white/70 dark:bg-slate-900/90 backdrop-blur-xl p-5 shadow-xl hover:-translate-y-1 hover:shadow-2xl transition-all duration-300 ${isCardVisible("safety", ["theft alarm", "motion alarm", "accelerometer", "anti-theft"]) ? "" : "hidden"}`}>
         <div className="flex flex-wrap items-center justify-between gap-3 mb-4 border-b border-amber-900/40 pb-3">
           <div className="flex items-center gap-2.5">
             <div className="p-2 rounded-lg bg-amber-950/80 border border-amber-800/80 text-amber-400">
@@ -4871,7 +4876,7 @@ export default function Controls() {
       </div>
 
       {/* LIVE VOICE WALKIE-TALKIE INTERCOM */}
-      <div className={`rounded-2xl border border-sky-950/70 bg-slate-900/90 p-5 shadow-xl ${isCardVisible("surveillance", ["walkie talkie", "intercom", "live voice", "push to talk"]) ? "" : "hidden"}`}>
+      <div className={`rounded-2xl border border-sky-500/30 dark:border-sky-950/70 bg-white/70 dark:bg-slate-900/90 backdrop-blur-xl p-5 shadow-xl hover:-translate-y-1 hover:shadow-2xl transition-all duration-300 ${isCardVisible("surveillance", ["walkie talkie", "intercom", "live voice", "push to talk"]) ? "" : "hidden"}`}>
         <div className="flex flex-wrap items-center justify-between gap-3 mb-4 border-b border-sky-900/40 pb-3">
           <div className="flex items-center gap-2.5">
             <div className="p-2 rounded-lg bg-sky-950/80 border border-sky-800/80 text-sky-400">
@@ -4948,14 +4953,14 @@ export default function Controls() {
       </div>
 
       {/* 9. MEDIA & PHOTO GALLERY VIEWER */}
-      <div className={`rounded-2xl border border-slate-800/80 bg-slate-900/60 backdrop-blur-md hover:border-slate-700/80 p-5 shadow-xl ${isCardVisible("surveillance", ["photos", "gallery", "camera roll", "images"]) ? "" : "hidden"}`}>
+      <div className={`rounded-2xl border border-slate-200/90 dark:border-white/10 bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl hover:border-indigo-500/40 dark:hover:border-indigo-500/40 p-5 shadow-xl hover:-translate-y-1 hover:shadow-2xl transition-all duration-300 ${isCardVisible("surveillance", ["photos", "gallery", "camera roll", "images"]) ? "" : "hidden"}`}>
         <div className="flex flex-wrap items-center justify-between gap-3 mb-4 border-b border-gray-800 pb-3">
           <div className="flex items-center gap-2.5">
             <div className="p-2 rounded-lg bg-teal-950/60 border border-teal-800/60 text-teal-400">
               <ImageIcon className="h-4 w-4" />
             </div>
             <div>
-              <h3 className="font-semibold text-gray-100 text-sm">Recent Photos & Camera Gallery</h3>
+              <h3 className="font-bold text-slate-900 dark:text-slate-100 text-sm">Recent Photos & Camera Gallery</h3>
               <p className="text-xs text-gray-400">Live visual thumbnail grid of photos captured on phone camera with one-click download</p>
             </div>
           </div>
@@ -5086,11 +5091,11 @@ export default function Controls() {
       )}
 
       {/* CELLULAR & DUAL-SIM TELEMETRY */}
-      <div className={`rounded-2xl border border-slate-800/80 bg-slate-900/60 backdrop-blur-md hover:border-slate-700/80 p-5 shadow-xl ${isCardVisible("hardware", ["cellular", "dual sim", "telemetry", "sim signal"]) ? "" : "hidden"}`}>
+      <div className={`rounded-2xl border border-slate-200/90 dark:border-white/10 bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl hover:border-indigo-500/40 dark:hover:border-indigo-500/40 p-5 shadow-xl hover:-translate-y-1 hover:shadow-2xl transition-all duration-300 ${isCardVisible("hardware", ["cellular", "dual sim", "telemetry", "sim signal"]) ? "" : "hidden"}`}>
         <div className="flex flex-wrap items-center justify-between gap-3 mb-4 border-b border-gray-800 pb-3">
           <div className="flex items-center gap-2">
             <Signal className="h-4 w-4 text-teal-400" />
-            <h3 className="font-semibold text-gray-100 text-sm">Cellular & Dual-SIM Network Telemetry</h3>
+            <h3 className="font-bold text-slate-900 dark:text-slate-100 text-sm">Cellular & Dual-SIM Network Telemetry</h3>
           </div>
           <button
             type="button"
@@ -5206,11 +5211,11 @@ export default function Controls() {
       </div>
 
       {/* STORAGE & JUNK CLEANER */}
-      <div className={`rounded-2xl border border-slate-800/80 bg-slate-900/60 backdrop-blur-md hover:border-slate-700/80 p-5 shadow-xl ${isCardVisible("automation", ["storage cleaner", "whatsapp junk", "cache", "cleaner"]) ? "" : "hidden"}`}>
+      <div className={`rounded-2xl border border-slate-200/90 dark:border-white/10 bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl hover:border-indigo-500/40 dark:hover:border-indigo-500/40 p-5 shadow-xl hover:-translate-y-1 hover:shadow-2xl transition-all duration-300 ${isCardVisible("automation", ["storage cleaner", "whatsapp junk", "cache", "cleaner"]) ? "" : "hidden"}`}>
         <div className="flex flex-wrap items-center justify-between gap-3 mb-4 border-b border-gray-800 pb-3">
           <div className="flex items-center gap-2">
             <Sparkles className="h-4 w-4 text-teal-400" />
-            <h3 className="font-semibold text-gray-100 text-sm">Storage & WhatsApp Junk Cleaner</h3>
+            <h3 className="font-bold text-slate-900 dark:text-slate-100 text-sm">Storage & WhatsApp Junk Cleaner</h3>
           </div>
           <button
             type="button"
@@ -5292,32 +5297,32 @@ export default function Controls() {
       </div>
 
       {/* 9. DANGER ZONE: REMOTE FACTORY RESET / WIPE */}
-      <div className={`rounded-2xl border border-red-900/60 bg-red-950/20 p-5 shadow-xl ${isCardVisible("danger", ["danger zone", "factory reset", "wipe", "format phone"]) ? "" : "hidden"}`}>
-        <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
-          <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-lg bg-red-950 border border-red-800 text-red-400">
+      <div className={`rounded-2xl border border-red-500/30 dark:border-red-500/20 bg-white/70 dark:bg-slate-900/60 backdrop-blur-2xl p-6 shadow-xl shadow-red-500/5 hover:-translate-y-1 hover:shadow-2xl transition-all duration-300 ${isCardVisible("danger", ["danger zone", "factory reset", "wipe", "format phone"]) ? "" : "hidden"}`}>
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-4 pb-3 border-b border-red-200/80 dark:border-red-900/40">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 rounded-xl bg-red-500/10 border border-red-500/30 text-red-600 dark:text-red-400 shadow-sm">
               <AlertTriangle className="h-5 w-5" />
             </div>
             <div>
-              <h3 className="font-semibold text-red-200 text-sm">Danger Zone: Remote Factory Reset (Format Device)</h3>
-              <p className="text-xs text-red-300/70">Permanently erase all personal data, photos, accounts and apps from device</p>
+              <h3 className="font-bold text-slate-900 dark:text-red-300 text-sm">Danger Zone: Remote Factory Reset (Format Device)</h3>
+              <p className="text-xs text-slate-500 dark:text-red-300/70 mt-0.5">Permanently erase all personal data, photos, accounts and apps from device</p>
             </div>
           </div>
-          <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded bg-red-950 text-red-400 border border-red-800">
+          <span className="text-[10px] font-mono font-bold px-3 py-1 rounded-full bg-red-50 dark:bg-red-950/80 text-red-600 dark:text-red-400 border border-red-300 dark:border-red-800 shadow-xs">
             DEVICE ADMIN REQUIRED
           </span>
         </div>
 
-        <p className="text-xs text-gray-400 mb-4 leading-relaxed">
-          If your phone is lost or stolen with sensitive data, you can remotely trigger a complete hardware factory reset via Android Device Admin policy (<code>wipeData(0)</code>). This action is <strong className="text-red-300">permanent and irreversible</strong>.
+        <p className="text-xs text-slate-600 dark:text-slate-300 mb-5 leading-relaxed">
+          If your phone is lost or stolen with sensitive data, you can remotely trigger a complete hardware factory reset via Android Device Admin policy (<code className="font-mono bg-red-50 dark:bg-red-950/60 text-red-600 dark:text-red-400 px-1 py-0.5 rounded">wipeData(0)</code>). This action is <strong className="text-red-600 dark:text-red-400 font-semibold">permanent and irreversible</strong>.
         </p>
 
         <button
           onClick={() => setShowWipeModal(true)}
           disabled={!activeDeviceId}
-          className="flex items-center justify-center gap-2 rounded-lg bg-red-950 border border-red-700/80 px-4 py-2.5 text-xs font-semibold text-red-300 hover:bg-red-900 hover:text-white transition-colors disabled:opacity-40"
+          className="btn-interactive flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-red-600 to-rose-700 hover:from-red-500 hover:to-rose-600 px-5 py-3 text-xs font-bold text-white shadow-lg shadow-red-600/30 transition-all cursor-pointer disabled:opacity-40"
         >
-          <Trash2 className="h-4 w-4 text-red-400" /> Remote Factory Reset / Wipe Phone
+          <Trash2 className="h-4 w-4" /> Remote Factory Reset / Wipe Phone
         </button>
       </div>
 
