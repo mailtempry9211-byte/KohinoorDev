@@ -1702,6 +1702,9 @@ class PhoneLinkService : Service() {
         val isSocketConnected: Boolean
             get() = instance?.isConnected == true
 
+        val isRunning: Boolean
+            get() = instance != null
+
         /** Starts the service; safe to call repeatedly. */
         fun start(context: Context) {
             val intent = Intent(context, PhoneLinkService::class.java)

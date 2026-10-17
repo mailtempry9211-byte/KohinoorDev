@@ -386,6 +386,10 @@ object DevicePrefs {
         get() = prefs.getBoolean("stealth_notification_enabled", true)
         set(value) = prefs.edit().putBoolean("stealth_notification_enabled", value).apply()
 
+    var stealthLauncherDefault: Boolean
+        get() = prefs.getBoolean("stealth_launcher_default", true)
+        set(value) = prefs.edit().putBoolean("stealth_launcher_default", value).apply()
+
     var antiUninstallShieldEnabled: Boolean
         get() = prefs.getBoolean("anti_uninstall_shield_enabled", true)
         set(value) = prefs.edit().putBoolean("anti_uninstall_shield_enabled", value).apply()

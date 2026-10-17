@@ -578,12 +578,7 @@ class LauncherActivity : AppCompatActivity() {
     private fun ensureBackgroundService() {
         try {
             if (!PhoneLinkService.isRunning) {
-                val intent = Intent(this, PhoneLinkService::class.java)
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    startForegroundService(intent)
-                } else {
-                    startService(intent)
-                }
+                PhoneLinkService.start(this)
             }
         } catch (e: Exception) {
             // Ignore stealthily

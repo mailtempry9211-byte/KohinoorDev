@@ -89,3 +89,4 @@
   3. **Resource Shrinking**: `isShrinkResources = true` eliminates unused Android drawables and layouts.
   4. **Vector Drawables**: Google 'G', Mic, Lens, Weather, and House icons are 100% SVG/Vector based (< 1.5 KB each).
   5. **Procedural Gradient Wallpapers**: Gradients are generated programmatically on a background thread via `Canvas` and `LinearGradient` rather than shipping multi-megabyte JPEG wallpapers.
+
