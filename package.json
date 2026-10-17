@@ -2,6 +2,7 @@
   "name": "phonelink-hub",
   "version": "1.0.0",
   "description": "PhoneLink Hub - Dedicated Standalone Parental Control & Telemetry Suite",
+  "author": "PhoneLink",
   "main": "electron/main.cjs",
   "scripts": {
     "start": "electron .",
@@ -50,3 +51,4 @@
     "asar": false
   }
 }
+

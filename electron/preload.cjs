@@ -6,3 +6,4 @@ contextBridge.exposeInMainWorld('electronAPI', {
   switchPort: () => ipcRenderer.send('switch-port'),
   getAppVersion: () => ipcRenderer.invoke('get-version')
 });
+

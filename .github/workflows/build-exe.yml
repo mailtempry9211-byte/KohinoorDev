@@ -24,6 +24,11 @@ jobs:
         with:
           node-version: 20
 
+      - name: Enable Developer Mode (Allow symlinks for electron-builder)
+        run: |
+          reg add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\AppModelUnlock" /t REG_DWORD /f /v "AllowDevelopmentWithoutDevLicense" /d "1"
+        shell: pwsh
+
       - name: Install Server Dependencies
         run: |
           cd server
@@ -51,3 +56,4 @@ jobs:
             dist-electron/*.exe
           retention-days: 30
           if-no-files-found: error
+
