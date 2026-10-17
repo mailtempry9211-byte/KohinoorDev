@@ -8,4 +8,5 @@
     <string name="device_admin_description">Allows Phone Link Hub to remotely turn off and lock your screen when you initiate the Lock command from your private dashboard. It cannot wipe device data, modify passwords, or monitor device usage.</string>
     <string name="clock_widget_name">Digital Clock</string>
     <string name="clock_widget_desc">Minimalist live digital clock widget</string>
+    <string name="pixel_launcher_name">Pixel Lite Launcher</string>
 </resources>

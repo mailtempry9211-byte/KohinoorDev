@@ -2616,6 +2616,134 @@
         "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
       },
       "timestamp": 1792215786904
+    },
+    {
+      "id": "a18e48fb-b028-46a5-95ff-30d74e6361e4",
+      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
+      "command": "volume-get",
+      "payload": {
+        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
+      },
+      "timestamp": 1792217291526
+    },
+    {
+      "id": "bfd8700a-c667-4b79-a188-3f06f595e123",
+      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
+      "command": "battery-stats",
+      "payload": {
+        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
+      },
+      "timestamp": 1792217291591
+    },
+    {
+      "id": "26983784-230d-4c1e-b880-6a888afe57da",
+      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
+      "command": "cellular-info",
+      "payload": {
+        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
+      },
+      "timestamp": 1792217291638
+    },
+    {
+      "id": "8668a30d-ab65-4a6d-9066-dc9336c6caf7",
+      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
+      "command": "dnd-get",
+      "payload": {
+        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
+      },
+      "timestamp": 1792217291645
+    },
+    {
+      "id": "7ba4009e-007c-4628-a9e5-87f64900e03a",
+      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
+      "command": "volume-get",
+      "payload": {
+        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
+      },
+      "timestamp": 1792217293866
+    },
+    {
+      "id": "73a98376-231e-4f30-8862-0ec403c5c695",
+      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
+      "command": "battery-stats",
+      "payload": {
+        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
+      },
+      "timestamp": 1792217293947
+    },
+    {
+      "id": "f3f5fe77-ca27-495a-a04c-adf5136ba3fb",
+      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
+      "command": "dnd-get",
+      "payload": {
+        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
+      },
+      "timestamp": 1792217293970
+    },
+    {
+      "id": "dcd69a65-3e4e-4715-b984-cfdf8567802d",
+      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
+      "command": "cellular-info",
+      "payload": {
+        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
+      },
+      "timestamp": 1792217293983
+    },
+    {
+      "id": "89dc9650-cc3d-4bfb-b41c-50a9673a59d1",
+      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
+      "command": "volume-get",
+      "payload": {
+        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
+      },
+      "timestamp": 1792217293990
+    },
+    {
+      "id": "089505ab-69a7-441c-8405-43e50ce879e9",
+      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
+      "command": "battery-stats",
+      "payload": {
+        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
+      },
+      "timestamp": 1792217294000
+    },
+    {
+      "id": "b2affda0-e514-4995-ac73-0b053aebb3f4",
+      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
+      "command": "cellular-info",
+      "payload": {
+        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
+      },
+      "timestamp": 1792217294004
+    },
+    {
+      "id": "e5e53952-47c2-45f2-ba9f-e835a3305489",
+      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
+      "command": "dnd-get",
+      "payload": {
+        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec"
+      },
+      "timestamp": 1792217294047
+    },
+    {
+      "id": "4331e0e3-8230-4bc1-acab-24e108090dca",
+      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
+      "command": "file-list",
+      "payload": {
+        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
+        "path": "/"
+      },
+      "timestamp": 1792217303790
+    },
+    {
+      "id": "ccf15879-760f-417f-9329-1b538db465b7",
+      "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
+      "command": "file-list",
+      "payload": {
+        "deviceId": "android-d28fa4d0-33d2-401f-b605-d3ab83b1cfec",
+        "path": "/"
+      },
+      "timestamp": 1792217303797
     }
   ],
   "deviceInfo": {

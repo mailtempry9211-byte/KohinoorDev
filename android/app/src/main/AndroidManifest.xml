@@ -136,7 +136,8 @@
         <!-- Pixel Style Safe Launcher Activity (Home & Default) -->
         <activity
             android:name=".launcher.LauncherActivity"
-            android:label="Pixel Safe Launcher"
+            android:label="@string/pixel_launcher_name"
+            android:icon="@drawable/ic_pixel_house"
             android:launchMode="singleTask"
             android:clearTaskOnLaunch="true"
             android:stateNotNeeded="true"
