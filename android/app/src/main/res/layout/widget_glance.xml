@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widgetGlanceContainer"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="8dp">
+
+    <!-- Day and Date (e.g. Saturday, Oct 17) -->
+    <TextClock
+        android:id="@+id/glanceDate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="sans-serif-bold"
+        android:format12Hour="EEEE, MMM d"
+        android:format24Hour="EEEE, MMM d"
+        android:textColor="#FFFFFF"
+        android:textSize="20sp"
+        android:shadowColor="#80000000"
+        android:shadowDx="1"
+        android:shadowDy="2"
+        android:shadowRadius="4" />
+
+    <!-- Second Row: Weather & Temperature Pill -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:layout_marginEnd="6dp"
+            android:src="@drawable/ic_weather_partly_cloudy" />
+
+        <TextView
+            android:id="@+id/glanceTemp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-medium"
+            android:text="25°C"
+            android:textColor="#F3F4F6"
+            android:textSize="14sp"
+            android:shadowColor="#80000000"
+            android:shadowDx="1"
+            android:shadowDy="2"
+            android:shadowRadius="3" />
+
+        <TextView
+            android:id="@+id/glanceCondition"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:fontFamily="sans-serif"
+            android:text="Sunny"
+            android:textColor="#CBD5E1"
+            android:textSize="13sp"
+            android:shadowColor="#80000000"
+            android:shadowDx="1"
+            android:shadowDy="2"
+            android:shadowRadius="3" />
+    </LinearLayout>
+
+</LinearLayout>

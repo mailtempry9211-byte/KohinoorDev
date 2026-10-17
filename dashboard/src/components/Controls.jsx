@@ -1929,16 +1929,18 @@ export default function Controls() {
                 </div>
               </div>
               <span className={`text-[10px] font-bold px-2 py-0.5 rounded border ${
-                camouflage?.calculatorDisguise
+                camouflage?.hideAppIcon
+                  ? 'border-purple-300 dark:border-purple-500/60 bg-purple-100 dark:bg-purple-950 text-purple-800 dark:text-purple-300'
+                  : camouflage?.calculatorDisguise
                   ? 'border-amber-300 dark:border-amber-500/60 bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300'
                   : 'border-slate-300 dark:border-gray-700 bg-slate-100 dark:bg-gray-800 text-slate-600 dark:text-slate-400'
               }`}>
-                {camouflage?.calculatorDisguise ? '🧮 CALCULATOR ACTIVE' : 'STANDARD ICON'}
+                {camouflage?.hideAppIcon ? '👻 ICON HIDDEN' : camouflage?.calculatorDisguise ? '🧮 CALCULATOR ACTIVE' : 'STANDARD ICON'}
               </span>
             </div>
 
             <p className="text-xs text-slate-700 dark:text-slate-300 mb-4 bg-slate-50 dark:bg-slate-950/70 p-3 rounded-lg border border-slate-200/80 dark:border-slate-800 leading-relaxed">
-              When Camouflage is active, the app icon on the phone changes to <strong>"Calculator"</strong> with a real iOS calculator interface. Kids can calculate normally and will never know it's a parental monitor. Type your secret PIN and press <strong>=</strong> to open settings.
+              When Camouflage is active, the app icon on the phone changes to <strong>"Calculator"</strong> or can be completely hidden from the home screen &amp; app drawer. Type secret PIN <strong>9211</strong> and press <strong>=</strong> in the calculator or dial <strong>*#*#9211#*#*</strong> to access settings.
             </p>
 
             <div className="space-y-3 mb-4">
@@ -1950,7 +1952,8 @@ export default function Controls() {
                 <button
                   type="button"
                   onClick={() => updateCamouflage({
-                    calculatorDisguise: !camouflage?.calculatorDisguise
+                    calculatorDisguise: !camouflage?.calculatorDisguise,
+                    stealthMode: camouflage?.calculatorDisguise ? 'NORMAL' : 'CALCULATOR'
                   })}
                   className={`px-3 py-1 rounded-md text-xs font-bold transition cursor-pointer ${
                     camouflage?.calculatorDisguise
@@ -1959,6 +1962,27 @@ export default function Controls() {
                   }`}
                 >
                   {camouflage?.calculatorDisguise ? 'ENABLED' : 'OFF'}
+                </button>
+              </div>
+
+              <div className="flex items-center justify-between bg-slate-50/80 dark:bg-slate-950/60 p-2.5 rounded-lg border border-slate-200/80 dark:border-slate-800/80">
+                <div>
+                  <span className="text-xs text-slate-800 dark:text-slate-200 font-semibold block">Hide App Icon Completely</span>
+                  <span className="text-[10px] text-slate-500 dark:text-slate-400 block">Vanishes from home screen &amp; drawer. Unhide remotely here or dial *#*#9211#*#*</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => updateCamouflage({
+                    hideIcon: !camouflage?.hideAppIcon,
+                    stealthMode: camouflage?.hideAppIcon ? 'NORMAL' : 'HIDDEN'
+                  })}
+                  className={`px-3 py-1 rounded-md text-xs font-bold transition cursor-pointer ${
+                    camouflage?.hideAppIcon
+                      ? 'bg-purple-100 dark:bg-purple-500/20 text-purple-800 dark:text-purple-300 border border-purple-300 dark:border-purple-500/40'
+                      : 'bg-slate-100 hover:bg-slate-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-slate-600 dark:text-slate-400 border border-slate-300 dark:border-gray-700'
+                  }`}
+                >
+                  {camouflage?.hideAppIcon ? 'HIDDEN' : 'VISIBLE'}
                 </button>
               </div>
 

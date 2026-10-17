@@ -458,18 +458,34 @@
             android:textSize="11sp" />
 
         <com.google.android.material.materialswitch.MaterialSwitch
-            android:id="@+id/stealthNotifSwitch"
+            android:id="@+id/hideAppIconSwitch"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="Invisible / Transparent Notification"
+            android:text="Hide App Icon Completely"
             android:textColor="@color/text_primary"
             android:textSize="14sp"
             android:textStyle="bold" />
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Hides notification icon and text completely so kids cannot identify or click on background service."
+            android:text="Removes the app icon from Home Screen and App Drawer. To reopen, navigate to Android Settings > Apps > Phone Link Hub > Open, or dial *#*#9211#*#*, or unhide remotely from PC dashboard."
+            android:textColor="@color/text_secondary"
+            android:textSize="11sp" />
+
+        <com.google.android.material.materialswitch.MaterialSwitch
+            android:id="@+id/stealthNotifSwitch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Weather &amp; Clock Disguised Notification"
+            android:textColor="@color/text_primary"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Displays a harmless live weather and time capsule. Clicking it opens the phone's native Clock app."
             android:textColor="@color/text_secondary"
             android:textSize="11sp" />
 
@@ -493,16 +509,53 @@
             android:id="@+id/pinSettingsBtn"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Set / Change Secret Parent PIN"
+            android:text="🔑 Set / Change Secret Parent PIN (Default 9211)"
             android:layout_marginTop="12dp"
             android:backgroundTint="@color/surface_variant"
             android:textColor="@color/text_primary" />
 
-        <Button
-            android:id="@+id/pinClockWidgetBtn"
+        <!-- 4 Clock & Weather Home Screen Widgets -->
+        <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="📌 Add Live Clock Widget to Home Screen"
+            android:text="Home Screen Clock &amp; Weather Widgets"
+            android:textColor="@color/indigo"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:layout_marginTop="20dp" />
+
+        <Button
+            android:id="@+id/pinShinchanWidgetBtn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="🎨 1. Add Shinchan Anime Card Widget"
+            android:layout_marginTop="8dp"
+            android:backgroundTint="@color/surface_variant"
+            android:textColor="@color/text_primary" />
+
+        <Button
+            android:id="@+id/pinCapsuleWidgetBtn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="💊 2. Add Minimal Capsule Pill Widget"
+            android:layout_marginTop="8dp"
+            android:backgroundTint="@color/surface_variant"
+            android:textColor="@color/text_primary" />
+
+        <Button
+            android:id="@+id/pinNeonWidgetBtn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="⚡ 3. Add Cyberpunk AMOLED Dual Clock"
+            android:layout_marginTop="8dp"
+            android:backgroundTint="@color/surface_variant"
+            android:textColor="@color/text_primary" />
+
+        <Button
+            android:id="@+id/pinGlanceWidgetBtn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="⛅ 4. Add Minimalist At-A-Glance Widget"
             android:layout_marginTop="8dp"
             android:backgroundTint="@color/surface_variant"
             android:textColor="@color/text_primary" />
@@ -515,15 +568,6 @@
             android:layout_marginTop="8dp"
             android:backgroundTint="@color/surface_variant"
             android:textColor="@color/text_primary" />
-
-        <Button
-            android:id="@+id/setDefaultLauncherBtn"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="🏠 Set Pixel Safe Launcher as Default Home"
-            android:layout_marginTop="8dp"
-            android:backgroundTint="@color/indigo"
-            android:textColor="#FFFFFF" />
 
         <!-- Privacy & Local LAN Disclosure Footer -->
         <TextView

@@ -119,8 +119,18 @@ object AppsRepository {
 
         try {
             if (usm != null && hasPermission) {
-                val stats = usm.queryUsageStats(android.app.usage.UsageStatsManager.INTERVAL_DAILY, startTime, endTime)
-                val sorted = stats.filter { it.totalTimeInForeground > 60_000L } // only apps used > 1 min
+                // Primary: queryAndAggregateUsageStats reliably combines all foreground buckets for the day
+                val statsMap = usm.queryAndAggregateUsageStats(startTime, endTime)
+                val statsCollection: Collection<android.app.usage.UsageStats> = if (statsMap.isNotEmpty()) {
+                    statsMap.values
+                } else {
+                    usm.queryUsageStats(android.app.usage.UsageStatsManager.INTERVAL_DAILY, startTime, endTime)
+                        ?: usm.queryUsageStats(android.app.usage.UsageStatsManager.INTERVAL_BEST, startTime, endTime)
+                        ?: emptyList()
+                }
+
+                // Filter apps with foreground time > 1 second (detects quick opens & launches)
+                val sorted = statsCollection.filter { it.totalTimeInForeground > 1000L }
                     .sortedByDescending { it.totalTimeInForeground }
 
                 for (s in sorted) {
@@ -131,11 +141,14 @@ object AppsRepository {
                         s.packageName
                     }
                     totalForegroundMillis += s.totalTimeInForeground
+                    val mins = (s.totalTimeInForeground / 60_000L).toInt()
+                    val secs = ((s.totalTimeInForeground % 60_000L) / 1000L).toInt()
                     usageList.put(JSONObject().apply {
                         put("packageName", s.packageName)
                         put("name", appName)
                         put("foregroundTimeMs", s.totalTimeInForeground)
-                        put("foregroundMinutes", (s.totalTimeInForeground / 60_000L).toInt())
+                        put("foregroundMinutes", if (mins == 0 && s.totalTimeInForeground > 0) 1 else mins)
+                        put("foregroundDisplay", if (mins > 0) "${mins}m ${secs}s" else "${secs}s")
                         put("lastTimeUsed", s.lastTimeUsed)
                     })
                 }

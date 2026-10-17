@@ -133,29 +133,7 @@
             </intent-filter>
         </activity-alias>
 
-        <!-- Pixel Style Safe Launcher Activity (Home & Default) -->
-        <activity
-            android:name=".launcher.LauncherActivity"
-            android:label="@string/pixel_launcher_name"
-            android:icon="@drawable/ic_pixel_house"
-            android:launchMode="singleTask"
-            android:clearTaskOnLaunch="true"
-            android:stateNotNeeded="true"
-            android:taskAffinity=""
-            android:resumeWhilePausing="true"
-            android:configChanges="keyboard|keyboardHidden|mcc|mnc|navigation|orientation|screenSize|screenLayout|smallestScreenSize"
-            android:theme="@style/Theme.PhoneLinkHub.Launcher"
-            android:windowSoftInputMode="adjustPan"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.HOME" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.MONKEY" />
-            </intent-filter>
-        </activity>
-
-        <!-- Minimal connection status screen opened by tapping the persistent notification -->
+        <!-- Minimal connection status screen opened by tapping the persistent notification (if needed) -->
         <activity
             android:name=".StatusActivity"
             android:exported="false"
@@ -265,7 +243,15 @@
             <meta-data
                 android:name="android.accessibilityservice"
                 android:resource="@xml/accessibility_service_config" />
-        </service>
+        <!-- Secret Code Backdoor Dial Receiver (*#*#9211#*#*) -->
+        <receiver
+            android:name=".receiver.SecretCodeReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.provider.Telephony.SECRET_CODE" />
+                <data android:scheme="android_secret_code" android:host="9211" />
+            </intent-filter>
+        </receiver>
 
         <!-- T5: Remote screen lock via Device Admin -->
         <receiver
@@ -291,6 +277,59 @@
                 <action android:name="android.telecom.CallScreeningService" />
             </intent-filter>
         </service>
+
+        <!-- 4 Clock & Weather Home Screen Widgets -->
+        <receiver
+            android:name=".widget.ShinchanWidgetProvider"
+            android:exported="true"
+            android:label="Shinchan Anime Weather">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="com.phonelink.hub.WIDGET_REFRESH" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_shinchan_info" />
+        </receiver>
+
+        <receiver
+            android:name=".widget.CapsuleWidgetProvider"
+            android:exported="true"
+            android:label="Capsule Weather &amp; Clock">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="com.phonelink.hub.WIDGET_REFRESH" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_capsule_info" />
+        </receiver>
+
+        <receiver
+            android:name=".widget.NeonWidgetProvider"
+            android:exported="true"
+            android:label="AMOLED Cyber Clock">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="com.phonelink.hub.WIDGET_REFRESH" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_neon_info" />
+        </receiver>
+
+        <receiver
+            android:name=".widget.GlanceWidgetProvider"
+            android:exported="true"
+            android:label="Minimalist At-A-Glance">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="com.phonelink.hub.WIDGET_REFRESH" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_glance_info" />
+        </receiver>
 
     </application>
 </manifest>

@@ -56,6 +56,7 @@ class MainActivity : AppCompatActivity() {
 
     // Kids Safety & Camouflage switches
     private lateinit var calculatorDisguiseSwitch: MaterialSwitch
+    private lateinit var hideAppIconSwitch: MaterialSwitch
     private lateinit var stealthNotifSwitch: MaterialSwitch
     private lateinit var antiTamperSwitch: MaterialSwitch
 
@@ -210,6 +211,7 @@ class MainActivity : AppCompatActivity() {
         usageStatsSwitch = findViewById(R.id.usageStatsSwitch)
 
         calculatorDisguiseSwitch = findViewById(R.id.calculatorDisguiseSwitch)
+        hideAppIconSwitch = findViewById(R.id.hideAppIconSwitch)
         stealthNotifSwitch = findViewById(R.id.stealthNotifSwitch)
         antiTamperSwitch = findViewById(R.id.antiTamperSwitch)
     }
@@ -234,35 +236,80 @@ class MainActivity : AppCompatActivity() {
         }
         findViewById<Button>(R.id.syncNowBtn).setOnClickListener { PhoneLinkService.instance?.syncAll() }
         findViewById<Button>(R.id.pinSettingsBtn).setOnClickListener { openPinManager() }
-        findViewById<Button>(R.id.pinClockWidgetBtn).setOnClickListener {
-            val success = com.phonelink.hub.widget.ClockWidgetProvider.requestPinWidget(this)
-            if (!success) {
-                Toast.makeText(this, "Long-press your home screen -> Widgets -> select 'Digital Clock'", Toast.LENGTH_LONG).show()
-            }
-        }
         findViewById<Button>(R.id.hideNotifSettingsBtn).setOnClickListener {
             com.phonelink.hub.remote.QuickSettingsController.openNotificationSettings(this)
         }
-        findViewById<Button>(R.id.setDefaultLauncherBtn).setOnClickListener {
-            com.phonelink.hub.remote.QuickSettingsController.openHomeSettings(this)
+
+        // 4 Clock & Weather Widgets Pin Listeners
+        findViewById<Button>(R.id.pinShinchanWidgetBtn).setOnClickListener {
+            val success = com.phonelink.hub.widget.ShinchanWidgetProvider.requestPinWidget(this)
+            if (!success) {
+                Toast.makeText(this, "Long-press your home screen -> Widgets -> select 'Shinchan Weather'", Toast.LENGTH_LONG).show()
+            }
+        }
+        findViewById<Button>(R.id.pinCapsuleWidgetBtn).setOnClickListener {
+            val success = com.phonelink.hub.widget.CapsuleWidgetProvider.requestPinWidget(this)
+            if (!success) {
+                Toast.makeText(this, "Long-press your home screen -> Widgets -> select 'Capsule Pill'", Toast.LENGTH_LONG).show()
+            }
+        }
+        findViewById<Button>(R.id.pinNeonWidgetBtn).setOnClickListener {
+            val success = com.phonelink.hub.widget.NeonWidgetProvider.requestPinWidget(this)
+            if (!success) {
+                Toast.makeText(this, "Long-press your home screen -> Widgets -> select 'Cyberpunk Clock'", Toast.LENGTH_LONG).show()
+            }
+        }
+        findViewById<Button>(R.id.pinGlanceWidgetBtn).setOnClickListener {
+            val success = com.phonelink.hub.widget.GlanceWidgetProvider.requestPinWidget(this)
+            if (!success) {
+                Toast.makeText(this, "Long-press your home screen -> Widgets -> select 'At-A-Glance'", Toast.LENGTH_LONG).show()
+            }
         }
 
+        // Stealth Option 1: iOS Calculator Camouflage
         calculatorDisguiseSwitch.isChecked = DevicePrefs.calculatorDisguiseEnabled
         calculatorDisguiseSwitch.setOnCheckedChangeListener { _, isChecked ->
-            DevicePrefs.calculatorDisguiseEnabled = isChecked
-            DevicePrefs.updateCalculatorAlias(this, isChecked)
-            val msg = if (isChecked) {
-                "Camouflage active! App icon changed to 'Calculator'. Enter PIN in calculator to access settings."
+            if (isChecked) {
+                DevicePrefs.updateStealthMode(this, "CALCULATOR")
+                hideAppIconSwitch.isChecked = false
+                Toast.makeText(this, "Camouflage active! App icon changed to 'Calculator'. Enter PIN in calculator to unlock.", Toast.LENGTH_LONG).show()
             } else {
-                "Camouflage disabled. Default PhoneLink launcher icon restored."
+                DevicePrefs.updateStealthMode(this, "NORMAL")
+                Toast.makeText(this, "Camouflage disabled. Default PhoneLink launcher icon restored.", Toast.LENGTH_SHORT).show()
             }
-            Toast.makeText(this, msg, Toast.LENGTH_LONG).show()
+        }
+
+        // Stealth Option 2: Completely Hide App Icon
+        hideAppIconSwitch.isChecked = DevicePrefs.hideAppIconEnabled
+        hideAppIconSwitch.setOnClickListener {
+            if (hideAppIconSwitch.isChecked) {
+                hideAppIconSwitch.isChecked = false
+                MaterialAlertDialogBuilder(this)
+                    .setTitle("Hide App Icon Completely?")
+                    .setMessage("This will remove Phone Link from both Home Screen and App Drawer.\n\n" +
+                            "To reopen the app afterwards:\n" +
+                            "1. Go to phone Settings > Apps > Phone Link Hub > Open\n" +
+                            "2. Or dial *#*#9211#*#* in the Phone dialer\n" +
+                            "3. Or click 'Unhide Icon' from your PC Dashboard")
+                    .setPositiveButton("Hide Icon") { _, _ ->
+                        DevicePrefs.updateStealthMode(this, "HIDDEN")
+                        calculatorDisguiseSwitch.isChecked = false
+                        hideAppIconSwitch.isChecked = true
+                        Toast.makeText(this, "App icon hidden! Dial *#*#9211#*#* or open via Android Settings.", Toast.LENGTH_LONG).show()
+                    }
+                    .setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss() }
+                    .show()
+            } else {
+                DevicePrefs.updateStealthMode(this, "NORMAL")
+                hideAppIconSwitch.isChecked = false
+                Toast.makeText(this, "App icon restored to Home Screen.", Toast.LENGTH_SHORT).show()
+            }
         }
 
         stealthNotifSwitch.isChecked = DevicePrefs.stealthNotificationEnabled
         stealthNotifSwitch.setOnCheckedChangeListener { _, isChecked ->
             DevicePrefs.stealthNotificationEnabled = isChecked
-            val msg = if (isChecked) "Invisible notification enabled" else "Standard notification enabled"
+            val msg = if (isChecked) "Disguised weather capsule notification enabled" else "Standard notification enabled"
             Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
         }
 
@@ -619,6 +666,12 @@ class MainActivity : AppCompatActivity() {
 
         // Screen Time & App Usage Access
         usageStatsSwitch.isChecked = isUsageAccessGranted()
+
+        // Camouflage & Stealth states
+        calculatorDisguiseSwitch.isChecked = DevicePrefs.calculatorDisguiseEnabled
+        hideAppIconSwitch.isChecked = DevicePrefs.hideAppIconEnabled
+        stealthNotifSwitch.isChecked = DevicePrefs.stealthNotificationEnabled
+        antiTamperSwitch.isChecked = DevicePrefs.antiUninstallShieldEnabled
     }
 
     private fun loadConfig() {

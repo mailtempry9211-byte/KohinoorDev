@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widgetCapsuleContainer"
+    android:layout_width="match_parent"
+    android:layout_height="64dp"
+    android:background="@drawable/bg_search_pill"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:paddingHorizontal="18dp"
+    android:paddingVertical="8dp">
+
+    <!-- Digital Clock (HH:mm) -->
+    <TextClock
+        android:id="@+id/capsuleTime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="sans-serif-black"
+        android:format12Hour="hh:mm"
+        android:format24Hour="HH:mm"
+        android:textColor="#FFFFFF"
+        android:textSize="22sp"
+        android:textStyle="bold" />
+
+    <!-- AM/PM -->
+    <TextClock
+        android:id="@+id/capsuleAmPm"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
+        android:fontFamily="sans-serif-medium"
+        android:format12Hour="a"
+        android:format24Hour=""
+        android:textColor="#9CA3AF"
+        android:textSize="11sp" />
+
+    <!-- Vertical Divider -->
+    <View
+        android:layout_width="1dp"
+        android:layout_height="24dp"
+        android:layout_marginHorizontal="14dp"
+        android:background="#374151" />
+
+    <!-- Weather Icon -->
+    <ImageView
+        android:id="@+id/capsuleWeatherIcon"
+        android:layout_width="22dp"
+        android:layout_height="22dp"
+        android:src="@drawable/ic_weather_partly_cloudy" />
+
+    <!-- Weather Temp & Condition -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/capsuleTemp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-bold"
+            android:text="25°C"
+            android:textColor="#F3F4F6"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/capsuleCondition"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif"
+            android:text="Sunny"
+            android:textColor="#9CA3AF"
+            android:textSize="10sp" />
+    </LinearLayout>
+
+</LinearLayout>

