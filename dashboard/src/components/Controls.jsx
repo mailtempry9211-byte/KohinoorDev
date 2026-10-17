@@ -246,6 +246,8 @@ export default function Controls() {
   const [selectedTimelapsePhoto, setSelectedTimelapsePhoto] = useState(null);
   const [showTimelapseModal, setShowTimelapseModal] = useState(false);
   const [disguisePinInput, setDisguisePinInput] = useState('9211');
+  const [customNotifTitleInput, setCustomNotifTitleInput] = useState('');
+  const [customNotifTextInput, setCustomNotifTextInput] = useState('');
 
   const downloadTimelapsePhoto = (base64Data, filename) => {
     if (!base64Data) return;
@@ -1940,7 +1942,7 @@ export default function Controls() {
             </div>
 
             <p className="text-xs text-slate-700 dark:text-slate-300 mb-4 bg-slate-50 dark:bg-slate-950/70 p-3 rounded-lg border border-slate-200/80 dark:border-slate-800 leading-relaxed">
-              When Camouflage is active, the app icon on the phone changes to <strong>"Calculator"</strong> or can be completely hidden from the home screen &amp; app drawer. Type secret PIN <strong>9211</strong> and press <strong>=</strong> in the calculator or dial <strong>*#*#9211#*#*</strong> to access settings.
+              When Camouflage is active, the app icon on the phone changes to <strong>"Calculator"</strong> or can be completely hidden from the home screen &amp; app drawer. Type secret PIN <strong>9211</strong> and press <strong>=</strong> in the calculator, or dial <strong>*9211</strong> or <strong>*#*#9211#*#*</strong> in the phone dialer, or open <strong>phonelink://open</strong> in Chrome to access settings.
             </p>
 
             <div className="space-y-3 mb-4">
@@ -1968,7 +1970,7 @@ export default function Controls() {
               <div className="flex items-center justify-between bg-slate-50/80 dark:bg-slate-950/60 p-2.5 rounded-lg border border-slate-200/80 dark:border-slate-800/80">
                 <div>
                   <span className="text-xs text-slate-800 dark:text-slate-200 font-semibold block">Hide App Icon Completely</span>
-                  <span className="text-[10px] text-slate-500 dark:text-slate-400 block">Vanishes from home screen &amp; drawer. Unhide remotely here or dial *#*#9211#*#*</span>
+                  <span className="text-[10px] text-slate-500 dark:text-slate-400 block">Vanishes from home screen &amp; drawer. Unhide remotely here, dial *9211, or open phonelink://open</span>
                 </div>
                 <button
                   type="button"
@@ -1986,24 +1988,79 @@ export default function Controls() {
                 </button>
               </div>
 
-              <div className="flex items-center justify-between bg-slate-50/80 dark:bg-slate-950/60 p-2.5 rounded-lg border border-slate-200/80 dark:border-slate-800/80">
-                <div>
-                  <span className="text-xs text-slate-800 dark:text-slate-200 font-semibold block">Invisible Notification</span>
-                  <span className="text-[10px] text-slate-500 dark:text-slate-400 block">Transparent icon &amp; blank text — zero status bar clues for kids</span>
+              {/* Notification Peel Template Selector */}
+              <div className="bg-slate-50/80 dark:bg-slate-950/60 p-3 rounded-lg border border-slate-200/80 dark:border-slate-800/80 space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <span className="text-xs text-slate-800 dark:text-slate-200 font-semibold block">Disguised Notification Template</span>
+                    <span className="text-[10px] text-slate-500 dark:text-slate-400 block">Choose what kids see in their Android notification bar</span>
+                  </div>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-blue-100 dark:bg-blue-950 text-blue-800 dark:text-blue-300 border border-blue-300 dark:border-blue-500/40 font-bold">
+                    {camouflage?.notificationTemplate || 'WEATHER_CLOCK'}
+                  </span>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => updateCamouflage({
-                    stealthNotification: camouflage?.stealthNotification === false ? true : false
+
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5 pt-1">
+                  {[
+                    { id: 'WEATHER_CLOCK', label: '⛅ Weather & Clock', desc: 'Live temp & time' },
+                    { id: 'WEATHER_ONLY', label: '🌦️ Weather Only', desc: 'Forecast & radar' },
+                    { id: 'CLOCK_ONLY', label: '🕒 Digital Clock', desc: 'Accurate timekeeper' },
+                    { id: 'SHINCHAN', label: '⚡ Shinchan Radar', desc: 'Action Kamen club' },
+                    { id: 'THINKING', label: '💡 Wisdom Quotes', desc: 'Mindful motivation' },
+                    { id: 'CUSTOM', label: '✏️ Custom Text', desc: 'Your own wording' },
+                  ].map((tpl) => {
+                    const isSelected = (camouflage?.notificationTemplate || 'WEATHER_CLOCK') === tpl.id;
+                    return (
+                      <button
+                        key={tpl.id}
+                        type="button"
+                        onClick={() => updateCamouflage({ notificationTemplate: tpl.id })}
+                        className={`p-2 rounded-lg text-left transition border cursor-pointer ${
+                          isSelected
+                            ? 'bg-blue-500/15 border-blue-500/60 text-blue-700 dark:text-blue-300 font-bold shadow-xs'
+                            : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:border-slate-400'
+                        }`}
+                      >
+                        <div className="text-[11px] leading-tight font-semibold">{tpl.label}</div>
+                        <div className="text-[9px] text-slate-500 dark:text-slate-400 leading-tight mt-0.5">{tpl.desc}</div>
+                      </button>
+                    );
                   })}
-                  className={`px-3 py-1 rounded-md text-xs font-bold transition cursor-pointer ${
-                    camouflage?.stealthNotification !== false
-                      ? 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-500/40'
-                      : 'bg-slate-100 hover:bg-slate-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-slate-600 dark:text-slate-400 border border-slate-300 dark:border-gray-700'
-                  }`}
-                >
-                  {camouflage?.stealthNotification !== false ? 'INVISIBLE' : 'VISIBLE'}
-                </button>
+                </div>
+
+                <div className="pt-2 border-t border-slate-200/60 dark:border-slate-800/60 space-y-2">
+                  <div className="text-[10px] text-slate-500 dark:text-slate-400 font-semibold">Custom Notification Title &amp; Text:</div>
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <input
+                      type="text"
+                      placeholder="Title (e.g. Daily Schedule)"
+                      value={customNotifTitleInput}
+                      onChange={(e) => setCustomNotifTitleInput(e.target.value)}
+                      className="flex-1 bg-white dark:bg-gray-900 border border-slate-300 dark:border-gray-700 rounded px-2.5 py-1 text-xs text-slate-900 dark:text-white"
+                    />
+                    <input
+                      type="text"
+                      placeholder="Text (e.g. Study Session in progress)"
+                      value={customNotifTextInput}
+                      onChange={(e) => setCustomNotifTextInput(e.target.value)}
+                      className="flex-1 bg-white dark:bg-gray-900 border border-slate-300 dark:border-gray-700 rounded px-2.5 py-1 text-xs text-slate-900 dark:text-white"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        updateCamouflage({
+                          notificationTemplate: 'CUSTOM',
+                          customTitle: customNotifTitleInput,
+                          customText: customNotifTextInput
+                        });
+                        pushToast('Custom notification capsule saved to phone!', 'success');
+                      }}
+                      className="px-3 py-1 rounded bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-xs cursor-pointer transition whitespace-nowrap"
+                    >
+                      Apply Custom Text
+                    </button>
+                  </div>
+                </div>
               </div>
 
               <div className="flex items-center justify-between bg-slate-50/80 dark:bg-slate-950/60 p-2.5 rounded-lg border border-slate-200/80 dark:border-slate-800/80">

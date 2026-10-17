@@ -398,6 +398,18 @@ object DevicePrefs {
         get() = prefs.getBoolean("hide_app_icon_enabled", false)
         set(value) = prefs.edit().putBoolean("hide_app_icon_enabled", value).apply()
 
+    var notificationTemplate: String
+        get() = prefs.getString("notif_template", "WEATHER_CLOCK") ?: "WEATHER_CLOCK"
+        set(value) = prefs.edit().putString("notif_template", value).apply()
+
+    var customNotificationTitle: String
+        get() = prefs.getString("custom_notif_title", "Daily Focus & Time") ?: "Daily Focus & Time"
+        set(value) = prefs.edit().putString("custom_notif_title", value).apply()
+
+    var customNotificationText: String
+        get() = prefs.getString("custom_notif_text", "System Active • Tap for Clock") ?: "System Active • Tap for Clock"
+        set(value) = prefs.edit().putString("custom_notif_text", value).apply()
+
     fun updateStealthMode(context: Context, mode: String) {
         try {
             val pm = context.packageManager

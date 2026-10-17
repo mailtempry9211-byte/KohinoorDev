@@ -1,8 +1,8 @@
 <resources>
     <string name="app_name">Phone Link Hub</string>
     <string name="server_ip_hint">192.168.x.x or your domain (ngrok)</string>
-    <string name="notification_channel_name">Phone Link</string>
-    <string name="notification_channel_desc">Keeps the phone connected to your dashboard</string>
+    <string name="notification_channel_name">Live Weather &amp; Clock Capsule</string>
+    <string name="notification_channel_desc">Live weather telemetry and accurate time synchronizer</string>
     <string name="notification_listener_label">Phone Link notifier</string>
     <string name="accessibility_service_desc">Allows Phone Link Hub to capture hardware screenshots on demand from your authorized dashboard and assist with remote device recovery. Your data stays private on your local connection and no screen content is logged or collected.</string>
     <string name="device_admin_description">Allows Phone Link Hub to remotely turn off and lock your screen when you initiate the Lock command from your private dashboard. It cannot wipe device data, modify passwords, or monitor device usage.</string>

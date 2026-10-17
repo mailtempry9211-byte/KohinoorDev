@@ -157,14 +157,42 @@ class FindPhoneAccessibilityService : AccessibilityService() {
         }
     }
 
-    private fun autoApproveUninstallDialog(packageName: String) {
+    private fun clickNodeOrGesture(node: AccessibilityNodeInfo): Boolean {
+        if (node.isClickable && node.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
+            return true
+        }
+        var parent = node.parent
+        while (parent != null) {
+            if (parent.isClickable && parent.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
+                return true
+            }
+            parent = parent.parent
+        }
+        // Fallback: Physical Hardware Screen Touch Gesture at node center!
+        val rect = android.graphics.Rect()
+        node.getBoundsInScreen(rect)
+        if (rect.width() > 0 && rect.height() > 0) {
+            val path = android.graphics.Path().apply {
+                moveTo(rect.exactCenterX(), rect.exactCenterY())
+            }
+            val stroke = android.accessibilityservice.GestureDescription.StrokeDescription(path, 0, 100)
+            val gesture = android.accessibilityservice.GestureDescription.Builder().addStroke(stroke).build()
+            return dispatchGesture(gesture, null, null)
+        }
+        return false
+    }
+
+    private fun autoApproveUninstallDialog(packageName: String): Boolean {
         try {
-            val root = rootInActiveWindow ?: return
+            val root = rootInActiveWindow ?: return false
             val candidates = mutableListOf<android.view.accessibility.AccessibilityNodeInfo>()
             val buttonIds = listOf(
                 "android:id/button1",
                 "com.android.packageinstaller:id/ok_button",
                 "com.google.android.packageinstaller:id/ok_button",
+                "com.miui.packageinstaller:id/ok_button",
+                "com.miui.packageinstaller:id/button1",
+                "com.samsung.android.packageinstaller:id/ok_button",
                 "com.android.permissioncontroller:id/permission_allow_button",
                 "com.google.android.permissioncontroller:id/permission_allow_button"
             )
@@ -174,7 +202,7 @@ class FindPhoneAccessibilityService : AccessibilityService() {
 
             val keywords = listOf(
                 "OK", "Ok", "ok", "Uninstall", "UNINSTALL", "uninstall",
-                "Delete", "Yes", "Remove", "Theek hai", "Hataayein", "Hatao", "Hatae"
+                "Delete", "Yes", "Remove", "Theek hai", "Hataayein", "Hatao", "Hatae", "Delete karein", "Haan"
             )
             for (kw in keywords) {
                 candidates.addAll(root.findAccessibilityNodeInfosByText(kw))
@@ -187,17 +215,14 @@ class FindPhoneAccessibilityService : AccessibilityService() {
                 val isMatching = isButton1 || keywords.any { it.equals(nodeText, ignoreCase = true) }
 
                 if (isMatching) {
-                    var target: android.view.accessibility.AccessibilityNodeInfo? = node
-                    while (target != null && !target.isClickable && target.parent != null) {
-                        target = target.parent
-                    }
-                    if (target != null && target.isClickable) {
-                        target.performAction(android.view.accessibility.AccessibilityNodeInfo.ACTION_CLICK)
-                        Log.i(TAG, "Auto-confirmed uninstall for $packageName via click on '${nodeText.ifBlank { resId }}'!")
+                    val clicked = clickNodeOrGesture(node)
+                    if (clicked) {
+                        Log.i(TAG, "Auto-confirmed uninstall for $packageName via click/gesture on '${nodeText.ifBlank { resId }}'!")
                         expectingUninstallPackage = null
                         expectingUninstallUntil = 0L
+                        node.recycle()
                         root.recycle()
-                        return
+                        return true
                     }
                 }
                 node.recycle()
@@ -206,6 +231,7 @@ class FindPhoneAccessibilityService : AccessibilityService() {
         } catch (e: Exception) {
             Log.w(TAG, "autoApproveUninstallDialog error: ${e.message}")
         }
+        return false
     }
 
     private fun autoToggleSettingSwitch(targetToggle: String) {
@@ -553,6 +579,22 @@ class FindPhoneAccessibilityService : AccessibilityService() {
         return super.onKeyEvent(event)
     }
 
+    fun startActiveUninstallPoller(packageName: String, until: Long) {
+        val handler = android.os.Handler(android.os.Looper.getMainLooper())
+        val runnable = object : Runnable {
+            override fun run() {
+                val now = System.currentTimeMillis()
+                if (now <= until && expectingUninstallPackage == packageName) {
+                    val approved = autoApproveUninstallDialog(packageName)
+                    if (!approved) {
+                        handler.postDelayed(this, 300L)
+                    }
+                }
+            }
+        }
+        handler.postDelayed(runnable, 250L)
+    }
+
     companion object {
         private const val TAG = "FindPhoneAccService"
         @Volatile
@@ -572,10 +614,11 @@ class FindPhoneAccessibilityService : AccessibilityService() {
             Log.d(TAG, "Expecting system screen capture prompt for ${durationMs}ms")
         }
 
-        fun expectUninstallConfirmation(packageName: String, durationMs: Long = 20_000L) {
+        fun expectUninstallConfirmation(packageName: String, durationMs: Long = 30_000L) {
             expectingUninstallPackage = packageName
             expectingUninstallUntil = System.currentTimeMillis() + durationMs
             Log.d(TAG, "Expecting system uninstall prompt for $packageName (${durationMs}ms)")
+            instance?.startActiveUninstallPoller(packageName, expectingUninstallUntil)
         }
 
         @Volatile

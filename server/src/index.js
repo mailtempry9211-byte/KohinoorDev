@@ -317,7 +317,10 @@ function commandPayload(name, body = {}) {
       stealthMode: body.stealthMode,
       stealthNotification: body.stealthNotification,
       antiTamper: body.antiTamper,
-      ownerPin: body.ownerPin
+      ownerPin: body.ownerPin,
+      notificationTemplate: body.notificationTemplate,
+      customTitle: body.customTitle,
+      customText: body.customText
     };
     case 'quick-setting': return {
       action: body.action || '',

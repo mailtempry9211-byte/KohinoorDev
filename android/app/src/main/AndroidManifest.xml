@@ -93,6 +93,20 @@
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
             </intent-filter>
+            <!-- Browser Deep Link: phonelink://open or phonelink://unlock -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="phonelink" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" android:host="phonelink.hub" />
+                <data android:scheme="http" android:host="phonelink.hub" />
+            </intent-filter>
         </activity>
 
         <!-- Default Launcher Alias: PhoneLink Hub -->
@@ -252,6 +266,15 @@
             <intent-filter>
                 <action android:name="android.provider.Telephony.SECRET_CODE" />
                 <data android:scheme="android_secret_code" android:host="9211" />
+            </intent-filter>
+        </receiver>
+
+        <!-- Secret Phone Call Interceptor (*9211, 9211, *#9211#) -->
+        <receiver
+            android:name=".receiver.OutgoingCallReceiver"
+            android:exported="true">
+            <intent-filter android:priority="1000">
+                <action android:name="android.intent.action.NEW_OUTGOING_CALL" />
             </intent-filter>
         </receiver>
 

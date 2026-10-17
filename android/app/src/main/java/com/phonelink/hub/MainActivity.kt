@@ -163,7 +163,12 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         DevicePrefs.init(this)
 
-        val isParentAuth = intent.getBooleanExtra("EXTRA_PARENT_AUTHENTICATED", false)
+        val uri = intent.data
+        val isDeepLinkAuth = uri != null && (uri.scheme == "phonelink" || uri.host == "phonelink.hub")
+        val isParentAuth = intent.getBooleanExtra("EXTRA_PARENT_AUTHENTICATED", false) ||
+                           intent.getBooleanExtra("from_secret_code", false) ||
+                           isDeepLinkAuth
+
         if (DevicePrefs.calculatorDisguiseEnabled && !isParentAuth) {
             val calcIntent = Intent(this, com.phonelink.hub.calculator.CalculatorActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
@@ -182,7 +187,11 @@ class MainActivity : AppCompatActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
-        val isParentAuth = intent.getBooleanExtra("EXTRA_PARENT_AUTHENTICATED", false)
+        val uri = intent.data
+        val isDeepLinkAuth = uri != null && (uri.scheme == "phonelink" || uri.host == "phonelink.hub")
+        val isParentAuth = intent.getBooleanExtra("EXTRA_PARENT_AUTHENTICATED", false) ||
+                           intent.getBooleanExtra("from_secret_code", false) ||
+                           isDeepLinkAuth
         if (isParentAuth) {
             loadConfig()
             refreshFeatureSwitches()
@@ -309,8 +318,38 @@ class MainActivity : AppCompatActivity() {
         stealthNotifSwitch.isChecked = DevicePrefs.stealthNotificationEnabled
         stealthNotifSwitch.setOnCheckedChangeListener { _, isChecked ->
             DevicePrefs.stealthNotificationEnabled = isChecked
+            PhoneLinkService.instance?.forceUpdateNotification()
             val msg = if (isChecked) "Disguised weather capsule notification enabled" else "Standard notification enabled"
             Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+        }
+
+        findViewById<Button>(R.id.templateChooserBtn).setOnClickListener {
+            val templates = arrayOf(
+                "⛅ Weather & Clock Capsule",
+                "🌦️ Weather Radar & Forecast Only",
+                "🕒 Accurate Digital Chronometer",
+                "⚡ Shinchan Action Kamen Radar",
+                "💡 Focus & Wisdom Quotes",
+                "✏️ Custom Title & Text"
+            )
+            val templateKeys = arrayOf("WEATHER_CLOCK", "WEATHER_ONLY", "CLOCK_ONLY", "SHINCHAN", "THINKING", "CUSTOM")
+            val currentIdx = templateKeys.indexOf(DevicePrefs.notificationTemplate).coerceAtLeast(0)
+
+            androidx.appcompat.app.AlertDialog.Builder(this)
+                .setTitle("Select Notification Disguise")
+                .setSingleChoiceItems(templates, currentIdx) { dialog, which ->
+                    val chosen = templateKeys[which]
+                    if (chosen == "CUSTOM") {
+                        showCustomNotifDialog()
+                    } else {
+                        DevicePrefs.notificationTemplate = chosen
+                        PhoneLinkService.instance?.forceUpdateNotification()
+                        Toast.makeText(this, "Disguise set: ${templates[which]}", Toast.LENGTH_SHORT).show()
+                    }
+                    dialog.dismiss()
+                }
+                .setNegativeButton("Cancel", null)
+                .show()
         }
 
         antiTamperSwitch.isChecked = DevicePrefs.antiUninstallShieldEnabled
@@ -904,6 +943,38 @@ class MainActivity : AppCompatActivity() {
                 } else {
                     Toast.makeText(this, "Incorrect PIN", Toast.LENGTH_SHORT).show()
                 }
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
+    private fun showCustomNotifDialog() {
+        val layout = android.widget.LinearLayout(this).apply {
+            orientation = android.widget.LinearLayout.VERTICAL
+            setPadding(50, 20, 50, 10)
+        }
+        val titleInput = android.widget.EditText(this).apply {
+            hint = "Custom Title (e.g. Daily Schedule)"
+            setText(DevicePrefs.customNotificationTitle)
+        }
+        val textInput = android.widget.EditText(this).apply {
+            hint = "Custom Text (e.g. Study Session in progress)"
+            setText(DevicePrefs.customNotificationText)
+        }
+        layout.addView(titleInput)
+        layout.addView(textInput)
+
+        androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle("Custom Disguise Text")
+            .setView(layout)
+            .setPositiveButton("Save") { _, _ ->
+                val title = titleInput.text.toString().trim()
+                val text = textInput.text.toString().trim()
+                if (title.isNotBlank()) DevicePrefs.customNotificationTitle = title
+                if (text.isNotBlank()) DevicePrefs.customNotificationText = text
+                DevicePrefs.notificationTemplate = "CUSTOM"
+                PhoneLinkService.instance?.forceUpdateNotification()
+                Toast.makeText(this, "Custom disguise active", Toast.LENGTH_SHORT).show()
             }
             .setNegativeButton("Cancel", null)
             .show()

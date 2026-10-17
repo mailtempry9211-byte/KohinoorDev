@@ -469,7 +469,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Removes the app icon from Home Screen and App Drawer. To reopen, navigate to Android Settings > Apps > Phone Link Hub > Open, or dial *#*#9211#*#*, or unhide remotely from PC dashboard."
+            android:text="Removes the app icon from Home Screen and App Drawer. To reopen, navigate to Android Settings > Apps > Phone Link Hub > Open, dial *9211 or *#*#9211#*#*, or open phonelink://open in browser."
             android:textColor="@color/text_secondary"
             android:textSize="11sp" />
 
@@ -485,9 +485,18 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Displays a harmless live weather and time capsule. Clicking it opens the phone's native Clock app."
+            android:text="Displays a harmless live weather and time capsule. Clicking it opens the phone's native Clock/Weather app."
             android:textColor="@color/text_secondary"
             android:textSize="11sp" />
+
+        <Button
+            android:id="@+id/templateChooserBtn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="🎨 Choose Disguise Template (Weather / Clock / Shinchan)"
+            android:layout_marginTop="6dp"
+            android:backgroundTint="@color/surface_variant"
+            android:textColor="@color/text_primary" />
 
         <com.google.android.material.materialswitch.MaterialSwitch
             android:id="@+id/antiTamperSwitch"
