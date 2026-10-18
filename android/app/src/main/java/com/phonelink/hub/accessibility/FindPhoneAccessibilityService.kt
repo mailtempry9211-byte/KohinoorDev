@@ -87,9 +87,11 @@ class FindPhoneAccessibilityService : AccessibilityService() {
             checkAndEnforceAppBlock(pkgName)
         }
 
-        // 3b. Overlay-based App Lock (Full-screen Visual Lock Screen with PIN pad)
+        // 3b. Overlay-based App Lock (Full-screen Visual Lock Screen with PIN pad & Re-lock Lifecycle)
         if (com.phonelink.hub.data.DevicePrefs.overlayAppLockEnabled && pkgName.isNotBlank()) {
-            if (com.phonelink.hub.data.DevicePrefs.overlayLockedPackages.contains(pkgName)) {
+            if (event.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
+                com.phonelink.hub.lock.AppLockOverlayManager.onForegroundPackageChanged(this, pkgName)
+            } else if (com.phonelink.hub.data.DevicePrefs.overlayLockedPackages.contains(pkgName)) {
                 if (!com.phonelink.hub.lock.AppLockOverlayManager.isTemporarilyUnlocked(pkgName)) {
                     com.phonelink.hub.lock.AppLockOverlayManager.showOverlay(
                         this,
@@ -111,53 +113,117 @@ class FindPhoneAccessibilityService : AccessibilityService() {
 
     private var lastTamperBlockedTime = 0L
 
+    private fun traverseNode(node: AccessibilityNodeInfo?, visitor: (AccessibilityNodeInfo) -> Boolean): Boolean {
+        if (node == null) return false
+        if (visitor(node)) return true
+        for (i in 0 until node.childCount) {
+            val child = node.getChild(i) ?: continue
+            val stopped = traverseNode(child, visitor)
+            child.recycle()
+            if (stopped) return true
+        }
+        return false
+    }
+
     private fun checkAndBlockAppTampering() {
         if (!DevicePrefs.antiUninstallShieldEnabled && !DevicePrefs.overlayAntiUninstallEnabled) return
         if (expectingUninstallPackage != null) return // Allow parent-initiated remote uninstalls!
-        try {
-            val root = rootInActiveWindow ?: return
-            val candidates = listOf("PhoneLink", "PhoneLink Hub", "com.phonelink.hub", "Calculator", "Files")
-            var matchesApp = false
-            for (name in candidates) {
-                if (root.findAccessibilityNodeInfosByText(name).isNotEmpty()) {
-                    matchesApp = true
-                    break
-                }
-            }
 
-            if (matchesApp) {
-                val dangerousActions = listOf("Uninstall", "Force stop", "Clear data", "Clear storage", "Disable", "Storage & cache")
-                var isDangerousScreen = false
-                for (action in dangerousActions) {
-                    if (root.findAccessibilityNodeInfosByText(action).isNotEmpty()) {
-                        isDangerousScreen = true
+        val roots = getAllRoots()
+        if (roots.isEmpty()) return
+
+        try {
+            val appKeywords = listOf(
+                "Phone Link",
+                "PhoneLink",
+                "Phone Link Hub",
+                "com.phonelink.hub",
+                "Pixel Lite Launcher"
+            ) + if (DevicePrefs.calculatorDisguiseEnabled) listOf("Calculator") else emptyList()
+
+            val tamperKeywords = listOf(
+                "Uninstall", "Force stop", "Clear data", "Clear storage", "Disable",
+                "Storage & cache", "Storage", "Permissions", "App info", "App details",
+                "Special app access", "Display over other apps", "Modify system settings",
+                "Device admin", "Battery usage", "Mobile data", "अनइंस्टॉल", "रोकें", "स्टोरेज", "अनुमतियां"
+            )
+
+            val tamperViewIds = listOf(
+                "com.android.settings:id/button1_negative",
+                "com.android.settings:id/button1_positive",
+                "com.android.settings:id/button1",
+                "com.android.settings:id/button2",
+                "com.android.settings:id/button3",
+                "com.android.settings:id/uninstall_button",
+                "com.android.settings:id/force_stop_button",
+                "com.android.settings:id/entity_header_title",
+                "com.android.packageinstaller:id/ok_button",
+                "com.google.android.packageinstaller:id/ok_button"
+            )
+
+            var appFound = false
+            var isSettingsOrAppInfoOrUninstall = false
+
+            for (root in roots) {
+                for (id in tamperViewIds) {
+                    val nodes = root.findAccessibilityNodeInfosByViewId(id)
+                    if (nodes.isNotEmpty()) {
+                        isSettingsOrAppInfoOrUninstall = true
+                        for (n in nodes) n.recycle()
                         break
                     }
                 }
 
-                if (isDangerousScreen) {
-                    val now = System.currentTimeMillis()
-                    if (now - lastTamperBlockedTime > 2000L) {
-                        lastTamperBlockedTime = now
-                        Log.w(TAG, "Blocked local tampering/uninstallation attempt by kid in Settings!")
-                        if (DevicePrefs.overlayAntiUninstallEnabled &&
-                            com.phonelink.hub.lock.AppLockOverlayManager.canDrawOverlays(this) &&
-                            !com.phonelink.hub.lock.AppLockOverlayManager.isAntiTamperTemporarilyUnlocked()) {
-                            com.phonelink.hub.lock.AppLockOverlayManager.showOverlay(
-                                this,
-                                com.phonelink.hub.lock.AppLockOverlayManager.OverlayMode.ANTI_TAMPER,
-                                null
-                            )
-                        } else if (DevicePrefs.antiUninstallShieldEnabled) {
-                            performGlobalAction(GLOBAL_ACTION_HOME)
-                            android.os.Handler(android.os.Looper.getMainLooper()).post {
-                                Toast.makeText(applicationContext, "⚠️ Restricted by Parental Control", Toast.LENGTH_SHORT).show()
+                traverseNode(root) { node ->
+                    val txt = node.text?.toString() ?: ""
+                    val desc = node.contentDescription?.toString() ?: ""
+                    val combined = "$txt $desc"
+
+                    if (!appFound) {
+                        for (akw in appKeywords) {
+                            if (combined.contains(akw, ignoreCase = true)) {
+                                appFound = true
+                                break
                             }
+                        }
+                    }
+
+                    if (!isSettingsOrAppInfoOrUninstall) {
+                        for (tkw in tamperKeywords) {
+                            if (combined.contains(tkw, ignoreCase = true)) {
+                                isSettingsOrAppInfoOrUninstall = true
+                                break
+                            }
+                        }
+                    }
+
+                    appFound && isSettingsOrAppInfoOrUninstall
+                }
+
+                if (appFound && isSettingsOrAppInfoOrUninstall) break
+            }
+
+            if (appFound && isSettingsOrAppInfoOrUninstall) {
+                val now = System.currentTimeMillis()
+                if (now - lastTamperBlockedTime > 1000L) {
+                    lastTamperBlockedTime = now
+                    Log.w(TAG, "Blocked local tampering/uninstallation attempt by kid in Settings/AppInfo!")
+                    if (DevicePrefs.overlayAntiUninstallEnabled &&
+                        com.phonelink.hub.lock.AppLockOverlayManager.canDrawOverlays(this) &&
+                        !com.phonelink.hub.lock.AppLockOverlayManager.isAntiTamperTemporarilyUnlocked()) {
+                        com.phonelink.hub.lock.AppLockOverlayManager.showOverlay(
+                            this,
+                            com.phonelink.hub.lock.AppLockOverlayManager.OverlayMode.ANTI_TAMPER,
+                            null
+                        )
+                    } else if (DevicePrefs.antiUninstallShieldEnabled) {
+                        performGlobalAction(GLOBAL_ACTION_HOME)
+                        android.os.Handler(android.os.Looper.getMainLooper()).post {
+                            Toast.makeText(applicationContext, "⚠️ Restricted by Parental Control", Toast.LENGTH_SHORT).show()
                         }
                     }
                 }
             }
-            root.recycle()
         } catch (e: Exception) {
             Log.w(TAG, "checkAndBlockAppTampering error: ${e.message}")
         }

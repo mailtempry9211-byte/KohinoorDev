@@ -62,7 +62,13 @@ class PhoneLinkService : Service() {
     private lateinit var location: LocationRepository
     private lateinit var ttsSpeaker: TtsSpeaker
     private lateinit var audioPlayer: AudioPlayer
-    private var connectedSinceMs: Long = 0L
+    private val screenReceiver = object : android.content.BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            if (intent?.action == Intent.ACTION_SCREEN_OFF) {
+                com.phonelink.hub.lock.AppLockOverlayManager.onScreenOff()
+            }
+        }
+    }
 
     val isConnected: Boolean
         get() = try { ::webSocket.isInitialized && webSocket.isOpen } catch (e: Exception) { false }
@@ -230,6 +236,11 @@ class PhoneLinkService : Service() {
         TheftMotionAlarm.init(this)
 
         registerNetworkCallback()
+        try {
+            registerReceiver(screenReceiver, IntentFilter(Intent.ACTION_SCREEN_OFF))
+        } catch (e: Exception) {
+            Log.w(TAG, "registerReceiver screenReceiver failed: ${e.message}")
+        }
 
         webSocket = WebSocketClient(
             prefsProvider = { Pair(DevicePrefs.serverIp, DevicePrefs.serverPort) },
@@ -317,6 +328,7 @@ class PhoneLinkService : Service() {
         try { com.phonelink.hub.remote.TorchController.toggleTorch(this, false) } catch (_: Exception) {}
         com.phonelink.hub.media.MediaProjectionHolder.release()
         unregisterNetworkCallback()
+        try { unregisterReceiver(screenReceiver) } catch (_: Exception) {}
         // The listener is bound by the OS, so stop pointing it at our dead socket.
         WebSocketHolder.webSocket = null
         instance = null
@@ -519,6 +531,10 @@ class PhoneLinkService : Service() {
         if (payload.has("overlayAppLockPin")) {
             val pin = payload.optString("overlayAppLockPin", "")
             if (pin.isNotBlank()) DevicePrefs.overlayAppLockPin = pin
+        }
+        if (payload.has("overlayRelockTimeout")) {
+            DevicePrefs.overlayRelockTimeout = payload.optInt("overlayRelockTimeout", 0)
+            com.phonelink.hub.lock.AppLockOverlayManager.clearUnlockedCache()
         }
 
         val status = DevicePrefs.getParentalControlJson().apply {

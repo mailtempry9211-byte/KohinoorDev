@@ -155,6 +155,7 @@ object DevicePrefs {
         put("overlayAntiUninstallEnabled", overlayAntiUninstallEnabled)
         put("overlayLockedPackages", org.json.JSONArray(overlayLockedPackages))
         put("hasAppLockPin", overlayAppLockPin.isNotBlank() || hasOwnerPin())
+        put("overlayRelockTimeout", overlayRelockTimeout)
     }
 
     // -------------------------------------------------------------
@@ -171,6 +172,10 @@ object DevicePrefs {
     var overlayLockedPackages: Set<String>
         get() = prefs.getStringSet("overlay_locked_packages", emptySet()) ?: emptySet()
         set(value) = prefs.edit().putStringSet("overlay_locked_packages", value).apply()
+
+    var overlayRelockTimeout: Int
+        get() = prefs.getInt("overlay_relock_timeout", 0)
+        set(value) = prefs.edit().putInt("overlay_relock_timeout", value).apply()
 
     var overlayAppLockPin: String
         get() = prefs.getString("overlay_app_lock_pin", "") ?: ""

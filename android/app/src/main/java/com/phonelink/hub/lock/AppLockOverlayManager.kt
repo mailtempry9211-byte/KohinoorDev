@@ -41,9 +41,17 @@ object AppLockOverlayManager {
     private var currentMode: OverlayMode? = null
     private var currentPackage: String? = null
 
-    // Cache of packages temporarily unlocked by parents with PIN (e.g. for 15 mins)
+    // Package currently unlocked in active session
+    @Volatile
+    private var currentlyActiveUnlockedPkg: String? = null
+
+    // Cache of packages temporarily unlocked by parents with timestamp until which they are unlocked
     private val temporaryUnlockedPackages = ConcurrentHashMap<String, Long>()
     private var antiTamperUnlockedUntil = 0L
+
+    // Last known foreground package
+    @Volatile
+    private var lastForegroundPackage: String = ""
 
     fun canDrawOverlays(context: Context): Boolean {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -54,6 +62,9 @@ object AppLockOverlayManager {
     }
 
     fun isTemporarilyUnlocked(packageName: String): Boolean {
+        if (currentlyActiveUnlockedPkg == packageName) {
+            return true
+        }
         val expiry = temporaryUnlockedPackages[packageName] ?: return false
         if (System.currentTimeMillis() < expiry) {
             return true
@@ -64,6 +75,73 @@ object AppLockOverlayManager {
 
     fun isAntiTamperTemporarilyUnlocked(): Boolean {
         return System.currentTimeMillis() < antiTamperUnlockedUntil
+    }
+
+    fun isTransientPackage(pkg: String): Boolean {
+        if (pkg.isBlank()) return true
+        val lower = pkg.lowercase()
+        return lower == "android" ||
+                lower == "com.phonelink.hub" ||
+                lower.contains("inputmethod") ||
+                lower.contains("keyboard") ||
+                lower.contains("systemui") ||
+                lower.contains("permissioncontroller")
+    }
+
+    fun onForegroundPackageChanged(context: Context, newPackage: String) {
+        if (newPackage.isBlank() || isTransientPackage(newPackage)) {
+            return
+        }
+
+        val previous = lastForegroundPackage
+        if (newPackage == previous) {
+            return
+        }
+        lastForegroundPackage = newPackage
+
+        // Did user exit the currently active unlocked app?
+        val active = currentlyActiveUnlockedPkg
+        if (active != null && newPackage != active) {
+            val timeout = DevicePrefs.overlayRelockTimeout
+            if (timeout == 0) {
+                // Immediately upon exit: re-lock right now!
+                currentlyActiveUnlockedPkg = null
+                temporaryUnlockedPackages.remove(active)
+                Log.i(TAG, "User exited unlocked app '$active' -> Re-locking immediately.")
+            } else if (timeout > 0) {
+                // Timer starts from the moment they exit the app
+                currentlyActiveUnlockedPkg = null
+                temporaryUnlockedPackages[active] = System.currentTimeMillis() + (timeout * 1000L)
+                Log.i(TAG, "User exited unlocked app '$active' -> Re-locking in ${timeout}s.")
+            } else {
+                // timeout < 0: keeps unlocked until screen off
+                currentlyActiveUnlockedPkg = null
+            }
+        }
+
+        // Now check if newPackage is locked and needs overlay
+        if (DevicePrefs.overlayAppLockEnabled && DevicePrefs.overlayLockedPackages.contains(newPackage)) {
+            if (!isTemporarilyUnlocked(newPackage)) {
+                showOverlay(context, OverlayMode.APP_LOCK, newPackage)
+            }
+        }
+    }
+
+    fun onScreenOff() {
+        Log.i(TAG, "Screen off received -> Resetting active unlocks")
+        currentlyActiveUnlockedPkg = null
+        val timeout = DevicePrefs.overlayRelockTimeout
+        if (timeout <= 0) {
+            temporaryUnlockedPackages.clear()
+        }
+        antiTamperUnlockedUntil = 0L
+        dismissOverlay()
+    }
+
+    fun clearUnlockedCache() {
+        currentlyActiveUnlockedPkg = null
+        temporaryUnlockedPackages.clear()
+        antiTamperUnlockedUntil = 0L
     }
 
     /**
@@ -168,6 +246,15 @@ object AppLockOverlayManager {
             setBackgroundColor(Color.parseColor("#F50B0F19")) // 96% opacity dark AMOLED
             isClickable = true
             isFocusable = true
+            isFocusableInTouchMode = true
+            setOnKeyListener { _, keyCode, event ->
+                if (keyCode == android.view.KeyEvent.KEYCODE_BACK && event.action == android.view.KeyEvent.ACTION_UP) {
+                    goToHome(context)
+                    true
+                } else {
+                    false
+                }
+            }
         }
 
         // Card Container
@@ -356,8 +443,22 @@ object AppLockOverlayManager {
         if (DevicePrefs.verifyAppLockPin(pin)) {
             Log.i(TAG, "PIN verified successfully for mode=$mode pkg=$targetPackage")
             if (mode == OverlayMode.APP_LOCK && targetPackage != null) {
-                // Unlock for 15 minutes
-                temporaryUnlockedPackages[targetPackage] = System.currentTimeMillis() + 15 * 60 * 1000L
+                currentlyActiveUnlockedPkg = targetPackage
+                val timeout = DevicePrefs.overlayRelockTimeout
+                when {
+                    timeout == 0 -> {
+                        // Immediately upon exit: Valid ONLY during active session
+                        temporaryUnlockedPackages.remove(targetPackage)
+                    }
+                    timeout < 0 -> {
+                        // Until screen turns off
+                        temporaryUnlockedPackages[targetPackage] = Long.MAX_VALUE
+                    }
+                    else -> {
+                        // After specified seconds (e.g. 60s, 300s, 900s)
+                        temporaryUnlockedPackages[targetPackage] = System.currentTimeMillis() + (timeout * 1000L)
+                    }
+                }
             } else if (mode == OverlayMode.ANTI_TAMPER) {
                 // Allow tampering/settings access for 5 minutes
                 antiTamperUnlockedUntil = System.currentTimeMillis() + 5 * 60 * 1000L

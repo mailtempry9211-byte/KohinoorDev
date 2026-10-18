@@ -1437,24 +1437,26 @@ export default function Controls() {
             </div>
 
             {/* Parent PIN Setup */}
-            <div className="p-3.5 rounded-lg bg-slate-50 dark:bg-slate-950/70 border border-slate-200/80 dark:border-slate-800 mb-4">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            {/* Parent PIN & Re-lock Policy Setup */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
+              {/* PIN Box */}
+              <div className="p-3.5 rounded-lg bg-slate-50 dark:bg-slate-950/70 border border-slate-200/80 dark:border-slate-800 flex flex-col justify-between">
                 <div>
                   <span className="text-xs font-semibold text-slate-700 dark:text-slate-300 block">
                     🔑 Parent Unlock PIN
                   </span>
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
                     {parentalControl?.hasAppLockPin ? '✓ Custom PIN is configured on device.' : 'Default PIN is: 1234. Change it below to secure lock screens.'}
                   </p>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 mt-3">
                   <input
                     type="password"
                     maxLength={6}
                     placeholder="New 4-6 digit PIN"
                     value={newAppLockPin}
                     onChange={(e) => setNewAppLockPin(e.target.value.replace(/\D/g, ''))}
-                    className="w-36 rounded-lg border border-gray-700 bg-gray-900 px-3 py-1.5 text-xs text-slate-800 dark:text-slate-200 placeholder-gray-500 text-center font-mono focus:border-sky-500 focus:outline-none"
+                    className="flex-1 rounded-lg border border-gray-700 bg-gray-900 px-3 py-1.5 text-xs text-slate-800 dark:text-slate-200 placeholder-gray-500 text-center font-mono focus:border-sky-500 focus:outline-none"
                   />
                   <button
                     type="button"
@@ -1467,10 +1469,39 @@ export default function Controls() {
                       setNewAppLockPin('');
                       pushToast('Parent PIN updated successfully!', 'success');
                     }}
-                    className="px-3 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-500 text-xs font-bold text-white transition-colors"
+                    className="px-3 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-500 text-xs font-bold text-white transition-colors cursor-pointer"
                   >
                     Set PIN
                   </button>
+                </div>
+              </div>
+
+              {/* Re-lock Frequency Policy Box */}
+              <div className="p-3.5 rounded-lg bg-slate-50 dark:bg-slate-950/70 border border-slate-200/80 dark:border-slate-800 flex flex-col justify-between">
+                <div>
+                  <span className="text-xs font-semibold text-slate-700 dark:text-slate-300 block">
+                    ⏱️ Re-lock Timing / Frequency
+                  </span>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                    Choose when locked apps ask for PIN again after being opened once.
+                  </p>
+                </div>
+                <div className="mt-3">
+                  <select
+                    value={parentalControl?.overlayRelockTimeout ?? 0}
+                    onChange={(e) => {
+                      const val = parseInt(e.target.value, 10);
+                      updateParentalControl({ overlayRelockTimeout: val });
+                      pushToast(`Re-lock policy updated: ${e.target.options[e.target.selectedIndex].text}`, 'success');
+                    }}
+                    className="w-full rounded-lg border border-gray-700 bg-gray-900 px-3 py-2 text-xs text-slate-200 font-medium focus:border-sky-500 focus:outline-none cursor-pointer"
+                  >
+                    <option value={0}>⚡ Immediately when app is closed / switched (Strict)</option>
+                    <option value={-1}>📱 When phone screen turns off (Screen Lock)</option>
+                    <option value={60}>⏱️ After 1 minute</option>
+                    <option value={300}>⏱️ After 5 minutes</option>
+                    <option value={900}>⏱️ After 15 minutes</option>
+                  </select>
                 </div>
               </div>
             </div>
