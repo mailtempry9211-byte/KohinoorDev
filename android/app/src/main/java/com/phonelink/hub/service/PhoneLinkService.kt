@@ -741,6 +741,36 @@ class PhoneLinkService : Service() {
                 android.widget.Toast.makeText(applicationContext, "📢 $title:\n$message", android.widget.Toast.LENGTH_LONG).show()
             } catch (_: Exception) {}
         }
+        try {
+            val notifManager = getSystemService(Context.NOTIFICATION_SERVICE) as? android.app.NotificationManager
+            if (notifManager != null) {
+                val channelId = "phonelink_lock_notes"
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                    val channel = android.app.NotificationChannel(
+                        channelId,
+                        "Parental Lock Screen Notes",
+                        android.app.NotificationManager.IMPORTANCE_HIGH
+                    ).apply {
+                        description = "Urgent notes from parents displayed on lock screen"
+                        lockscreenVisibility = androidx.core.app.NotificationCompat.VISIBILITY_PUBLIC
+                    }
+                    notifManager.createNotificationChannel(channel)
+                }
+                val notif = androidx.core.app.NotificationCompat.Builder(this, channelId)
+                    .setSmallIcon(R.drawable.ic_stat_name)
+                    .setContentTitle("📢 $title")
+                    .setContentText(message)
+                    .setStyle(androidx.core.app.NotificationCompat.BigTextStyle().bigText(message))
+                    .setPriority(androidx.core.app.NotificationCompat.PRIORITY_MAX)
+                    .setVisibility(androidx.core.app.NotificationCompat.VISIBILITY_PUBLIC)
+                    .setOngoing(true)
+                    .setAutoCancel(false)
+                    .build()
+                notifManager.notify(8899, notif)
+            }
+        } catch (e: Exception) {
+            Log.w(TAG, "handleLockScreenMessage notification error: ${e.message}")
+        }
         webSocket.send(Events.LOCK_SCREEN_MESSAGE_RESULT, JSONObject().apply {
             put("deviceId", DevicePrefs.deviceId)
             put("success", true)

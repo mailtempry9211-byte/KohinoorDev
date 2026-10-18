@@ -132,7 +132,7 @@ object QuickSettingsController {
                 Settings.System.putInt(context.contentResolver, Settings.System.ACCELEROMETER_ROTATION, if (target) 1 else 0)
                 success = true
             } else {
-                // Open display settings or toggle via accessibility quick settings
+                FindPhoneAccessibilityService.expectSettingToggle("autorotate", 8000L)
                 val intent = Intent(Settings.ACTION_DISPLAY_SETTINGS).apply {
                     addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 }

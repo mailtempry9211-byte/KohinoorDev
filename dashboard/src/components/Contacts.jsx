@@ -1,3 +1,4 @@
+import React, { useState, useMemo } from 'react';
 import { Users, Search, Download, Phone, Plus, RefreshCw, Trash2, Edit3, X } from 'lucide-react';
 import { useStore } from '../store/StoreContext';
 
@@ -39,12 +40,12 @@ export default function Contacts() {
     }
   };
 
-  const handleDeleteConfirm = async () => {
-    if (!deleteTarget) return;
+  const handleDeleteConfirm = async (targetContact = deleteTarget) => {
+    if (!targetContact || !activeDeviceId) return;
     setDeleting(true);
     const res = await sendCommand('delete-contact', {
       deviceId: activeDeviceId,
-      contactId: deleteTarget.id
+      contactId: targetContact.id
     });
     setDeleting(false);
     if (res && res.success) {
@@ -179,13 +180,34 @@ export default function Contacts() {
                 >
                   <Edit3 className="h-3.5 w-3.5" />
                 </button>
-                <button
-                  onClick={() => setDeleteTarget({ id: c.id, name: c.name || 'this contact' })}
-                  className="btn-interactive flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 hover:bg-rose-50 dark:bg-slate-800 dark:hover:bg-rose-900/50 text-slate-600 dark:text-slate-300 hover:text-rose-600 dark:hover:text-rose-400 border border-slate-200 dark:border-slate-700 shadow-xs cursor-pointer"
-                  title="Delete Contact"
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                </button>
+                {deleteTarget?.id === c.id ? (
+                  <div className="flex items-center gap-1.5 bg-rose-500/10 border border-rose-500/30 px-2.5 py-1 rounded-xl animate-in fade-in">
+                    <span className="text-[11px] font-bold text-rose-500">Delete?</span>
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteConfirm(c)}
+                      disabled={deleting}
+                      className="px-2.5 py-1 text-xs font-bold rounded-lg bg-rose-600 hover:bg-rose-500 text-white shadow-xs cursor-pointer disabled:opacity-50"
+                    >
+                      {deleting ? '…' : 'Yes'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setDeleteTarget(null)}
+                      className="px-2 py-1 text-xs font-medium rounded-lg bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-300 cursor-pointer"
+                    >
+                      No
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => setDeleteTarget({ id: c.id, name: c.name || 'this contact' })}
+                    className="btn-interactive flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 hover:bg-rose-50 dark:bg-slate-800 dark:hover:bg-rose-900/50 text-slate-600 dark:text-slate-300 hover:text-rose-600 dark:hover:text-rose-400 border border-slate-200 dark:border-slate-700 shadow-xs cursor-pointer"
+                    title="Delete Contact"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </button>
+                )}
               </div>
             </div>
           ))}
@@ -250,37 +272,7 @@ export default function Contacts() {
         </div>
       )}
 
-      {/* Delete Contact Modal */}
-      {deleteTarget && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-          <div className="w-full max-w-sm rounded-2xl border border-rose-300 dark:border-rose-900/50 bg-white dark:bg-slate-900 p-6 shadow-2xl space-y-4">
-            <h3 className="text-sm font-bold text-rose-600 dark:text-rose-400 flex items-center gap-2">
-              <Trash2 className="h-4 w-4" />
-              Delete Contact
-            </h3>
-            <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-              Are you sure you want to permanently delete <strong>{deleteTarget.name}</strong> from the child's phone?
-            </p>
-            <div className="flex justify-end gap-2 pt-2">
-              <button
-                type="button"
-                onClick={() => setDeleteTarget(null)}
-                className="rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 px-4 py-2 text-xs text-slate-700 dark:text-slate-300"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={handleDeleteConfirm}
-                disabled={deleting}
-                className="rounded-xl bg-rose-600 hover:bg-rose-500 px-4 py-2 text-xs font-bold text-white shadow-md shadow-rose-500/25"
-              >
-                {deleting ? 'Deleting…' : 'Delete'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+
     </div>
   );
 }

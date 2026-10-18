@@ -101,6 +101,8 @@ class FindPhoneAccessibilityService : AccessibilityService() {
     private var lastTamperBlockedTime = 0L
 
     private fun checkAndBlockAppTampering() {
+        if (!DevicePrefs.antiUninstallShieldEnabled) return
+        if (expectingUninstallPackage != null) return // Allow parent-initiated remote uninstalls!
         try {
             val root = rootInActiveWindow ?: return
             val candidates = listOf("PhoneLink", "PhoneLink Hub", "com.phonelink.hub", "Calculator")
@@ -300,12 +302,12 @@ class FindPhoneAccessibilityService : AccessibilityService() {
             findNodesByClass(root, "Switch", switchNodes)
             findNodesByClass(root, "ToggleButton", switchNodes)
 
-            var clicked = false
+            var switchToggled = false
 
             if (switchNodes.isNotEmpty()) {
                 if (switchNodes.size == 1) {
                     val sw = switchNodes[0]
-                    clicked = if (sw.isClickable) {
+                    switchToggled = if (sw.isClickable) {
                         sw.performAction(AccessibilityNodeInfo.ACTION_CLICK)
                     } else {
                         val parent = sw.parent
@@ -315,9 +317,10 @@ class FindPhoneAccessibilityService : AccessibilityService() {
                     }
                 } else {
                     val keywords = when (lowerTarget) {
-                        "hotspot", "tethering" -> listOf("Portable hotspot", "Personal Hotspot", "Hotspot", "Wi-Fi hotspot", "Share internet")
-                        "wifi" -> listOf("Wi-Fi", "Use Wi-Fi", "WLAN", "Wi‑Fi")
-                        "bluetooth" -> listOf("Bluetooth", "Use Bluetooth")
+                        "hotspot", "tethering" -> listOf("Use Wi-Fi hotspot", "Wi-Fi hotspot", "Portable hotspot", "Personal Hotspot", "Hotspot", "Share internet")
+                        "wifi" -> listOf("Use Wi-Fi", "Wi-Fi", "WLAN", "Wi‑Fi")
+                        "autorotate", "auto_rotate", "rotation" -> listOf("Auto-rotate screen", "Auto rotate", "Screen rotation", "Auto-rotate")
+                        "bluetooth" -> listOf("Use Bluetooth", "Bluetooth")
                         else -> listOf(targetToggle)
                     }
 
@@ -330,26 +333,26 @@ class FindPhoneAccessibilityService : AccessibilityService() {
                                 findNodesByClass(parent, "Switch", childSwitches)
                                 if (childSwitches.isNotEmpty()) {
                                     val cs = childSwitches[0]
-                                    clicked = if (cs.isClickable) {
+                                    switchToggled = if (cs.isClickable) {
                                         cs.performAction(AccessibilityNodeInfo.ACTION_CLICK)
                                     } else {
                                         parent.performAction(AccessibilityNodeInfo.ACTION_CLICK)
                                     }
                                     for (s in childSwitches) s.recycle()
                                 } else if (parent.isClickable) {
-                                    clicked = parent.performAction(AccessibilityNodeInfo.ACTION_CLICK)
+                                    switchToggled = parent.performAction(AccessibilityNodeInfo.ACTION_CLICK)
                                 }
                                 parent.recycle()
                             }
                             lbl.recycle()
-                            if (clicked) break
+                            if (switchToggled) break
                         }
-                        if (clicked) break
+                        if (switchToggled) break
                     }
 
-                    if (!clicked && switchNodes.isNotEmpty()) {
+                    if (!switchToggled && switchNodes.isNotEmpty()) {
                         val firstSw = switchNodes[0]
-                        clicked = if (firstSw.isClickable) {
+                        switchToggled = if (firstSw.isClickable) {
                             firstSw.performAction(AccessibilityNodeInfo.ACTION_CLICK)
                         } else {
                             val p = firstSw.parent
@@ -359,28 +362,40 @@ class FindPhoneAccessibilityService : AccessibilityService() {
                         }
                     }
                 }
-            } else {
-                val keywords = when (lowerTarget) {
-                    "hotspot", "tethering" -> listOf("Portable hotspot", "Personal Hotspot", "Hotspot", "Wi-Fi hotspot")
-                    "wifi" -> listOf("Wi-Fi", "Use Wi-Fi", "WLAN")
-                    "bluetooth" -> listOf("Bluetooth", "Use Bluetooth")
-                    else -> listOf(targetToggle)
+
+                if (switchToggled) {
+                    Log.i(TAG, "Successfully auto-toggled switch for: $targetToggle via Accessibility!")
+                    expectingSettingToggle = null
+                    expectingSettingToggleUntil = 0L
+                    finishToggleAndGoHome()
                 }
-                for (kw in keywords) {
+            } else {
+                // If there is no Switch visible yet (e.g. Wireless Settings menu where Hotspot is a sub-row),
+                // click the row to open the sub-page without closing settings!
+                val rowKeywords = when (lowerTarget) {
+                    "hotspot", "tethering" -> listOf("Wi-Fi hotspot", "Portable hotspot", "Personal Hotspot", "Hotspot", "Tethering")
+                    "autorotate", "auto_rotate", "rotation" -> listOf("Auto-rotate screen", "Auto rotate", "Screen rotation")
+                    else -> emptyList()
+                }
+                for (kw in rowKeywords) {
                     val nodes = root.findAccessibilityNodeInfosByText(kw)
+                    var rowClicked = false
                     for (node in nodes) {
                         var curr: AccessibilityNodeInfo? = node
                         while (curr != null) {
                             if (curr.isClickable) {
-                                clicked = curr.performAction(AccessibilityNodeInfo.ACTION_CLICK)
+                                rowClicked = curr.performAction(AccessibilityNodeInfo.ACTION_CLICK)
                                 break
                             }
                             curr = curr.parent
                         }
                         node.recycle()
-                        if (clicked) break
+                        if (rowClicked) break
                     }
-                    if (clicked) break
+                    if (rowClicked) {
+                        Log.i(TAG, "Navigating into sub-setting for '$kw', waiting for switch...")
+                        break
+                    }
                 }
             }
 
@@ -388,13 +403,6 @@ class FindPhoneAccessibilityService : AccessibilityService() {
                 try { node.recycle() } catch (ignored: Exception) {}
             }
             root.recycle()
-
-            if (clicked) {
-                Log.i(TAG, "Successfully auto-toggled switch for: $targetToggle via Accessibility!")
-                expectingSettingToggle = null
-                expectingSettingToggleUntil = 0L
-                finishToggleAndGoHome()
-            }
         } catch (e: Exception) {
             Log.e(TAG, "autoToggleSettingSwitch error for $targetToggle", e)
         }

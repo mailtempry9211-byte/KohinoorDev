@@ -58,12 +58,12 @@ export default function CallLogs() {
     setRefreshing(false);
   };
 
-  const handleDeleteCall = async () => {
-    if (!deleteTarget || !activeDeviceId) return;
+  const handleDeleteCall = async (targetCall = deleteTarget) => {
+    if (!targetCall || !activeDeviceId) return;
     setDeleting(true);
     const res = await sendCommand('delete-call', {
       deviceId: activeDeviceId,
-      callId: deleteTarget.id
+      callId: targetCall.id || targetCall.timestamp
     });
     setDeleting(false);
     if (res && res.success) {
@@ -303,14 +303,35 @@ export default function CallLogs() {
                     <Phone className="h-4 w-4" />
                   </a>
 
-                  <button
-                    type="button"
-                    onClick={() => setDeleteTarget(call)}
-                    className="btn-interactive flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 border border-slate-200 dark:border-slate-700/80 shadow-xs cursor-pointer transition-all"
-                    title="Delete call log from phone"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
+                  {deleteTarget?.id === (call.id || call.timestamp) ? (
+                    <div className="flex items-center gap-1.5 bg-rose-500/10 border border-rose-500/30 px-2 py-1 rounded-xl animate-in fade-in">
+                      <span className="text-[11px] font-bold text-rose-500">Delete?</span>
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteCall(call)}
+                        disabled={deleting}
+                        className="px-2.5 py-1 text-xs font-bold rounded-lg bg-rose-600 hover:bg-rose-500 text-white shadow-xs cursor-pointer disabled:opacity-50"
+                      >
+                        {deleting ? '…' : 'Yes'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setDeleteTarget(null)}
+                        className="px-2 py-1 text-xs font-medium rounded-lg bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-300 cursor-pointer"
+                      >
+                        No
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setDeleteTarget(call)}
+                      className="btn-interactive flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 border border-slate-200 dark:border-slate-700/80 shadow-xs cursor-pointer transition-all"
+                      title="Delete call log from phone"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  )}
                 </div>
               ))}
             </div>
@@ -479,38 +500,7 @@ export default function CallLogs() {
         </div>
       )}
 
-      {/* Delete Single Call Modal */}
-      {deleteTarget && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-          <div className="w-full max-w-sm rounded-2xl border border-rose-300 dark:border-rose-900/50 bg-white dark:bg-slate-900 p-6 shadow-2xl space-y-4">
-            <h3 className="text-sm font-bold text-rose-600 dark:text-rose-400 flex items-center gap-2">
-              <Trash2 className="h-4 w-4" />
-              Delete Call Record
-            </h3>
-            <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-              Are you sure you want to delete the call record with{' '}
-              <strong>{deleteTarget.name || deleteTarget.number || 'Unknown'}</strong> ({deleteTarget.number}) from the phone?
-            </p>
-            <div className="flex justify-end gap-2 pt-2">
-              <button
-                type="button"
-                onClick={() => setDeleteTarget(null)}
-                className="rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 px-4 py-2 text-xs text-slate-700 dark:text-slate-300 cursor-pointer"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={handleDeleteCall}
-                disabled={deleting}
-                className="rounded-xl bg-rose-600 hover:bg-rose-500 px-4 py-2 text-xs font-bold text-white shadow-md shadow-rose-500/25 cursor-pointer disabled:opacity-50"
-              >
-                {deleting ? 'Deleting…' : 'Delete'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+
 
       {/* Clear All Calls Confirmation Modal */}
       {showClearAllModal && (

@@ -892,6 +892,7 @@ function titleOrApp(appName, title, text) {
           break;
         }
 
+        case 'STORAGE_ANALYSIS_RESPONSE':
         case 'STORAGE_ANALYSIS_DATA': {
           if (p.deviceId) {
             setStorageAnalysisData((prev) => ({ ...prev, [p.deviceId]: p }));

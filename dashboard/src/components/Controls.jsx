@@ -2623,31 +2623,6 @@ export default function Controls() {
                 <span className="text-[10px] text-slate-500 dark:text-slate-400">Toggle Wi-Fi</span>
               </button>
 
-              {/* Bluetooth Control */}
-              <button
-                type="button"
-                onClick={() => sendQuickSetting('bluetooth', { enable: !quickSettings?.bluetoothEnabled })}
-                className={`p-2.5 rounded-lg border text-left flex flex-col gap-1 transition ${
-                  quickSettings?.bluetoothEnabled
-                    ? 'border-indigo-500/40 bg-indigo-500/10 dark:bg-indigo-950/20 text-indigo-700 dark:text-indigo-300'
-                    : 'border-slate-200/80 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-950/60 text-slate-700 dark:text-slate-300 hover:border-indigo-400/40'
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <span className="flex items-center gap-1.5 text-xs font-semibold">
-                    <Radio className="h-3.5 w-3.5 text-indigo-500 dark:text-indigo-400" /> Bluetooth
-                  </span>
-                  <span className={`text-[10px] font-mono uppercase px-1.5 py-0.5 rounded font-bold ${
-                    quickSettings?.bluetoothEnabled
-                      ? 'bg-indigo-100 dark:bg-indigo-950/80 text-indigo-800 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800'
-                      : 'bg-slate-200/80 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
-                  }`}>
-                    {quickSettings?.bluetoothEnabled ? 'ON' : 'OFF'}
-                  </span>
-                </div>
-                <span className="text-[10px] text-slate-500 dark:text-slate-400">Toggle Bluetooth</span>
-              </button>
-
               {/* Hotspot / Tethering */}
               <button
                 type="button"
@@ -2672,6 +2647,8 @@ export default function Controls() {
                 </div>
                 <span className="text-[10px] text-slate-500 dark:text-slate-400">Toggle Hotspot</span>
               </button>
+
+
 
               {/* Auto-Rotate */}
               <button

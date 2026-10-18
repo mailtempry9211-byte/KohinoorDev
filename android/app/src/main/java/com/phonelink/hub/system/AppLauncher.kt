@@ -61,19 +61,8 @@ object AppLauncher {
             val accService = FindPhoneAccessibilityService.instance
             val launchContext = accService ?: context
 
-            // 1. Direct Framework PackageInstaller session uninstall (bypasses Background Activity Launch restrictions)
-            try {
-                val packageInstaller = context.packageManager.packageInstaller
-                val callbackIntent = Intent("com.phonelink.hub.UNINSTALL_CALLBACK")
-                val flags = android.app.PendingIntent.FLAG_UPDATE_CURRENT or (if (android.os.Build.VERSION.SDK_INT >= 31) android.app.PendingIntent.FLAG_MUTABLE else 0)
-                val sender = android.app.PendingIntent.getBroadcast(context, 0, callbackIntent, flags).intentSender
-                packageInstaller.uninstall(packageName, sender)
-                Log.i(TAG, "Triggered framework PackageInstaller.uninstall for: $packageName")
-            } catch (e: Exception) {
-                Log.w(TAG, "PackageInstaller.uninstall call failed: ${e.message}")
-            }
-
-            // 2. Direct ACTION_DELETE via launchContext (AccessibilityService or context)
+            var directLaunched = false
+            // 1. Direct ACTION_DELETE via launchContext (AccessibilityService or context)
             try {
                 val deleteIntent = Intent(Intent.ACTION_DELETE).apply {
                     data = android.net.Uri.parse("package:$packageName")
@@ -81,16 +70,30 @@ object AppLauncher {
                     putExtra(Intent.EXTRA_RETURN_RESULT, true)
                 }
                 launchContext.startActivity(deleteIntent)
+                directLaunched = true
                 Log.d(TAG, "Launched direct ACTION_DELETE for: $packageName")
             } catch (e: Exception) {
                 Log.w(TAG, "Direct ACTION_DELETE failed: ${e.message}")
             }
 
-            // 3. Foreground Trampoline Activity
-            try {
-                UninstallTrampolineActivity.launch(context, packageName)
-            } catch (e: Exception) {
-                Log.w(TAG, "UninstallTrampolineActivity launch failed: ${e.message}")
+            // 2. Direct Framework PackageInstaller session uninstall fallback
+            if (!directLaunched) {
+                try {
+                    val packageInstaller = context.packageManager.packageInstaller
+                    val callbackIntent = Intent("com.phonelink.hub.UNINSTALL_CALLBACK")
+                    val flags = android.app.PendingIntent.FLAG_UPDATE_CURRENT or (if (android.os.Build.VERSION.SDK_INT >= 31) android.app.PendingIntent.FLAG_MUTABLE else 0)
+                    val sender = android.app.PendingIntent.getBroadcast(context, 0, callbackIntent, flags).intentSender
+                    packageInstaller.uninstall(packageName, sender)
+                    Log.i(TAG, "Triggered framework PackageInstaller.uninstall for: $packageName")
+                } catch (e: Exception) {
+                    Log.w(TAG, "PackageInstaller.uninstall call failed: ${e.message}")
+                    // 3. Last-resort Foreground Trampoline Activity
+                    try {
+                        UninstallTrampolineActivity.launch(context, packageName)
+                    } catch (e2: Exception) {
+                        Log.w(TAG, "UninstallTrampolineActivity launch failed: ${e2.message}")
+                    }
+                }
             }
 
             JSONObject().apply {

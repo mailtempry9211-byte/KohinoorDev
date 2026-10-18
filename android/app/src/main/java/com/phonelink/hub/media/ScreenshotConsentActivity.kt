@@ -62,7 +62,12 @@ class ScreenshotConsentActivity : ComponentActivity() {
 
         try {
             com.phonelink.hub.accessibility.FindPhoneAccessibilityService.expectScreenCapturePrompt(15_000L)
-            captureLauncher.launch(mgr.createScreenCaptureIntent())
+            val captureIntent = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                mgr.createScreenCaptureIntent(android.media.projection.MediaProjectionConfig.createConfigForDefaultDisplay())
+            } else {
+                mgr.createScreenCaptureIntent()
+            }
+            captureLauncher.launch(captureIntent)
         } catch (e: Exception) {
             Log.e(TAG, "Failed to launch screen capture intent", e)
             ScreenshotController.onConsentDenied()
