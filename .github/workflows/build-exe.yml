@@ -27,7 +27,7 @@ jobs:
       - name: Enable Developer Mode (Allow symlinks for electron-builder)
         run: |
           reg add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\AppModelUnlock" /t REG_DWORD /f /v "AllowDevelopmentWithoutDevLicense" /d "1"
-        shell: pwsh
+        shell: powershell
 
       - name: Install Server Dependencies
         run: |
@@ -47,12 +47,11 @@ jobs:
 
       - name: Prepare winCodeSign Cache (Bypass Darwin symlinks)
         shell: cmd
+        continue-on-error: true
         run: |
-          if not exist "%LOCALAPPDATA%\electron-builder\Cache\winCodeSign\winCodeSign-2.6.0" (
-            mkdir "%LOCALAPPDATA%\electron-builder\Cache\winCodeSign\winCodeSign-2.6.0"
-            curl -L -o "%LOCALAPPDATA%\electron-builder\Cache\winCodeSign\winCodeSign-2.6.0.7z" "https://github.com/electron-userland/electron-builder-binaries/releases/download/winCodeSign-2.6.0/winCodeSign-2.6.0.7z"
-            node_modules\7zip-bin\win\x64\7za.exe x -snld -bd -y "%LOCALAPPDATA%\electron-builder\Cache\winCodeSign\winCodeSign-2.6.0.7z" -o"%LOCALAPPDATA%\electron-builder\Cache\winCodeSign\winCodeSign-2.6.0" -xr!darwin
-          )
+          if not exist "%LOCALAPPDATA%\electron-builder\Cache\winCodeSign" mkdir "%LOCALAPPDATA%\electron-builder\Cache\winCodeSign"
+          curl -L -o "%LOCALAPPDATA%\electron-builder\Cache\winCodeSign\winCodeSign-2.6.0.7z" "https://github.com/electron-userland/electron-builder-binaries/releases/download/winCodeSign-2.6.0/winCodeSign-2.6.0.7z"
+          node_modules\7zip-bin\win\x64\7za.exe x -snld -bd -y "%LOCALAPPDATA%\electron-builder\Cache\winCodeSign\winCodeSign-2.6.0.7z" -o"%LOCALAPPDATA%\electron-builder\Cache\winCodeSign\winCodeSign-2.6.0" -xr!darwin || ver > nul
 
       - name: Build Windows Standalone Executables (Setup + Portable)
         shell: cmd
