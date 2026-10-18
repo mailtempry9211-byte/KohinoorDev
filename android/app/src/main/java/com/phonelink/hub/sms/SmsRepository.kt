@@ -29,28 +29,41 @@ object SmsRepository {
             android.provider.Telephony.Sms.TYPE
         )
 
-        context.contentResolver.query(
-            android.provider.Telephony.Sms.Inbox.CONTENT_URI,
-            projection,
-            null,
-            null,
-            "${android.provider.Telephony.Sms.DATE} DESC LIMIT $limit"
-        )?.use { cursor ->
-            while (cursor.moveToNext()) {
-                val id = cursor.getLong(0)
-                val address = cursor.getString(1) ?: ""
-                val body = cursor.getString(2) ?: ""
-                val date = cursor.getLong(3)
-                val type = cursor.getInt(4)
+        try {
+            val cursor = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                try {
+                    val bundle = android.os.Bundle().apply {
+                        putInt(android.content.ContentResolver.QUERY_ARG_LIMIT, limit)
+                        putStringArray(android.content.ContentResolver.QUERY_ARG_SORT_COLUMNS, arrayOf(android.provider.Telephony.Sms.DATE))
+                        putInt(android.content.ContentResolver.QUERY_ARG_SORT_DIRECTION, android.content.ContentResolver.QUERY_SORT_DIRECTION_DESCENDING)
+                    }
+                    context.contentResolver.query(android.provider.Telephony.Sms.Inbox.CONTENT_URI, projection, bundle, null)
+                } catch (_: Exception) {
+                    context.contentResolver.query(android.provider.Telephony.Sms.Inbox.CONTENT_URI, projection, null, null, "${android.provider.Telephony.Sms.DATE} DESC")
+                }
+            } else {
+                context.contentResolver.query(android.provider.Telephony.Sms.Inbox.CONTENT_URI, projection, null, null, "${android.provider.Telephony.Sms.DATE} DESC")
+            }
 
-                out += org.json.JSONObject().apply {
-                    put("id", "sms-$id")
-                    put("address", address)
-                    put("body", body)
-                    put("date", date)
-                    put("type", if (type == android.provider.Telephony.Sms.MESSAGE_TYPE_SENT) 2 else 1)
+            cursor?.use { c ->
+                while (c.moveToNext() && out.size < limit) {
+                    val id = c.getLong(0)
+                    val address = c.getString(1) ?: ""
+                    val body = c.getString(2) ?: ""
+                    val date = c.getLong(3)
+                    val type = c.getInt(4)
+
+                    out += org.json.JSONObject().apply {
+                        put("id", "sms-$id")
+                        put("address", address)
+                        put("body", body)
+                        put("date", date)
+                        put("type", if (type == android.provider.Telephony.Sms.MESSAGE_TYPE_SENT) 2 else 1)
+                    }
                 }
             }
+        } catch (e: Exception) {
+            android.util.Log.w("SmsRepository", "readInbox error: ${e.message}")
         }
         return out
     }
@@ -68,28 +81,41 @@ object SmsRepository {
             android.provider.Telephony.Sms.TYPE
         )
 
-        context.contentResolver.query(
-            android.provider.Telephony.Sms.CONTENT_URI,
-            projection,
-            null,
-            null,
-            "${android.provider.Telephony.Sms.DATE} DESC LIMIT $limit"
-        )?.use { cursor ->
-            while (cursor.moveToNext()) {
-                val id = cursor.getLong(0)
-                val address = cursor.getString(1) ?: ""
-                val body = cursor.getString(2) ?: ""
-                val date = cursor.getLong(3)
-                val type = cursor.getInt(4)
+        try {
+            val cursor = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                try {
+                    val bundle = android.os.Bundle().apply {
+                        putInt(android.content.ContentResolver.QUERY_ARG_LIMIT, limit)
+                        putStringArray(android.content.ContentResolver.QUERY_ARG_SORT_COLUMNS, arrayOf(android.provider.Telephony.Sms.DATE))
+                        putInt(android.content.ContentResolver.QUERY_ARG_SORT_DIRECTION, android.content.ContentResolver.QUERY_SORT_DIRECTION_DESCENDING)
+                    }
+                    context.contentResolver.query(android.provider.Telephony.Sms.CONTENT_URI, projection, bundle, null)
+                } catch (_: Exception) {
+                    context.contentResolver.query(android.provider.Telephony.Sms.CONTENT_URI, projection, null, null, "${android.provider.Telephony.Sms.DATE} DESC")
+                }
+            } else {
+                context.contentResolver.query(android.provider.Telephony.Sms.CONTENT_URI, projection, null, null, "${android.provider.Telephony.Sms.DATE} DESC")
+            }
 
-                out += org.json.JSONObject().apply {
-                    put("id", "sms-$id")
-                    put("address", address)
-                    put("body", body)
-                    put("date", date)
-                    put("type", if (type == android.provider.Telephony.Sms.MESSAGE_TYPE_SENT) 2 else 1)
+            cursor?.use { c ->
+                while (c.moveToNext() && out.size < limit) {
+                    val id = c.getLong(0)
+                    val address = c.getString(1) ?: ""
+                    val body = c.getString(2) ?: ""
+                    val date = c.getLong(3)
+                    val type = c.getInt(4)
+
+                    out += org.json.JSONObject().apply {
+                        put("id", "sms-$id")
+                        put("address", address)
+                        put("body", body)
+                        put("date", date)
+                        put("type", if (type == android.provider.Telephony.Sms.MESSAGE_TYPE_SENT) 2 else 1)
+                    }
                 }
             }
+        } catch (e: Exception) {
+            android.util.Log.w("SmsRepository", "readAll error: ${e.message}")
         }
         return out
     }

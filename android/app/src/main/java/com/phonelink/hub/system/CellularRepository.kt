@@ -43,20 +43,27 @@ object CellularRepository {
             })
 
             // Data State
-            result.put("dataState", when (telephonyManager.dataState) {
-                TelephonyManager.DATA_CONNECTED -> "CONNECTED"
-                TelephonyManager.DATA_CONNECTING -> "CONNECTING"
-                TelephonyManager.DATA_DISCONNECTED -> "DISCONNECTED"
-                TelephonyManager.DATA_SUSPENDED -> "SUSPENDED"
-                else -> "UNKNOWN"
-            })
+            val dataState = try {
+                when (telephonyManager.dataState) {
+                    TelephonyManager.DATA_CONNECTED -> "CONNECTED"
+                    TelephonyManager.DATA_CONNECTING -> "CONNECTING"
+                    TelephonyManager.DATA_DISCONNECTED -> "DISCONNECTED"
+                    TelephonyManager.DATA_SUSPENDED -> "SUSPENDED"
+                    else -> "UNKNOWN"
+                }
+            } catch (_: Exception) { "UNKNOWN" }
+            result.put("dataState", dataState)
 
             // Network Generation
             val netTypeInt = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                try { telephonyManager.dataNetworkType } catch (_: Exception) { telephonyManager.networkType }
+                try { 
+                    telephonyManager.dataNetworkType 
+                } catch (_: Exception) { 
+                    try { telephonyManager.networkType } catch (_: Exception) { TelephonyManager.NETWORK_TYPE_UNKNOWN }
+                }
             } else {
                 @Suppress("DEPRECATION")
-                telephonyManager.networkType
+                try { telephonyManager.networkType } catch (_: Exception) { TelephonyManager.NETWORK_TYPE_UNKNOWN }
             }
 
             val (gen, typeName) = when (netTypeInt) {

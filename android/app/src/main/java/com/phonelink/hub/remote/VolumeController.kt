@@ -21,24 +21,33 @@ object VolumeController {
             }
         }
 
-        val ringerModeStr = when (am.ringerMode) {
-            AudioManager.RINGER_MODE_SILENT -> "silent"
-            AudioManager.RINGER_MODE_VIBRATE -> "vibrate"
-            else -> "normal"
-        }
+        return try {
+            val ringerModeStr = when (am.ringerMode) {
+                AudioManager.RINGER_MODE_SILENT -> "silent"
+                AudioManager.RINGER_MODE_VIBRATE -> "vibrate"
+                else -> "normal"
+            }
 
-        return JSONObject().apply {
-            put("deviceId", DevicePrefs.deviceId)
-            put("mediaVolume", am.getStreamVolume(AudioManager.STREAM_MUSIC))
-            put("mediaMax", am.getStreamMaxVolume(AudioManager.STREAM_MUSIC))
-            put("ringVolume", am.getStreamVolume(AudioManager.STREAM_RING))
-            put("ringMax", am.getStreamMaxVolume(AudioManager.STREAM_RING))
-            put("alarmVolume", am.getStreamVolume(AudioManager.STREAM_ALARM))
-            put("alarmMax", am.getStreamMaxVolume(AudioManager.STREAM_ALARM))
-            put("notificationVolume", am.getStreamVolume(AudioManager.STREAM_NOTIFICATION))
-            put("notificationMax", am.getStreamMaxVolume(AudioManager.STREAM_NOTIFICATION))
-            put("ringerMode", ringerModeStr)
-            put("success", true)
+            JSONObject().apply {
+                put("deviceId", DevicePrefs.deviceId)
+                put("mediaVolume", try { am.getStreamVolume(AudioManager.STREAM_MUSIC) } catch (_: Exception) { 0 })
+                put("mediaMax", try { am.getStreamMaxVolume(AudioManager.STREAM_MUSIC) } catch (_: Exception) { 15 })
+                put("ringVolume", try { am.getStreamVolume(AudioManager.STREAM_RING) } catch (_: Exception) { 0 })
+                put("ringMax", try { am.getStreamMaxVolume(AudioManager.STREAM_RING) } catch (_: Exception) { 15 })
+                put("alarmVolume", try { am.getStreamVolume(AudioManager.STREAM_ALARM) } catch (_: Exception) { 0 })
+                put("alarmMax", try { am.getStreamMaxVolume(AudioManager.STREAM_ALARM) } catch (_: Exception) { 15 })
+                put("notificationVolume", try { am.getStreamVolume(AudioManager.STREAM_NOTIFICATION) } catch (_: Exception) { 0 })
+                put("notificationMax", try { am.getStreamMaxVolume(AudioManager.STREAM_NOTIFICATION) } catch (_: Exception) { 15 })
+                put("ringerMode", ringerModeStr)
+                put("success", true)
+            }
+        } catch (e: Exception) {
+            Log.w(TAG, "getVolumeInfo error: ${e.message}")
+            JSONObject().apply {
+                put("deviceId", DevicePrefs.deviceId)
+                put("success", false)
+                put("error", e.message ?: "Failed reading volume info")
+            }
         }
     }
 

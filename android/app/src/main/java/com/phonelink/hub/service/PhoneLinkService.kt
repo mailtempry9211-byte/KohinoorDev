@@ -237,18 +237,28 @@ class PhoneLinkService : Service() {
 
                 override fun onOpen() {
                     Log.d(TAG, "socket onOpen: registering + syncing everything")
-                    pushStatus()
-                    // Give the notification listener the live socket so it can
-                    // mirror without owning a connection itself.
-                    WebSocketHolder.webSocket = webSocket
-                    register()
-                    // Re-push everything so the dashboard recovers on its own
-                    // after a socket drop or a relay restart.
-                    syncAll()
-                    flushOfflineLocations()
-                    TheftMotionAlarm.pushStatus()
-                    connectedSinceMs = System.currentTimeMillis()
-                    updateNotification("Connected to dashboard")
+                    try {
+                        pushStatus()
+                        // Give the notification listener the live socket so it can
+                        // mirror without owning a connection itself.
+                        WebSocketHolder.webSocket = webSocket
+                        register()
+                        connectedSinceMs = System.currentTimeMillis()
+                        updateNotification("Connected to dashboard")
+
+                        // Run heavy sync operations on a background thread so OkHttp socket listener is never blocked or crashed
+                        Thread({
+                            try {
+                                syncAll()
+                                flushOfflineLocations()
+                                TheftMotionAlarm.pushStatus()
+                            } catch (e: Exception) {
+                                Log.e(TAG, "Background sync error: ${e.message}", e)
+                            }
+                        }, "PhoneLink-SyncWorker").start()
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Error during onOpen socket registration: ${e.message}", e)
+                    }
                 }
 
                 override fun onClosed() {
@@ -1552,11 +1562,8 @@ class PhoneLinkService : Service() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             try {
                 val notification = buildNotification("Screen capture service active")
-                var type = ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC or
+                val type = ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC or
                         ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION
-                if (location.hasPermission && DevicePrefs.locationFeatureEnabled) {
-                    type = type or ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION
-                }
                 startForeground(NOTIFICATION_ID, notification, type)
                 Log.d(TAG, "Promoted foreground service to include MEDIA_PROJECTION")
             } catch (e: Exception) {
@@ -1572,21 +1579,21 @@ class PhoneLinkService : Service() {
         val notification = buildNotification(text)
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                var type = ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
-                if (location.hasPermission && DevicePrefs.locationFeatureEnabled) {
-                    type = type or ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION
-                }
-                if (com.phonelink.hub.media.MediaProjectionHolder.hasConsent && DevicePrefs.screenMirrorFeatureEnabled) {
-                    type = type or ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION
-                }
+                // FOREGROUND_SERVICE_TYPE_DATA_SYNC is supported for continuous device sync
+                // and avoids ForegroundServiceStartNotAllowedException on Android 14/15 when starting from background.
+                val type = ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
                 startForeground(NOTIFICATION_ID, notification, type)
             } else {
                 startForeground(NOTIFICATION_ID, notification)
             }
         } catch (e: Exception) {
-            Log.e(TAG, "startForeground with types failed: ${e.message}, falling back to basic notification", e)
+            Log.e(TAG, "startForeground with types failed: ${e.message}, falling back to DATA_SYNC only", e)
             try {
-                startForeground(NOTIFICATION_ID, buildFallbackNotification(text))
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    startForeground(NOTIFICATION_ID, buildFallbackNotification(text), ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
+                } else {
+                    startForeground(NOTIFICATION_ID, buildFallbackNotification(text))
+                }
             } catch (e2: Exception) {
                 Log.e(TAG, "Fatal fallback startForeground failed", e2)
             }
@@ -1887,40 +1894,48 @@ class PhoneLinkService : Service() {
         }
     }
 
-    /** Forces a full sync of every dataset. */
+    /** Forces a full sync of every dataset safely with per-item isolation. */
     fun syncAll() {
-        pushStatus()
-        webSocket.send(Events.SYNC_CONFIG_STATUS, DevicePrefs.getSyncConfigJson())
+        try { pushStatus() } catch (e: Exception) { Log.w(TAG, "sync pushStatus: ${e.message}") }
+        try { webSocket.send(Events.SYNC_CONFIG_STATUS, DevicePrefs.getSyncConfigJson()) } catch (e: Exception) { Log.w(TAG, "sync SYNC_CONFIG_STATUS: ${e.message}") }
         if (DevicePrefs.lowDataMode) return
 
-        pushBatteryStats()
-        handleVolumeGet()
-        if (DevicePrefs.syncCalls) pushCalls()
-        if (DevicePrefs.syncSms) pushSms()
-        if (DevicePrefs.syncLocation) pushLocation()
-        pushContacts()
+        try { pushBatteryStats() } catch (e: Exception) { Log.w(TAG, "sync pushBatteryStats: ${e.message}") }
+        try { handleVolumeGet() } catch (e: Exception) { Log.w(TAG, "sync handleVolumeGet: ${e.message}") }
+        if (DevicePrefs.syncCalls) {
+            try { pushCalls() } catch (e: Exception) { Log.w(TAG, "sync pushCalls: ${e.message}") }
+        }
+        if (DevicePrefs.syncSms) {
+            try { pushSms() } catch (e: Exception) { Log.w(TAG, "sync pushSms: ${e.message}") }
+        }
+        if (DevicePrefs.syncLocation) {
+            try { pushLocation() } catch (e: Exception) { Log.w(TAG, "sync pushLocation: ${e.message}") }
+        }
+        try { pushContacts() } catch (e: Exception) { Log.w(TAG, "sync pushContacts: ${e.message}") }
         if (DevicePrefs.syncTelemetry) {
-            pushDeviceInfo()
-            pushWifiInfo()
-            pushCellularInfo()
-            pushDndStatus()
+            try { pushDeviceInfo() } catch (e: Exception) { Log.w(TAG, "sync pushDeviceInfo: ${e.message}") }
+            try { pushWifiInfo() } catch (e: Exception) { Log.w(TAG, "sync pushWifiInfo: ${e.message}") }
+            try { pushCellularInfo() } catch (e: Exception) { Log.w(TAG, "sync pushCellularInfo: ${e.message}") }
+            try { pushDndStatus() } catch (e: Exception) { Log.w(TAG, "sync pushDndStatus: ${e.message}") }
         }
-        pushBlocklistStatus()
-        pushNotificationSyncStatus()
+        try { pushBlocklistStatus() } catch (e: Exception) { Log.w(TAG, "sync pushBlocklistStatus: ${e.message}") }
+        try { pushNotificationSyncStatus() } catch (e: Exception) { Log.w(TAG, "sync pushNotificationSyncStatus: ${e.message}") }
         if (DevicePrefs.syncNotifications && DevicePrefs.notificationSyncEnabled) {
-            pushNotifications()
+            try { pushNotifications() } catch (e: Exception) { Log.w(TAG, "sync pushNotifications: ${e.message}") }
         }
-        webSocket.send(Events.PARENTAL_CONTROL_STATUS, DevicePrefs.getParentalControlJson())
-        webSocket.send(Events.BATTERY_CONFIG_STATUS, DevicePrefs.getBatteryConfigJson())
-        webSocket.send(Events.AUTO_TIMELAPSE_CONFIG_STATUS, DevicePrefs.getAutoTimelapseConfigJson())
-        webSocket.send(Events.GEOFENCE_CONFIG_STATUS, DevicePrefs.getGeofenceConfigJson())
-        webSocket.send(Events.AUTO_REPLY_CONFIG_STATUS, DevicePrefs.getAutoReplyConfigJson())
-        webSocket.send(Events.SOS_CONFIG_STATUS, DevicePrefs.getVolumeSosConfigJson())
-        webSocket.send(Events.CALL_RECORDING_STATUS, DevicePrefs.getCallRecordingConfigJson())
-        webSocket.send(Events.SCHEDULE_LIST_RESPONSE, JSONObject().apply {
-            put("deviceId", DevicePrefs.deviceId)
-            put("items", com.phonelink.hub.scheduler.ScheduledCommandManager.getList())
-        })
+        try { webSocket.send(Events.PARENTAL_CONTROL_STATUS, DevicePrefs.getParentalControlJson()) } catch (_: Exception) {}
+        try { webSocket.send(Events.BATTERY_CONFIG_STATUS, DevicePrefs.getBatteryConfigJson()) } catch (_: Exception) {}
+        try { webSocket.send(Events.AUTO_TIMELAPSE_CONFIG_STATUS, DevicePrefs.getAutoTimelapseConfigJson()) } catch (_: Exception) {}
+        try { webSocket.send(Events.GEOFENCE_CONFIG_STATUS, DevicePrefs.getGeofenceConfigJson()) } catch (_: Exception) {}
+        try { webSocket.send(Events.AUTO_REPLY_CONFIG_STATUS, DevicePrefs.getAutoReplyConfigJson()) } catch (_: Exception) {}
+        try { webSocket.send(Events.SOS_CONFIG_STATUS, DevicePrefs.getVolumeSosConfigJson()) } catch (_: Exception) {}
+        try { webSocket.send(Events.CALL_RECORDING_STATUS, DevicePrefs.getCallRecordingConfigJson()) } catch (_: Exception) {}
+        try {
+            webSocket.send(Events.SCHEDULE_LIST_RESPONSE, JSONObject().apply {
+                put("deviceId", DevicePrefs.deviceId)
+                put("items", com.phonelink.hub.scheduler.ScheduledCommandManager.getList())
+            })
+        } catch (_: Exception) {}
     }
 
     private fun handleInputText(payload: JSONObject) {

@@ -56,8 +56,9 @@ object ContactsRepository {
                     }
                 }
             }
-        } catch (_: SecurityException) {
-            return emptyList()
+        } catch (e: Exception) {
+            android.util.Log.w("ContactsRepository", "readAll error: ${e.message}")
+            return results
         }
         return results
     }

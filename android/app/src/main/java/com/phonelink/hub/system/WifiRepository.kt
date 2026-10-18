@@ -21,16 +21,16 @@ object WifiRepository {
             }
         }
 
-        val isEnabled = wm.isWifiEnabled
-        val info = wm.connectionInfo
+        val isEnabled = try { wm.isWifiEnabled } catch (_: Exception) { false }
+        val info = try { wm.connectionInfo } catch (_: Exception) { null }
 
-        val ssid = info?.ssid?.trim('\"') ?: "Unknown"
-        val bssid = info?.bssid ?: ""
-        val rssi = info?.rssi ?: -127
-        val linkSpeed = info?.linkSpeed ?: 0
-        val frequency = info?.frequency ?: 0
+        val ssid = try { info?.ssid?.trim('\"') ?: "Unknown" } catch (_: Exception) { "Unknown" }
+        val bssid = try { info?.bssid ?: "" } catch (_: Exception) { "" }
+        val rssi = try { info?.rssi ?: -127 } catch (_: Exception) { -127 }
+        val linkSpeed = try { info?.linkSpeed ?: 0 } catch (_: Exception) { 0 }
+        val frequency = try { info?.frequency ?: 0 } catch (_: Exception) { 0 }
         @Suppress("DEPRECATION")
-        val ipAddress = Formatter.formatIpAddress(info?.ipAddress ?: 0)
+        val ipAddress = try { Formatter.formatIpAddress(info?.ipAddress ?: 0) } catch (_: Exception) { "0.0.0.0" }
 
         val scanList = try {
             val results = wm.scanResults ?: emptyList()

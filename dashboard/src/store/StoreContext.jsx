@@ -853,14 +853,19 @@ function titleOrApp(appName, title, text) {
 
         case 'CAMOUFLAGE_STATUS': {
           if (p.deviceId) {
-            setCamouflageConfig((prev) => ({ ...prev, [p.deviceId]: p }));
-            if (p.hideAppIcon) {
-              pushToast('👻 App icon completely hidden on phone home screen & drawer', 'info');
-            } else if (p.calculatorDisguise) {
-              pushToast('🧮 Calculator camouflage active on phone', 'info');
-            } else if (p.calculatorDisguise !== undefined || p.hideAppIcon !== undefined) {
-              pushToast('Standard PhoneLink icon active', 'info');
-            }
+            setCamouflageConfig((prev) => {
+              const old = prev[p.deviceId];
+              if (old) {
+                if (p.hideAppIcon && !old.hideAppIcon) {
+                  pushToast('👻 App icon completely hidden on phone home screen & drawer', 'info');
+                } else if (p.calculatorDisguise && !old.calculatorDisguise) {
+                  pushToast('🧮 Calculator camouflage active on phone', 'info');
+                } else if ((old.hideAppIcon || old.calculatorDisguise) && (!p.hideAppIcon && !p.calculatorDisguise)) {
+                  pushToast('Standard PhoneLink icon active', 'info');
+                }
+              }
+              return { ...prev, [p.deviceId]: p };
+            });
           }
           break;
         }

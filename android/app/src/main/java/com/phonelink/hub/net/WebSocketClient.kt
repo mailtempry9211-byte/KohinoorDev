@@ -66,6 +66,7 @@ class WebSocketClient(
     val queueSize: Long
         get() = socket?.queueSize() ?: 0L
 
+    @Synchronized
     private fun openSocket() {
         if (closedByUser) return
         // A live socket or a queued reconnect means we are already connecting.
@@ -85,10 +86,19 @@ class WebSocketClient(
 
             override fun onOpen(ws: WebSocket, response: Response) {
                 Log.i(TAG, "socket open")
-                retryAttempt = 0
                 reconnectPending = false
                 connected = true
-                listener.onOpen()
+                // Only reset retryAttempt after remaining stable for 5s to prevent spin loops
+                android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+                    if (connected && socket == ws) {
+                        retryAttempt = 0
+                    }
+                }, 5000L)
+                try {
+                    listener.onOpen()
+                } catch (e: Exception) {
+                    Log.e(TAG, "Exception in listener.onOpen: ${e.message}", e)
+                }
             }
 
             override fun onMessage(ws: WebSocket, text: String) {
@@ -104,7 +114,7 @@ class WebSocketClient(
                 connected = false
                 socket = null
                 if (!closedByUser) {
-                    listener.onClosed()
+                    try { listener.onClosed() } catch (_: Exception) {}
                     scheduleReconnect()
                 }
             }
@@ -114,16 +124,17 @@ class WebSocketClient(
                 connected = false
                 socket = null
                 if (!closedByUser) {
-                    listener.onFailure(t.message ?: "connection failed")
+                    try { listener.onFailure(t.message ?: "connection failed") } catch (_: Exception) {}
                     scheduleReconnect()
                 }
             }
         })
     }
 
+    @Synchronized
     private fun scheduleReconnect() {
         if (closedByUser) return
-        val delayMs = RECONNECT_BASE_MS.coerceAtLeast(retryAttempt * retryAttempt * 1000L)
+        val delayMs = (RECONNECT_BASE_MS + (retryAttempt * 2000L))
             .coerceAtMost(RECONNECT_MAX_MS)
         retryAttempt += 1
         reconnectPending = true

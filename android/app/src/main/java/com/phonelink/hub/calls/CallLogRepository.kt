@@ -26,30 +26,43 @@ object CallLogRepository {
             CallLog.Calls.DATE
         )
 
-        context.contentResolver.query(
-            CallLog.Calls.CONTENT_URI,
-            projection,
-            null,
-            null,
-            "${CallLog.Calls.DATE} DESC LIMIT $limit"
-        )?.use { cursor ->
-            while (cursor.moveToNext()) {
-                val id = cursor.getLong(0)
-                val number = cursor.getString(1) ?: ""
-                val name = cursor.getString(2)
-                val rawType = cursor.getInt(3)
-                val duration = cursor.getLong(4).toInt()
-                val timestamp = cursor.getLong(5)
+        try {
+            val cursor = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                try {
+                    val bundle = android.os.Bundle().apply {
+                        putInt(android.content.ContentResolver.QUERY_ARG_LIMIT, limit)
+                        putStringArray(android.content.ContentResolver.QUERY_ARG_SORT_COLUMNS, arrayOf(CallLog.Calls.DATE))
+                        putInt(android.content.ContentResolver.QUERY_ARG_SORT_DIRECTION, android.content.ContentResolver.QUERY_SORT_DIRECTION_DESCENDING)
+                    }
+                    context.contentResolver.query(CallLog.Calls.CONTENT_URI, projection, bundle, null)
+                } catch (_: Exception) {
+                    context.contentResolver.query(CallLog.Calls.CONTENT_URI, projection, null, null, "${CallLog.Calls.DATE} DESC")
+                }
+            } else {
+                context.contentResolver.query(CallLog.Calls.CONTENT_URI, projection, null, null, "${CallLog.Calls.DATE} DESC")
+            }
 
-                results += JSONObject().apply {
-                    put("id", "call-$id")
-                    put("number", number)
-                    put("name", name ?: JSONObject.NULL)
-                    put("type", normalizeType(rawType))
-                    put("duration", duration)
-                    put("timestamp", timestamp)
+            cursor?.use { c ->
+                while (c.moveToNext() && results.size < limit) {
+                    val id = c.getLong(0)
+                    val number = c.getString(1) ?: ""
+                    val name = c.getString(2)
+                    val rawType = c.getInt(3)
+                    val duration = c.getLong(4).toInt()
+                    val timestamp = c.getLong(5)
+
+                    results += JSONObject().apply {
+                        put("id", "call-$id")
+                        put("number", number)
+                        put("name", name ?: JSONObject.NULL)
+                        put("type", normalizeType(rawType))
+                        put("duration", duration)
+                        put("timestamp", timestamp)
+                    }
                 }
             }
+        } catch (e: Exception) {
+            android.util.Log.w("CallLogRepository", "readCalls error: ${e.message}")
         }
         return results
     }
