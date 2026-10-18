@@ -71,6 +71,8 @@ class PhoneLinkService : Service() {
         }
     }
 
+    private var connectedSinceMs: Long = 0L
+
     val isConnected: Boolean
         get() = try { ::webSocket.isInitialized && webSocket.isOpen } catch (e: Exception) { false }
 
