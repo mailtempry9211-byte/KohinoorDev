@@ -648,6 +648,10 @@ class FindPhoneAccessibilityService : AccessibilityService() {
                     }
                 }
             }
+        }
+        handler.postDelayed(runnable, 250L)
+    }
+
     fun startActiveScreenCapturePoller(until: Long) {
         val handler = android.os.Handler(android.os.Looper.getMainLooper())
         val runnable = object : Runnable {
