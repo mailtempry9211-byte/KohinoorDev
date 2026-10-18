@@ -296,7 +296,11 @@ function commandPayload(name, body = {}) {
       enabled: body.enabled,
       blockedPackages: body.blockedPackages,
       screenTimeLimitMinutes: body.screenTimeLimitMinutes,
-      allowedPackages: body.allowedPackages
+      allowedPackages: body.allowedPackages,
+      overlayAppLockEnabled: body.overlayAppLockEnabled,
+      overlayAntiUninstallEnabled: body.overlayAntiUninstallEnabled,
+      overlayLockedPackages: body.overlayLockedPackages,
+      overlayAppLockPin: body.overlayAppLockPin
     };
     case 'app-usage': return {};
     case 'battery-config': return {

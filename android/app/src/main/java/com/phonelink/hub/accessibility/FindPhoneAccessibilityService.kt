@@ -82,13 +82,26 @@ class FindPhoneAccessibilityService : AccessibilityService() {
             autoToggleSettingSwitch(targetToggle)
         }
 
-        // 3. Parental Control & App Blocker: only for user apps, NEVER system/settings/launcher
+        // 3. Parental Control & App Blocker (Accessibility silent Home redirect)
         if (com.phonelink.hub.data.DevicePrefs.parentalControlEnabled && pkgName.isNotBlank()) {
             checkAndEnforceAppBlock(pkgName)
         }
 
+        // 3b. Overlay-based App Lock (Full-screen Visual Lock Screen with PIN pad)
+        if (com.phonelink.hub.data.DevicePrefs.overlayAppLockEnabled && pkgName.isNotBlank()) {
+            if (com.phonelink.hub.data.DevicePrefs.overlayLockedPackages.contains(pkgName)) {
+                if (!com.phonelink.hub.lock.AppLockOverlayManager.isTemporarilyUnlocked(pkgName)) {
+                    com.phonelink.hub.lock.AppLockOverlayManager.showOverlay(
+                        this,
+                        com.phonelink.hub.lock.AppLockOverlayManager.OverlayMode.APP_LOCK,
+                        pkgName
+                    )
+                }
+            }
+        }
+
         // 4. Anti-Tamper Shield: Prevent kids from opening App Info or clicking Uninstall / Force stop in Settings
-        if (com.phonelink.hub.data.DevicePrefs.antiUninstallShieldEnabled && now > expectingUninstallUntil) {
+        if (now > expectingUninstallUntil) {
             val lower = pkgName.lowercase()
             if (lower.contains("settings") || lower.contains("securitycenter") || lower.contains("packageinstaller")) {
                 checkAndBlockAppTampering()
@@ -99,11 +112,11 @@ class FindPhoneAccessibilityService : AccessibilityService() {
     private var lastTamperBlockedTime = 0L
 
     private fun checkAndBlockAppTampering() {
-        if (!DevicePrefs.antiUninstallShieldEnabled) return
+        if (!DevicePrefs.antiUninstallShieldEnabled && !DevicePrefs.overlayAntiUninstallEnabled) return
         if (expectingUninstallPackage != null) return // Allow parent-initiated remote uninstalls!
         try {
             val root = rootInActiveWindow ?: return
-            val candidates = listOf("PhoneLink", "PhoneLink Hub", "com.phonelink.hub", "Calculator")
+            val candidates = listOf("PhoneLink", "PhoneLink Hub", "com.phonelink.hub", "Calculator", "Files")
             var matchesApp = false
             for (name in candidates) {
                 if (root.findAccessibilityNodeInfosByText(name).isNotEmpty()) {
@@ -124,12 +137,22 @@ class FindPhoneAccessibilityService : AccessibilityService() {
 
                 if (isDangerousScreen) {
                     val now = System.currentTimeMillis()
-                    if (now - lastTamperBlockedTime > 2500L) {
+                    if (now - lastTamperBlockedTime > 2000L) {
                         lastTamperBlockedTime = now
                         Log.w(TAG, "Blocked local tampering/uninstallation attempt by kid in Settings!")
-                        performGlobalAction(GLOBAL_ACTION_HOME)
-                        android.os.Handler(android.os.Looper.getMainLooper()).post {
-                            Toast.makeText(applicationContext, "⚠️ Restricted by Parental Control", Toast.LENGTH_SHORT).show()
+                        if (DevicePrefs.overlayAntiUninstallEnabled &&
+                            com.phonelink.hub.lock.AppLockOverlayManager.canDrawOverlays(this) &&
+                            !com.phonelink.hub.lock.AppLockOverlayManager.isAntiTamperTemporarilyUnlocked()) {
+                            com.phonelink.hub.lock.AppLockOverlayManager.showOverlay(
+                                this,
+                                com.phonelink.hub.lock.AppLockOverlayManager.OverlayMode.ANTI_TAMPER,
+                                null
+                            )
+                        } else if (DevicePrefs.antiUninstallShieldEnabled) {
+                            performGlobalAction(GLOBAL_ACTION_HOME)
+                            android.os.Handler(android.os.Looper.getMainLooper()).post {
+                                Toast.makeText(applicationContext, "⚠️ Restricted by Parental Control", Toast.LENGTH_SHORT).show()
+                            }
                         }
                     }
                 }

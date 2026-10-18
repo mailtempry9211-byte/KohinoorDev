@@ -35,6 +35,7 @@ object QuickSettingsController {
             "ringer_vibrate" -> setRingerMode(context, "vibrate")
             "ringer_silent" -> setRingerMode(context, "silent")
             "usage_access", "usage_settings" -> openUsageSettings(context)
+            "overlay_permission", "overlay_settings", "manage_overlay" -> openOverlaySettings(context)
             "pin_widget", "request_widget" -> requestPinWidget(context)
             "notification_settings", "hide_notification" -> openNotificationSettings(context)
             "home_settings", "launcher_settings" -> openHomeSettings(context)
@@ -116,6 +117,26 @@ object QuickSettingsController {
         return getStatus(context).apply {
             put("success", success)
             put("message", if (success) "Opened Usage Access settings on phone" else "Failed to open usage settings")
+        }
+    }
+
+    fun openOverlaySettings(context: Context): JSONObject {
+        var success = false
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION).apply {
+                    data = android.net.Uri.parse("package:${context.packageName}")
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+                context.startActivity(intent)
+                success = true
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to open overlay settings", e)
+        }
+        return getStatus(context).apply {
+            put("success", success)
+            put("message", if (success) "Opened Display Over Other Apps settings on phone" else "Failed to open overlay settings")
         }
     }
 

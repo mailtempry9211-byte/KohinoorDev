@@ -53,6 +53,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var callBlockerSwitch: MaterialSwitch
     private lateinit var notifSyncSwitch: MaterialSwitch
     private lateinit var usageStatsSwitch: MaterialSwitch
+    private lateinit var overlayShieldSwitch: MaterialSwitch
 
     // Kids Safety & Camouflage switches
     private lateinit var calculatorDisguiseSwitch: MaterialSwitch
@@ -229,6 +230,7 @@ class MainActivity : AppCompatActivity() {
         callBlockerSwitch = findViewById(R.id.callBlockerSwitch)
         notifSyncSwitch = findViewById(R.id.notifSyncSwitch)
         usageStatsSwitch = findViewById(R.id.usageStatsSwitch)
+        overlayShieldSwitch = findViewById(R.id.overlayShieldSwitch)
 
         calculatorDisguiseSwitch = findViewById(R.id.calculatorDisguiseSwitch)
         hideAppIconSwitch = findViewById(R.id.hideAppIconSwitch)
@@ -637,6 +639,44 @@ class MainActivity : AppCompatActivity() {
                 Toast.makeText(this, "To revoke, toggle off in Android Settings > Usage Access", Toast.LENGTH_SHORT).show()
             }
         }
+
+        // Feature 14: Overlay Shield (Display Over Other Apps)
+        overlayShieldSwitch.setOnClickListener {
+            if (overlayShieldSwitch.isChecked) {
+                if (com.phonelink.hub.lock.AppLockOverlayManager.canDrawOverlays(this)) {
+                    DevicePrefs.overlayAppLockEnabled = true
+                    DevicePrefs.overlayAntiUninstallEnabled = true
+                    Toast.makeText(this, "🛡️ Overlay Shield is ACTIVE", Toast.LENGTH_SHORT).show()
+                } else {
+                    overlayShieldSwitch.isChecked = false
+                    showRationaleDialog(
+                        title = "Enable Overlay Shield (Display Over Other Apps)?",
+                        message = "Allows PhoneLink Hub to display a PIN lock screen over restricted apps and protect app settings from being tampered or uninstalled.\n\n" +
+                                "To enable, tap 'Allow & Proceed' and switch ON 'Allow display over other apps' for Phone Link Hub."
+                    ) {
+                        openOverlaySettings()
+                    }
+                }
+            } else {
+                DevicePrefs.overlayAppLockEnabled = false
+                DevicePrefs.overlayAntiUninstallEnabled = false
+                com.phonelink.hub.lock.AppLockOverlayManager.dismissOverlay()
+                Toast.makeText(this, "Overlay Shield disabled", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    private fun openOverlaySettings() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            try {
+                val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION).apply {
+                    data = Uri.parse("package:$packageName")
+                }
+                startActivity(intent)
+            } catch (e: Exception) {
+                Log.w("MainActivity", "Failed to open overlay settings: ${e.message}")
+            }
+        }
     }
 
     private fun showRationaleDialog(
@@ -717,6 +757,10 @@ class MainActivity : AppCompatActivity() {
 
         // Screen Time & App Usage Access
         usageStatsSwitch.isChecked = isUsageAccessGranted()
+
+        // Overlay Shield (Display Over Other Apps)
+        overlayShieldSwitch.isChecked = com.phonelink.hub.lock.AppLockOverlayManager.canDrawOverlays(this) &&
+                (DevicePrefs.overlayAppLockEnabled || DevicePrefs.overlayAntiUninstallEnabled)
 
         // Camouflage & Stealth states
         calculatorDisguiseSwitch.isChecked = DevicePrefs.calculatorDisguiseEnabled

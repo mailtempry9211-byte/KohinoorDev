@@ -403,6 +403,23 @@
             android:textColor="@color/text_secondary"
             android:textSize="11sp" />
 
+        <!-- Feature 14: Overlay Shield (Display Over Other Apps) -->
+        <com.google.android.material.materialswitch.MaterialSwitch
+            android:id="@+id/overlayShieldSwitch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="Overlay Shield (App Lock &amp; Anti-Tamper)"
+            android:textColor="@color/text_primary"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Displays a PIN lock screen over restricted apps and blocks access to PhoneLink App Info in Settings."
+            android:textColor="@color/text_secondary"
+            android:textSize="11sp" />
+
         <!-- Action Buttons -->
         <Button
             android:id="@+id/startBtn"

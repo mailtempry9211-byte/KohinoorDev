@@ -234,6 +234,8 @@ export default function Controls() {
   const [cameraStreamFps, setCameraStreamFps] = useState(15);
 
   const [newBlockPkg, setNewBlockPkg] = useState('');
+  const [newOverlayPkg, setNewOverlayPkg] = useState('');
+  const [newAppLockPin, setNewAppLockPin] = useState('');
   const [screenTimeLimit, setScreenTimeLimit] = useState(120);
   const [allowedAppsText, setAllowedAppsText] = useState('com.whatsapp, com.android.dialer, com.google.android.apps.messaging, com.android.camera, com.google.android.apps.photos');
 
@@ -1355,6 +1357,200 @@ export default function Controls() {
                           updateParentalControl({ blockedPackages: updated });
                         }}
                         className="hover:text-white font-bold"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  ))
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* LAYER 2: OVERLAY APP LOCK & ANTI-TAMPER GUARDIAN */}
+        <div className={`col-span-full rounded-2xl border border-sky-500/40 bg-white/70 dark:bg-slate-900/60 dark:bg-gradient-to-br dark:from-slate-900 dark:via-sky-950/20 dark:to-slate-950 p-5 shadow-xl flex flex-col justify-between ${isCardVisible("parental", ["overlay", "applock", "lock", "anti-uninstall", "tamper", "pin"]) ? "" : "hidden"}`}>
+          <div>
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200/80 dark:border-slate-800 pb-3 mb-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-lg bg-sky-500/20 border border-sky-500/40 text-sky-400">
+                  <Lock className="h-5 w-5" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-base font-bold text-slate-900 dark:text-white">Layer 2: Overlay App Lock &amp; Anti-Tamper Shield</h3>
+                    <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full border ${
+                      parentalControl?.overlayAppLockEnabled
+                        ? 'bg-sky-950 border-sky-500 text-sky-300'
+                        : 'bg-gray-800 border-gray-700 text-slate-500 dark:text-slate-400'
+                    }`}>
+                      {parentalControl?.overlayAppLockEnabled ? '🔒 APP LOCK ACTIVE' : 'APP LOCK OFF'}
+                    </span>
+                    <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full border ${
+                      parentalControl?.overlayAntiUninstallEnabled !== false
+                        ? 'bg-emerald-950 border-emerald-500 text-emerald-300'
+                        : 'bg-gray-800 border-gray-700 text-slate-500 dark:text-slate-400'
+                    }`}>
+                      {parentalControl?.overlayAntiUninstallEnabled !== false ? '🛡️ ANTI-TAMPER ACTIVE' : 'TAMPER OFF'}
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                    <strong>Display Over Other Apps (SYSTEM_ALERT_WINDOW):</strong> Renders an impassable PIN lock screen over restricted apps and locks phone settings if someone tries to open App Info to uninstall PhoneLink Hub.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => sendQuickSetting('overlay_permission')}
+                  className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-800 hover:bg-gray-700 text-sky-300 border border-gray-700 transition-colors"
+                  title="Opens Android 'Display over other apps' screen on phone"
+                >
+                  ⚙️ Open Overlay Permission on Phone
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => updateParentalControl({ overlayAntiUninstallEnabled: !(parentalControl?.overlayAntiUninstallEnabled !== false) })}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${
+                    parentalControl?.overlayAntiUninstallEnabled !== false
+                      ? 'bg-emerald-600 hover:bg-emerald-500 border-emerald-500 text-white'
+                      : 'bg-gray-800 hover:bg-gray-700 border-gray-700 text-slate-300'
+                  }`}
+                >
+                  {parentalControl?.overlayAntiUninstallEnabled !== false ? 'Anti-Tamper: ON' : 'Anti-Tamper: OFF'}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => updateParentalControl({ overlayAppLockEnabled: !parentalControl?.overlayAppLockEnabled })}
+                  className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all shadow-md border ${
+                    parentalControl?.overlayAppLockEnabled
+                      ? 'bg-rose-600 hover:bg-rose-500 border-rose-500 text-white'
+                      : 'bg-sky-600 hover:bg-sky-500 border-sky-500 text-white'
+                  }`}
+                >
+                  {parentalControl?.overlayAppLockEnabled ? 'Disable App Lock' : 'Enable App Lock'}
+                </button>
+              </div>
+            </div>
+
+            {/* Parent PIN Setup */}
+            <div className="p-3.5 rounded-lg bg-slate-50 dark:bg-slate-950/70 border border-slate-200/80 dark:border-slate-800 mb-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <span className="text-xs font-semibold text-slate-700 dark:text-slate-300 block">
+                    🔑 Parent Unlock PIN
+                  </span>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                    {parentalControl?.hasAppLockPin ? '✓ Custom PIN is configured on device.' : 'Default PIN is: 1234. Change it below to secure lock screens.'}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="password"
+                    maxLength={6}
+                    placeholder="New 4-6 digit PIN"
+                    value={newAppLockPin}
+                    onChange={(e) => setNewAppLockPin(e.target.value.replace(/\D/g, ''))}
+                    className="w-36 rounded-lg border border-gray-700 bg-gray-900 px-3 py-1.5 text-xs text-slate-800 dark:text-slate-200 placeholder-gray-500 text-center font-mono focus:border-sky-500 focus:outline-none"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (newAppLockPin.length < 4) {
+                        pushToast('PIN must be at least 4 digits', 'error');
+                        return;
+                      }
+                      updateParentalControl({ overlayAppLockPin: newAppLockPin });
+                      setNewAppLockPin('');
+                      pushToast('Parent PIN updated successfully!', 'success');
+                    }}
+                    className="px-3 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-500 text-xs font-bold text-white transition-colors"
+                  >
+                    Set PIN
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Overlay Locked Apps Manager */}
+            <div className="p-3.5 rounded-lg bg-slate-50 dark:bg-slate-950/70 border border-slate-200/80 dark:border-slate-800">
+              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-2">
+                🔒 Overlay App Lock List (Draws an impassable PIN keypad over these apps when opened)
+              </label>
+
+              <div className="flex gap-2 mb-3">
+                <input
+                  type="text"
+                  placeholder="Enter package name (e.g. com.instagram.android, com.google.android.youtube)..."
+                  value={newOverlayPkg}
+                  onChange={(e) => setNewOverlayPkg(e.target.value)}
+                  className="flex-1 rounded-lg border border-gray-700 bg-gray-900 px-3 py-1.5 text-xs text-slate-800 dark:text-slate-200 placeholder-gray-500 focus:border-sky-500 focus:outline-none"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    const clean = newOverlayPkg.trim();
+                    if (!clean) return;
+                    const existing = Array.isArray(parentalControl?.overlayLockedPackages) ? parentalControl.overlayLockedPackages : [];
+                    const updated = Array.from(new Set([...existing, clean]));
+                    updateParentalControl({ overlayLockedPackages: updated });
+                    setNewOverlayPkg('');
+                  }}
+                  className="px-3.5 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-500 text-xs font-bold text-white transition-colors"
+                >
+                  Lock App
+                </button>
+              </div>
+
+              {/* Quick Lock Presets */}
+              <div className="flex flex-wrap gap-1.5 mb-3">
+                <span className="text-[11px] text-slate-500 dark:text-slate-400 py-0.5">Quick Lock:</span>
+                {[
+                  { name: 'Instagram', pkg: 'com.instagram.android' },
+                  { name: 'YouTube', pkg: 'com.google.android.youtube' },
+                  { name: 'Snapchat', pkg: 'com.snapchat.android' },
+                  { name: 'Free Fire / BGMI', pkg: 'com.dts.freefireth' },
+                  { name: 'TikTok', pkg: 'com.zhiliaoapp.musically' },
+                  { name: 'Chrome', pkg: 'com.android.chrome' }
+                ].map((item) => (
+                  <button
+                    key={item.pkg}
+                    type="button"
+                    onClick={() => {
+                      const existing = Array.isArray(parentalControl?.overlayLockedPackages) ? parentalControl.overlayLockedPackages : [];
+                      const updated = Array.from(new Set([...existing, item.pkg]));
+                      updateParentalControl({ overlayLockedPackages: updated });
+                    }}
+                    className="px-2 py-0.5 rounded text-[10px] bg-gray-800 hover:bg-sky-950/60 hover:text-sky-300 border border-gray-700 text-slate-700 dark:text-slate-300 transition-colors"
+                  >
+                    + Lock {item.name}
+                  </button>
+                ))}
+              </div>
+
+              {/* Locked Apps Chips */}
+              <div className="flex flex-wrap gap-2">
+                {(parentalControl?.overlayLockedPackages || []).length === 0 ? (
+                  <span className="text-xs text-gray-500 italic">No apps currently locked with overlay. Add package above or tap Quick Lock.</span>
+                ) : (
+                  (parentalControl?.overlayLockedPackages || []).map((pkg) => (
+                    <span
+                      key={pkg}
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs bg-sky-950/60 border border-sky-800 text-sky-300"
+                    >
+                      🔒 {pkg}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const existing = Array.isArray(parentalControl?.overlayLockedPackages) ? parentalControl.overlayLockedPackages : [];
+                          const updated = existing.filter((p) => p !== pkg);
+                          updateParentalControl({ overlayLockedPackages: updated });
+                        }}
+                        className="hover:text-white font-bold"
+                        title="Remove lock"
                       >
                         ×
                       </button>

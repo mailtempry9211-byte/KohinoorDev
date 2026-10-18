@@ -492,12 +492,37 @@ class PhoneLinkService : Service() {
             if (set.isNotEmpty()) DevicePrefs.allowedPackagesDuringLimit = set
         }
 
-        val status = JSONObject().apply {
-            put("deviceId", DevicePrefs.deviceId)
-            put("enabled", DevicePrefs.parentalControlEnabled)
-            put("blockedPackages", org.json.JSONArray(DevicePrefs.blockedPackages))
-            put("screenTimeLimitMinutes", DevicePrefs.screenTimeLimitMinutes)
-            put("allowedPackages", org.json.JSONArray(DevicePrefs.allowedPackagesDuringLimit))
+        // Overlay Shield: App Lock & Anti-Tamper
+        if (payload.has("overlayAppLockEnabled")) {
+            DevicePrefs.overlayAppLockEnabled = payload.optBoolean("overlayAppLockEnabled")
+            if (!DevicePrefs.overlayAppLockEnabled) {
+                com.phonelink.hub.lock.AppLockOverlayManager.dismissOverlay()
+            }
+        }
+        if (payload.has("overlayAntiUninstallEnabled")) {
+            DevicePrefs.overlayAntiUninstallEnabled = payload.optBoolean("overlayAntiUninstallEnabled")
+            if (!DevicePrefs.overlayAntiUninstallEnabled) {
+                com.phonelink.hub.lock.AppLockOverlayManager.dismissOverlay()
+            }
+        }
+        if (payload.has("overlayLockedPackages")) {
+            val arr = payload.optJSONArray("overlayLockedPackages")
+            val set = mutableSetOf<String>()
+            if (arr != null) {
+                for (i in 0 until arr.length()) {
+                    val p = arr.optString(i)
+                    if (p.isNotBlank()) set.add(p)
+                }
+            }
+            DevicePrefs.overlayLockedPackages = set
+        }
+        if (payload.has("overlayAppLockPin")) {
+            val pin = payload.optString("overlayAppLockPin", "")
+            if (pin.isNotBlank()) DevicePrefs.overlayAppLockPin = pin
+        }
+
+        val status = DevicePrefs.getParentalControlJson().apply {
+            put("canDrawOverlays", com.phonelink.hub.lock.AppLockOverlayManager.canDrawOverlays(this@PhoneLinkService))
             put("success", true)
         }
         webSocket.send(Events.PARENTAL_CONTROL_STATUS, status)

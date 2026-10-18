@@ -151,6 +151,40 @@ object DevicePrefs {
         put("blockedPackages", org.json.JSONArray(blockedPackages))
         put("screenTimeLimitMinutes", screenTimeLimitMinutes)
         put("allowedPackages", org.json.JSONArray(allowedPackagesDuringLimit))
+        put("overlayAppLockEnabled", overlayAppLockEnabled)
+        put("overlayAntiUninstallEnabled", overlayAntiUninstallEnabled)
+        put("overlayLockedPackages", org.json.JSONArray(overlayLockedPackages))
+        put("hasAppLockPin", overlayAppLockPin.isNotBlank() || hasOwnerPin())
+    }
+
+    // -------------------------------------------------------------
+    // Overlay-based App Lock & Anti-Tamper Shield (SYSTEM_ALERT_WINDOW)
+    // -------------------------------------------------------------
+    var overlayAppLockEnabled: Boolean
+        get() = prefs.getBoolean("feat_overlay_app_lock", false)
+        set(value) = prefs.edit().putBoolean("feat_overlay_app_lock", value).apply()
+
+    var overlayAntiUninstallEnabled: Boolean
+        get() = prefs.getBoolean("feat_overlay_anti_uninstall", true)
+        set(value) = prefs.edit().putBoolean("feat_overlay_anti_uninstall", value).apply()
+
+    var overlayLockedPackages: Set<String>
+        get() = prefs.getStringSet("overlay_locked_packages", emptySet()) ?: emptySet()
+        set(value) = prefs.edit().putStringSet("overlay_locked_packages", value).apply()
+
+    var overlayAppLockPin: String
+        get() = prefs.getString("overlay_app_lock_pin", "") ?: ""
+        set(value) = prefs.edit().putString("overlay_app_lock_pin", value).apply()
+
+    fun verifyAppLockPin(pin: String): Boolean {
+        val configured = overlayAppLockPin.trim()
+        if (configured.isNotBlank()) {
+            return configured == pin.trim()
+        }
+        if (hasOwnerPin()) {
+            return verifyOwnerPin(pin)
+        }
+        return pin.trim() == "1234" // Default fallback PIN
     }
 
     // -------------------------------------------------------------
