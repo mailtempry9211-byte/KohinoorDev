@@ -757,7 +757,7 @@ class PhoneLinkService : Service() {
                     notifManager.createNotificationChannel(channel)
                 }
                 val notif = androidx.core.app.NotificationCompat.Builder(this, channelId)
-                    .setSmallIcon(R.drawable.ic_stat_name)
+                    .setSmallIcon(R.drawable.ic_notification)
                     .setContentTitle("📢 $title")
                     .setContentText(message)
                     .setStyle(androidx.core.app.NotificationCompat.BigTextStyle().bigText(message))
