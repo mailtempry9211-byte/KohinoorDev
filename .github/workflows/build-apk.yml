@@ -49,23 +49,24 @@ jobs:
 
       - name: Build Android Client Release APK
         run: |
+          set -e -o pipefail
           cd android
           chmod +x gradlew
           ./gradlew assembleRelease --stacktrace --no-daemon 2>&1 | tee build.log
 
       - name: Display Gradle Error on Failure
-        if: failure()
+        if: always()
         run: |
           if [ -f android/build.log ]; then
-            echo "================= GRADLE FAILURE LOG ================="
-            tail -n 150 android/build.log
+            echo "================= GRADLE BUILD LOG (TAIL) ================="
+            tail -n 200 android/build.log
           fi
 
       - name: Upload Build Log Artifact on Failure
-        if: failure()
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: gradle-build-failure-log
+          name: gradle-build-log
           path: android/build.log
 
       - name: Collect and Name Output APK
