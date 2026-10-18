@@ -18,13 +18,33 @@ object CallLogRepository {
     fun deleteCall(context: Context, callId: String): Boolean {
         if (!hasWritePermission(context) || callId.isBlank()) return false
         val id = callId.removePrefix("call-").trim()
-        return try {
+        var count = 0
+        try {
             val uri = android.net.Uri.withAppendedPath(CallLog.Calls.CONTENT_URI, id)
-            val count = context.contentResolver.delete(uri, null, null)
-            count > 0
-        } catch (_: Exception) {
-            false
+            count = context.contentResolver.delete(uri, null, null)
+        } catch (_: Exception) {}
+
+        if (count <= 0) {
+            try {
+                count = context.contentResolver.delete(
+                    CallLog.Calls.CONTENT_URI,
+                    "${CallLog.Calls._ID} = ?",
+                    arrayOf(id)
+                )
+            } catch (_: Exception) {}
         }
+
+        if (count <= 0) {
+            try {
+                count = context.contentResolver.delete(
+                    CallLog.Calls.CONTENT_URI,
+                    "${CallLog.Calls.DATE} = ?",
+                    arrayOf(id)
+                )
+            } catch (_: Exception) {}
+        }
+
+        return count > 0
     }
 
     fun clearAllCalls(context: Context): Boolean {

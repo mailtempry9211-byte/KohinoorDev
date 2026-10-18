@@ -298,6 +298,44 @@ function titleOrApp(appName, title, text) {
           break;
         }
 
+        case 'DELETE_CALL_RESULT': {
+          if (p.success && p.deviceId && p.callId) {
+            const rawId = String(p.callId).replace(/^call-/, '').trim();
+            setCalls((c) => {
+              const current = c[p.deviceId] || [];
+              const next = current.filter((item) =>
+                item.id !== p.callId &&
+                String(item.id).replace(/^call-/, '').trim() !== rawId &&
+                String(item.timestamp) !== String(p.callId)
+              );
+              return { ...c, [p.deviceId]: next };
+            });
+          }
+          break;
+        }
+
+        case 'CLEAR_CALLS_RESULT': {
+          if (p.success && p.deviceId) {
+            setCalls((c) => ({ ...c, [p.deviceId]: [] }));
+          }
+          break;
+        }
+
+        case 'DELETE_CONTACT_RESULT': {
+          if (p.success && p.deviceId && p.contactId) {
+            const rawId = String(p.contactId).replace(/^contact-/, '').trim();
+            setContacts((prev) => {
+              const current = prev[p.deviceId] || [];
+              const next = current.filter((item) =>
+                item.id !== p.contactId &&
+                String(item.id).replace(/^contact-/, '').trim() !== rawId
+              );
+              return { ...prev, [p.deviceId]: next };
+            });
+          }
+          break;
+        }
+
         case 'FIND_PHONE_STOPPED': {
           if (p.deviceId) {
             if (findPhoneTimers.current[p.deviceId]) {

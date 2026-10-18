@@ -118,13 +118,32 @@ object ContactsRepository {
     fun deleteContact(context: Context, contactId: String): Boolean {
         if (!hasWritePermission(context) || contactId.isBlank()) return false
         val id = contactId.removePrefix("contact-").trim()
-        return try {
+        var deletedCount = 0
+        try {
+            val rawDeleted = context.contentResolver.delete(
+                ContactsContract.RawContacts.CONTENT_URI,
+                "${ContactsContract.RawContacts.CONTACT_ID} = ?",
+                arrayOf(id)
+            )
+            deletedCount += rawDeleted
+        } catch (_: Exception) {}
+
+        try {
             val uri = android.net.Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_URI, id)
-            val deleted = context.contentResolver.delete(uri, null, null)
-            deleted > 0
-        } catch (_: Exception) {
-            false
-        }
+            val uriDeleted = context.contentResolver.delete(uri, null, null)
+            deletedCount += uriDeleted
+        } catch (_: Exception) {}
+
+        try {
+            val selDeleted = context.contentResolver.delete(
+                ContactsContract.Contacts.CONTENT_URI,
+                "${ContactsContract.Contacts._ID} = ?",
+                arrayOf(id)
+            )
+            deletedCount += selDeleted
+        } catch (_: Exception) {}
+
+        return deletedCount > 0
     }
 
     /** Updates name and phone number for contact ID. False if fail. */

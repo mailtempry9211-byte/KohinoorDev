@@ -574,8 +574,8 @@ function handleMessage(ws, msg) {
 
     case 'SYNC_CALLS': {
       const { deviceId, calls = [] } = payload;
+      db.data.calls = db.data.calls.filter((c) => c.deviceId !== deviceId);
       for (const call of calls) {
-        db.data.calls = db.data.calls.filter((c) => c.id !== call.id);
         db.data.calls.push({ ...call, deviceId });
       }
       db.data.calls.sort((a, b) => b.timestamp - a.timestamp);
@@ -849,10 +849,43 @@ function handleMessage(ws, msg) {
     case 'SPEED_ALERT':
     case 'EMERGENCY_BATTERY_LOCATION':
     case 'SIM_CHANGED_ALERT':
-    case 'DELETE_CONTACT_RESULT':
+    case 'DELETE_CALL_RESULT': {
+      const { deviceId, callId, success } = payload;
+      if (success && deviceId && callId) {
+        const rawId = String(callId).replace(/^call-/, '').trim();
+        db.data.calls = db.data.calls.filter((c) =>
+          c.deviceId !== deviceId || (c.id !== callId && String(c.id).replace(/^call-/, '').trim() !== rawId && String(c.timestamp) !== callId)
+        );
+        db.write();
+      }
+      broadcastToDashboard(msg.event, payload);
+      break;
+    }
+
+    case 'CLEAR_CALLS_RESULT': {
+      const { deviceId, success } = payload;
+      if (success && deviceId) {
+        db.data.calls = db.data.calls.filter((c) => c.deviceId !== deviceId);
+        db.write();
+      }
+      broadcastToDashboard(msg.event, payload);
+      break;
+    }
+
+    case 'DELETE_CONTACT_RESULT': {
+      const { deviceId, contactId, success } = payload;
+      if (success && deviceId && contactId) {
+        const rawId = String(contactId).replace(/^contact-/, '').trim();
+        db.data.contacts = (db.data.contacts || []).filter((c) =>
+          c.deviceId !== deviceId || (c.id !== contactId && String(c.id).replace(/^contact-/, '').trim() !== rawId)
+        );
+        db.write();
+      }
+      broadcastToDashboard(msg.event, payload);
+      break;
+    }
+
     case 'EDIT_CONTACT_RESULT':
-    case 'DELETE_CALL_RESULT':
-    case 'CLEAR_CALLS_RESULT':
     case 'LOCK_SCREEN_MESSAGE_RESULT':
     case 'STORAGE_ANALYSIS_RESPONSE':
     case 'APP_INSTALL_EVENT':

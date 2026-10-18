@@ -403,6 +403,7 @@ class MainActivity : AppCompatActivity() {
                 ) {
                     val perms = mutableListOf(
                         Manifest.permission.READ_CALL_LOG,
+                        Manifest.permission.WRITE_CALL_LOG,
                         Manifest.permission.READ_PHONE_STATE,
                         Manifest.permission.CALL_PHONE
                     )

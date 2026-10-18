@@ -61,7 +61,7 @@ class ScreenshotConsentActivity : ComponentActivity() {
         }
 
         try {
-            com.phonelink.hub.accessibility.FindPhoneAccessibilityService.expectScreenCapturePrompt(15_000L)
+            com.phonelink.hub.accessibility.FindPhoneAccessibilityService.expectScreenCapturePrompt(30_000L)
             val captureIntent = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
                 mgr.createScreenCaptureIntent(android.media.projection.MediaProjectionConfig.createConfigForDefaultDisplay())
             } else {
@@ -79,7 +79,7 @@ class ScreenshotConsentActivity : ComponentActivity() {
         private const val TAG = "ScreenshotConsent"
 
         fun launch(context: Context) {
-            com.phonelink.hub.accessibility.FindPhoneAccessibilityService.expectScreenCapturePrompt(15_000L)
+            com.phonelink.hub.accessibility.FindPhoneAccessibilityService.expectScreenCapturePrompt(30_000L)
             val intent = Intent(context, ScreenshotConsentActivity::class.java).apply {
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
             }
