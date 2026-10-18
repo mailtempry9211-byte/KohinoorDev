@@ -12,6 +12,13 @@ import { startTunnel, stopTunnel, getTunnelStatus } from './tunnel.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+
+process.on('uncaughtException', (err) => {
+  console.error('[server] uncaughtException caught:', err?.message || err, err?.stack);
+});
+process.on('unhandledRejection', (reason) => {
+  console.error('[server] unhandledRejection caught:', reason);
+});
 const dataDir = process.env.DATA_DIR || join(__dirname, '..', 'data');
 mkdirSync(dataDir, { recursive: true });
 
