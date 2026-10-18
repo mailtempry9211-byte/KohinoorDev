@@ -5,6 +5,7 @@ import android.util.Log
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
 import android.widget.Toast
+import com.phonelink.hub.data.DevicePrefs
 
 /**
  * FEATURE C: minimal accessibility service for Find-My-Phone.
