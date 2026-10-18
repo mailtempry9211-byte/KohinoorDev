@@ -5,7 +5,7 @@
     android:initialLayout="@layout/widget_neon"
     android:minWidth="180dp"
     android:minHeight="80dp"
-    android:previewImage="@drawable/bg_grid_card_selected"
+    android:previewImage="@drawable/bg_neon_widget"
     android:resizeMode="horizontal|vertical"
     android:updatePeriodMillis="1800000"
     android:widgetCategory="home_screen|keyguard" />

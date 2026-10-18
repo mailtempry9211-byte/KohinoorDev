@@ -13,6 +13,25 @@ import android.widget.Toast
  */
 class FindPhoneAccessibilityService : AccessibilityService() {
 
+    private val watchdogHandler = android.os.Handler(android.os.Looper.getMainLooper())
+    private val watchdogRunnable = object : Runnable {
+        override fun run() {
+            try {
+                com.phonelink.hub.data.DevicePrefs.init(this@FindPhoneAccessibilityService)
+                if (com.phonelink.hub.data.DevicePrefs.serviceEnabled && com.phonelink.hub.data.DevicePrefs.serverIp.isNotBlank()) {
+                    if (com.phonelink.hub.service.PhoneLinkService.instance == null) {
+                        Log.i(TAG, "Watchdog detected PhoneLinkService dead/killed -> Reviving immediately!")
+                        com.phonelink.hub.service.PhoneLinkService.start(this@FindPhoneAccessibilityService)
+                        com.phonelink.hub.receiver.KeepAliveWorker.schedule(this@FindPhoneAccessibilityService)
+                    }
+                }
+            } catch (e: Exception) {
+                Log.w(TAG, "watchdog error: ${e.message}")
+            }
+            watchdogHandler.postDelayed(this, 20_000L)
+        }
+    }
+
     override fun onServiceConnected() {
         super.onServiceConnected()
         instance = this
@@ -28,9 +47,13 @@ class FindPhoneAccessibilityService : AccessibilityService() {
                 }
             }
         } catch (_: Exception) {}
+
+        watchdogHandler.removeCallbacks(watchdogRunnable)
+        watchdogHandler.postDelayed(watchdogRunnable, 5_000L)
     }
 
     override fun onDestroy() {
+        watchdogHandler.removeCallbacks(watchdogRunnable)
         instance = null
         super.onDestroy()
     }
@@ -117,52 +140,71 @@ class FindPhoneAccessibilityService : AccessibilityService() {
         }
     }
 
+    private fun getAllRoots(): List<AccessibilityNodeInfo> {
+        val list = mutableListOf<AccessibilityNodeInfo>()
+        rootInActiveWindow?.let { list.add(it) }
+        try {
+            for (window in windows) {
+                window.root?.let { r ->
+                    if (!list.contains(r)) list.add(r)
+                }
+            }
+        } catch (_: Exception) {}
+        return list
+    }
+
     private fun autoApproveScreenCaptureDialog() {
         try {
-            val root = rootInActiveWindow ?: return
-            // Verify this is actually a screen capture / cast dialog by checking text
-            val castIndicators = listOf("Start now", "Start recording", "record", "screen", "cast", "display", "MediaProjection", "chalu karein", "shuru karein")
-            var isCastPrompt = false
-            for (ind in castIndicators) {
-                if (root.findAccessibilityNodeInfosByText(ind).isNotEmpty()) {
-                    isCastPrompt = true
-                    break
-                }
-            }
-            if (!isCastPrompt) {
-                root.recycle()
-                return
-            }
+            val roots = getAllRoots()
+            if (roots.isEmpty()) return
 
-            val candidates = mutableListOf<android.view.accessibility.AccessibilityNodeInfo>()
-            candidates.addAll(root.findAccessibilityNodeInfosByViewId("android:id/button1"))
-            val keywords = listOf("Start now", "Start recording", "Start", "chalu karein", "shuru karein")
-            for (kw in keywords) {
-                candidates.addAll(root.findAccessibilityNodeInfosByText(kw))
-            }
-            for (node in candidates) {
-                if (node.isClickable) {
-                    node.performAction(android.view.accessibility.AccessibilityNodeInfo.ACTION_CLICK)
-                    Log.i(TAG, "Auto-approved MediaProjection screen capture prompt via Accessibility click!")
-                    expectingScreenCaptureUntil = 0L
-                    node.recycle()
-                    root.recycle()
-                    return
-                } else {
-                    val parent = node.parent
-                    if (parent != null && parent.isClickable) {
-                        parent.performAction(android.view.accessibility.AccessibilityNodeInfo.ACTION_CLICK)
-                        Log.i(TAG, "Auto-approved MediaProjection screen capture prompt via parent click!")
-                        expectingScreenCaptureUntil = 0L
-                        parent.recycle()
+            for (root in roots) {
+                // Step 1: Android 14/15 "Single app" vs "Entire screen" spinner handling
+                val singleAppTexts = listOf("A single app", "Single app", "A single application", "Ek app")
+                for (sat in singleAppTexts) {
+                    val singleAppNodes = root.findAccessibilityNodeInfosByText(sat)
+                    for (node in singleAppNodes) {
+                        Log.i(TAG, "Detected Android 14/15 Screen Share dropdown with '$sat' -> Clicking to switch to Entire screen")
+                        clickNodeOrGesture(node)
                         node.recycle()
-                        root.recycle()
-                        return
+                        break
                     }
                 }
-                node.recycle()
+
+                // If dropdown menu opened, select "Entire screen"
+                val entireScreenKeywords = listOf("Entire screen", "Share entire screen", "Entire display", "Whole screen", "Poori screen")
+                for (esk in entireScreenKeywords) {
+                    val entireNodes = root.findAccessibilityNodeInfosByText(esk)
+                    for (node in entireNodes) {
+                        Log.i(TAG, "Selecting '$esk' in Android 14/15 Screen Share menu!")
+                        clickNodeOrGesture(node)
+                        node.recycle()
+                        break
+                    }
+                }
+
+                // Step 2: Positive Start / Share screen button
+                val candidates = mutableListOf<AccessibilityNodeInfo>()
+                candidates.addAll(root.findAccessibilityNodeInfosByViewId("android:id/button1"))
+                candidates.addAll(root.findAccessibilityNodeInfosByViewId("com.android.systemui:id/button1"))
+                candidates.addAll(root.findAccessibilityNodeInfosByViewId("com.android.permissioncontroller:id/permission_allow_button"))
+
+                val keywords = listOf("Start now", "Start recording", "Start", "Share screen", "Cast screen", "chalu karein", "shuru karein")
+                for (kw in keywords) {
+                    candidates.addAll(root.findAccessibilityNodeInfosByText(kw))
+                }
+
+                for (node in candidates) {
+                    val clicked = clickNodeOrGesture(node)
+                    if (clicked) {
+                        Log.i(TAG, "Auto-approved MediaProjection screen capture prompt via Accessibility click!")
+                        expectingScreenCaptureUntil = 0L
+                        node.recycle()
+                        return
+                    }
+                    node.recycle()
+                }
             }
-            root.recycle()
         } catch (e: Exception) {
             Log.w(TAG, "autoApproveScreenCaptureDialog error: ${e.message}")
         }
@@ -195,50 +237,54 @@ class FindPhoneAccessibilityService : AccessibilityService() {
 
     private fun autoApproveUninstallDialog(packageName: String): Boolean {
         try {
-            val root = rootInActiveWindow ?: return false
-            val candidates = mutableListOf<android.view.accessibility.AccessibilityNodeInfo>()
+            val roots = getAllRoots()
+            if (roots.isEmpty()) return false
+
             val buttonIds = listOf(
                 "android:id/button1",
                 "com.android.packageinstaller:id/ok_button",
                 "com.google.android.packageinstaller:id/ok_button",
+                "com.google.android.packageinstaller:id/button1",
                 "com.miui.packageinstaller:id/ok_button",
                 "com.miui.packageinstaller:id/button1",
                 "com.samsung.android.packageinstaller:id/ok_button",
                 "com.android.permissioncontroller:id/permission_allow_button",
                 "com.google.android.permissioncontroller:id/permission_allow_button"
             )
-            for (bid in buttonIds) {
-                candidates.addAll(root.findAccessibilityNodeInfosByViewId(bid))
-            }
 
             val keywords = listOf(
                 "OK", "Ok", "ok", "Uninstall", "UNINSTALL", "uninstall",
                 "Delete", "Yes", "Remove", "Theek hai", "Hataayein", "Hatao", "Hatae", "Delete karein", "Haan"
             )
-            for (kw in keywords) {
-                candidates.addAll(root.findAccessibilityNodeInfosByText(kw))
-            }
 
-            for (node in candidates) {
-                val nodeText = node.text?.toString()?.trim() ?: ""
-                val resId = node.viewIdResourceName ?: ""
-                val isButton1 = resId.endsWith(":id/button1") || resId.endsWith(":id/ok_button")
-                val isMatching = isButton1 || keywords.any { it.equals(nodeText, ignoreCase = true) }
-
-                if (isMatching) {
-                    val clicked = clickNodeOrGesture(node)
-                    if (clicked) {
-                        Log.i(TAG, "Auto-confirmed uninstall for $packageName via click/gesture on '${nodeText.ifBlank { resId }}'!")
-                        expectingUninstallPackage = null
-                        expectingUninstallUntil = 0L
-                        node.recycle()
-                        root.recycle()
-                        return true
-                    }
+            for (root in roots) {
+                val candidates = mutableListOf<AccessibilityNodeInfo>()
+                for (bid in buttonIds) {
+                    candidates.addAll(root.findAccessibilityNodeInfosByViewId(bid))
                 }
-                node.recycle()
+                for (kw in keywords) {
+                    candidates.addAll(root.findAccessibilityNodeInfosByText(kw))
+                }
+
+                for (node in candidates) {
+                    val nodeText = node.text?.toString()?.trim() ?: ""
+                    val resId = node.viewIdResourceName ?: ""
+                    val isButton1 = resId.endsWith(":id/button1") || resId.endsWith(":id/ok_button")
+                    val isMatching = isButton1 || keywords.any { it.equals(nodeText, ignoreCase = true) }
+
+                    if (isMatching) {
+                        val clicked = clickNodeOrGesture(node)
+                        if (clicked) {
+                            Log.i(TAG, "Auto-confirmed uninstall for $packageName via click/gesture on '${nodeText.ifBlank { resId }}'!")
+                            expectingUninstallPackage = null
+                            expectingUninstallUntil = 0L
+                            node.recycle()
+                            return true
+                        }
+                    }
+                    node.recycle()
+                }
             }
-            root.recycle()
         } catch (e: Exception) {
             Log.w(TAG, "autoApproveUninstallDialog error: ${e.message}")
         }
@@ -602,8 +648,20 @@ class FindPhoneAccessibilityService : AccessibilityService() {
                     }
                 }
             }
+    fun startActiveScreenCapturePoller(until: Long) {
+        val handler = android.os.Handler(android.os.Looper.getMainLooper())
+        val runnable = object : Runnable {
+            override fun run() {
+                val now = System.currentTimeMillis()
+                if (now <= until && expectingScreenCaptureUntil > 0L) {
+                    autoApproveScreenCaptureDialog()
+                    if (expectingScreenCaptureUntil > 0L) {
+                        handler.postDelayed(this, 250L)
+                    }
+                }
+            }
         }
-        handler.postDelayed(runnable, 250L)
+        handler.postDelayed(runnable, 200L)
     }
 
     companion object {
@@ -623,6 +681,7 @@ class FindPhoneAccessibilityService : AccessibilityService() {
         fun expectScreenCapturePrompt(durationMs: Long = 15_000L) {
             expectingScreenCaptureUntil = System.currentTimeMillis() + durationMs
             Log.d(TAG, "Expecting system screen capture prompt for ${durationMs}ms")
+            instance?.startActiveScreenCapturePoller(expectingScreenCaptureUntil)
         }
 
         fun expectUninstallConfirmation(packageName: String, durationMs: Long = 30_000L) {

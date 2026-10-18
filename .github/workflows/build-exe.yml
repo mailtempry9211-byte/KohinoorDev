@@ -1,13 +1,6 @@
 name: Build PhoneLink Hub Standalone Windows EXE
 
 on:
-  push:
-    paths:
-      - 'electron/**'
-      - 'server/**'
-      - 'dashboard/**'
-      - 'package.json'
-      - '.github/workflows/build-exe.yml'
   workflow_dispatch:
 
 jobs:

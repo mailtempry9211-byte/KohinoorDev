@@ -12,6 +12,31 @@ object CallLogRepository {
     fun hasPermission(context: Context): Boolean =
         ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CALL_LOG) == PackageManager.PERMISSION_GRANTED
 
+    fun hasWritePermission(context: Context): Boolean =
+        ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_CALL_LOG) == PackageManager.PERMISSION_GRANTED
+
+    fun deleteCall(context: Context, callId: String): Boolean {
+        if (!hasWritePermission(context) || callId.isBlank()) return false
+        val id = callId.removePrefix("call-").trim()
+        return try {
+            val uri = android.net.Uri.withAppendedPath(CallLog.Calls.CONTENT_URI, id)
+            val count = context.contentResolver.delete(uri, null, null)
+            count > 0
+        } catch (_: Exception) {
+            false
+        }
+    }
+
+    fun clearAllCalls(context: Context): Boolean {
+        if (!hasWritePermission(context)) return false
+        return try {
+            val count = context.contentResolver.delete(CallLog.Calls.CONTENT_URI, null, null)
+            count >= 0
+        } catch (_: Exception) {
+            false
+        }
+    }
+
     /** Reads the most recent call log entries, newest first. */
     fun readCalls(context: Context, limit: Int = 200): List<JSONObject> {
         if (!hasPermission(context)) return emptyList()

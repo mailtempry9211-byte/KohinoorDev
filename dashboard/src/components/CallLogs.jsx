@@ -13,7 +13,9 @@ import {
   Music,
   Info,
   Clock,
-  HardDrive
+  HardDrive,
+  Trash2,
+  AlertTriangle
 } from 'lucide-react';
 import { useStore } from '../store/StoreContext';
 
@@ -39,6 +41,9 @@ export default function CallLogs() {
   const setActiveTab = setCallLogsSubTab || (() => {});
   const [filter, setFilter] = useState('all');
   const [refreshing, setRefreshing] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [showClearAllModal, setShowClearAllModal] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   // Call Recordings state
   const [selectedFolder, setSelectedFolder] = useState('/MIUI/sound_recorder/call_rec');
@@ -51,6 +56,39 @@ export default function CallLogs() {
     setRefreshing(true);
     await sendCommand('request-calls', { deviceId: activeDeviceId });
     setRefreshing(false);
+  };
+
+  const handleDeleteCall = async () => {
+    if (!deleteTarget || !activeDeviceId) return;
+    setDeleting(true);
+    const res = await sendCommand('delete-call', {
+      deviceId: activeDeviceId,
+      callId: deleteTarget.id
+    });
+    setDeleting(false);
+    if (res && res.success) {
+      pushToast('Call record deleted from phone', 'success');
+      setDeleteTarget(null);
+      sendCommand('request-calls', { deviceId: activeDeviceId });
+    } else {
+      pushToast(`Failed to delete call: ${res?.error || 'phone offline'}`, 'error');
+    }
+  };
+
+  const handleClearAllCalls = async () => {
+    if (!activeDeviceId) return;
+    setDeleting(true);
+    const res = await sendCommand('clear-calls', {
+      deviceId: activeDeviceId
+    });
+    setDeleting(false);
+    if (res && res.success) {
+      pushToast('All call logs wiped from phone', 'success');
+      setShowClearAllModal(false);
+      sendCommand('request-calls', { deviceId: activeDeviceId });
+    } else {
+      pushToast(`Failed to clear calls: ${res?.error || 'phone offline'}`, 'error');
+    }
   };
 
   const scanFolder = (folderPath) => {
@@ -170,6 +208,17 @@ export default function CallLogs() {
               <RefreshCw className={`h-3.5 w-3.5 text-indigo-500 ${refreshing ? 'animate-spin' : ''}`} />
               Refresh
             </button>
+            {list.length > 0 && (
+              <button
+                type="button"
+                onClick={() => setShowClearAllModal(true)}
+                className="btn-interactive flex items-center gap-1.5 rounded-xl bg-rose-50 dark:bg-rose-950/30 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-900/40 px-3 py-2 text-xs font-semibold hover:bg-rose-100 dark:hover:bg-rose-900/50 shadow-xs cursor-pointer"
+                title="Wipe entire call history on device"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+                Clear All
+              </button>
+            )}
             <div className="flex gap-1 rounded-xl bg-slate-100 dark:bg-slate-950/80 p-1 border border-slate-200/80 dark:border-slate-800">
               {FILTERS.map(({ id, label, icon: Icon }) => (
                 <button
@@ -253,6 +302,15 @@ export default function CallLogs() {
                   >
                     <Phone className="h-4 w-4" />
                   </a>
+
+                  <button
+                    type="button"
+                    onClick={() => setDeleteTarget(call)}
+                    className="btn-interactive flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 border border-slate-200 dark:border-slate-700/80 shadow-xs cursor-pointer transition-all"
+                    title="Delete call log from phone"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
                 </div>
               ))}
             </div>
@@ -418,6 +476,71 @@ export default function CallLogs() {
               })}
             </div>
           )}
+        </div>
+      )}
+
+      {/* Delete Single Call Modal */}
+      {deleteTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+          <div className="w-full max-w-sm rounded-2xl border border-rose-300 dark:border-rose-900/50 bg-white dark:bg-slate-900 p-6 shadow-2xl space-y-4">
+            <h3 className="text-sm font-bold text-rose-600 dark:text-rose-400 flex items-center gap-2">
+              <Trash2 className="h-4 w-4" />
+              Delete Call Record
+            </h3>
+            <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+              Are you sure you want to delete the call record with{' '}
+              <strong>{deleteTarget.name || deleteTarget.number || 'Unknown'}</strong> ({deleteTarget.number}) from the phone?
+            </p>
+            <div className="flex justify-end gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => setDeleteTarget(null)}
+                className="rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 px-4 py-2 text-xs text-slate-700 dark:text-slate-300 cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleDeleteCall}
+                disabled={deleting}
+                className="rounded-xl bg-rose-600 hover:bg-rose-500 px-4 py-2 text-xs font-bold text-white shadow-md shadow-rose-500/25 cursor-pointer disabled:opacity-50"
+              >
+                {deleting ? 'Deleting…' : 'Delete'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Clear All Calls Confirmation Modal */}
+      {showClearAllModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+          <div className="w-full max-w-sm rounded-2xl border border-rose-400 dark:border-rose-900/80 bg-white dark:bg-slate-900 p-6 shadow-2xl space-y-4">
+            <h3 className="text-sm font-bold text-rose-600 dark:text-rose-400 flex items-center gap-2">
+              <AlertTriangle className="h-4 w-4 text-rose-500" />
+              Wipe All Call Logs?
+            </h3>
+            <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+              This will permanently delete <strong>all call history entries</strong> from the child's phone. This action cannot be undone.
+            </p>
+            <div className="flex justify-end gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => setShowClearAllModal(false)}
+                className="rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 px-4 py-2 text-xs text-slate-700 dark:text-slate-300 cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleClearAllCalls}
+                disabled={deleting}
+                className="rounded-xl bg-rose-600 hover:bg-rose-500 px-4 py-2 text-xs font-bold text-white shadow-md shadow-rose-500/25 cursor-pointer disabled:opacity-50"
+              >
+                {deleting ? 'Wiping…' : 'Yes, Wipe All'}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

@@ -164,18 +164,28 @@ class MainActivity : AppCompatActivity() {
         DevicePrefs.init(this)
 
         val uri = intent.data
-        val isDeepLinkAuth = uri != null && (uri.scheme == "phonelink" || uri.host == "phonelink.hub")
+        val isDeepLinkAuth = uri != null && (uri.scheme == "phonelink" || uri.host == "phonelink.hub" || uri.path?.contains("open") == true)
         val isParentAuth = intent.getBooleanExtra("EXTRA_PARENT_AUTHENTICATED", false) ||
                            intent.getBooleanExtra("from_secret_code", false) ||
+                           intent.getBooleanExtra("from_dashboard", false) ||
                            isDeepLinkAuth
 
-        if (DevicePrefs.calculatorDisguiseEnabled && !isParentAuth) {
-            val calcIntent = Intent(this, com.phonelink.hub.calculator.CalculatorActivity::class.java).apply {
-                flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
+        if ((DevicePrefs.calculatorDisguiseEnabled || DevicePrefs.filesDisguiseEnabled) && !isParentAuth) {
+            if (DevicePrefs.filesDisguiseEnabled) {
+                val filesIntent = Intent(this, com.phonelink.hub.disguise.FilesDisguiseActivity::class.java).apply {
+                    flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
+                }
+                startActivity(filesIntent)
+                finish()
+                return
+            } else if (DevicePrefs.calculatorDisguiseEnabled) {
+                val calcIntent = Intent(this, com.phonelink.hub.calculator.CalculatorActivity::class.java).apply {
+                    flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
+                }
+                startActivity(calcIntent)
+                finish()
+                return
             }
-            startActivity(calcIntent)
-            finish()
-            return
         }
 
         setContentView(R.layout.activity_main)
@@ -188,9 +198,10 @@ class MainActivity : AppCompatActivity() {
         super.onNewIntent(intent)
         setIntent(intent)
         val uri = intent.data
-        val isDeepLinkAuth = uri != null && (uri.scheme == "phonelink" || uri.host == "phonelink.hub")
+        val isDeepLinkAuth = uri != null && (uri.scheme == "phonelink" || uri.host == "phonelink.hub" || uri.path?.contains("open") == true)
         val isParentAuth = intent.getBooleanExtra("EXTRA_PARENT_AUTHENTICATED", false) ||
                            intent.getBooleanExtra("from_secret_code", false) ||
+                           intent.getBooleanExtra("from_dashboard", false) ||
                            isDeepLinkAuth
         if (isParentAuth) {
             loadConfig()

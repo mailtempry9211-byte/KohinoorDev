@@ -10,7 +10,10 @@ import {
   RefreshCw,
   Trash2,
   Edit3,
-  FolderPlus
+  FolderPlus,
+  Eye,
+  X,
+  Loader2
 } from 'lucide-react';
 import { useStore } from '../store/StoreContext';
 
@@ -25,6 +28,7 @@ export default function FileManager() {
   const [renameItem, setRenameItem] = useState(null);
   const [renameValue, setRenameValue] = useState('');
   const [deleteTarget, setDeleteTarget] = useState(null);
+  const [previewItem, setPreviewItem] = useState(null);
 
   useEffect(() => {
     if (activeDeviceId) sendCommand('file-list', { deviceId: activeDeviceId, path: '/' });
@@ -385,6 +389,74 @@ export default function FileManager() {
                 className="rounded-lg bg-red-600 px-4 py-1.5 text-xs font-bold text-white hover:bg-red-500 shadow-md shadow-red-500/30"
               >
                 Permanently Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Centered Downloading Progress Modal */}
+      {downloading && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+          <div className="w-full max-w-sm rounded-2xl border border-teal-500/30 bg-white/95 dark:bg-slate-900/95 p-6 shadow-2xl text-center space-y-4">
+            <Loader2 className="mx-auto h-10 w-10 animate-spin text-teal-500" />
+            <div>
+              <h3 className="text-base font-bold text-slate-900 dark:text-white">Downloading from Phone...</h3>
+              <p className="mt-1 text-xs text-slate-500 dark:text-slate-400 font-mono break-all">{downloading}</p>
+            </div>
+            <p className="text-[11px] text-slate-400 dark:text-slate-500">File is being streamed over WebSocket relay</p>
+          </div>
+        </div>
+      )}
+
+      {/* Centered File Download / Preview Success Modal */}
+      {downloaded && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
+          <div className="w-full max-w-lg rounded-2xl border border-slate-300 dark:border-white/10 bg-white/95 dark:bg-slate-900/95 p-6 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <FileIcon className="h-5 w-5 text-teal-500" />
+                <h3 className="text-sm font-bold text-slate-900 dark:text-white truncate max-w-[280px]" title={downloaded.name}>{downloaded.name}</h3>
+              </div>
+              <button
+                onClick={() => setDownloaded(null)}
+                className="rounded-lg p-1 text-slate-400 hover:text-slate-600 dark:hover:text-white"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            {/* Media Preview if Image */}
+            {/\.(jpg|jpeg|png|webp|gif|svg)$/i.test(downloaded.name) ? (
+              <div className="overflow-hidden rounded-xl bg-slate-950 flex items-center justify-center max-h-[350px]">
+                <img src={downloaded.url} alt={downloaded.name} className="max-h-[350px] w-auto object-contain" />
+              </div>
+            ) : (
+              <div className="p-4 rounded-xl bg-slate-100 dark:bg-slate-950/80 text-xs text-slate-700 dark:text-slate-300 font-mono">
+                ✓ File downloaded successfully to your PC browser.
+              </div>
+            )}
+
+            <div className="flex items-center justify-end gap-2 pt-2">
+              <button
+                onClick={() => {
+                  const link = document.createElement('a');
+                  link.href = downloaded.url;
+                  link.download = downloaded.name;
+                  document.body.appendChild(link);
+                  link.click();
+                  document.body.removeChild(link);
+                }}
+                className="flex items-center gap-1.5 rounded-lg bg-teal-600 hover:bg-teal-500 px-4 py-2 text-xs font-bold text-white shadow-md shadow-teal-500/25"
+              >
+                <Download className="h-3.5 w-3.5" />
+                Save to PC
+              </button>
+              <button
+                onClick={() => setDownloaded(null)}
+                className="rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-gray-800 dark:hover:bg-gray-700 px-4 py-2 text-xs text-slate-700 dark:text-gray-300 border border-slate-300 dark:border-gray-700"
+              >
+                Close
               </button>
             </div>
           </div>

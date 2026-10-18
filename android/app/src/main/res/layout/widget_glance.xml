@@ -3,8 +3,12 @@
     android:id="@+id/widgetGlanceContainer"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:background="@drawable/bg_search_pill"
     android:orientation="vertical"
-    android:padding="8dp">
+    android:paddingStart="16dp"
+    android:paddingEnd="16dp"
+    android:paddingTop="12dp"
+    android:paddingBottom="12dp">
 
     <!-- Day and Date (e.g. Saturday, Oct 17) -->
     <TextClock
@@ -15,11 +19,8 @@
         android:format12Hour="EEEE, MMM d"
         android:format24Hour="EEEE, MMM d"
         android:textColor="#FFFFFF"
-        android:textSize="20sp"
-        android:shadowColor="#80000000"
-        android:shadowDx="1"
-        android:shadowDy="2"
-        android:shadowRadius="4" />
+        android:textSize="18sp"
+        android:textStyle="bold" />
 
     <!-- Second Row: Weather & Temperature Pill -->
     <LinearLayout
@@ -39,14 +40,10 @@
             android:id="@+id/glanceTemp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="sans-serif-medium"
+            android:fontFamily="sans-serif-bold"
             android:text="25°C"
             android:textColor="#F3F4F6"
-            android:textSize="14sp"
-            android:shadowColor="#80000000"
-            android:shadowDx="1"
-            android:shadowDy="2"
-            android:shadowRadius="3" />
+            android:textSize="14sp" />
 
         <TextView
             android:id="@+id/glanceCondition"
@@ -56,11 +53,7 @@
             android:fontFamily="sans-serif"
             android:text="Sunny"
             android:textColor="#CBD5E1"
-            android:textSize="13sp"
-            android:shadowColor="#80000000"
-            android:shadowDx="1"
-            android:shadowDy="2"
-            android:shadowRadius="3" />
+            android:textSize="13sp" />
     </LinearLayout>
 
 </LinearLayout>

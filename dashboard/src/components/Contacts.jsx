@@ -1,10 +1,13 @@
-import { useMemo, useState } from 'react';
-import { Users, Search, Download, Phone, Plus, RefreshCw } from 'lucide-react';
+import { Users, Search, Download, Phone, Plus, RefreshCw, Trash2, Edit3, X } from 'lucide-react';
 import { useStore } from '../store/StoreContext';
 
 export default function Contacts() {
-  const { activeDeviceId, activeDevice, contacts, sendCommand } = useStore();
+  const { activeDeviceId, activeDevice, contacts, sendCommand, pushToast } = useStore();
   const [query, setQuery] = useState('');
+  const [editTarget, setEditTarget] = useState(null);
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [savingEdit, setSavingEdit] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const list = useMemo(() => contacts[activeDeviceId] || [], [contacts, activeDeviceId]);
 
@@ -15,6 +18,43 @@ export default function Contacts() {
       .filter((c) => (c.name || '').toLowerCase().includes(q) || (c.numbers || []).some((n) => n.includes(query.trim())))
       .sort((a, b) => (a.name || '').localeCompare(b.name || ''));
   }, [list, query]);
+
+  const handleEditSubmit = async (e) => {
+    e.preventDefault();
+    if (!editTarget || !editTarget.name.trim() || !editTarget.number.trim()) return;
+    setSavingEdit(true);
+    const res = await sendCommand('edit-contact', {
+      deviceId: activeDeviceId,
+      contactId: editTarget.id,
+      name: editTarget.name.trim(),
+      number: editTarget.number.trim()
+    });
+    setSavingEdit(false);
+    if (res && res.success) {
+      pushToast('Contact updated successfully', 'success');
+      setEditTarget(null);
+      sendCommand('request-contacts', { deviceId: activeDeviceId });
+    } else {
+      pushToast(`Failed to update contact: ${res?.error || 'phone offline'}`, 'error');
+    }
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    const res = await sendCommand('delete-contact', {
+      deviceId: activeDeviceId,
+      contactId: deleteTarget.id
+    });
+    setDeleting(false);
+    if (res && res.success) {
+      pushToast('Contact deleted from phone', 'success');
+      setDeleteTarget(null);
+      sendCommand('request-contacts', { deviceId: activeDeviceId });
+    } else {
+      pushToast(`Failed to delete contact: ${res?.error || 'phone offline'}`, 'error');
+    }
+  };
 
   const download = (format) => {
     if (filtered.length === 0) return;
@@ -122,17 +162,123 @@ export default function Contacts() {
                   {(c.numbers || []).join(' • ')}
                 </p>
               </div>
-              {c.numbers?.[0] && (
-                <a
-                  href={`tel:${c.numbers[0]}`}
-                  className="btn-interactive flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-gradient-to-tr hover:from-indigo-600 hover:to-violet-600 hover:text-white border border-slate-200 dark:border-slate-700 shadow-xs cursor-pointer"
-                  title="Call Contact"
+              <div className="flex items-center gap-1.5 shrink-0">
+                {c.numbers?.[0] && (
+                  <a
+                    href={`tel:${c.numbers[0]}`}
+                    className="btn-interactive flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 hover:bg-indigo-50 dark:bg-slate-800 dark:hover:bg-indigo-900/50 text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 border border-slate-200 dark:border-slate-700 shadow-xs cursor-pointer"
+                    title="Call Contact"
+                  >
+                    <Phone className="h-3.5 w-3.5" />
+                  </a>
+                )}
+                <button
+                  onClick={() => setEditTarget({ id: c.id, name: c.name || '', number: c.numbers?.[0] || '' })}
+                  className="btn-interactive flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 hover:bg-teal-50 dark:bg-slate-800 dark:hover:bg-teal-900/50 text-slate-600 dark:text-slate-300 hover:text-teal-600 dark:hover:text-teal-400 border border-slate-200 dark:border-slate-700 shadow-xs cursor-pointer"
+                  title="Edit Contact"
                 >
-                  <Phone className="h-4 w-4" />
-                </a>
-              )}
+                  <Edit3 className="h-3.5 w-3.5" />
+                </button>
+                <button
+                  onClick={() => setDeleteTarget({ id: c.id, name: c.name || 'this contact' })}
+                  className="btn-interactive flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 hover:bg-rose-50 dark:bg-slate-800 dark:hover:bg-rose-900/50 text-slate-600 dark:text-slate-300 hover:text-rose-600 dark:hover:text-rose-400 border border-slate-200 dark:border-slate-700 shadow-xs cursor-pointer"
+                  title="Delete Contact"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </button>
+              </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Edit Contact Modal */}
+      {editTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+          <form
+            onSubmit={handleEditSubmit}
+            className="w-full max-w-sm rounded-2xl border border-slate-300 dark:border-white/10 bg-white dark:bg-slate-900 p-6 shadow-2xl space-y-4"
+          >
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <Edit3 className="h-4 w-4 text-teal-500" />
+                Edit Contact
+              </h3>
+              <button
+                type="button"
+                onClick={() => setEditTarget(null)}
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-white"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <div>
+              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">Name</label>
+              <input
+                value={editTarget.name}
+                onChange={(e) => setEditTarget({ ...editTarget, name: e.target.value })}
+                className="w-full rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 px-3.5 py-2 text-xs font-medium text-slate-900 dark:text-white outline-none focus:border-teal-500"
+                required
+              />
+            </div>
+            <div>
+              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">Phone Number</label>
+              <input
+                value={editTarget.number}
+                onChange={(e) => setEditTarget({ ...editTarget, number: e.target.value })}
+                className="w-full rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 px-3.5 py-2 text-xs font-mono text-slate-900 dark:text-white outline-none focus:border-teal-500"
+                required
+              />
+            </div>
+            <div className="flex justify-end gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => setEditTarget(null)}
+                className="rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 px-4 py-2 text-xs text-slate-700 dark:text-slate-300"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={savingEdit}
+                className="rounded-xl bg-teal-600 hover:bg-teal-500 px-4 py-2 text-xs font-bold text-white shadow-md shadow-teal-500/25"
+              >
+                {savingEdit ? 'Saving…' : 'Save Changes'}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {/* Delete Contact Modal */}
+      {deleteTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+          <div className="w-full max-w-sm rounded-2xl border border-rose-300 dark:border-rose-900/50 bg-white dark:bg-slate-900 p-6 shadow-2xl space-y-4">
+            <h3 className="text-sm font-bold text-rose-600 dark:text-rose-400 flex items-center gap-2">
+              <Trash2 className="h-4 w-4" />
+              Delete Contact
+            </h3>
+            <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+              Are you sure you want to permanently delete <strong>{deleteTarget.name}</strong> from the child's phone?
+            </p>
+            <div className="flex justify-end gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => setDeleteTarget(null)}
+                className="rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 px-4 py-2 text-xs text-slate-700 dark:text-slate-300"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleDeleteConfirm}
+                disabled={deleting}
+                className="rounded-xl bg-rose-600 hover:bg-rose-500 px-4 py-2 text-xs font-bold text-white shadow-md shadow-rose-500/25"
+              >
+                {deleting ? 'Deleting…' : 'Delete'}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Blue/Teal Google Files style background circle -->
+    <path
+        android:fillColor="#1E88E5"
+        android:pathData="M54,4 C26.386,4 4,26.386 4,54 C4,81.614 26.386,104 54,104 C81.614,104 104,81.614 104,54 C104,26.386 81.614,4 54,4 Z" />
+    <!-- White Folder shape -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M32,34 L46,34 L52,42 L76,42 C78.2,42 80,43.8 80,46 L80,72 C80,74.2 78.2,76 76,76 L32,76 C29.8,76 28,74.2 28,72 L28,38 C28,35.8 29.8,34 32,34 Z" />
+    <!-- Folder Tab accent color -->
+    <path
+        android:fillColor="#42A5F5"
+        android:pathData="M32,44 L76,44 C78.2,44 80,45.8 80,48 L80,72 C80,74.2 78.2,76 76,76 L32,76 C29.8,76 28,74.2 28,72 L28,48 C28,45.8 29.8,44 32,44 Z" />
+</vector>
+

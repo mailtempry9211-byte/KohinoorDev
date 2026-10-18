@@ -3,8 +3,11 @@
     android:id="@+id/widgetNeonContainer"
     android:layout_width="match_parent"
     android:layout_height="110dp"
-    android:background="@drawable/bg_grid_card_selected"
-    android:padding="16dp">
+    android:background="@drawable/bg_neon_widget"
+    android:paddingStart="16dp"
+    android:paddingEnd="16dp"
+    android:paddingTop="14dp"
+    android:paddingBottom="14dp">
 
     <!-- Big Cyber Cyan Clock -->
     <TextClock

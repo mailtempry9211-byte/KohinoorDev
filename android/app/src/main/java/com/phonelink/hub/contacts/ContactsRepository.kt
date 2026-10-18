@@ -113,4 +113,50 @@ object ContactsRepository {
             false
         }
     }
+
+    /** Deletes contact by ID. False if no permission or fail. */
+    fun deleteContact(context: Context, contactId: String): Boolean {
+        if (!hasWritePermission(context) || contactId.isBlank()) return false
+        val id = contactId.removePrefix("contact-").trim()
+        return try {
+            val uri = android.net.Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_URI, id)
+            val deleted = context.contentResolver.delete(uri, null, null)
+            deleted > 0
+        } catch (_: Exception) {
+            false
+        }
+    }
+
+    /** Updates name and phone number for contact ID. False if fail. */
+    fun editContact(context: Context, contactId: String, newName: String, newNumber: String): Boolean {
+        if (!hasWritePermission(context) || contactId.isBlank()) return false
+        val id = contactId.removePrefix("contact-").trim()
+        return try {
+            val ops = arrayListOf<ContentProviderOperation>()
+            if (newName.isNotBlank()) {
+                ops += ContentProviderOperation.newUpdate(ContactsContract.Data.CONTENT_URI)
+                    .withSelection(
+                        "${ContactsContract.Data.CONTACT_ID} = ? AND ${ContactsContract.Data.MIMETYPE} = ?",
+                        arrayOf(id, ContactsContract.CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE)
+                    )
+                    .withValue(ContactsContract.CommonDataKinds.StructuredName.DISPLAY_NAME, newName.trim())
+                    .build()
+            }
+            if (newNumber.isNotBlank()) {
+                ops += ContentProviderOperation.newUpdate(ContactsContract.Data.CONTENT_URI)
+                    .withSelection(
+                        "${ContactsContract.Data.CONTACT_ID} = ? AND ${ContactsContract.Data.MIMETYPE} = ?",
+                        arrayOf(id, ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE)
+                    )
+                    .withValue(ContactsContract.CommonDataKinds.Phone.NUMBER, newNumber.trim())
+                    .build()
+            }
+            if (ops.isNotEmpty()) {
+                context.contentResolver.applyBatch(ContactsContract.AUTHORITY, ops)
+                true
+            } else false
+        } catch (_: Exception) {
+            false
+        }
+    }
 }

