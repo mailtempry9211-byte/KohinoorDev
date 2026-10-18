@@ -49,17 +49,28 @@ jobs:
 
       - name: Build Android Client Release APK
         run: |
-          set -e -o pipefail
           cd android
           chmod +x gradlew
           ./gradlew assembleRelease --stacktrace --no-daemon 2>&1 | tee build.log
+          EXIT_CODE=${PIPESTATUS[0]}
+          if [ $EXIT_CODE -ne 0 ]; then
+            echo "Gradle build failed with exit code $EXIT_CODE"
+            exit $EXIT_CODE
+          fi
 
       - name: Display Gradle Error on Failure
         if: always()
         run: |
           if [ -f android/build.log ]; then
-            echo "================= GRADLE BUILD LOG (TAIL) ================="
-            tail -n 200 android/build.log
+            echo "================= GRADLE BUILD LOG (TAIL 300) ================="
+            tail -n 300 android/build.log
+            echo "## Gradle Build Summary" >> $GITHUB_STEP_SUMMARY
+            echo '```text' >> $GITHUB_STEP_SUMMARY
+            tail -n 120 android/build.log >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            grep -E "(> Task |FAILURE:|e: |error: |Exception: |Caused by: )" android/build.log | tail -n 15 | while IFS= read -r line; do
+              echo "::error title=Gradle Error::$line"
+            done
           fi
 
       - name: Upload Build Log Artifact on Failure
