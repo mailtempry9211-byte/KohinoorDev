@@ -1369,7 +1369,7 @@ export default function Controls() {
         </div>
 
         {/* LAYER 2: OVERLAY APP LOCK & ANTI-TAMPER GUARDIAN */}
-        <div className={`col-span-full rounded-2xl border border-sky-500/40 bg-white/70 dark:bg-slate-900/60 dark:bg-gradient-to-br dark:from-slate-900 dark:via-sky-950/20 dark:to-slate-950 p-5 shadow-xl flex flex-col justify-between ${isCardVisible("parental", ["overlay", "applock", "lock", "anti-uninstall", "tamper", "pin"]) ? "" : "hidden"}`}>
+        <div className={`md:col-span-2 rounded-2xl border border-sky-500/40 bg-white/70 dark:bg-slate-900/60 dark:bg-gradient-to-br dark:from-slate-900 dark:via-sky-950/20 dark:to-slate-950 p-5 shadow-xl flex flex-col justify-between ${isCardVisible("safety", ["overlay", "applock", "lock", "anti-uninstall", "tamper", "pin", "parental"]) ? "" : "hidden"}`}>
           <div>
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200/80 dark:border-slate-800 pb-3 mb-4">
               <div className="flex items-center gap-3">
