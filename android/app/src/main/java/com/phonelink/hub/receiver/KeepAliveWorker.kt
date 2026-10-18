@@ -44,6 +44,7 @@ class KeepAliveWorker(appContext: Context, params: WorkerParameters) : Worker(ap
                     ExistingPeriodicWorkPolicy.KEEP,
                     request
                 )
+                BootReceiver.scheduleNextAlarm(context)
             } catch (e: Exception) {
                 Log.w(TAG, "could not schedule keep-alive", e)
             }

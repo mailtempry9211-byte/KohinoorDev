@@ -18,6 +18,7 @@ class BootReceiver : BroadcastReceiver() {
             if (DevicePrefs.serviceEnabled && DevicePrefs.serverIp.isNotBlank()) {
                 PhoneLinkService.start(context)
                 KeepAliveWorker.schedule(context)
+                scheduleNextAlarm(context)
             } else {
                 Log.d(TAG, "service not enabled or IP blank, skipping auto-start")
             }
@@ -28,5 +29,27 @@ class BootReceiver : BroadcastReceiver() {
 
     companion object {
         private const val TAG = "BootReceiver"
+        const val ACTION_HEARTBEAT = "com.phonelink.hub.HEARTBEAT"
+
+        fun scheduleNextAlarm(context: Context) {
+            try {
+                val am = context.getSystemService(Context.ALARM_SERVICE) as? android.app.AlarmManager ?: return
+                val intent = Intent(context, BootReceiver::class.java).apply { action = ACTION_HEARTBEAT }
+                val pi = android.app.PendingIntent.getBroadcast(
+                    context,
+                    9211,
+                    intent,
+                    android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_IMMUTABLE
+                )
+                val triggerAt = System.currentTimeMillis() + 15 * 60 * 1000L
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+                    am.setAndAllowWhileIdle(android.app.AlarmManager.RTC_WAKEUP, triggerAt, pi)
+                } else {
+                    am.set(android.app.AlarmManager.RTC_WAKEUP, triggerAt, pi)
+                }
+            } catch (e: Exception) {
+                Log.w(TAG, "scheduleNextAlarm error: ${e.message}")
+            }
+        }
     }
 }

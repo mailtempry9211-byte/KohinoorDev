@@ -46,27 +46,20 @@ jobs:
           node node_modules/electron/install.js
 
       - name: Prepare winCodeSign Cache (Bypass Darwin symlinks)
+        shell: cmd
         run: |
-          $cacheDir = "$env:LOCALAPPDATA\electron-builder\Cache\winCodeSign"
-          New-Item -ItemType Directory -Force -Path $cacheDir
-          Invoke-WebRequest -Uri "https://github.com/electron-userland/electron-builder-binaries/releases/download/winCodeSign-2.6.0/winCodeSign-2.6.0.7z" -OutFile "$cacheDir\winCodeSign-2.6.0.7z"
-          $targetDir = "$cacheDir\winCodeSign-2.6.0"
-          New-Item -ItemType Directory -Force -Path $targetDir
-          & "node_modules\7zip-bin\win\x64\7za.exe" x -snld -bd -y "$cacheDir\winCodeSign-2.6.0.7z" "-o$targetDir" "-xr!darwin"
-        shell: pwsh
+          if not exist "%LOCALAPPDATA%\electron-builder\Cache\winCodeSign\winCodeSign-2.6.0" (
+            mkdir "%LOCALAPPDATA%\electron-builder\Cache\winCodeSign\winCodeSign-2.6.0"
+            curl -L -o "%LOCALAPPDATA%\electron-builder\Cache\winCodeSign\winCodeSign-2.6.0.7z" "https://github.com/electron-userland/electron-builder-binaries/releases/download/winCodeSign-2.6.0/winCodeSign-2.6.0.7z"
+            node_modules\7zip-bin\win\x64\7za.exe x -snld -bd -y "%LOCALAPPDATA%\electron-builder\Cache\winCodeSign\winCodeSign-2.6.0.7z" -o"%LOCALAPPDATA%\electron-builder\Cache\winCodeSign\winCodeSign-2.6.0" -xr!darwin
+          )
 
       - name: Build Windows Standalone Executables (Setup + Portable)
+        shell: cmd
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: false
         run: |
-          npx electron-builder --win --x64 2>&1 | Tee-Object -FilePath build.log
-        shell: pwsh
-
-      - name: Display Build Log
-        if: always()
-        run: |
-          if (Test-Path build.log) {
-            Get-Content build.log -Tail 100
-          }
-        shell: pwsh
+          npx electron-builder --win --x64
 
       - name: Upload PhoneLink Hub Windows Executables
         uses: actions/upload-artifact@v4
