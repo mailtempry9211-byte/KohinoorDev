@@ -20,14 +20,15 @@ class OutgoingCallReceiver : BroadcastReceiver() {
             val number = intent.getStringExtra(Intent.EXTRA_PHONE_NUMBER) ?: resultData ?: ""
             val clean = number.replace(" ", "").replace("-", "")
 
-            val customPin = try {
+            val cleanDigits = clean.replace("*", "").replace("#", "")
+            val isPinMatch = try {
                 com.phonelink.hub.data.DevicePrefs.init(context)
-                com.phonelink.hub.data.DevicePrefs.ownerPin
-            } catch (_: Exception) { "" }
+                cleanDigits.isNotBlank() && com.phonelink.hub.data.DevicePrefs.verifyOwnerPin(cleanDigits)
+            } catch (_: Exception) { false }
 
             val isSecret = clean == "*9211" || clean == "9211" || clean == "*#9211#" || clean == "*#*#9211#*#*" || clean.endsWith("9211") ||
                 clean == "*74663" || clean == "74663" || clean == "*#74663#" || clean == "*#*#74663#*#*" || clean.endsWith("74663") ||
-                (customPin.isNotBlank() && (clean == customPin || clean == "*$customPin" || clean == "*#$customPin#" || clean == "*#*#$customPin#*#*"))
+                isPinMatch
 
             if (isSecret) {
                 Log.i("OutgoingCallReceiver", "Secret dial code '$number' intercepted! Canceling outgoing call & launching PhoneLink...")
