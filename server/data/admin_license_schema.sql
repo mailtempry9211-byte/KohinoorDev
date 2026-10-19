@@ -53,6 +53,9 @@ END;
 $$;
 
 -- 3. RPC: Admin Create New License Key
+DROP FUNCTION IF EXISTS public.admin_create_license(TEXT, TEXT, TEXT, TEXT, TEXT, INT, INT, BOOLEAN);
+DROP FUNCTION IF EXISTS public.admin_create_license(TEXT, TEXT, TEXT, TEXT, TEXT, INT, INT, BOOLEAN, TEXT);
+
 CREATE OR REPLACE FUNCTION public.admin_create_license(
     p_admin_pin TEXT,
     p_license_key TEXT,
