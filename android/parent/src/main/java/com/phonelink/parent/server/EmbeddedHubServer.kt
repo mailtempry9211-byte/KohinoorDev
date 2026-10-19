@@ -39,7 +39,6 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
 import java.io.InputStream
-import java.time.Duration
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
 
@@ -79,8 +78,6 @@ class EmbeddedHubServer(private val context: Context, private val port: Int = 50
         try {
             engine = embeddedServer(CIO, port = port, host = "0.0.0.0") {
                 install(WebSockets) {
-                    pingPeriod = Duration.ofSeconds(15)
-                    timeout = Duration.ofSeconds(15)
                     maxFrameSize = Long.MAX_VALUE
                     masking = false
                 }
@@ -105,7 +102,7 @@ class EmbeddedHubServer(private val context: Context, private val port: Int = 50
 
                     // ---------------- REST API Endpoints ----------------
                     get("/api/server-info") {
-                        val ip = NetworkUtils.getLocalIpAddress(context)
+                        val ip = NetworkUtils.getLocalIpAddress(this@EmbeddedHubServer.context)
                         val info = mapOf(
                             "localIp" to ip,
                             "port" to port,
