@@ -24,6 +24,7 @@ import Contacts from './components/Contacts';
 import Controls from './components/Controls';
 import AlertBanner from './components/AlertBanner';
 import ThinkingClock from './components/ThinkingClock';
+import LicenseModal from './components/LicenseModal';
 import { useStore } from './store/StoreContext';
 
 const TABS = [
@@ -76,6 +77,14 @@ export default function App() {
   const toggleTheme = () => {
     setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
   };
+
+  const [showLicenseModal, setShowLicenseModal] = useState(false);
+
+  useEffect(() => {
+    const handler = () => setShowLicenseModal(true);
+    window.addEventListener('open-license-modal', handler);
+    return () => window.removeEventListener('open-license-modal', handler);
+  }, []);
 
   const unreadAll = activeDeviceId
     ? notifications.filter((n) => n.deviceId === activeDeviceId && !n.read).length
@@ -274,6 +283,9 @@ export default function App() {
               </div>
             ))}
           </div>
+
+          {/* Commercial Licensing Modal */}
+          <LicenseModal isOpen={showLicenseModal} onClose={() => setShowLicenseModal(false)} />
         </div>
       </div>
     </div>

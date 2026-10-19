@@ -1,8 +1,18 @@
-import { Smartphone, Battery, BatteryCharging, Wifi, WifiOff, Trash2, ShieldCheck, Radio } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Smartphone, Battery, BatteryCharging, Wifi, WifiOff, Trash2, ShieldCheck, Radio, KeyRound } from 'lucide-react';
 import { useStore } from '../store/StoreContext';
 
 export default function Sidebar() {
   const { devices, activeDeviceId, setActiveDeviceId, removeDevice } = useStore();
+  const [licenseStatus, setLicenseStatus] = useState(null);
+
+  useEffect(() => {
+    fetch('/api/license/status')
+      .then((r) => r.json())
+      .then(setLicenseStatus)
+      .catch(() => {});
+  }, []);
+
   const deviceList = Object.values(devices);
   const onlineCount = deviceList.filter((d) => d.online).length;
 
@@ -179,8 +189,8 @@ export default function Sidebar() {
         })}
       </div>
 
-      {/* Footer Info */}
-      <div className="border-t border-slate-200/80 dark:border-slate-800/80 p-3.5 bg-white/40 dark:bg-slate-950/80">
+      {/* Footer Info & License Status */}
+      <div className="border-t border-slate-200/80 dark:border-slate-800/80 p-3.5 bg-white/40 dark:bg-slate-950/80 space-y-2.5">
         <div className="flex items-center gap-2 text-[11px] text-slate-500 dark:text-slate-400">
           <ShieldCheck className="h-4 w-4 text-indigo-500 dark:text-indigo-400 shrink-0" />
           <div className="min-w-0">
@@ -188,6 +198,22 @@ export default function Sidebar() {
             <p className="text-[10px] text-slate-400 dark:text-slate-500 truncate">Direct P2P &amp; WebSocket</p>
           </div>
         </div>
+
+        <button
+          type="button"
+          onClick={() => window.dispatchEvent(new CustomEvent('open-license-modal'))}
+          className="w-full flex items-center justify-between p-2 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/30 text-indigo-700 dark:text-indigo-300 text-[11px] font-semibold transition-all cursor-pointer shadow-xs"
+        >
+          <div className="flex items-center gap-1.5 truncate">
+            <KeyRound className="h-3.5 w-3.5 text-indigo-500 dark:text-indigo-400 shrink-0" />
+            <span className="truncate">
+              {licenseStatus?.activated ? (licenseStatus.planType || 'Pro License') : 'Activate License'}
+            </span>
+          </div>
+          <span className="text-[10px] font-mono text-cyan-600 dark:text-cyan-400 shrink-0 font-bold">
+            {licenseStatus?.activated ? `${licenseStatus.daysRemaining}d left` : 'Locked 🔒'}
+          </span>
+        </button>
       </div>
     </aside>
   );

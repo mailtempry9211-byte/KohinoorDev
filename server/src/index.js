@@ -9,6 +9,7 @@ import { JSONFilePreset } from 'lowdb/node';
 import { randomUUID } from 'crypto';
 import os from 'os';
 import { startTunnel, stopTunnel, getTunnelStatus } from './tunnel.js';
+import { getLicenseStatus, activateLicense, replaceAndActivateDevice, initLicenseManager } from './licenseManager.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -21,6 +22,8 @@ process.on('unhandledRejection', (reason) => {
 });
 const dataDir = process.env.DATA_DIR || join(__dirname, '..', 'data');
 mkdirSync(dataDir, { recursive: true });
+
+initLicenseManager();
 
 // Resolve dashboard dist path across dev and packaged Electron environments
 let distPath = join(__dirname, '../../dashboard/dist');
@@ -1232,6 +1235,29 @@ app.post('/api/tunnel/stop', async (req, res) => {
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
+});
+
+// ------------------------------------------------------------- Commercial Licensing API
+app.get('/api/license/status', (req, res) => {
+  res.json(getLicenseStatus());
+});
+
+app.post('/api/license/activate', async (req, res) => {
+  const { licenseKey } = req.body || {};
+  if (!licenseKey) {
+    return res.status(400).json({ success: false, message: 'License key is required.' });
+  }
+  const result = await activateLicense(licenseKey);
+  res.json(result);
+});
+
+app.post('/api/license/replace-device', async (req, res) => {
+  const { licenseKey, oldHwid } = req.body || {};
+  if (!licenseKey || !oldHwid) {
+    return res.status(400).json({ success: false, message: 'License key and old HWID are required.' });
+  }
+  const result = await replaceAndActivateDevice(licenseKey, oldHwid);
+  res.json(result);
 });
 
 if (existsSync(distPath)) {
