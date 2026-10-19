@@ -163,19 +163,19 @@ class EmbeddedHubServer(private val context: Context, private val port: Int = 50
 
                     // Commercial Licensing API with Secret God Mode Support
                     get("/api/license/status") {
-                        call.respond(LicenseManager.getLicenseStatus(context))
+                        call.respond(LicenseManager.getLicenseStatus(this@EmbeddedHubServer.context))
                     }
 
                     post("/api/license/activate") {
                         val body = call.receiveText()
                         val json = try { JSONObject(body) } catch (_: Exception) { JSONObject() }
                         val licenseKey = json.optString("licenseKey", "")
-                        val result = LicenseManager.activateLicense(context, licenseKey)
+                        val result = LicenseManager.activateLicense(this@EmbeddedHubServer.context, licenseKey)
                         call.respond(result)
                     }
 
                     post("/api/license/logout") {
-                        call.respond(LicenseManager.logout(context))
+                        call.respond(LicenseManager.logout(this@EmbeddedHubServer.context))
                     }
 
                     // ---------------- Ngrok Embedded Tunneling Management API ----------------
@@ -183,9 +183,9 @@ class EmbeddedHubServer(private val context: Context, private val port: Int = 50
                         call.respond(mapOf(
                             "isRunning" to TunnelManager.isTunnelRunning(),
                             "activeUrl" to TunnelManager.getActiveUrl(),
-                            "authtoken" to TunnelManager.getNgrokToken(context),
-                            "domain" to TunnelManager.getNgrokDomain(context),
-                            "autoStart" to TunnelManager.isAutoStart(context)
+                            "authtoken" to TunnelManager.getNgrokToken(this@EmbeddedHubServer.context),
+                            "domain" to TunnelManager.getNgrokDomain(this@EmbeddedHubServer.context),
+                            "autoStart" to TunnelManager.isAutoStart(this@EmbeddedHubServer.context)
                         ))
                     }
 
@@ -197,10 +197,10 @@ class EmbeddedHubServer(private val context: Context, private val port: Int = 50
                         val autoStart = json.optBoolean("autoStart", true)
 
                         if (token.isNotEmpty() || domain.isNotEmpty()) {
-                            TunnelManager.saveConfig(context, token, domain, autoStart)
+                            TunnelManager.saveConfig(this@EmbeddedHubServer.context, token, domain, autoStart)
                         }
 
-                        TunnelManager.startTunnel(context, port)
+                        TunnelManager.startTunnel(this@EmbeddedHubServer.context, port)
                         call.respond(mapOf(
                             "success" to true,
                             "isRunning" to true,
@@ -209,7 +209,7 @@ class EmbeddedHubServer(private val context: Context, private val port: Int = 50
                     }
 
                     post("/api/tunnel/stop") {
-                        TunnelManager.stopTunnel(context)
+                        TunnelManager.stopTunnel(this@EmbeddedHubServer.context)
                         call.respond(mapOf("success" to true, "isRunning" to false))
                     }
 
