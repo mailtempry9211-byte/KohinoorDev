@@ -1260,9 +1260,14 @@ app.post('/api/license/replace-device', async (req, res) => {
   res.json(result);
 });
 
+const licensePortalPath = join(__dirname, '../../license-portal');
+if (existsSync(licensePortalPath)) {
+  app.use('/license-admin', express.static(licensePortalPath));
+}
+
 if (existsSync(distPath)) {
   app.get('*', (req, res, next) => {
-    if (req.path.startsWith('/api')) return next();
+    if (req.path.startsWith('/api') || req.path.startsWith('/license-admin')) return next();
     res.sendFile(join(distPath, 'index.html'));
   });
 }

@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PhoneLink Hub — Commercial License Management Portal</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#eef2ff',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+              900: '#312e81',
+              950: '#0b0f19',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.98); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    .animate-pop { animation: fadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+  </style>
+</head>
+<body class="bg-[#070913] text-slate-100 min-h-screen font-sans selection:bg-indigo-500 selection:text-white">
+
+  <!-- Glow Background Orbs -->
+  <div class="pointer-events-none fixed inset-0 overflow-hidden select-none z-0">
+    <div class="absolute -top-32 -left-32 h-96 w-96 rounded-full bg-indigo-600/15 blur-[120px]"></div>
+    <div class="absolute top-1/3 -right-32 h-96 w-96 rounded-full bg-cyan-600/10 blur-[130px]"></div>
+    <div class="absolute -bottom-32 left-1/3 h-96 w-96 rounded-full bg-violet-600/15 blur-[120px]"></div>
+  </div>
+
+  <div id="app" class="relative z-10 flex flex-col min-h-screen">
+    
+    <!-- TOP NAVBAR -->
+    <header class="border-b border-slate-800/80 bg-[#0B0F19]/80 backdrop-blur-xl px-6 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="p-2.5 rounded-2xl bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">
+          <i data-lucide="shield-check" class="h-6 w-6"></i>
+        </div>
+        <div>
+          <h1 class="text-base font-extrabold tracking-tight flex items-center gap-2">
+            PhoneLink Hub
+            <span class="text-[10px] uppercase font-mono px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+              License Admin GUI
+            </span>
+          </h1>
+          <p class="text-xs text-slate-400">Commercial Multi-Device Key Generator &amp; Slot Manager</p>
+        </div>
+      </div>
+
+      <div id="navActions" class="hidden flex items-center gap-3">
+        <button onclick="openCreateModal()" class="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-500 text-white transition-all shadow-lg shadow-indigo-500/25 cursor-pointer">
+          <i data-lucide="plus-circle" class="h-4 w-4"></i>
+          <span>Create New Key</span>
+        </button>
+
+        <button onclick="handleLogout()" class="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-slate-900 hover:bg-slate-800 border border-slate-700/80 text-slate-300 transition-all cursor-pointer">
+          <i data-lucide="log-out" class="h-3.5 w-3.5"></i>
+          <span>Lock</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- MAIN CONTAINER -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-6 space-y-6">
+
+      <!-- 1. PIN LOGIN SCREEN (If not authenticated) -->
+      <div id="loginScreen" class="max-w-md mx-auto my-20 p-8 rounded-3xl bg-[#0B0F19] border border-slate-800/80 shadow-2xl shadow-indigo-500/10 text-center animate-pop">
+        <div class="h-16 w-16 mx-auto rounded-3xl bg-indigo-500/15 border border-indigo-500/30 text-indigo-400 flex items-center justify-center mb-5">
+          <i data-lucide="lock" class="h-8 w-8"></i>
+        </div>
+        <h2 class="text-xl font-bold tracking-tight mb-2">Admin Master Access</h2>
+        <p class="text-xs text-slate-400 mb-6">Enter your Admin Secret PIN to manage customer licenses and slots.</p>
+
+        <form onsubmit="handleLogin(event)" class="space-y-4">
+          <div>
+            <input type="password" id="pinInput" placeholder="Enter Admin PIN (Default: 9211)" class="w-full text-center px-4 py-3.5 rounded-2xl bg-slate-900 border border-slate-700/80 font-mono text-base tracking-widest text-cyan-300 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all placeholder:text-slate-600" autofocus />
+          </div>
+          <div id="loginError" class="hidden text-xs text-rose-400 font-semibold"></div>
+          <button type="submit" id="loginBtn" class="w-full py-3.5 rounded-2xl font-bold text-sm bg-indigo-600 hover:bg-indigo-500 text-white transition-all shadow-lg shadow-indigo-500/25 flex items-center justify-center gap-2 cursor-pointer">
+            <span>Unlock Admin Dashboard</span>
+            <i data-lucide="arrow-right" class="h-4 w-4"></i>
+          </button>
+        </form>
+      </div>
+
+      <!-- 2. AUTHENTICATED DASHBOARD VIEW -->
+      <div id="adminDashboard" class="hidden space-y-6 animate-pop">
+        
+        <!-- METRICS ROW -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="p-5 rounded-2xl bg-[#0B0F19] border border-slate-800 flex items-center justify-between">
+            <div>
+              <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Licenses</p>
+              <h3 id="statTotal" class="text-2xl font-black text-white mt-1">0</h3>
+            </div>
+            <div class="p-3 rounded-xl bg-slate-900 text-indigo-400 border border-slate-800">
+              <i data-lucide="key" class="h-5 w-5"></i>
+            </div>
+          </div>
+
+          <div class="p-5 rounded-2xl bg-[#0B0F19] border border-slate-800 flex items-center justify-between">
+            <div>
+              <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Active Customer Keys</p>
+              <h3 id="statActive" class="text-2xl font-black text-emerald-400 mt-1">0</h3>
+            </div>
+            <div class="p-3 rounded-xl bg-emerald-950/40 text-emerald-400 border border-emerald-500/30">
+              <i data-lucide="check-circle" class="h-5 w-5"></i>
+            </div>
+          </div>
+
+          <div class="p-5 rounded-2xl bg-[#0B0F19] border border-slate-800 flex items-center justify-between">
+            <div>
+              <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Connected PC Machines</p>
+              <h3 id="statDevices" class="text-2xl font-black text-cyan-400 mt-1">0</h3>
+            </div>
+            <div class="p-3 rounded-xl bg-cyan-950/40 text-cyan-400 border border-cyan-500/30">
+              <i data-lucide="laptop" class="h-5 w-5"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- SEARCH & FILTER BAR -->
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 rounded-2xl bg-[#0B0F19] border border-slate-800">
+          <div class="relative w-full sm:w-96">
+            <i data-lucide="search" class="absolute left-3.5 top-3 h-4 w-4 text-slate-500"></i>
+            <input type="text" id="searchInput" oninput="renderTable()" placeholder="Search by name, phone, or key..." class="w-full pl-10 pr-4 py-2 rounded-xl bg-slate-900 border border-slate-700/80 text-xs text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-indigo-500" />
+          </div>
+
+          <div class="flex items-center gap-2 w-full sm:w-auto">
+            <select id="statusFilter" onchange="renderTable()" class="px-3 py-2 rounded-xl bg-slate-900 border border-slate-700/80 text-xs text-slate-300 focus:outline-none">
+              <option value="ALL">All Status</option>
+              <option value="ACTIVE">Active Only</option>
+              <option value="EXPIRED">Expired</option>
+              <option value="REVOKED">Revoked</option>
+            </select>
+
+            <button onclick="fetchLicenses()" class="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 cursor-pointer transition-colors">
+              <i data-lucide="refresh-cw" class="h-3.5 w-3.5"></i>
+              <span>Refresh</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- LICENSES LIST TABLE -->
+        <div class="rounded-3xl border border-slate-800 bg-[#0B0F19] overflow-hidden shadow-xl">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-900/80 border-b border-slate-800 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+                <tr>
+                  <th class="py-3.5 px-5">Customer</th>
+                  <th class="py-3.5 px-5">License Key</th>
+                  <th class="py-3.5 px-5">Plan &amp; Slots</th>
+                  <th class="py-3.5 px-5">Hardware Protection</th>
+                  <th class="py-3.5 px-5">Validity</th>
+                  <th class="py-3.5 px-5">Status</th>
+                  <th class="py-3.5 px-5 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="licensesTableBody" class="divide-y divide-slate-800/60 font-mono">
+                <!-- Dynamically Rendered -->
+              </tbody>
+            </table>
+          </div>
+          <div id="emptyMessage" class="hidden p-12 text-center text-slate-500 text-xs font-sans">
+            No licenses found matching your filters.
+          </div>
+        </div>
+
+      </div>
+
+    </main>
+
+    <!-- CREATE LICENSE MODAL -->
+    <div id="createModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-xl animate-pop select-none">
+      <div class="relative w-full max-w-lg rounded-3xl border border-slate-700/80 bg-[#0B0F19] text-white shadow-2xl p-6 space-y-5">
+        
+        <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+          <div class="flex items-center gap-2.5">
+            <div class="p-2 rounded-xl bg-indigo-500/20 text-indigo-400">
+              <i data-lucide="sparkles" class="h-5 w-5"></i>
+            </div>
+            <div>
+              <h3 class="text-base font-bold">Generate New License Key</h3>
+              <p class="text-xs text-slate-400">Creates an instant commercial key on Supabase</p>
+            </div>
+          </div>
+          <button onclick="closeCreateModal()" class="text-slate-400 hover:text-white p-1 rounded-lg">
+            <i data-lucide="x" class="h-5 w-5"></i>
+          </button>
+        </div>
+
+        <form onsubmit="handleCreateLicense(event)" class="space-y-4 font-sans text-xs">
+          <div>
+            <label class="block text-slate-300 font-semibold mb-1">Customer Full Name</label>
+            <input type="text" id="custName" placeholder="e.g. Rohit Sharma" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white focus:outline-none focus:border-indigo-500" required />
+          </div>
+
+          <div>
+            <label class="block text-slate-300 font-semibold mb-1">Customer WhatsApp / Phone (Optional)</label>
+            <input type="text" id="custPhone" placeholder="e.g. 9876543210" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white focus:outline-none focus:border-indigo-500" />
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-slate-300 font-semibold mb-1">Plan &amp; Quota</label>
+              <select id="custPlan" onchange="syncMaxDevices()" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white focus:outline-none">
+                <option value="Single_1PC" data-devices="1">Single PC (1 Machine)</option>
+                <option value="Duo_2PC" data-devices="2">Duo Plan (2 Machines)</option>
+                <option value="Family_5PC" data-devices="5">Family / Team (5 Machines)</option>
+                <option value="Trial_1PC" data-devices="1">3-Day Free Trial (1 Machine)</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-slate-300 font-semibold mb-1">Validity Duration</label>
+              <select id="custDays" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white focus:outline-none">
+                <option value="365">1 Year (365 Days)</option>
+                <option value="30">1 Month (30 Days)</option>
+                <option value="90">3 Months (90 Days)</option>
+                <option value="180">6 Months (180 Days)</option>
+                <option value="3">3 Days (Trial)</option>
+                <option value="99999">Lifetime (No Expiry)</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-slate-300 font-semibold mb-1">Custom License Key (Leave empty to auto-generate)</label>
+            <input type="text" id="custCustomKey" placeholder="e.g. PLH-VIP-2026 or auto" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 font-mono text-cyan-300 focus:outline-none uppercase" />
+          </div>
+
+          <div class="flex items-center justify-between p-3 rounded-xl bg-slate-900/90 border border-slate-800">
+            <div>
+              <p class="font-semibold text-slate-200">Hardware Protection Mode</p>
+              <p class="text-[11px] text-slate-400">Flexible allows customer to transfer PC slot by themselves</p>
+            </div>
+            <select id="custHwLock" class="px-2.5 py-1.5 rounded-lg bg-slate-800 border border-slate-700 text-xs text-white">
+              <option value="false">Flexible Transfer (Recommended)</option>
+              <option value="true">Strict HWID Lock</option>
+            </select>
+          </div>
+
+          <div id="createError" class="hidden text-rose-400 text-xs"></div>
+
+          <button type="submit" id="createSubmitBtn" class="w-full py-3 rounded-xl font-bold bg-indigo-600 hover:bg-indigo-500 text-white transition-all shadow-lg shadow-indigo-500/25 flex items-center justify-center gap-2 cursor-pointer">
+            <i data-lucide="check" class="h-4 w-4"></i>
+            <span>Create &amp; Activate License</span>
+          </button>
+        </form>
+
+      </div>
+    </div>
+
+    <!-- SUCCESS COPY MODAL -->
+    <div id="shareModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-xl animate-pop select-none">
+      <div class="relative w-full max-w-md rounded-3xl border border-emerald-500/40 bg-[#0B0F19] text-white shadow-2xl p-6 space-y-4">
+        
+        <div class="text-center space-y-2">
+          <div class="h-12 w-12 mx-auto rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+            <i data-lucide="check-circle-2" class="h-6 w-6"></i>
+          </div>
+          <h3 class="text-base font-bold text-emerald-300">License Generated Successfully!</h3>
+          <p class="text-xs text-slate-400">Share this message with the customer directly:</p>
+        </div>
+
+        <textarea id="shareText" rows="6" readonly class="w-full p-3 rounded-xl bg-slate-900 border border-slate-700 text-xs font-mono text-slate-200 focus:outline-none"></textarea>
+
+        <div class="flex gap-2">
+          <button onclick="copyShareText()" class="flex-1 py-2.5 rounded-xl font-bold text-xs bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white transition-all flex items-center justify-center gap-1.5 cursor-pointer">
+            <i data-lucide="copy" class="h-3.5 w-3.5"></i>
+            <span id="copyBtnText">Copy Message</span>
+          </button>
+
+          <a id="whatsappShareLink" href="#" target="_blank" class="flex-1 py-2.5 rounded-xl font-bold text-xs bg-emerald-600 hover:bg-emerald-500 text-white transition-all flex items-center justify-center gap-1.5 shadow-md shadow-emerald-500/25">
+            <i data-lucide="message-circle" class="h-3.5 w-3.5"></i>
+            <span>Open WhatsApp</span>
+          </a>
+        </div>
+
+        <button onclick="closeShareModal()" class="w-full py-2 rounded-xl text-xs text-slate-400 hover:text-white transition-colors">
+          Done
+        </button>
+
+      </div>
+    </div>
+
+  </div>
+
+  <!-- CLIENT-SIDE SCRIPT -->
+  <script>
+    const SUPABASE_URL = 'https://dhqqyinbtjttndxfeloa.supabase.co';
+    const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRocXF5aW5idGp0dG5keGZlbG9hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIzODI3ODAsImV4cCI6MjEwNzk1ODc4MH0.w4K9J9Qrn-IA1uAL_qXtbQ626-lKZpEke3GLu7s6exE';
+    const SUPPORT_PHONE = '8418944572';
+
+    let currentPin = sessionStorage.getItem('plh_admin_pin') || '';
+    let allLicenses = [];
+
+    async function callRpc(fnName, body) {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${fnName}`, {
+        method: 'POST',
+        headers: {
+          'apikey': SUPABASE_ANON,
+          'Authorization': `Bearer ${SUPABASE_ANON}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(body)
+      });
+      return await res.json();
+    }
+
+    async function handleLogin(e) {
+      e?.preventDefault();
+      const pin = document.getElementById('pinInput').value.trim();
+      if (!pin) return;
+
+      const btn = document.getElementById('loginBtn');
+      const err = document.getElementById('loginError');
+      btn.disabled = true;
+      btn.innerText = 'Verifying...';
+      err.classList.add('hidden');
+
+      try {
+        const data = await callRpc('admin_get_licenses', { p_admin_pin: pin });
+        if (data.success) {
+          currentPin = pin;
+          sessionStorage.setItem('plh_admin_pin', pin);
+          allLicenses = data.licenses || [];
+          showDashboard();
+        } else {
+          err.innerText = data.message || 'Incorrect Admin PIN!';
+          err.classList.remove('hidden');
+        }
+      } catch (e) {
+        err.innerText = 'Network error reaching Supabase.';
+        err.classList.remove('hidden');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<span>Unlock Admin Dashboard</span><i data-lucide="arrow-right" class="h-4 w-4"></i>';
+        lucide.createIcons();
+      }
+    }
+
+    function handleLogout() {
+      sessionStorage.removeItem('plh_admin_pin');
+      currentPin = '';
+      document.getElementById('loginScreen').classList.remove('hidden');
+      document.getElementById('adminDashboard').classList.add('hidden');
+      document.getElementById('navActions').classList.add('hidden');
+    }
+
+    function showDashboard() {
+      document.getElementById('loginScreen').classList.add('hidden');
+      document.getElementById('adminDashboard').classList.remove('hidden');
+      document.getElementById('navActions').classList.remove('hidden');
+      renderTable();
+      lucide.createIcons();
+    }
+
+    async function fetchLicenses() {
+      if (!currentPin) return;
+      try {
+        const data = await callRpc('admin_get_licenses', { p_admin_pin: currentPin });
+        if (data.success) {
+          allLicenses = data.licenses || [];
+          renderTable();
+        }
+      } catch (_) {}
+    }
+
+    function renderTable() {
+      const q = (document.getElementById('searchInput').value || '').toLowerCase();
+      const statusF = document.getElementById('statusFilter').value;
+      const tbody = document.getElementById('licensesTableBody');
+      const empty = document.getElementById('emptyMessage');
+
+      const filtered = allLicenses.filter(l => {
+        const matchQ = (l.customer_name || '').toLowerCase().includes(q) ||
+                       (l.customer_phone || '').includes(q) ||
+                       (l.license_key || '').toLowerCase().includes(q);
+        const matchStatus = statusF === 'ALL' || l.status === statusF;
+        return matchQ && matchStatus;
+      });
+
+      // Update Metrics
+      document.getElementById('statTotal').innerText = allLicenses.length;
+      document.getElementById('statActive').innerText = allLicenses.filter(l => l.status === 'ACTIVE').length;
+      
+      let totalConnectedPcs = 0;
+      allLicenses.forEach(l => {
+        totalConnectedPcs += (l.registered_devices || []).length;
+      });
+      document.getElementById('statDevices').innerText = totalConnectedPcs;
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = '';
+        empty.classList.remove('hidden');
+        return;
+      }
+      empty.classList.add('hidden');
+
+      tbody.innerHTML = filtered.map(l => {
+        const devCount = (l.registered_devices || []).length;
+        const maxDev = l.max_devices || 1;
+        const isExp = new Date(l.valid_until).getTime() < Date.now();
+        const displayStatus = isExp ? 'EXPIRED' : l.status;
+
+        const statusBadge = displayStatus === 'ACTIVE'
+          ? '<span class="px-2 py-0.5 rounded-full bg-emerald-950/80 border border-emerald-500/40 text-emerald-300 font-semibold text-[10px]">ACTIVE</span>'
+          : displayStatus === 'REVOKED'
+          ? '<span class="px-2 py-0.5 rounded-full bg-rose-950/80 border border-rose-500/40 text-rose-300 font-semibold text-[10px]">REVOKED</span>'
+          : '<span class="px-2 py-0.5 rounded-full bg-amber-950/80 border border-amber-500/40 text-amber-300 font-semibold text-[10px]">EXPIRED</span>';
+
+        const devicesList = (l.registered_devices || []).map(d => `
+          <div class="text-[10px] text-slate-400 truncate">
+            🖥️ <b>${d.device_name || 'PC'}</b> (${d.hwid ? d.hwid.slice(0, 16) : ''})
+          </div>
+        `).join('');
+
+        return `
+          <tr class="hover:bg-slate-900/40 transition-colors">
+            <td class="py-3 px-5">
+              <div class="font-sans font-semibold text-slate-100">${escapeHtml(l.customer_name || 'Customer')}</div>
+              <div class="text-[10px] text-slate-500">${escapeHtml(l.customer_phone || 'No phone')}</div>
+            </td>
+            <td class="py-3 px-5">
+              <span class="text-cyan-300 font-bold tracking-wide">${l.license_key}</span>
+            </td>
+            <td class="py-3 px-5">
+              <div class="font-sans font-semibold text-indigo-300 text-[11px]">${l.plan_type || 'Single_1PC'}</div>
+              <div class="text-[10px] text-slate-400 mt-0.5 font-sans">${devCount} / ${maxDev} PCs Active</div>
+              ${devicesList}
+            </td>
+            <td class="py-3 px-5">
+              ${l.hardware_protection 
+                ? '<span class="text-[10px] text-rose-300 bg-rose-950/40 border border-rose-500/30 px-2 py-0.5 rounded-md font-sans">Strict Lock</span>'
+                : '<span class="text-[10px] text-emerald-300 bg-emerald-950/40 border border-emerald-500/30 px-2 py-0.5 rounded-md font-sans">Flexible Slot</span>'}
+            </td>
+            <td class="py-3 px-5 font-sans text-[11px] text-slate-300">
+              ${new Date(l.valid_until).toLocaleDateString()}
+            </td>
+            <td class="py-3 px-5">
+              ${statusBadge}
+            </td>
+            <td class="py-3 px-5 text-right font-sans">
+              <div class="flex items-center justify-end gap-1.5">
+                <button title="Reset Connected PCs" onclick="actionResetDevices('${l.license_key}')" class="p-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 cursor-pointer">
+                  <i data-lucide="rotate-ccw" class="h-3.5 w-3.5"></i>
+                </button>
+                ${l.status === 'ACTIVE' 
+                  ? `<button title="Revoke Key" onclick="actionUpdateStatus('${l.license_key}', 'REVOKED')" class="p-1.5 rounded-lg bg-slate-900 hover:bg-rose-950/50 border border-slate-700 text-rose-400 cursor-pointer">
+                       <i data-lucide="pause-circle" class="h-3.5 w-3.5"></i>
+                     </button>`
+                  : `<button title="Reactivate Key" onclick="actionUpdateStatus('${l.license_key}', 'ACTIVE')" class="p-1.5 rounded-lg bg-slate-900 hover:bg-emerald-950/50 border border-slate-700 text-emerald-400 cursor-pointer">
+                       <i data-lucide="play-circle" class="h-3.5 w-3.5"></i>
+                     </button>`}
+                <button title="Delete Key" onclick="actionDelete('${l.license_key}')" class="p-1.5 rounded-lg bg-slate-900 hover:bg-rose-900/50 border border-slate-700 text-slate-400 hover:text-rose-400 cursor-pointer">
+                  <i data-lucide="trash-2" class="h-3.5 w-3.5"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      lucide.createIcons();
+    }
+
+    function openCreateModal() {
+      document.getElementById('createModal').classList.remove('hidden');
+      document.getElementById('custName').focus();
+    }
+    function closeCreateModal() {
+      document.getElementById('createModal').classList.add('hidden');
+    }
+
+    function syncMaxDevices() {
+      const plan = document.getElementById('custPlan');
+      const dev = plan.options[plan.selectedIndex].getAttribute('data-devices');
+      if (plan.value.includes('Trial')) {
+        document.getElementById('custDays').value = '3';
+      }
+    }
+
+    async function handleCreateLicense(e) {
+      e?.preventDefault();
+      const name = document.getElementById('custName').value.trim();
+      const phone = document.getElementById('custPhone').value.trim();
+      const planEl = document.getElementById('custPlan');
+      const plan = planEl.value;
+      const maxDev = parseInt(planEl.options[planEl.selectedIndex].getAttribute('data-devices') || '1', 10);
+      const days = parseInt(document.getElementById('custDays').value, 10);
+      const customKey = document.getElementById('custCustomKey').value.trim();
+      const hwLock = document.getElementById('custHwLock').value === 'true';
+
+      const btn = document.getElementById('createSubmitBtn');
+      const err = document.getElementById('createError');
+      btn.disabled = true;
+      btn.innerText = 'Creating License...';
+      err.classList.add('hidden');
+
+      try {
+        const data = await callRpc('admin_create_license', {
+          p_admin_pin: currentPin,
+          p_license_key: customKey,
+          p_customer_name: name,
+          p_customer_phone: phone,
+          p_plan_type: plan,
+          p_max_devices: maxDev,
+          p_days_valid: days,
+          p_hardware_protection: hwLock
+        });
+
+        if (data.success && data.license) {
+          closeCreateModal();
+          e.target.reset();
+          await fetchLicenses();
+          openShareModal(data.license);
+        } else {
+          err.innerText = data.message || 'Creation failed.';
+          err.classList.remove('hidden');
+        }
+      } catch (err) {
+        err.innerText = 'Network error creating license.';
+        err.classList.remove('hidden');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i data-lucide="check" class="h-4 w-4"></i><span>Create & Activate License</span>';
+        lucide.createIcons();
+      }
+    }
+
+    function openShareModal(lic) {
+      const modal = document.getElementById('shareModal');
+      const msg = `🎉 Hello ${lic.customer_name},\nYour Phone Link Hub Commercial License is Ready!\n\n🔑 License Key: ${lic.license_key}\n🖥️ Allowed Systems: ${lic.max_devices} PC(s)\n📱 Plan: ${lic.plan_type}\n⏳ Valid Until: ${new Date(lic.valid_until).toLocaleDateString()}\n\nOfficial Support WhatsApp: +91 ${SUPPORT_PHONE}`;
+      
+      document.getElementById('shareText').value = msg;
+      
+      const phoneNum = (lic.customer_phone || '').replace(/[^0-9]/g, '');
+      const waUrl = phoneNum 
+        ? `https://wa.me/91${phoneNum}?text=${encodeURIComponent(msg)}`
+        : `https://wa.me/?text=${encodeURIComponent(msg)}`;
+      
+      document.getElementById('whatsappShareLink').href = waUrl;
+      modal.classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeShareModal() {
+      document.getElementById('shareModal').classList.add('hidden');
+    }
+
+    function copyShareText() {
+      const text = document.getElementById('shareText').value;
+      navigator.clipboard.writeText(text);
+      const btn = document.getElementById('copyBtnText');
+      btn.innerText = 'Copied!';
+      setTimeout(() => btn.innerText = 'Copy Message', 2000);
+    }
+
+    async function actionResetDevices(key) {
+      if (!confirm(`Reset all connected devices for ${key}? The customer can rebind to new computers.`)) return;
+      const res = await callRpc('admin_reset_devices', { p_admin_pin: currentPin, p_license_key: key });
+      alert(res.message);
+      fetchLicenses();
+    }
+
+    async function actionUpdateStatus(key, status) {
+      const res = await callRpc('admin_update_license_status', { p_admin_pin: currentPin, p_license_key: key, p_new_status: status });
+      fetchLicenses();
+    }
+
+    async function actionDelete(key) {
+      if (!confirm(`Are you sure you want to PERMANENTLY delete license ${key}?`)) return;
+      const res = await callRpc('admin_delete_license', { p_admin_pin: currentPin, p_license_key: key });
+      alert(res.message);
+      fetchLicenses();
+    }
+
+    function escapeHtml(str) {
+      return (str || '').replace(/[&<>"']/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
+    }
+
+    // Auto-login if session pin is present
+    window.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+      if (currentPin) {
+        document.getElementById('pinInput').value = currentPin;
+        handleLogin();
+      }
+    });
+  </script>
+</body>
+</html>
