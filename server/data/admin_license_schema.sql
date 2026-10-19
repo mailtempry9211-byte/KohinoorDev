@@ -325,6 +325,35 @@ BEGIN
 
     RETURN jsonb_build_object('success', true, 'message', 'License deleted permanently.');
 END;
+-- 7. RPC: Admin Change Password / PIN
+CREATE OR REPLACE FUNCTION public.admin_change_pin(
+    p_old_pin TEXT,
+    p_new_pin TEXT
+)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+    v_correct_pin TEXT;
+    v_clean_new TEXT;
+BEGIN
+    SELECT admin_pin INTO v_correct_pin FROM public.license_admin_config WHERE id = 1;
+    IF v_correct_pin IS NULL OR TRIM(p_old_pin) <> v_correct_pin THEN
+        RETURN jsonb_build_object('success', false, 'message', 'Current Password/PIN is incorrect!');
+    END IF;
+
+    v_clean_new := TRIM(COALESCE(p_new_pin, ''));
+    IF LENGTH(v_clean_new) < 4 THEN
+        RETURN jsonb_build_object('success', false, 'message', 'New Password must be at least 4 characters long!');
+    END IF;
+
+    UPDATE public.license_admin_config
+    SET admin_pin = v_clean_new
+    WHERE id = 1;
+
+    RETURN jsonb_build_object('success', true, 'message', 'Admin Password/PIN changed successfully!');
+END;
 $$;
 
 -- Grant execution to anon/authenticated
@@ -335,4 +364,5 @@ GRANT EXECUTE ON FUNCTION public.admin_remove_device TO anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.admin_update_license_status TO anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.admin_reset_devices TO anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.admin_delete_license TO anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.admin_change_pin TO anon, authenticated;
 

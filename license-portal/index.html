@@ -69,6 +69,11 @@
           <span>Create New Key</span>
         </button>
 
+        <button onclick="openChangePinModal()" class="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-slate-900 hover:bg-slate-800 border border-slate-700/80 text-amber-300 transition-all cursor-pointer">
+          <i data-lucide="key-round" class="h-3.5 w-3.5 text-amber-400"></i>
+          <span>Change Password</span>
+        </button>
+
         <button onclick="handleLogout()" class="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-slate-900 hover:bg-slate-800 border border-slate-700/80 text-slate-300 transition-all cursor-pointer">
           <i data-lucide="log-out" class="h-3.5 w-3.5"></i>
           <span>Lock</span>
@@ -361,6 +366,52 @@
         <button onclick="closeShareModal()" class="w-full py-2 rounded-xl text-xs text-slate-400 hover:text-white transition-colors">
           Done
         </button>
+
+      </div>
+    </div>
+
+    <!-- CHANGE ADMIN PIN / PASSWORD MODAL -->
+    <div id="changePinModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-xl animate-pop select-none">
+      <div class="relative w-full max-w-md rounded-3xl border border-amber-500/40 bg-[#0B0F19] text-white shadow-2xl p-6 space-y-4">
+        
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+          <div class="flex items-center gap-2.5">
+            <div class="p-2 rounded-xl bg-amber-500/20 text-amber-400">
+              <i data-lucide="shield-check" class="h-5 w-5"></i>
+            </div>
+            <div>
+              <h3 class="text-sm font-bold text-amber-300">Change Admin Password / PIN</h3>
+              <p class="text-[11px] text-slate-400">Set a new secret password for this portal</p>
+            </div>
+          </div>
+          <button onclick="closeChangePinModal()" class="text-slate-400 hover:text-white p-1 rounded-lg">
+            <i data-lucide="x" class="h-4 w-4"></i>
+          </button>
+        </div>
+
+        <form onsubmit="handleChangePin(event)" class="space-y-3 font-sans text-xs">
+          <div>
+            <label class="block text-slate-300 font-semibold mb-1">Current Password / PIN</label>
+            <input type="password" id="oldPinInput" placeholder="Current PIN" required class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 font-mono text-cyan-300 focus:outline-none text-xs" />
+          </div>
+
+          <div>
+            <label class="block text-slate-300 font-semibold mb-1">New Password / PIN</label>
+            <input type="password" id="newPinInput" placeholder="Minimum 4 characters" required minlength="4" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 font-mono text-cyan-300 focus:outline-none text-xs" />
+          </div>
+
+          <div>
+            <label class="block text-slate-300 font-semibold mb-1">Confirm New Password / PIN</label>
+            <input type="password" id="confirmPinInput" placeholder="Re-enter new password" required minlength="4" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 font-mono text-cyan-300 focus:outline-none text-xs" />
+          </div>
+
+          <div id="changePinError" class="hidden text-rose-400 text-xs"></div>
+
+          <button type="submit" id="changePinSubmitBtn" class="w-full py-2.5 rounded-xl font-bold bg-amber-600 hover:bg-amber-500 text-white transition-all shadow-lg shadow-amber-500/25 flex items-center justify-center gap-1.5 cursor-pointer">
+            <i data-lucide="check" class="h-4 w-4"></i>
+            <span>Update Password</span>
+          </button>
+        </form>
 
       </div>
     </div>
@@ -757,6 +808,68 @@
       const res = await callRpc('admin_delete_license', { p_admin_pin: currentPin, p_license_key: key });
       alert(res.message);
       fetchLicenses();
+    }
+
+    function openChangePinModal() {
+      document.getElementById('oldPinInput').value = currentPin || '';
+      document.getElementById('newPinInput').value = '';
+      document.getElementById('confirmPinInput').value = '';
+      document.getElementById('changePinError').classList.add('hidden');
+      document.getElementById('changePinModal').classList.remove('hidden');
+      document.getElementById('newPinInput').focus();
+      lucide.createIcons();
+    }
+
+    function closeChangePinModal() {
+      document.getElementById('changePinModal').classList.add('hidden');
+    }
+
+    async function handleChangePin(e) {
+      e?.preventDefault();
+      const oldPin = document.getElementById('oldPinInput').value.trim();
+      const newPin = document.getElementById('newPinInput').value.trim();
+      const confirmPin = document.getElementById('confirmPinInput').value.trim();
+      const btn = document.getElementById('changePinSubmitBtn');
+      const err = document.getElementById('changePinError');
+
+      if (newPin !== confirmPin) {
+        err.innerText = 'New password and confirm password do not match!';
+        err.classList.remove('hidden');
+        return;
+      }
+      if (newPin.length < 4) {
+        err.innerText = 'New password must be at least 4 characters!';
+        err.classList.remove('hidden');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerText = 'Updating Password...';
+      err.classList.add('hidden');
+
+      try {
+        const data = await callRpc('admin_change_pin', {
+          p_old_pin: oldPin,
+          p_new_pin: newPin
+        });
+
+        if (data.success) {
+          currentPin = newPin;
+          sessionStorage.setItem('plh_admin_pin', newPin);
+          closeChangePinModal();
+          alert('✅ Password changed successfully! Use your new password to login next time.');
+        } else {
+          err.innerText = data.message || 'Failed to change password.';
+          err.classList.remove('hidden');
+        }
+      } catch (e) {
+        err.innerText = 'Network error changing password.';
+        err.classList.remove('hidden');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i data-lucide="check" class="h-4 w-4"></i><span>Update Password</span>';
+        lucide.createIcons();
+      }
     }
 
     function escapeHtml(str) {
