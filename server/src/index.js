@@ -9,7 +9,7 @@ import { JSONFilePreset } from 'lowdb/node';
 import { randomUUID } from 'crypto';
 import os from 'os';
 import { startTunnel, stopTunnel, getTunnelStatus } from './tunnel.js';
-import { getLicenseStatus, activateLicense, replaceAndActivateDevice, initLicenseManager } from './licenseManager.js';
+import { getLicenseStatus, activateLicense, replaceAndActivateDevice, logoutLicense, initLicenseManager } from './licenseManager.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -1260,7 +1260,25 @@ app.post('/api/license/replace-device', async (req, res) => {
   res.json(result);
 });
 
-const licensePortalPath = join(__dirname, '../../license-portal');
+app.post('/api/license/logout', (req, res) => {
+  res.json(logoutLicense());
+});
+
+let licensePortalPath = join(__dirname, '../../license-portal');
+if (!existsSync(licensePortalPath)) {
+  const possiblePortalPaths = [
+    join(__dirname, '../license-portal'),
+    join(process.cwd(), 'license-portal'),
+    join(process.resourcesPath || '', 'license-portal'),
+    join(process.resourcesPath || '', 'app/license-portal')
+  ];
+  for (const p of possiblePortalPaths) {
+    if (existsSync(p)) {
+      licensePortalPath = p;
+      break;
+    }
+  }
+}
 if (existsSync(licensePortalPath)) {
   app.use('/license-admin', express.static(licensePortalPath));
 }

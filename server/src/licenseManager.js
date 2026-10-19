@@ -1,7 +1,7 @@
 import { execSync } from 'child_process';
 import crypto from 'crypto';
 import os from 'os';
-import { readFileSync, writeFileSync, existsSync } from 'fs';
+import { readFileSync, writeFileSync, existsSync, unlinkSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 
@@ -11,6 +11,8 @@ const __dirname = dirname(__filename);
 const SUPABASE_URL = 'https://dhqqyinbtjttndxfeloa.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRocXF5aW5idGp0dG5keGZlbG9hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIzODI3ODAsImV4cCI6MjEwNzk1ODc4MH0.w4K9J9Qrn-IA1uAL_qXtbQ626-lKZpEke3GLu7s6exE';
 const SUPPORT_PHONE = '8418944572';
+
+export const MASTER_GOD_KEY = 'Humsafar@1998Humsafar@1998';
 
 const dataDir = process.env.DATA_DIR || join(__dirname, '..', 'data');
 const licenseFilePath = join(dataDir, 'license.json');
@@ -71,13 +73,30 @@ function loadLocalLicense() {
   try {
     if (existsSync(licenseFilePath)) {
       const content = readFileSync(licenseFilePath, 'utf8');
-      return JSON.parse(content);
+      const data = JSON.parse(content);
+      // God Mode is in-memory only and never persists across app restarts
+      if (data.isGodMode) {
+        try { unlinkSync(licenseFilePath); } catch (_) {}
+        return {
+          activated: false,
+          isGodMode: false,
+          licenseKey: null,
+          planType: null,
+          validUntil: null,
+          maxDevices: 1,
+          activeDevices: 0,
+          registeredDevices: [],
+          lastValidated: 0
+        };
+      }
+      return data;
     }
   } catch (e) {
     console.error('[license] Failed to read license.json:', e);
   }
   return {
     activated: false,
+    isGodMode: false,
     licenseKey: null,
     planType: null,
     validUntil: null,
@@ -90,6 +109,8 @@ function loadLocalLicense() {
 
 function saveLocalLicense(data) {
   try {
+    // Never persist God Mode to disk
+    if (data.isGodMode) return;
     writeFileSync(licenseFilePath, JSON.stringify(data, null, 2), 'utf8');
   } catch (e) {
     console.error('[license] Failed to write license.json:', e);
@@ -102,6 +123,9 @@ let licenseState = loadLocalLicense();
  * Checks system clock for rollback tampering.
  */
 function verifyClockTampering(serverTimestampMs) {
+  // If God Mode is active, bypass clock tampering
+  if (licenseState.isGodMode) return { tampered: false };
+
   const localNow = Date.now();
   if (licenseState.lastValidated && localNow < licenseState.lastValidated - 300000) {
     // Clock moved backwards by more than 5 minutes
@@ -122,11 +146,46 @@ function verifyClockTampering(serverTimestampMs) {
 }
 
 /**
- * Validates or activates a license key on Supabase.
+ * Validates or activates a license key on Supabase or unlocks God Mode.
  */
 export async function activateLicense(licenseKey) {
   const hwid = getMachineHwid();
   const deviceName = getDeviceName();
+  const trimmed = (licenseKey || '').trim();
+
+  // 1. 👑 MASTER KEY GOD-MODE BYPASS (Owner Superuser)
+  if (trimmed === MASTER_GOD_KEY || trimmed.toUpperCase() === MASTER_GOD_KEY.toUpperCase()) {
+    console.log('[license] 👑 GOD MODE UNLOCKED BY OWNER!');
+    licenseState = {
+      activated: true,
+      isGodMode: true,
+      licenseKey: 'OWNER-GOD-MODE-ACTIVE',
+      planType: '👑 Owner God Mode (Unrestricted)',
+      validUntil: new Date(Date.now() + 100 * 365 * 86400000).toISOString(),
+      maxDevices: 9999,
+      activeDevices: 1,
+      registeredDevices: [
+        {
+          hwid: hwid,
+          device_name: `${deviceName} (Owner Master Terminal)`,
+          activated_at: new Date().toISOString()
+        }
+      ],
+      lastValidated: Date.now()
+    };
+    // Note: NEVER saved to disk, so next restart requires re-entering master key
+    return {
+      success: true,
+      code: 'GOD_MODE_ACTIVATED',
+      message: '👑 God Mode Activated! Running as Application Owner with full unrestricted access.',
+      planType: licenseState.planType,
+      maxDevices: 9999,
+      activeDevices: 1,
+      validUntil: licenseState.validUntil,
+      isGodMode: true,
+      registeredDevices: licenseState.registeredDevices
+    };
+  }
 
   const clockCheck = verifyClockTampering();
   if (clockCheck.tampered) {
@@ -293,6 +352,7 @@ export function getLicenseStatus() {
 
   return {
     activated: licenseState.activated && !isExpired && !clockCheck.tampered,
+    isGodMode: !!licenseState.isGodMode,
     isExpired,
     clockTampered: clockCheck.tampered,
     clockMessage: clockCheck.message,
@@ -315,13 +375,54 @@ export function getLicenseStatus() {
 }
 
 /**
+ * Logs out / deactivates the license session.
+ * For God Mode, session is wiped instantly from memory.
+ * For normal key, license.json is wiped so app locks back up.
+ */
+export function logoutLicense() {
+  console.log('[license] Logging out and locking license session...');
+  licenseState = {
+    activated: false,
+    isGodMode: false,
+    licenseKey: null,
+    planType: null,
+    validUntil: null,
+    maxDevices: 1,
+    activeDevices: 0,
+    registeredDevices: [],
+    lastValidated: 0
+  };
+  try {
+    if (existsSync(licenseFilePath)) {
+      unlinkSync(licenseFilePath);
+    }
+  } catch (_) {}
+  return { success: true, message: 'License deactivated. Hub is locked.' };
+}
+
+/**
  * Initializes and performs background re-validation on server start.
  */
 export async function initLicenseManager() {
   const hwid = getMachineHwid();
   console.log(`[license] Initialized. Machine HWID: ${hwid} (${getDeviceName()})`);
 
-  if (licenseState.activated && licenseState.licenseKey) {
+  // Ensure God Mode is NEVER persisted across app startup
+  if (licenseState.isGodMode) {
+    licenseState = {
+      activated: false,
+      isGodMode: false,
+      licenseKey: null,
+      planType: null,
+      validUntil: null,
+      maxDevices: 1,
+      activeDevices: 0,
+      registeredDevices: [],
+      lastValidated: 0
+    };
+  }
+
+  if (licenseState.activated && licenseState.licenseKey && !licenseState.isGodMode) {
     // Re-validate in background
     setTimeout(async () => {
       try {
@@ -343,7 +444,7 @@ export async function initLicenseManager() {
 
     // Schedule re-validation every 4 hours
     setInterval(async () => {
-      if (licenseState.activated && licenseState.licenseKey) {
+      if (licenseState.activated && licenseState.licenseKey && !licenseState.isGodMode) {
         try {
           await activateLicense(licenseState.licenseKey);
         } catch (_) {}
@@ -351,4 +452,5 @@ export async function initLicenseManager() {
     }, 4 * 3600 * 1000);
   }
 }
+
 

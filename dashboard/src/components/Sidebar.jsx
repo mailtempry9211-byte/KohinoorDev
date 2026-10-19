@@ -1,16 +1,22 @@
 import { useState, useEffect } from 'react';
-import { Smartphone, Battery, BatteryCharging, Wifi, WifiOff, Trash2, ShieldCheck, Radio, KeyRound } from 'lucide-react';
+import { Smartphone, Battery, BatteryCharging, Wifi, WifiOff, Trash2, ShieldCheck, Radio, KeyRound, Crown } from 'lucide-react';
 import { useStore } from '../store/StoreContext';
 
 export default function Sidebar() {
   const { devices, activeDeviceId, setActiveDeviceId, removeDevice } = useStore();
   const [licenseStatus, setLicenseStatus] = useState(null);
 
-  useEffect(() => {
+  const refreshLicense = () => {
     fetch('/api/license/status')
       .then((r) => r.json())
       .then(setLicenseStatus)
       .catch(() => {});
+  };
+
+  useEffect(() => {
+    refreshLicense();
+    window.addEventListener('license-updated', refreshLicense);
+    return () => window.removeEventListener('license-updated', refreshLicense);
   }, []);
 
   const deviceList = Object.values(devices);
@@ -202,16 +208,28 @@ export default function Sidebar() {
         <button
           type="button"
           onClick={() => window.dispatchEvent(new CustomEvent('open-license-modal'))}
-          className="w-full flex items-center justify-between p-2 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/30 text-indigo-700 dark:text-indigo-300 text-[11px] font-semibold transition-all cursor-pointer shadow-xs"
+          className={`w-full flex items-center justify-between p-2 rounded-xl text-[11px] font-semibold transition-all cursor-pointer shadow-xs ${
+            licenseStatus?.isGodMode
+              ? 'bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/40 text-amber-300'
+              : 'bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/30 text-indigo-700 dark:text-indigo-300'
+          }`}
         >
           <div className="flex items-center gap-1.5 truncate">
-            <KeyRound className="h-3.5 w-3.5 text-indigo-500 dark:text-indigo-400 shrink-0" />
+            {licenseStatus?.isGodMode ? (
+              <Crown className="h-3.5 w-3.5 text-amber-400 shrink-0" />
+            ) : (
+              <KeyRound className="h-3.5 w-3.5 text-indigo-500 dark:text-indigo-400 shrink-0" />
+            )}
             <span className="truncate">
-              {licenseStatus?.activated ? (licenseStatus.planType || 'Pro License') : 'Activate License'}
+              {licenseStatus?.isGodMode
+                ? 'Owner God Mode'
+                : licenseStatus?.activated
+                ? (licenseStatus.planType || 'Pro License')
+                : 'Activate License'}
             </span>
           </div>
-          <span className="text-[10px] font-mono text-cyan-600 dark:text-cyan-400 shrink-0 font-bold">
-            {licenseStatus?.activated ? `${licenseStatus.daysRemaining}d left` : 'Locked 🔒'}
+          <span className={`text-[10px] font-mono shrink-0 font-bold ${licenseStatus?.isGodMode ? 'text-amber-400' : 'text-cyan-600 dark:text-cyan-400'}`}>
+            {licenseStatus?.isGodMode ? 'Permanent 👑' : licenseStatus?.activated ? `${licenseStatus.daysRemaining}d left` : 'Locked 🔒'}
           </span>
         </button>
       </div>

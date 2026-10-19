@@ -25,9 +25,7 @@
         "nsis",
         "portable"
       ],
-      "icon": "electron/icon.ico",
-      "sign": null,
-      "signExecutable": false
+      "icon": "electron/icon.ico"
     },
     "nsis": {
       "oneClick": false,
@@ -47,6 +45,13 @@
         "filter": [
           "**/*",
           "!data/db.json"
+        ]
+      },
+      {
+        "from": "license-portal",
+        "to": "license-portal",
+        "filter": [
+          "**/*"
         ]
       }
     ],

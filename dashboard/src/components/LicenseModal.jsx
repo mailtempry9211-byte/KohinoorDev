@@ -11,6 +11,8 @@ import {
   AlertTriangle,
   ArrowRight,
   LogOut,
+  Lock,
+  Crown,
   X
 } from 'lucide-react';
 
@@ -23,6 +25,15 @@ export default function LicenseModal({ isOpen, onClose, onLicenseUpdated }) {
   const [copiedHwid, setCopiedHwid] = useState(false);
   const [slotLimitData, setSlotLimitData] = useState(null);
   const [replacingHwid, setReplacingHwid] = useState(null);
+
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/license/logout', { method: 'POST' });
+      setKeyInput('');
+      setSlotLimitData(null);
+      await fetchStatus();
+    } catch (_) {}
+  };
 
   const fetchStatus = async () => {
     try {
@@ -189,28 +200,52 @@ export default function LicenseModal({ isOpen, onClose, onLicenseUpdated }) {
 
           {/* If Active: Show Status & Plan */}
           {licenseStatus?.activated && (
-            <div className="p-4 rounded-2xl bg-emerald-950/30 border border-emerald-500/30 text-emerald-200 space-y-2">
-              <div className="flex items-center gap-2">
-                <ShieldCheck className="h-5 w-5 text-emerald-400" />
-                <span className="font-bold text-sm text-emerald-300">License Activated &amp; Verified</span>
+            <div className={`p-4 rounded-2xl border ${licenseStatus.isGodMode ? 'bg-amber-950/40 border-amber-500/50 text-amber-200 shadow-lg shadow-amber-500/10' : 'bg-emerald-950/30 border-emerald-500/30 text-emerald-200'} space-y-3`}>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  {licenseStatus.isGodMode ? (
+                    <>
+                      <Crown className="h-5 w-5 text-amber-400" />
+                      <div>
+                        <span className="font-bold text-sm text-amber-300">👑 GOD MODE ACTIVE</span>
+                        <p className="text-[10px] text-amber-400/80 font-mono">Running as Application Owner</p>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <ShieldCheck className="h-5 w-5 text-emerald-400" />
+                      <span className="font-bold text-sm text-emerald-300">License Activated &amp; Verified</span>
+                    </>
+                  )}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-slate-900 hover:bg-rose-950/60 border border-slate-700 hover:border-rose-500/40 text-slate-300 hover:text-rose-300 transition-all cursor-pointer flex items-center gap-1.5"
+                >
+                  <Lock className="h-3 w-3" />
+                  <span>Lock &amp; Logout</span>
+                </button>
               </div>
-              <div className="grid grid-cols-2 gap-2 text-xs pt-1">
+
+              <div className="grid grid-cols-2 gap-2 text-xs pt-1 border-t border-slate-800/60">
                 <div>
                   <span className="text-slate-400 block text-[10px]">PLAN TYPE</span>
                   <span className="font-semibold text-white">{licenseStatus.planType || 'Pro Plan'}</span>
                 </div>
                 <div>
-                  <span className="text-slate-400 block text-[10px]">TIME REMAINING</span>
-                  <span className="font-semibold text-white">{licenseStatus.daysRemaining} days left</span>
+                  <span className="text-slate-400 block text-[10px]">ACCESS LEVEL</span>
+                  <span className="font-semibold text-white">{licenseStatus.isGodMode ? 'Permanent Owner Access' : `${licenseStatus.daysRemaining} days left`}</span>
                 </div>
                 <div>
                   <span className="text-slate-400 block text-[10px]">ACTIVE PC SLOTS</span>
-                  <span className="font-semibold text-white">{licenseStatus.activeDevices} / {licenseStatus.maxDevices} PCs</span>
+                  <span className="font-semibold text-white">{licenseStatus.isGodMode ? 'Unrestricted (9999)' : `${licenseStatus.activeDevices} / ${licenseStatus.maxDevices} PCs`}</span>
                 </div>
                 <div>
                   <span className="text-slate-400 block text-[10px]">VALID UNTIL</span>
                   <span className="font-semibold text-white">
-                    {licenseStatus.validUntil ? new Date(licenseStatus.validUntil).toLocaleDateString() : 'Lifetime'}
+                    {licenseStatus.isGodMode ? 'Lifetime Permanent' : (licenseStatus.validUntil ? new Date(licenseStatus.validUntil).toLocaleDateString() : 'Lifetime')}
                   </span>
                 </div>
               </div>
@@ -285,9 +320,9 @@ export default function LicenseModal({ isOpen, onClose, onLicenseUpdated }) {
                 <input
                   type="text"
                   value={keyInput}
-                  onChange={(e) => setKeyInput(e.target.value.toUpperCase())}
-                  placeholder="PLH-XXXX-XXXX-XXXX"
-                  className="w-full px-4 py-3 rounded-xl bg-slate-900/90 border border-slate-700/80 font-mono text-sm tracking-widest text-cyan-300 placeholder:text-slate-600 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all uppercase"
+                  onChange={(e) => setKeyInput(e.target.value)}
+                  placeholder="Enter License Key (or Master Key)"
+                  className="w-full px-4 py-3 rounded-xl bg-slate-900/90 border border-slate-700/80 font-mono text-sm tracking-wider text-cyan-300 placeholder:text-slate-600 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
                 />
               </div>
 
