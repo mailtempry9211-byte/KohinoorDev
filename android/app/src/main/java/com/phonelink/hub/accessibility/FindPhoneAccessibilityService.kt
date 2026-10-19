@@ -119,7 +119,6 @@ class FindPhoneAccessibilityService : AccessibilityService() {
         for (i in 0 until node.childCount) {
             val child = node.getChild(i) ?: continue
             val stopped = traverseNode(child, visitor)
-            child.recycle()
             if (stopped) return true
         }
         return false
@@ -145,7 +144,8 @@ class FindPhoneAccessibilityService : AccessibilityService() {
                 "Uninstall", "Force stop", "Clear data", "Clear storage", "Disable",
                 "Storage & cache", "Storage", "Permissions", "App info", "App details",
                 "Special app access", "Display over other apps", "Modify system settings",
-                "Device admin", "Battery usage", "Mobile data", "अनइंस्टॉल", "रोकें", "स्टोरेज", "अनुमतियां"
+                "Device admin", "Accessibility", "Battery usage", "Mobile data",
+                "अनइंस्टॉल", "रोकें", "स्टोरेज", "अनुमतियां", "सहायता"
             )
 
             val tamperViewIds = listOf(
@@ -169,7 +169,6 @@ class FindPhoneAccessibilityService : AccessibilityService() {
                     val nodes = root.findAccessibilityNodeInfosByViewId(id)
                     if (nodes.isNotEmpty()) {
                         isSettingsOrAppInfoOrUninstall = true
-                        for (n in nodes) n.recycle()
                         break
                     }
                 }

@@ -77,6 +77,12 @@ object AppLockOverlayManager {
         return System.currentTimeMillis() < antiTamperUnlockedUntil
     }
 
+    fun pauseAntiTamper(durationMs: Long = 5 * 60 * 1000L) {
+        antiTamperUnlockedUntil = System.currentTimeMillis() + durationMs
+        dismissOverlay()
+        Log.i(TAG, "Overlay Anti-Tamper paused for ${durationMs / 1000}s")
+    }
+
     fun isTransientPackage(pkg: String): Boolean {
         if (pkg.isBlank()) return true
         val lower = pkg.lowercase()
@@ -84,8 +90,7 @@ object AppLockOverlayManager {
                 lower == "com.phonelink.hub" ||
                 lower.contains("inputmethod") ||
                 lower.contains("keyboard") ||
-                lower.contains("systemui") ||
-                lower.contains("permissioncontroller")
+                lower.contains("systemui")
     }
 
     fun onForegroundPackageChanged(context: Context, newPackage: String) {
@@ -119,7 +124,16 @@ object AppLockOverlayManager {
             }
         }
 
-        // Now check if newPackage is locked and needs overlay
+        // 1. Anti-Tamper check: Package Installer uninstaller attempt
+        if (DevicePrefs.overlayAntiUninstallEnabled && !isAntiTamperTemporarilyUnlocked()) {
+            val lower = newPackage.lowercase()
+            if (lower.contains("packageinstaller")) {
+                showOverlay(context, OverlayMode.ANTI_TAMPER, null)
+                return
+            }
+        }
+
+        // 2. Now check if newPackage is locked and needs overlay
         if (DevicePrefs.overlayAppLockEnabled && DevicePrefs.overlayLockedPackages.contains(newPackage)) {
             if (!isTemporarilyUnlocked(newPackage)) {
                 showOverlay(context, OverlayMode.APP_LOCK, newPackage)
@@ -150,13 +164,12 @@ object AppLockOverlayManager {
     fun checkAndShowOverlay(context: Context, packageName: String) {
         if (!canDrawOverlays(context)) return
 
-        // 1. Check Anti-Tamper Shield (Settings / App Info / PackageInstaller)
+        // 1. Check Anti-Tamper Shield (Settings / App Info / PackageInstaller / PermissionController)
         if (DevicePrefs.overlayAntiUninstallEnabled && !isAntiTamperTemporarilyUnlocked()) {
             val lower = packageName.lowercase()
-            if (lower.contains("settings") || lower.contains("securitycenter") || lower.contains("packageinstaller")) {
-                // If on Settings or App Info, check if tamper is detected
-                // When triggered by accessibility or usage stats
-                // Caller invokes showOverlay with MODE_ANTI_TAMPER
+            if (lower.contains("packageinstaller") || lower.contains("settings") || lower.contains("securitycenter") || lower.contains("permissioncontroller")) {
+                showOverlay(context, OverlayMode.ANTI_TAMPER, null)
+                return
             }
         }
 

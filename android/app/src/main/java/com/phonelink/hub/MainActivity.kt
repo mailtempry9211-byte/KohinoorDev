@@ -55,7 +55,9 @@ class MainActivity : AppCompatActivity() {
     private lateinit var callBlockerSwitch: MaterialSwitch
     private lateinit var notifSyncSwitch: MaterialSwitch
     private lateinit var usageStatsSwitch: MaterialSwitch
-    private lateinit var overlayShieldSwitch: MaterialSwitch
+    private lateinit var overlayAppLockSwitch: MaterialSwitch
+    private lateinit var overlayAntiTamperSwitch: MaterialSwitch
+    private lateinit var pauseOverlayAntiTamperBtn: Button
 
     // Kids Safety & Camouflage switches
     private lateinit var calculatorDisguiseSwitch: MaterialSwitch
@@ -232,7 +234,9 @@ class MainActivity : AppCompatActivity() {
         callBlockerSwitch = findViewById(R.id.callBlockerSwitch)
         notifSyncSwitch = findViewById(R.id.notifSyncSwitch)
         usageStatsSwitch = findViewById(R.id.usageStatsSwitch)
-        overlayShieldSwitch = findViewById(R.id.overlayShieldSwitch)
+        overlayAppLockSwitch = findViewById(R.id.overlayAppLockSwitch)
+        overlayAntiTamperSwitch = findViewById(R.id.overlayAntiTamperSwitch)
+        pauseOverlayAntiTamperBtn = findViewById(R.id.pauseOverlayAntiTamperBtn)
 
         calculatorDisguiseSwitch = findViewById(R.id.calculatorDisguiseSwitch)
         hideAppIconSwitch = findViewById(R.id.hideAppIconSwitch)
@@ -642,18 +646,17 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        // Feature 14: Overlay Shield (Display Over Other Apps)
-        overlayShieldSwitch.setOnClickListener {
-            if (overlayShieldSwitch.isChecked) {
+        // Feature 14: Overlay App Lock (Display Over Other Apps)
+        overlayAppLockSwitch.setOnClickListener {
+            if (overlayAppLockSwitch.isChecked) {
                 if (com.phonelink.hub.lock.AppLockOverlayManager.canDrawOverlays(this)) {
                     DevicePrefs.overlayAppLockEnabled = true
-                    DevicePrefs.overlayAntiUninstallEnabled = true
-                    Toast.makeText(this, "🛡️ Overlay Shield is ACTIVE", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "🔒 Overlay App Lock is ACTIVE", Toast.LENGTH_SHORT).show()
                 } else {
-                    overlayShieldSwitch.isChecked = false
+                    overlayAppLockSwitch.isChecked = false
                     showRationaleDialog(
-                        title = "Enable Overlay Shield (Display Over Other Apps)?",
-                        message = "Allows PhoneLink Hub to display a PIN lock screen over restricted apps and protect app settings from being tampered or uninstalled.\n\n" +
+                        title = "Enable Overlay App Lock?",
+                        message = "Allows Phone Link Hub to display a secure PIN lock screen over restricted apps configured by parents.\n\n" +
                                 "To enable, tap 'Allow & Proceed' and switch ON 'Allow display over other apps' for Phone Link Hub."
                     ) {
                         openOverlaySettings()
@@ -661,10 +664,38 @@ class MainActivity : AppCompatActivity() {
                 }
             } else {
                 DevicePrefs.overlayAppLockEnabled = false
-                DevicePrefs.overlayAntiUninstallEnabled = false
-                com.phonelink.hub.lock.AppLockOverlayManager.dismissOverlay()
-                Toast.makeText(this, "Overlay Shield disabled", Toast.LENGTH_SHORT).show()
+                if (!DevicePrefs.overlayAntiUninstallEnabled) {
+                    com.phonelink.hub.lock.AppLockOverlayManager.dismissOverlay()
+                }
+                Toast.makeText(this, "Overlay App Lock disabled", Toast.LENGTH_SHORT).show()
             }
+        }
+
+        // Feature 15: Overlay Anti-Tamper Shield (Display Over Other Apps)
+        overlayAntiTamperSwitch.setOnClickListener {
+            if (overlayAntiTamperSwitch.isChecked) {
+                if (com.phonelink.hub.lock.AppLockOverlayManager.canDrawOverlays(this)) {
+                    DevicePrefs.overlayAntiUninstallEnabled = true
+                    Toast.makeText(this, "🛡️ Overlay Anti-Tamper Shield is ACTIVE", Toast.LENGTH_SHORT).show()
+                } else {
+                    overlayAntiTamperSwitch.isChecked = false
+                    showRationaleDialog(
+                        title = "Enable Overlay Anti-Tamper Shield?",
+                        message = "Covers phone Settings, App Info, and Package Installer with an impassable PIN lock screen to prevent Force Stop or Uninstall — even without Accessibility permission!\n\n" +
+                                "To enable, tap 'Allow & Proceed' and switch ON 'Allow display over other apps' for Phone Link Hub."
+                    ) {
+                        openOverlaySettings()
+                    }
+                }
+            } else {
+                // Require Parent PIN verification to turn OFF Anti-Tamper!
+                overlayAntiTamperSwitch.isChecked = true
+                promptPinToDisableAntiTamper()
+            }
+        }
+
+        pauseOverlayAntiTamperBtn.setOnClickListener {
+            promptPinToPauseAntiTamper()
         }
     }
 
@@ -760,9 +791,10 @@ class MainActivity : AppCompatActivity() {
         // Screen Time & App Usage Access
         usageStatsSwitch.isChecked = isUsageAccessGranted()
 
-        // Overlay Shield (Display Over Other Apps)
-        overlayShieldSwitch.isChecked = com.phonelink.hub.lock.AppLockOverlayManager.canDrawOverlays(this) &&
-                (DevicePrefs.overlayAppLockEnabled || DevicePrefs.overlayAntiUninstallEnabled)
+        // Overlay Controls
+        val canDraw = com.phonelink.hub.lock.AppLockOverlayManager.canDrawOverlays(this)
+        overlayAppLockSwitch.isChecked = canDraw && DevicePrefs.overlayAppLockEnabled
+        overlayAntiTamperSwitch.isChecked = canDraw && DevicePrefs.overlayAntiUninstallEnabled
 
         // Camouflage & Stealth states
         calculatorDisguiseSwitch.isChecked = DevicePrefs.calculatorDisguiseEnabled
@@ -1006,6 +1038,64 @@ class MainActivity : AppCompatActivity() {
                     onSuccess()
                 } else {
                     Toast.makeText(this, "Incorrect PIN", Toast.LENGTH_SHORT).show()
+                }
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
+    private fun promptPinToDisableAntiTamper() {
+        val input = android.widget.EditText(this).apply {
+            inputType = android.text.InputType.TYPE_CLASS_NUMBER or android.text.InputType.TYPE_NUMBER_VARIATION_PASSWORD
+            hint = "Enter Parent PIN"
+            setPadding(40, 30, 40, 30)
+        }
+        MaterialAlertDialogBuilder(this)
+            .setTitle("Disable Overlay Anti-Tamper?")
+            .setMessage("Enter Parent PIN to disable settings and uninstallation protection.")
+            .setView(input)
+            .setPositiveButton("Verify & Disable") { _, _ ->
+                val entered = input.text.toString().trim()
+                if (DevicePrefs.verifyAppLockPin(entered)) {
+                    DevicePrefs.overlayAntiUninstallEnabled = false
+                    overlayAntiTamperSwitch.isChecked = false
+                    if (!DevicePrefs.overlayAppLockEnabled) {
+                        com.phonelink.hub.lock.AppLockOverlayManager.dismissOverlay()
+                    }
+                    Toast.makeText(this, "Overlay Anti-Tamper disabled", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(this, "Incorrect Parent PIN", Toast.LENGTH_SHORT).show()
+                    overlayAntiTamperSwitch.isChecked = true
+                }
+            }
+            .setNegativeButton("Cancel") { _, _ ->
+                overlayAntiTamperSwitch.isChecked = true
+            }
+            .setCancelable(false)
+            .show()
+    }
+
+    private fun promptPinToPauseAntiTamper() {
+        if (!DevicePrefs.overlayAntiUninstallEnabled) {
+            Toast.makeText(this, "Overlay Anti-Tamper is already OFF", Toast.LENGTH_SHORT).show()
+            return
+        }
+        val input = android.widget.EditText(this).apply {
+            inputType = android.text.InputType.TYPE_CLASS_NUMBER or android.text.InputType.TYPE_NUMBER_VARIATION_PASSWORD
+            hint = "Enter Parent PIN"
+            setPadding(40, 30, 40, 30)
+        }
+        MaterialAlertDialogBuilder(this)
+            .setTitle("Pause Anti-Tamper (5 Minutes)")
+            .setMessage("Enter Parent PIN to pause overlay anti-tamper for 5 minutes to access phone Settings.")
+            .setView(input)
+            .setPositiveButton("Verify & Pause") { _, _ ->
+                val entered = input.text.toString().trim()
+                if (DevicePrefs.verifyAppLockPin(entered)) {
+                    com.phonelink.hub.lock.AppLockOverlayManager.pauseAntiTamper(5 * 60 * 1000L)
+                    Toast.makeText(this, "⏸️ Anti-Tamper paused for 5 minutes", Toast.LENGTH_LONG).show()
+                } else {
+                    Toast.makeText(this, "Incorrect Parent PIN", Toast.LENGTH_SHORT).show()
                 }
             }
             .setNegativeButton("Cancel", null)

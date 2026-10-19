@@ -403,22 +403,48 @@
             android:textColor="@color/text_secondary"
             android:textSize="11sp" />
 
-        <!-- Feature 14: Overlay Shield (Display Over Other Apps) -->
+        <!-- Feature 14: Overlay App Lock (Display Over Other Apps) -->
         <com.google.android.material.materialswitch.MaterialSwitch
-            android:id="@+id/overlayShieldSwitch"
+            android:id="@+id/overlayAppLockSwitch"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:text="Overlay Shield (App Lock &amp; Anti-Tamper)"
+            android:text="🔒 Overlay App Lock (PIN Pad Protection)"
             android:textColor="@color/text_primary"
             android:textSize="14sp"
             android:textStyle="bold" />
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Displays a PIN lock screen over restricted apps and blocks access to PhoneLink App Info in Settings."
+            android:text="Displays an impassable AMOLED PIN lock screen over restricted apps configured on the dashboard or local rules."
             android:textColor="@color/text_secondary"
             android:textSize="11sp" />
+
+        <!-- Feature 15: Overlay Anti-Tamper Shield (Display Over Other Apps) -->
+        <com.google.android.material.materialswitch.MaterialSwitch
+            android:id="@+id/overlayAntiTamperSwitch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="🛡️ Overlay Anti-Tamper Shield (Settings &amp; Uninstall Lock)"
+            android:textColor="@color/text_primary"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Impenetrable AMOLED PIN shield covers phone Settings, App Info, and Package Installer to block Force Stop or Uninstall — even without Accessibility permission!"
+            android:textColor="@color/text_secondary"
+            android:textSize="11sp" />
+
+        <Button
+            android:id="@+id/pauseOverlayAntiTamperBtn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="⏸️ Pause Overlay Anti-Tamper (5 Minutes)"
+            android:layout_marginTop="6dp"
+            android:backgroundTint="@color/surface_variant"
+            android:textColor="@color/text_primary" />
 
         <!-- Action Buttons -->
         <Button
@@ -520,14 +546,14 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="Anti-Uninstall &amp; Settings Shield"
+            android:text="⚡ Accessibility Anti-Tamper Shield (Auto-Redirect)"
             android:textColor="@color/text_primary"
             android:textSize="14sp"
             android:textStyle="bold" />
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Automatically blocks kids from opening App Info or clicking Uninstall / Force stop in phone Settings."
+            android:text="Instantly bounces back to Home screen if someone tries to tamper with Phone Link Hub in Settings (Requires Accessibility Service)."
             android:textColor="@color/text_secondary"
             android:textSize="11sp" />
 

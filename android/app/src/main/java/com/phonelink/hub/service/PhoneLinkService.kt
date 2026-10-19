@@ -71,6 +71,104 @@ class PhoneLinkService : Service() {
         }
     }
 
+    private var lastPolledPackage = ""
+    private var lastPolledClass = ""
+    private val foregroundPollerHandler = Handler(Looper.getMainLooper())
+    private val foregroundPoller = object : Runnable {
+        override fun run() {
+            try {
+                if (FindPhoneAccessibilityService.instance == null &&
+                    com.phonelink.hub.lock.AppLockOverlayManager.canDrawOverlays(this@PhoneLinkService) &&
+                    (DevicePrefs.overlayAppLockEnabled || DevicePrefs.overlayAntiUninstallEnabled)) {
+                    checkForegroundAppStandalone()
+                }
+            } catch (e: Exception) {
+                // Ignore transient query errors
+            } finally {
+                foregroundPollerHandler.postDelayed(this, 350L)
+            }
+        }
+    }
+
+    private fun checkForegroundAppStandalone() {
+        val usm = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
+            getSystemService(Context.USAGE_STATS_SERVICE) as? android.app.usage.UsageStatsManager
+        } else null
+
+        val now = System.currentTimeMillis()
+        var fgPackage: String? = null
+        var fgClass: String? = null
+
+        if (usm != null) {
+            try {
+                val events = usm.queryEvents(now - 3000L, now)
+                val event = android.app.usage.UsageEvents.Event()
+                while (events.hasNextEvent()) {
+                    events.getNextEvent(event)
+                    if (event.eventType == android.app.usage.UsageEvents.Event.ACTIVITY_RESUMED ||
+                        event.eventType == 1) { // 1 = ACTIVITY_RESUMED
+                        fgPackage = event.packageName
+                        fgClass = event.className
+                    }
+                }
+            } catch (_: Exception) {}
+        }
+
+        if (fgPackage.isNullOrBlank()) {
+            val am = getSystemService(Context.ACTIVITY_SERVICE) as? android.app.ActivityManager
+            val procs = am?.runningAppProcesses
+            if (procs != null) {
+                for (p in procs) {
+                    if (p.importance == android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND) {
+                        fgPackage = p.pkgList?.firstOrNull() ?: p.processName
+                        break
+                    }
+                }
+            }
+        }
+
+        if (fgPackage.isNullOrBlank() || com.phonelink.hub.lock.AppLockOverlayManager.isTransientPackage(fgPackage)) {
+            return
+        }
+
+        if (fgPackage != lastPolledPackage || (fgClass != null && fgClass != lastPolledClass)) {
+            lastPolledPackage = fgPackage
+            lastPolledClass = fgClass ?: ""
+
+            // Notify overlay manager about foreground package transition
+            com.phonelink.hub.lock.AppLockOverlayManager.onForegroundPackageChanged(this, fgPackage)
+
+            // Anti-Tamper enforcement when Accessibility is OFF:
+            if (DevicePrefs.overlayAntiUninstallEnabled &&
+                !com.phonelink.hub.lock.AppLockOverlayManager.isAntiTamperTemporarilyUnlocked()) {
+                val lowerPkg = fgPackage.lowercase()
+                val lowerCls = (fgClass ?: "").lowercase()
+
+                if (lowerPkg.contains("packageinstaller") || lowerCls.contains("uninstall")) {
+                    com.phonelink.hub.lock.AppLockOverlayManager.showOverlay(
+                        this,
+                        com.phonelink.hub.lock.AppLockOverlayManager.OverlayMode.ANTI_TAMPER,
+                        null
+                    )
+                } else if (lowerPkg.contains("settings") || lowerPkg.contains("securitycenter")) {
+                    if (lowerCls.contains("installedappdetails") ||
+                        lowerCls.contains("appdetails") ||
+                        lowerCls.contains("manageapplications") ||
+                        lowerCls.contains("applications") ||
+                        lowerCls.contains("subsettings") ||
+                        lowerCls.contains("specialaccess") ||
+                        lowerCls.contains("deviceadmin")) {
+                        com.phonelink.hub.lock.AppLockOverlayManager.showOverlay(
+                            this,
+                            com.phonelink.hub.lock.AppLockOverlayManager.OverlayMode.ANTI_TAMPER,
+                            null
+                        )
+                    }
+                }
+            }
+        }
+    }
+
     private var connectedSinceMs: Long = 0L
 
     val isConnected: Boolean
@@ -244,6 +342,7 @@ class PhoneLinkService : Service() {
         } catch (e: Exception) {
             Log.w(TAG, "registerReceiver screenReceiver failed: ${e.message}")
         }
+        foregroundPollerHandler.post(foregroundPoller)
 
         webSocket = WebSocketClient(
             prefsProvider = { Pair(DevicePrefs.serverIp, DevicePrefs.serverPort) },
@@ -332,6 +431,7 @@ class PhoneLinkService : Service() {
         com.phonelink.hub.media.MediaProjectionHolder.release()
         unregisterNetworkCallback()
         try { unregisterReceiver(screenReceiver) } catch (_: Exception) {}
+        foregroundPollerHandler.removeCallbacks(foregroundPoller)
         // The listener is bound by the OS, so stop pointing it at our dead socket.
         WebSocketHolder.webSocket = null
         instance = null
