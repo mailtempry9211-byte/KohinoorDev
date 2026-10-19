@@ -245,6 +245,22 @@
             <input type="text" id="custCustomKey" placeholder="e.g. PLH-VIP-2026 or auto" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 font-mono text-cyan-300 focus:outline-none uppercase" />
           </div>
 
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <label class="block text-slate-300 font-semibold">Customer Machine HWID <span class="text-slate-500 font-normal text-[11px]">(Optional)</span></label>
+              <span class="text-[10px] text-cyan-400 font-medium">Agar customer ne WhatsApp par bheja ho</span>
+            </div>
+            <div class="relative flex items-center">
+              <input type="text" id="custHwid" placeholder="Paste HWID e.g. PLH-WIN-17F384AE-8A19 (or leave blank)" class="w-full pl-3.5 pr-20 py-2.5 rounded-xl bg-slate-900 border border-slate-700 font-mono text-cyan-300 focus:outline-none uppercase text-xs" />
+              <button type="button" onclick="pasteToInput('custHwid')" class="absolute right-2 px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-[11px] font-sans text-slate-300 border border-slate-600 transition-colors cursor-pointer">
+                📋 Paste
+              </button>
+            </div>
+            <p class="text-[10px] text-slate-500 mt-1">
+              ✨ <b>Auto-bind:</b> Agar ye box khali chhodenge to customer jab apne PC par key daalega, uska PC auto-bind ho jayega.
+            </p>
+          </div>
+
           <div class="flex items-center justify-between p-3 rounded-xl bg-slate-900/90 border border-slate-800">
             <div>
               <p class="font-semibold text-slate-200">Hardware Protection Mode</p>
@@ -261,6 +277,55 @@
           <button type="submit" id="createSubmitBtn" class="w-full py-3 rounded-xl font-bold bg-indigo-600 hover:bg-indigo-500 text-white transition-all shadow-lg shadow-indigo-500/25 flex items-center justify-center gap-2 cursor-pointer">
             <i data-lucide="check" class="h-4 w-4"></i>
             <span>Create &amp; Activate License</span>
+          </button>
+        </form>
+
+      </div>
+    </div>
+
+    <!-- BIND HWID TO EXISTING KEY MODAL -->
+    <div id="bindModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-xl animate-pop select-none">
+      <div class="relative w-full max-w-md rounded-3xl border border-cyan-500/40 bg-[#0B0F19] text-white shadow-2xl p-6 space-y-4">
+        
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+          <div class="flex items-center gap-2.5">
+            <div class="p-2 rounded-xl bg-cyan-500/20 text-cyan-400">
+              <i data-lucide="cpu" class="h-5 w-5"></i>
+            </div>
+            <div>
+              <h3 class="text-sm font-bold">Bind Customer Machine (HWID)</h3>
+              <p class="text-[11px] text-cyan-400 font-mono" id="bindKeySubtitle">Key: PLH-...</p>
+            </div>
+          </div>
+          <button onclick="closeBindModal()" class="text-slate-400 hover:text-white p-1 rounded-lg">
+            <i data-lucide="x" class="h-4 w-4"></i>
+          </button>
+        </div>
+
+        <form onsubmit="handleBindHwid(event)" class="space-y-3 font-sans text-xs">
+          <input type="hidden" id="bindKeyInput" />
+          
+          <div>
+            <label class="block text-slate-300 font-semibold mb-1">Customer Hardware ID (HWID)</label>
+            <div class="relative flex items-center">
+              <input type="text" id="bindHwidInput" placeholder="PLH-WIN-XXXXXXXX-XXXX" required class="w-full pl-3.5 pr-20 py-2.5 rounded-xl bg-slate-900 border border-slate-700 font-mono text-cyan-300 focus:outline-none uppercase text-xs" />
+              <button type="button" onclick="pasteToInput('bindHwidInput')" class="absolute right-2 px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-[11px] text-slate-300 border border-slate-600 transition-colors cursor-pointer">
+                📋 Paste
+              </button>
+            </div>
+            <p class="text-[10px] text-slate-400 mt-1">Customer ke PhoneLink Hub dashboard se copy kiya gaya HWID yahan paste karein.</p>
+          </div>
+
+          <div>
+            <label class="block text-slate-300 font-semibold mb-1">PC Nickname / Label (Optional)</label>
+            <input type="text" id="bindDevNameInput" placeholder="e.g. Office Laptop / Home PC" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white focus:outline-none text-xs" />
+          </div>
+
+          <div id="bindError" class="hidden text-rose-400 text-xs"></div>
+
+          <button type="submit" id="bindSubmitBtn" class="w-full py-2.5 rounded-xl font-bold bg-cyan-600 hover:bg-cyan-500 text-white transition-all shadow-lg shadow-cyan-500/25 flex items-center justify-center gap-1.5 cursor-pointer">
+            <i data-lucide="link-2" class="h-4 w-4"></i>
+            <span>Bind Device to License</span>
           </button>
         </form>
 
@@ -427,10 +492,28 @@
           : '<span class="px-2 py-0.5 rounded-full bg-amber-950/80 border border-amber-500/40 text-amber-300 font-semibold text-[10px]">EXPIRED</span>';
 
         const devicesList = (l.registered_devices || []).map(d => `
-          <div class="text-[10px] text-slate-400 truncate">
-            🖥️ <b>${d.device_name || 'PC'}</b> (${d.hwid ? d.hwid.slice(0, 16) : ''})
+          <div class="mt-1 flex items-center justify-between gap-1 text-[10px] bg-slate-950/80 p-1.5 rounded-lg border border-slate-800">
+            <div class="truncate min-w-0" title="${escapeHtml(d.hwid || '')}">
+              <span class="text-slate-300 font-sans font-medium">🖥️ ${escapeHtml(d.device_name || 'PC')}</span>
+              <span class="text-cyan-400 font-mono block text-[9px] truncate">${escapeHtml(d.hwid || '')}</span>
+            </div>
+            <div class="flex items-center gap-1 shrink-0 font-sans">
+              <button type="button" title="Copy HWID" onclick="copyToClipboard('${escapeHtml(d.hwid || '')}')" class="p-1 hover:bg-slate-800 rounded text-slate-400 hover:text-white cursor-pointer">
+                <i data-lucide="copy" class="h-3 w-3"></i>
+              </button>
+              <button type="button" title="Unlink Device" onclick="actionRemoveDevice('${l.license_key}', '${escapeHtml(d.hwid || '')}')" class="p-1 hover:bg-rose-950/80 rounded text-slate-500 hover:text-rose-400 cursor-pointer">
+                <i data-lucide="x" class="h-3 w-3"></i>
+              </button>
+            </div>
           </div>
         `).join('');
+
+        const bindSlotBtn = devCount < maxDev
+          ? `<button type="button" onclick="openBindModal('${l.license_key}')" class="mt-1.5 inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-cyan-950/60 hover:bg-cyan-900/60 border border-cyan-500/40 text-[10px] text-cyan-300 cursor-pointer transition-colors font-sans font-medium">
+               <i data-lucide="plus" class="h-3 w-3"></i>
+               <span>+ Paste HWID</span>
+             </button>`
+          : '';
 
         return `
           <tr class="hover:bg-slate-900/40 transition-colors">
@@ -445,6 +528,7 @@
               <div class="font-sans font-semibold text-indigo-300 text-[11px]">${l.plan_type || 'Single_1PC'}</div>
               <div class="text-[10px] text-slate-400 mt-0.5 font-sans">${devCount} / ${maxDev} PCs Active</div>
               ${devicesList}
+              ${bindSlotBtn}
             </td>
             <td class="py-3 px-5">
               ${l.hardware_protection 
@@ -506,6 +590,7 @@
       const maxDev = parseInt(planEl.options[planEl.selectedIndex].getAttribute('data-devices') || '1', 10);
       const days = parseInt(document.getElementById('custDays').value, 10);
       const customKey = document.getElementById('custCustomKey').value.trim();
+      const custHwid = document.getElementById('custHwid').value.trim();
       const hwLock = document.getElementById('custHwLock').value === 'true';
 
       const btn = document.getElementById('createSubmitBtn');
@@ -523,7 +608,8 @@
           p_plan_type: plan,
           p_max_devices: maxDev,
           p_days_valid: days,
-          p_hardware_protection: hwLock
+          p_hardware_protection: hwLock,
+          p_hwid: custHwid
         });
 
         if (data.success && data.license) {
@@ -543,6 +629,87 @@
         btn.innerHTML = '<i data-lucide="check" class="h-4 w-4"></i><span>Create & Activate License</span>';
         lucide.createIcons();
       }
+    }
+
+    function openBindModal(key) {
+      document.getElementById('bindKeyInput').value = key;
+      document.getElementById('bindKeySubtitle').innerText = `Key: ${key}`;
+      document.getElementById('bindHwidInput').value = '';
+      document.getElementById('bindDevNameInput').value = '';
+      document.getElementById('bindError').classList.add('hidden');
+      document.getElementById('bindModal').classList.remove('hidden');
+      document.getElementById('bindHwidInput').focus();
+      lucide.createIcons();
+    }
+
+    function closeBindModal() {
+      document.getElementById('bindModal').classList.add('hidden');
+    }
+
+    async function handleBindHwid(e) {
+      e?.preventDefault();
+      const key = document.getElementById('bindKeyInput').value;
+      const hwid = document.getElementById('bindHwidInput').value.trim();
+      const devName = document.getElementById('bindDevNameInput').value.trim();
+      const btn = document.getElementById('bindSubmitBtn');
+      const err = document.getElementById('bindError');
+
+      if (!hwid) return;
+      btn.disabled = true;
+      btn.innerText = 'Binding HWID...';
+      err.classList.add('hidden');
+
+      try {
+        const data = await callRpc('admin_bind_hwid', {
+          p_admin_pin: currentPin,
+          p_license_key: key,
+          p_hwid: hwid,
+          p_device_name: devName
+        });
+
+        if (data.success) {
+          closeBindModal();
+          await fetchLicenses();
+        } else {
+          err.innerText = data.message || 'Binding failed.';
+          err.classList.remove('hidden');
+        }
+      } catch (e) {
+        err.innerText = 'Network error binding device.';
+        err.classList.remove('hidden');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i data-lucide="link-2" class="h-4 w-4"></i><span>Bind Device to License</span>';
+        lucide.createIcons();
+      }
+    }
+
+    async function actionRemoveDevice(key, hwid) {
+      if (!confirm(`Unlink device (${hwid}) from license ${key}?`)) return;
+      const res = await callRpc('admin_remove_device', {
+        p_admin_pin: currentPin,
+        p_license_key: key,
+        p_hwid: hwid
+      });
+      await fetchLicenses();
+    }
+
+    async function pasteToInput(inputId) {
+      try {
+        const text = await navigator.clipboard.readText();
+        if (text) {
+          const el = document.getElementById(inputId);
+          el.value = text.trim();
+          el.focus();
+        }
+      } catch (e) {
+        alert('Clipboard permission denied. Please press Ctrl+V to paste manually.');
+      }
+    }
+
+    function copyToClipboard(text) {
+      navigator.clipboard.writeText(text);
+      alert(`Copied HWID: ${text}`);
     }
 
     function openShareModal(lic) {
@@ -607,3 +774,4 @@
   </script>
 </body>
 </html>
+

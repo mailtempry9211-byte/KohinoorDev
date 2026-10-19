@@ -1,0 +1,17 @@
+{
+  "activated": true,
+  "licenseKey": "PLH-TEST-1PC-KEY1",
+  "planType": "Single_1PC",
+  "validUntil": "2027-10-19T05:12:11.762613+00:00",
+  "maxDevices": 1,
+  "activeDevices": 1,
+  "registeredDevices": [
+    {
+      "hwid": "PLH-WIN-5154-2EE4-E385",
+      "last_seen": "2026-10-19T05:32:42.029502+00:00",
+      "device_name": "DESKTOP-OE5TO2T",
+      "first_activated": "2026-10-19T05:32:42.029502+00:00"
+    }
+  ],
+  "lastValidated": 1792387961967
+}

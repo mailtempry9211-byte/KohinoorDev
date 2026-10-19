@@ -156,32 +156,35 @@ export default function LicenseModal({ isOpen, onClose, onLicenseUpdated }) {
           <div className="p-3.5 rounded-2xl bg-slate-900/80 border border-slate-800">
             <div className="flex items-center justify-between gap-2 mb-1.5">
               <span className="text-[11px] font-mono uppercase tracking-wider text-slate-400">
-                This Machine ID (HWID)
+                This Machine ID (Auto Detected)
               </span>
               <button
                 type="button"
                 onClick={handleCopyHwid}
-                className="flex items-center gap-1 text-[11px] font-mono text-cyan-400 hover:text-cyan-300 transition-colors"
+                className="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-cyan-950/60 border border-cyan-500/30 text-[11px] font-mono text-cyan-300 hover:text-cyan-200 transition-colors cursor-pointer"
               >
                 {copiedHwid ? (
                   <>
                     <Check className="h-3 w-3 text-emerald-400" />
-                    <span className="text-emerald-400">Copied!</span>
+                    <span className="text-emerald-400 font-sans font-semibold">HWID Copied!</span>
                   </>
                 ) : (
                   <>
                     <Copy className="h-3 w-3" />
-                    <span>Copy HWID</span>
+                    <span className="font-sans font-semibold">Copy HWID</span>
                   </>
                 )}
               </button>
             </div>
             <div className="flex items-center justify-between font-mono text-xs text-slate-200 bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/60">
-              <span className="font-semibold text-cyan-300 tracking-wide">
+              <span className="font-semibold text-cyan-300 tracking-wide select-all">
                 {licenseStatus?.hwid || 'Detecting machine...'}
               </span>
               <span className="text-[10px] text-slate-500">{licenseStatus?.deviceName}</span>
             </div>
+            <p className="text-[10px] text-slate-500 mt-1.5">
+              💡 License lene ke liye upar wala <b>Copy HWID</b> daba kar WhatsApp par Admin ko bhejein.
+            </p>
           </div>
 
           {/* If Active: Show Status & Plan */}
@@ -335,3 +338,4 @@ export default function LicenseModal({ isOpen, onClose, onLicenseUpdated }) {
     </div>
   );
 }
+

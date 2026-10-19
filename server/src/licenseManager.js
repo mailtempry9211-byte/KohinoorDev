@@ -351,3 +351,4 @@ export async function initLicenseManager() {
     }, 4 * 3600 * 1000);
   }
 }
+
