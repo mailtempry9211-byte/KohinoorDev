@@ -22,3 +22,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "PhoneLinkHub"
 include(":app")
+include(":parent")

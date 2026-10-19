@@ -25,8 +25,10 @@ jobs:
       - name: Prepare Release Keystore
         run: |
           mkdir -p android/app
+          mkdir -p android/parent
           if [ -n "${{ secrets.KEYSTORE_BASE64 }}" ]; then
             echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > android/app/release.keystore
+            cp android/app/release.keystore android/parent/release.keystore
             echo "KEYSTORE_FILE=$GITHUB_WORKSPACE/android/app/release.keystore" >> $GITHUB_ENV
             echo "KEYSTORE_PASSWORD=${{ secrets.KEYSTORE_PASSWORD }}" >> $GITHUB_ENV
             echo "KEY_ALIAS=${{ secrets.KEY_ALIAS }}" >> $GITHUB_ENV
@@ -41,13 +43,14 @@ jobs:
               -storepass phonelink123 \
               -keypass phonelink123 \
               -dname "CN=PhoneLink, OU=Hub, O=OpenSource, L=Local, S=State, C=US"
+            cp android/app/release.keystore android/parent/release.keystore
             echo "KEYSTORE_FILE=$GITHUB_WORKSPACE/android/app/release.keystore" >> $GITHUB_ENV
             echo "KEYSTORE_PASSWORD=phonelink123" >> $GITHUB_ENV
             echo "KEY_ALIAS=phonelink" >> $GITHUB_ENV
             echo "KEY_PASSWORD=phonelink123" >> $GITHUB_ENV
           fi
 
-      - name: Build Android Client Release APK
+      - name: Build Android Client & Parent Hub Release APKs
         run: |
           cd android
           chmod +x gradlew
@@ -80,19 +83,20 @@ jobs:
           name: gradle-build-log
           path: android/build.log
 
-      - name: Collect and Name Output APK
+      - name: Collect and Name Output APKs
         run: |
           mkdir -p dist_apk
-          find android/app/build/outputs/apk -name "*.apk" -exec cp -v {} dist_apk/PhoneLink-Client-v1.0-Release.apk \;
+          find android/app/build/outputs/apk -name "*release*.apk" -exec cp -v {} dist_apk/PhoneLink-Client-v1.0-Release.apk \;
+          find android/parent/build/outputs/apk -name "*release*.apk" -exec cp -v {} dist_apk/PhoneLink-ParentHub-v1.0-Release.apk \;
           cd dist_apk
           ls -la
           sha256sum *.apk > SHA256SUMS.txt
           cat SHA256SUMS.txt
 
-      - name: Upload PhoneLink Client Release APK
+      - name: Upload PhoneLink Release APKs
         uses: actions/upload-artifact@v4
         with:
-          name: PhoneLink-Client-v1.0-Release-APK
+          name: PhoneLink-Release-APKs
           path: |
             dist_apk/*.apk
             dist_apk/SHA256SUMS.txt
