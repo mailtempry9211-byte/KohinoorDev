@@ -10,6 +10,7 @@ import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Color
+import android.graphics.Typeface
 import android.media.MediaScannerConnection
 import android.net.Uri
 import android.net.http.SslError
@@ -22,6 +23,7 @@ import android.util.Base64
 import android.util.Log
 import android.view.Gravity
 import android.view.View
+import android.view.ViewGroup
 import android.webkit.ConsoleMessage
 import android.webkit.GeolocationPermissions
 import android.webkit.JavascriptInterface
@@ -94,9 +96,16 @@ class ParentMainActivity : AppCompatActivity() {
         setupWebView()
         updateHeaderInfo()
 
+        // Listen for live tunnel status changes
+        TunnelManager.onStatusListener = { isLive, url, detail ->
+            handler.post {
+                updateHeaderInfo()
+            }
+        }
+
         // Auto-start Ngrok tunnel if enabled
         if (TunnelManager.isAutoStart(this) && TunnelManager.getNgrokToken(this).isNotEmpty()) {
-            TunnelManager.startTunnel(this, 5000) { isLive, url ->
+            TunnelManager.startTunnel(this, 5000) { _, _ ->
                 handler.post {
                     updateHeaderInfo()
                 }
@@ -162,18 +171,24 @@ class ParentMainActivity : AppCompatActivity() {
             tvServerStatusDot.text = "☁️"
             tvServerAddress.text = tunnelUrl
             btnTunnelSettings.text = "☁️ On"
-            btnTunnelSettings.setTextColor(ContextCompat.getColor(this, R.color.green))
+            btnTunnelSettings.setTextColor(Color.parseColor("#10B981"))
+        } else if (isTunnelLive && tunnelUrl != null && tunnelUrl.startsWith("Connecting")) {
+            tvServerStatusDot.text = "🟡"
+            tvServerAddress.text = "Connecting Tunnel..."
+            btnTunnelSettings.text = "☁️ Wait"
+            btnTunnelSettings.setTextColor(Color.parseColor("#F59E0B"))
         } else if (isLocalMode) {
             val ip = NetworkUtils.getLocalIpAddress(this)
             tvServerStatusDot.text = "🟢"
             tvServerAddress.text = "http://$ip:$port"
             btnTunnelSettings.text = "☁️ Tunnel"
-            btnTunnelSettings.setTextColor(ContextCompat.getColor(this, R.color.cyan))
+            btnTunnelSettings.setTextColor(Color.parseColor("#06B6D4"))
         } else {
             val remoteUrl = prefs.getString(PREF_REMOTE_URL, "") ?: ""
             tvServerStatusDot.text = "🌐"
             tvServerAddress.text = remoteUrl.ifEmpty { "No remote URL set" }
             btnTunnelSettings.text = "☁️ Tunnel"
+            btnTunnelSettings.setTextColor(Color.parseColor("#94A3B8"))
         }
     }
 
@@ -194,13 +209,11 @@ class ParentMainActivity : AppCompatActivity() {
             ws.mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
         }
 
-        // Bridge to save downloads directly to internal storage PhoneLink folder
         webView.addJavascriptInterface(PhoneLinkJsBridge(), "AndroidPhoneLink")
 
         webView.setDownloadListener { url, userAgent, contentDisposition, mimeType, contentLength ->
             try {
                 if (url.startsWith("blob:") || url.startsWith("data:")) {
-                    // Blob URLs are handled via JS Bridge
                     return@setDownloadListener
                 }
                 val request = DownloadManager.Request(Uri.parse(url))
@@ -242,7 +255,6 @@ class ParentMainActivity : AppCompatActivity() {
                 super.onPageFinished(view, url)
                 reloadRetryCount = 0
 
-                // Inject hook for browser download links to auto-save into PhoneLink folder
                 val jsHook = """
                     (function() {
                         if (window.__phonelink_hook_installed) return;
@@ -334,33 +346,43 @@ class ParentMainActivity : AppCompatActivity() {
     }
 
     /**
-     * Out-of-network Ngrok Port Forwarding Settings Dialog
+     * Rich Diagnostic Ngrok Tunnel Dialog with Live Terminal Log Console
      */
     private fun showTunnelSettingsDialog() {
         val currentToken = TunnelManager.getNgrokToken(this)
         val currentDomain = TunnelManager.getNgrokDomain(this)
         val isAuto = TunnelManager.isAutoStart(this)
-        val isRunning = TunnelManager.isTunnelRunning()
-        val currentUrl = TunnelManager.getActiveUrl()
 
         val layout = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setPadding(48, 32, 48, 16)
+            setPadding(36, 24, 36, 16)
         }
 
-        // Live Status Indicator
+        // Live Status Badge
         val statusText = TextView(this).apply {
             textSize = 13f
-            if (isRunning && !currentUrl.isNullOrEmpty()) {
-                text = "🟢 Status: ACTIVE\n🔗 Live URL: $currentUrl"
-                setTextColor(Color.parseColor("#10B981"))
-            } else {
-                text = "⚪ Status: STOPPED (Local Network Only)"
-                setTextColor(Color.parseColor("#94A3B8"))
-            }
-            setPadding(0, 0, 0, 24)
+            typeface = Typeface.DEFAULT_BOLD
+            setPadding(0, 0, 0, 16)
         }
         layout.addView(statusText)
+
+        fun refreshStatusView() {
+            val running = TunnelManager.isTunnelRunning()
+            val url = TunnelManager.getActiveUrl()
+            val detail = TunnelManager.getDetailedStatus()
+
+            if (running && !url.isNullOrEmpty() && !url.startsWith("Connecting")) {
+                statusText.text = "🟢 Status: ACTIVE & ONLINE\n🔗 Public URL: $url"
+                statusText.setTextColor(Color.parseColor("#10B981"))
+            } else if (running) {
+                statusText.text = "🟡 Status: CONNECTING...\nℹ️ $detail"
+                statusText.setTextColor(Color.parseColor("#F59E0B"))
+            } else {
+                statusText.text = "⚪ Status: STOPPED\nℹ️ $detail"
+                statusText.setTextColor(Color.parseColor("#94A3B8"))
+            }
+        }
+        refreshStatusView()
 
         // Claimed Domain Input
         val lblDomain = TextView(this).apply {
@@ -373,7 +395,7 @@ class ParentMainActivity : AppCompatActivity() {
         val etDomain = EditText(this).apply {
             hint = "talented-wolf-primarily.ngrok-free.app"
             setText(currentDomain)
-            textSize = 14f
+            textSize = 13f
             setTextColor(Color.parseColor("#F1F5F9"))
             setHintTextColor(Color.parseColor("#64748B"))
         }
@@ -384,14 +406,14 @@ class ParentMainActivity : AppCompatActivity() {
             text = "Ngrok Authtoken (from dashboard.ngrok.com):"
             textSize = 12f
             setTextColor(Color.parseColor("#94A3B8"))
-            setPadding(0, 16, 0, 0)
+            setPadding(0, 12, 0, 0)
         }
         layout.addView(lblToken)
 
         val etToken = EditText(this).apply {
-            hint = "Paste your Ngrok authtoken here"
+            hint = "Paste your Ngrok authtoken"
             setText(currentToken)
-            textSize = 14f
+            textSize = 13f
             setTextColor(Color.parseColor("#F1F5F9"))
             setHintTextColor(Color.parseColor("#64748B"))
         }
@@ -402,18 +424,94 @@ class ParentMainActivity : AppCompatActivity() {
             text = "Auto-start tunnel when Parent Hub opens"
             isChecked = isAuto
             setTextColor(Color.parseColor("#E2E8F0"))
-            setPadding(0, 16, 0, 16)
+            setPadding(0, 8, 0, 8)
         }
         layout.addView(cbAutoStart)
 
-        val scrollView = ScrollView(this).apply {
+        // Live Log Terminal Header
+        val logHeaderLayout = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            setPadding(0, 16, 0, 6)
+        }
+
+        val lblLog = TextView(this).apply {
+            text = "Live Ngrok Engine Logs:"
+            textSize = 12f
+            typeface = Typeface.DEFAULT_BOLD
+            setTextColor(Color.parseColor("#38BDF8"))
+            layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f)
+        }
+        logHeaderLayout.addView(lblLog)
+
+        val btnCopyLogs = Button(this).apply {
+            text = "📋 Copy Logs"
+            textSize = 10f
+            setTextColor(Color.WHITE)
+            setBackgroundColor(Color.parseColor("#334155"))
+            setPadding(16, 4, 16, 4)
+            setOnClickListener {
+                val logs = TunnelManager.getRecentLogs()
+                val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                clipboard.setPrimaryClip(ClipData.newPlainText("Ngrok Logs", logs))
+                Toast.makeText(this@ParentMainActivity, "Copied full logs to clipboard!", Toast.LENGTH_SHORT).show()
+            }
+        }
+        logHeaderLayout.addView(btnCopyLogs)
+
+        val btnClearLogs = Button(this).apply {
+            text = "Clear"
+            textSize = 10f
+            setTextColor(Color.parseColor("#94A3B8"))
+            setBackgroundColor(Color.parseColor("#1E293B"))
+            setPadding(12, 4, 12, 4)
+            setOnClickListener {
+                TunnelManager.clearLogs()
+            }
+        }
+        logHeaderLayout.addView(btnClearLogs)
+        layout.addView(logHeaderLayout)
+
+        // Terminal Log Console View
+        val logScrollView = ScrollView(this).apply {
+            layoutParams = LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                (resources.displayMetrics.density * 160).toInt()
+            )
+            setBackgroundColor(Color.parseColor("#090D16"))
+            setPadding(12, 12, 12, 12)
+        }
+
+        val tvLogConsole = TextView(this).apply {
+            text = TunnelManager.getRecentLogs().ifEmpty { "Waiting for engine events..." }
+            textSize = 10.5f
+            typeface = Typeface.MONOSPACE
+            setTextColor(Color.parseColor("#4ADE80"))
+            setLineSpacing(4f, 1f)
+        }
+        logScrollView.addView(tvLogConsole)
+        layout.addView(logScrollView)
+
+        val mainScrollView = ScrollView(this).apply {
             addView(layout)
         }
 
+        // Live Log Stream Listener
+        val logCallback: (String) -> Unit = { line ->
+            handler.post {
+                tvLogConsole.append("\n$line")
+                logScrollView.post {
+                    logScrollView.fullScroll(View.FOCUS_DOWN)
+                }
+                refreshStatusView()
+            }
+        }
+        TunnelManager.onLogListener = logCallback
+
         val dialog = AlertDialog.Builder(this)
             .setTitle("☁️ Embedded Ngrok Port Forwarding")
-            .setView(scrollView)
-            .setPositiveButton(if (isRunning) "Restart Tunnel" else "Start Tunnel") { _, _ ->
+            .setView(mainScrollView)
+            .setPositiveButton(if (TunnelManager.isTunnelRunning()) "Restart Tunnel" else "Start Tunnel") { _, _ ->
                 val domain = etDomain.text.toString().trim()
                 val token = etToken.text.toString().trim()
                 TunnelManager.saveConfig(this, token, domain, cbAutoStart.isChecked)
@@ -422,6 +520,7 @@ class ParentMainActivity : AppCompatActivity() {
                 TunnelManager.startTunnel(this, 5000) { success, liveUrl ->
                     handler.post {
                         updateHeaderInfo()
+                        refreshStatusView()
                         if (success && !liveUrl.isNullOrEmpty() && !liveUrl.startsWith("Connecting")) {
                             Toast.makeText(this, "Ngrok Live! In child app connect to: ${liveUrl.removePrefix("https://").removePrefix("http://")}", Toast.LENGTH_LONG).show()
                         } else if (!success) {
@@ -430,23 +529,23 @@ class ParentMainActivity : AppCompatActivity() {
                     }
                 }
             }
-            .setNeutralButton(if (isRunning) "Stop Tunnel" else "Save Settings") { _, _ ->
+            .setNeutralButton("Stop Tunnel") { _, _ ->
                 val domain = etDomain.text.toString().trim()
                 val token = etToken.text.toString().trim()
                 TunnelManager.saveConfig(this, token, domain, cbAutoStart.isChecked)
 
-                if (isRunning) {
-                    TunnelManager.stopTunnel(this) { _, _ ->
-                        handler.post {
-                            updateHeaderInfo()
-                            Toast.makeText(this, "Ngrok Tunnel Stopped", Toast.LENGTH_SHORT).show()
-                        }
+                TunnelManager.stopTunnel(this) { _, _ ->
+                    handler.post {
+                        updateHeaderInfo()
+                        refreshStatusView()
+                        Toast.makeText(this, "Ngrok Tunnel Stopped", Toast.LENGTH_SHORT).show()
                     }
-                } else {
-                    Toast.makeText(this, "Settings Saved", Toast.LENGTH_SHORT).show()
                 }
             }
             .setNegativeButton("Close", null)
+            .setOnDismissListener {
+                TunnelManager.onLogListener = null
+            }
             .create()
 
         dialog.show()
