@@ -184,17 +184,34 @@ object TunnelManager {
                     configDir.mkdirs()
                 }
 
-                // Write ngrok.yml configuration file
-                if (token.isNotEmpty()) {
-                    try {
-                        val configFile = File(configDir, "ngrok.yml")
-                        val configContent = "version: \"2\"\nauthtoken: \"$token\"\n"
-                        configFile.writeText(configContent)
-                        appendLog("Wrote config to: ${configFile.absolutePath}")
-                    } catch (e: Exception) {
-                        appendLog("Config write warning: ${e.message}")
+                // Detect system DNS servers + Google & Cloudflare fallbacks (solves Android lack of /etc/resolv.conf)
+                val dnsList = mutableListOf("8.8.8.8", "1.1.1.1", "8.8.4.4", "1.0.0.1")
+                try {
+                    val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as? android.net.ConnectivityManager
+                    val activeNet = cm?.activeNetwork
+                    val linkProps = cm?.getLinkProperties(activeNet)
+                    val sysDns = linkProps?.dnsServers?.mapNotNull { it.hostAddress } ?: emptyList()
+                    for (dns in sysDns.reversed()) {
+                        if (!dns.contains(":") && !dnsList.contains(dns)) {
+                            dnsList.add(0, dns) // prioritize current cellular/wifi ISP DNS
+                        }
                     }
+                } catch (_: Exception) {}
+
+                appendLog("Configuring DNS resolvers for Android kernel: ${dnsList.joinToString(", ")}")
+
+                val configFile = File(configDir, "ngrok.yml")
+                val sbConfig = StringBuilder()
+                sbConfig.append("version: \"2\"\n")
+                if (token.isNotEmpty()) {
+                    sbConfig.append("authtoken: \"$token\"\n")
                 }
+                sbConfig.append("dns_resolver_ips:\n")
+                for (dns in dnsList) {
+                    sbConfig.append("  - \"$dns\"\n")
+                }
+                configFile.writeText(sbConfig.toString())
+                appendLog("Generated ngrok config at: ${configFile.absolutePath}")
 
                 updateStatus(true, "Connecting tunnel...", "Connecting to Ngrok cloud...")
                 onStatusChange?.invoke(true, "Connecting tunnel...")
@@ -204,6 +221,7 @@ object TunnelManager {
                 cmd.add(ngrokBin.absolutePath)
                 cmd.add("http")
                 cmd.add("$port")
+                cmd.add("--config=${configFile.absolutePath}")
                 cmd.add("--log=stdout")
                 cmd.add("--log-format=term")
 
@@ -212,8 +230,7 @@ object TunnelManager {
                 }
 
                 if (cleanDomain.isNotEmpty()) {
-                    // Pass both domain argument styles
-                    cmd.add("--domain=$cleanDomain")
+                    cmd.add("--url=$cleanDomain")
                 }
 
                 appendLog("Executing: ${cmd.joinToString(" ")}")
