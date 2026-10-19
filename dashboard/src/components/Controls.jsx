@@ -71,6 +71,7 @@ import {
   RotateCw
 } from 'lucide-react';
 import { useStore } from '../store/StoreContext';
+import DevicePairingHub from './DevicePairingHub';
 
 const PRESET_PATTERNS = [
   { label: 'Single Buzz', pattern: [0, 300] },
@@ -722,11 +723,12 @@ export default function Controls() {
 
   if (!activeDeviceId) {
     return (
-      <div className="flex h-full items-center justify-center text-gray-500">
-        <div className="text-center">
-          <Sliders className="mx-auto h-10 w-10 opacity-40 text-teal-400" />
-          <p className="mt-3 text-sm">Select an active device to access remote controls</p>
-        </div>
+      <div className="py-2">
+        <DevicePairingHub
+          onOpenTunnelModal={() => {
+            window.dispatchEvent(new CustomEvent('open-tunnel-modal'));
+          }}
+        />
       </div>
     );
   }

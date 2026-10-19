@@ -1237,6 +1237,17 @@ app.post('/api/tunnel/stop', async (req, res) => {
   }
 });
 
+app.get('/api/server-info', (req, res) => {
+  const ip = getLocalIP();
+  res.json({
+    localIp: ip,
+    port: PORT,
+    localUrl: `http://${ip}:${PORT}`,
+    tunnel: getTunnelStatus(),
+    tunnelConfig: db.data.tunnelConfig || {}
+  });
+});
+
 // ------------------------------------------------------------- Commercial Licensing API
 app.get('/api/license/status', (req, res) => {
   res.json(getLicenseStatus());
