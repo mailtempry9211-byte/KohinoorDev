@@ -4,3 +4,4 @@
     <string name="notification_channel_name">PhoneLink Parent Hub Service</string>
     <string name="notification_channel_desc">Keeps the parental server running in background</string>
 </resources>
+

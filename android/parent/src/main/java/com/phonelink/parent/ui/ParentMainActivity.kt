@@ -280,3 +280,4 @@ class ParentMainActivity : AppCompatActivity() {
         handler.removeCallbacksAndMessages(null)
     }
 }
+

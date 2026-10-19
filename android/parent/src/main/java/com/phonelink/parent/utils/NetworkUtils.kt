@@ -67,3 +67,4 @@ object NetworkUtils {
         return caps.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)
     }
 }
+

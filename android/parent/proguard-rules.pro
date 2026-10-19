@@ -2,3 +2,4 @@
 -keep class io.ktor.** { *; }
 -keep class com.phonelink.parent.** { *; }
 -dontwarn io.ktor.**
+
