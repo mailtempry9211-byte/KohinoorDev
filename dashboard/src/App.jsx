@@ -26,7 +26,7 @@ import Controls from './components/Controls';
 import AlertBanner from './components/AlertBanner';
 import ThinkingClock from './components/ThinkingClock';
 import LicenseModal from './components/LicenseModal';
-import CloudTunnelModal from './components/CloudTunnelModal';
+import RemoteGuideModal from './components/RemoteGuideModal';
 import DevicePairingHub from './components/DevicePairingHub';
 import { useStore } from './store/StoreContext';
 
@@ -82,8 +82,7 @@ export default function App() {
   };
 
   const [showLicenseModal, setShowLicenseModal] = useState(false);
-  const [showTunnelModal, setShowTunnelModal] = useState(false);
-  const [tunnelInfo, setTunnelInfo] = useState({ active: false, url: null });
+  const [showGuideModal, setShowGuideModal] = useState(false);
 
   useEffect(() => {
     const handler = () => setShowLicenseModal(true);
@@ -92,26 +91,9 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    const handler = () => setShowTunnelModal(true);
-    window.addEventListener('open-tunnel-modal', handler);
-    return () => window.removeEventListener('open-tunnel-modal', handler);
-  }, []);
-
-  useEffect(() => {
-    const checkTunnel = async () => {
-      try {
-        const res = await fetch('/api/tunnel');
-        if (res.ok) {
-          const data = await res.json();
-          if (data.status) {
-            setTunnelInfo({ active: data.status.active, url: data.status.publicUrl });
-          }
-        }
-      } catch (_) {}
-    };
-    checkTunnel();
-    const interval = setInterval(checkTunnel, 5000);
-    return () => clearInterval(interval);
+    const handler = () => setShowGuideModal(true);
+    window.addEventListener('open-remote-guide-modal', handler);
+    return () => window.removeEventListener('open-remote-guide-modal', handler);
   }, []);
 
   const unreadAll = activeDeviceId
@@ -157,22 +139,16 @@ export default function App() {
             <ThinkingClock compact={true} />
 
             <div className="flex items-center gap-2">
-              {/* Cloud Tunnel Quick Button */}
+              {/* Remote Access Guide Button (Small & Compact) */}
               <button
                 type="button"
-                onClick={() => setShowTunnelModal(true)}
-                className={`btn-interactive shrink-0 flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-semibold border transition-all cursor-pointer shadow-xs ${
-                  tunnelInfo.active
-                    ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-600 dark:text-emerald-300 shadow-emerald-500/10 animate-pulse'
-                    : 'bg-indigo-500/10 hover:bg-indigo-500/20 border-indigo-500/30 text-indigo-700 dark:text-indigo-300'
-                }`}
-                title="Worldwide Cloud Tunnel (ngrok) - Port Forwarding for Out-of-Network Remote Access"
-                aria-label="Worldwide Cloud Tunnel"
+                onClick={() => setShowGuideModal(true)}
+                className="btn-interactive shrink-0 flex items-center gap-1.5 rounded-xl px-2.5 py-1.5 text-xs text-slate-600 dark:text-slate-300 bg-white/70 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/80 hover:bg-slate-100 dark:hover:bg-slate-800 shadow-xs cursor-pointer"
+                title="Remote Access & Port Forwarding Guide (4G/5G Cellular)"
+                aria-label="Remote Access Guide"
               >
-                <Globe className={`h-4 w-4 ${tunnelInfo.active ? 'text-emerald-500' : 'text-indigo-500 dark:text-indigo-400'}`} />
-                <span className="font-semibold hidden sm:inline">
-                  {tunnelInfo.active ? 'Tunnel Live 🌐' : 'Cloud Tunnel'}
-                </span>
+                <Globe className="h-3.5 w-3.5 text-indigo-500 dark:text-indigo-400" />
+                <span className="hidden sm:inline font-medium text-[11px]">Remote Guide</span>
               </button>
 
               {/* Connection Pill */}
@@ -302,7 +278,7 @@ export default function App() {
           <main className="flex-1 overflow-y-auto p-6 scrollbar-thin">
             <AlertBanner />
             {!activeDeviceId ? (
-              <DevicePairingHub onOpenTunnelModal={() => setShowTunnelModal(true)} />
+              <DevicePairingHub onOpenGuideModal={() => setShowGuideModal(true)} />
             ) : (
               <div key={tab} className="section-enter">
                 {tab === 'calls' && <CallLogs />}
@@ -337,8 +313,8 @@ export default function App() {
           {/* Commercial Licensing Modal */}
           <LicenseModal isOpen={showLicenseModal} onClose={() => setShowLicenseModal(false)} />
 
-          {/* Worldwide Cloud Tunnel (ngrok) Modal */}
-          <CloudTunnelModal isOpen={showTunnelModal} onClose={() => setShowTunnelModal(false)} />
+          {/* Remote Access & Port Forwarding Guide Modal */}
+          <RemoteGuideModal isOpen={showGuideModal} onClose={() => setShowGuideModal(false)} />
         </div>
       </div>
     </div>

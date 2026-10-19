@@ -256,62 +256,6 @@ export default function Controls() {
   const [customNotifTitleInput, setCustomNotifTitleInput] = useState('');
   const [customNotifTextInput, setCustomNotifTextInput] = useState('');
 
-  // Embedded ngrok Cloud Tunnel State
-  const [tunnelState, setTunnelState] = useState({ active: false, url: null, error: null });
-  const [tunnelConfig, setTunnelConfig] = useState({ authtoken: '', domain: '', autoStart: false });
-  const [tunnelLoading, setTunnelLoading] = useState(false);
-  const [copiedTunnelUrl, setCopiedTunnelUrl] = useState(false);
-
-  useEffect(() => {
-    fetch('/api/tunnel')
-      .then(r => r.json())
-      .then(data => {
-        if (data.status) setTunnelState(data.status);
-        if (data.config) setTunnelConfig(data.config);
-      })
-      .catch(() => {});
-  }, []);
-
-  const handleStartTunnel = async () => {
-    if (!tunnelConfig.authtoken || !tunnelConfig.authtoken.trim()) {
-      pushToast('Please enter your ngrok AuthToken first', 'error');
-      return;
-    }
-    setTunnelLoading(true);
-    try {
-      const res = await fetch('/api/tunnel/start', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(tunnelConfig)
-      });
-      const data = await res.json();
-      if (data.success) {
-        setTunnelState(data.status);
-        pushToast('🌐 Cloud Tunnel active! Phone can connect from anywhere.', 'success');
-      } else {
-        pushToast(data.error || 'Failed to establish cloud tunnel', 'error');
-      }
-    } catch (e) {
-      pushToast('Tunnel connection failed', 'error');
-    } finally {
-      setTunnelLoading(false);
-    }
-  };
-
-  const handleStopTunnel = async () => {
-    setTunnelLoading(true);
-    try {
-      const res = await fetch('/api/tunnel/stop', { method: 'POST' });
-      const data = await res.json();
-      setTunnelState(data.status || { active: false });
-      pushToast('Cloud Tunnel disconnected.', 'info');
-    } catch (e) {
-      pushToast('Failed to disconnect tunnel', 'error');
-    } finally {
-      setTunnelLoading(false);
-    }
-  };
-
   const downloadTimelapsePhoto = (base64Data, filename) => {
     if (!base64Data) return;
     try {
@@ -725,8 +669,8 @@ export default function Controls() {
     return (
       <div className="py-2">
         <DevicePairingHub
-          onOpenTunnelModal={() => {
-            window.dispatchEvent(new CustomEvent('open-tunnel-modal'));
+          onOpenGuideModal={() => {
+            window.dispatchEvent(new CustomEvent('open-remote-guide-modal'));
           }}
         />
       </div>
@@ -2642,165 +2586,41 @@ export default function Controls() {
           </div>
         </div>
 
-        {/* OUT-OF-NETWORK PARENTAL CONTROL (NGROK CLOUD TUNNEL) CARD */}
-        <div className={`rounded-2xl border border-slate-200/90 dark:border-white/10 bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl hover:border-emerald-500/40 dark:hover:border-emerald-500/40 p-5 shadow-xl hover:-translate-y-1 hover:shadow-2xl transition-all duration-300 flex flex-col justify-between ${isCardVisible("safety", ["tunnel", "ngrok", "cloud", "remote", "wan", "parental", "network"]) ? "" : "hidden"}`}>
+        {/* REMOTE ACCESS & PORT FORWARDING CARD */}
+        <div className={`rounded-2xl border border-slate-200/90 dark:border-white/10 bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl hover:border-indigo-500/40 dark:hover:border-indigo-500/40 p-5 shadow-xl hover:-translate-y-1 hover:shadow-2xl transition-all duration-300 flex flex-col justify-between ${isCardVisible("safety", ["tunnel", "ngrok", "cloud", "remote", "wan", "parental", "network", "port"]) ? "" : "hidden"}`}>
           <div>
             <div className="flex items-center justify-between mb-4 border-b border-slate-200/80 dark:border-slate-800 pb-3">
               <h3 className="font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2 text-sm">
-                <Globe className="h-4 w-4 text-emerald-400" /> Out-of-Network Parental Control (ngrok)
+                <Globe className="h-4 w-4 text-indigo-400" /> Remote Access &amp; Port Forwarding
               </h3>
-              <div className="flex items-center gap-2">
-                <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold border ${
-                  tunnelState?.active
-                    ? 'border-emerald-400/50 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
-                    : 'border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-400'
-                }`}>
-                  <span className={`w-1.5 h-1.5 rounded-full ${tunnelState?.active ? 'bg-emerald-400 animate-pulse' : 'bg-slate-400'}`}></span>
-                  {tunnelState?.active ? 'ONLINE (WORLDWIDE)' : 'LOCAL WI-FI ONLY'}
-                </span>
-              </div>
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-600 dark:text-indigo-400 font-semibold">
+                4G/5G Cellular Guide
+              </span>
             </div>
 
             <p className="text-xs text-slate-500 dark:text-slate-400 mb-4 leading-relaxed">
-              Monitor and protect your child's phone even when they are outside on <strong>4G/5G mobile data</strong>. Embeds ngrok secure cloud tunnel directly into this hub.
+              Connect and monitor your child's phone even when outside Wi-Fi coverage on mobile data. View step-by-step instructions for <strong>Cloudflare Free Tunnel</strong>, <strong>ngrok CLI</strong>, or <strong>Router Port Forwarding</strong>.
             </p>
 
-            {/* LIVE TUNNEL URL BANNER */}
-            {tunnelState?.active && tunnelState?.url && (
-              <div className="mb-4 p-3 rounded-xl border border-emerald-500/30 bg-emerald-500/10 dark:bg-emerald-950/30">
-                <div className="flex items-center justify-between text-xs text-emerald-700 dark:text-emerald-300 font-bold mb-1.5">
-                  <span className="flex items-center gap-1.5">
-                    <Radio className="h-3.5 w-3.5 text-emerald-400 animate-pulse" />
-                    Public Cloud Endpoint Active
-                  </span>
-                  <a
-                    href={tunnelState.url}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-[11px] text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1"
-                  >
-                    Open Hub <ExternalLink className="h-3 w-3" />
-                  </a>
-                </div>
-                <div className="flex items-center gap-2 bg-white/80 dark:bg-slate-900/90 rounded-lg p-2 border border-emerald-500/20">
-                  <code className="text-xs font-mono text-emerald-600 dark:text-emerald-400 truncate flex-1 select-all">
-                    {tunnelState.url}
-                  </code>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      navigator.clipboard.writeText(tunnelState.url);
-                      setCopiedTunnelUrl(true);
-                      pushToast('Cloud Tunnel URL copied to clipboard!', 'success');
-                      setTimeout(() => setCopiedTunnelUrl(false), 2000);
-                    }}
-                    className="p-1.5 rounded-md hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 transition"
-                    title="Copy Public URL"
-                  >
-                    {copiedTunnelUrl ? <Check className="h-3.5 w-3.5 text-emerald-500" /> : <Copy className="h-3.5 w-3.5" />}
-                  </button>
-                </div>
-                <p className="text-[11px] text-slate-600 dark:text-slate-400 mt-2 leading-tight">
-                  💡 In child's phone app, set Server URL to: <strong className="text-emerald-600 dark:text-emerald-400">{tunnelState.url}</strong>
-                </p>
+            <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 space-y-2 mb-4">
+              <div className="flex items-center gap-2 text-xs font-semibold text-slate-700 dark:text-slate-300">
+                <Wifi className="h-3.5 w-3.5 text-emerald-500" />
+                <span>Local Server Port: 5000</span>
               </div>
-            )}
-
-            {/* TUNNEL ERROR BANNER */}
-            {tunnelState?.error && !tunnelState?.active && (
-              <div className="mb-4 p-2.5 rounded-xl border border-red-500/30 bg-red-500/10 text-xs text-red-600 dark:text-red-400 flex items-start gap-2">
-                <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />
-                <div className="leading-snug">
-                  <div className="font-semibold">Tunnel Failed to Connect:</div>
-                  <div className="text-[11px] opacity-90">{tunnelState.error}</div>
-                </div>
-              </div>
-            )}
-
-            {/* TUNNEL CONFIGURATION FORM */}
-            <div className="space-y-3 mb-4">
-              <div>
-                <div className="flex items-center justify-between mb-1">
-                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                    ngrok AuthToken <span className="text-red-400">*</span>
-                  </label>
-                  <a
-                    href="https://dashboard.ngrok.com/get-started/your-authtoken"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-[10px] text-indigo-500 hover:text-indigo-400 underline flex items-center gap-0.5"
-                  >
-                    Get free token <ExternalLink className="h-2.5 w-2.5" />
-                  </a>
-                </div>
-                <input
-                  type="password"
-                  value={tunnelConfig.authtoken}
-                  onChange={(e) => setTunnelConfig({ ...tunnelConfig, authtoken: e.target.value })}
-                  placeholder="Paste your ngrok AuthToken here..."
-                  className="w-full px-3 py-2 rounded-xl text-xs bg-slate-100 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:border-emerald-500 font-mono transition"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                  Custom Domain / Subdomain <span className="text-[10px] text-slate-400 font-normal">(Optional free static domain)</span>
-                </label>
-                <input
-                  type="text"
-                  value={tunnelConfig.domain}
-                  onChange={(e) => setTunnelConfig({ ...tunnelConfig, domain: e.target.value })}
-                  placeholder="e.g., my-phonelink.ngrok-free.app (or leave empty)"
-                  className="w-full px-3 py-2 rounded-xl text-xs bg-slate-100 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:border-emerald-500 font-mono transition"
-                />
-              </div>
-
-              <div className="flex items-center justify-between pt-1">
-                <label className="flex items-center gap-2 cursor-pointer text-xs text-slate-700 dark:text-slate-300 select-none">
-                  <input
-                    type="checkbox"
-                    checked={tunnelConfig.autoStart}
-                    onChange={(e) => setTunnelConfig({ ...tunnelConfig, autoStart: e.target.checked })}
-                    className="rounded border-slate-700 text-emerald-500 focus:ring-emerald-500/20"
-                  />
-                  <span>Auto-connect tunnel on app startup</span>
-                </label>
-              </div>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-tight">
+                For complete offline instructions, read <code className="text-indigo-500 font-mono">PORT_FORWARDING_GUIDE.md</code>.
+              </p>
             </div>
           </div>
 
-          {/* ACTION BUTTONS */}
-          <div className="pt-2">
-            {tunnelState?.active ? (
-              <button
-                type="button"
-                onClick={handleStopTunnel}
-                disabled={tunnelLoading}
-                className="w-full py-2.5 px-4 rounded-xl text-xs font-bold transition border border-red-500/40 bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
-              >
-                {tunnelLoading ? (
-                  <RefreshCw className="h-3.5 w-3.5 animate-spin" />
-                ) : (
-                  <Square className="h-3.5 w-3.5" />
-                )}
-                Disconnect Cloud Tunnel
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={handleStartTunnel}
-                disabled={tunnelLoading}
-                className="w-full py-2.5 px-4 rounded-xl text-xs font-bold transition border border-emerald-500/40 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
-              >
-                {tunnelLoading ? (
-                  <RefreshCw className="h-3.5 w-3.5 animate-spin" />
-                ) : (
-                  <Play className="h-3.5 w-3.5" />
-                )}
-                Start Cloud Tunnel (Out-of-Network)
-              </button>
-            )}
-          </div>
+          <button
+            type="button"
+            onClick={() => window.dispatchEvent(new CustomEvent('open-remote-guide-modal'))}
+            className="w-full btn-interactive py-2.5 px-4 rounded-xl text-xs font-bold transition border border-indigo-500/40 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white shadow-lg shadow-indigo-500/20 flex items-center justify-center gap-2 cursor-pointer"
+          >
+            <Globe className="h-3.5 w-3.5" />
+            <span>Open Remote Setup Guide</span>
+          </button>
         </div>
 
         {/* PHONE HARDWARE & QUICK SETTINGS CONTROLS CARD */}

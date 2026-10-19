@@ -46,15 +46,15 @@ export default function Sidebar() {
               No devices paired yet
             </p>
             <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
-              Connect phone via Wi-Fi or Worldwide Cloud Tunnel.
+              Connect phone via Wi-Fi or Remote Guide.
             </p>
             <button
               type="button"
-              onClick={() => window.dispatchEvent(new CustomEvent('open-tunnel-modal'))}
+              onClick={() => window.dispatchEvent(new CustomEvent('open-remote-guide-modal'))}
               className="btn-interactive mt-3 w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-white bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 shadow-md shadow-indigo-500/25 border border-indigo-400/30 cursor-pointer"
             >
               <Globe className="h-3.5 w-3.5" />
-              <span>Start Cloud Tunnel</span>
+              <span>Remote Setup Guide</span>
             </button>
           </div>
         )}

@@ -8,7 +8,6 @@ import { mkdirSync, existsSync } from 'fs';
 import { JSONFilePreset } from 'lowdb/node';
 import { randomUUID } from 'crypto';
 import os from 'os';
-import { startTunnel, stopTunnel, getTunnelStatus } from './tunnel.js';
 import { getLicenseStatus, activateLicense, replaceAndActivateDevice, logoutLicense, initLicenseManager } from './licenseManager.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -1196,55 +1195,12 @@ app.post('/api/command/:name', async (req, res) => {
   res.json({ success: true });
 });
 
-// ------------------------------------------------------------- ngrok Cloud Tunnel
-app.get('/api/tunnel', (req, res) => {
-  res.json({
-    status: getTunnelStatus(),
-    config: db.data.tunnelConfig || {}
-  });
-});
-
-app.post('/api/tunnel/start', async (req, res) => {
-  try {
-    const { authtoken, domain, autoStart } = req.body;
-    const token = authtoken || db.data.tunnelConfig?.authtoken;
-    const dom = domain !== undefined ? domain : db.data.tunnelConfig?.domain;
-
-    db.data.tunnelConfig = {
-      authtoken: token,
-      domain: dom,
-      autoStart: autoStart !== undefined ? Boolean(autoStart) : (db.data.tunnelConfig?.autoStart ?? true)
-    };
-    await db.write();
-
-    const status = await startTunnel({ port: PORT, authtoken: token, domain: dom });
-    res.json({ success: true, status, config: db.data.tunnelConfig });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
-
-app.post('/api/tunnel/stop', async (req, res) => {
-  try {
-    if (db.data.tunnelConfig) {
-      db.data.tunnelConfig.autoStart = false;
-      await db.write();
-    }
-    const status = await stopTunnel();
-    res.json({ success: true, status, config: db.data.tunnelConfig });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
-
 app.get('/api/server-info', (req, res) => {
   const ip = getLocalIP();
   res.json({
     localIp: ip,
     port: PORT,
-    localUrl: `http://${ip}:${PORT}`,
-    tunnel: getTunnelStatus(),
-    tunnelConfig: db.data.tunnelConfig || {}
+    localUrl: `http://${ip}:${PORT}`
   });
 });
 
@@ -1303,7 +1259,7 @@ if (existsSync(distPath)) {
 
 const PORT = parseInt(process.env.PORT || process.argv[2] || '5000', 10);
 
-httpServer.listen(PORT, '0.0.0.0', async () => {
+httpServer.listen(PORT, '0.0.0.0', () => {
   const ip = getLocalIP();
   console.log(`
 ====================================
@@ -1314,18 +1270,4 @@ httpServer.listen(PORT, '0.0.0.0', async () => {
   In the Android app connect to: ${ip} (Port: ${PORT})
 ====================================
 `);
-
-  // Auto-start tunnel if configured by parent
-  if (db.data.tunnelConfig?.autoStart && db.data.tunnelConfig?.authtoken) {
-    console.log('[ngrok] Auto-starting parental cloud tunnel from saved config...');
-    try {
-      await startTunnel({
-        port: PORT,
-        authtoken: db.data.tunnelConfig.authtoken,
-        domain: db.data.tunnelConfig.domain
-      });
-    } catch (e) {
-      console.warn('[ngrok] Auto-start tunnel failed:', e.message);
-    }
-  }
 });
