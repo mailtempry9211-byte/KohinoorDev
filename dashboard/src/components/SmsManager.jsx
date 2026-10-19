@@ -2,7 +2,7 @@ import { useMemo, useState, useEffect, useRef } from 'react';
 import { Send, MessageSquare, User, RefreshCw, ArrowLeft } from 'lucide-react';
 import { useStore } from '../store/StoreContext';
 
-export default function SmsManager() {
+export default function SmsManager({ isMobile = false }) {
   const { activeDeviceId, activeDevice, messages, sendCommand } = useStore();
   const [conversations, setConversations] = useState([]);
   const [openThread, setOpenThread] = useState(null);
@@ -82,9 +82,17 @@ export default function SmsManager() {
   };
 
   return (
-    <div className="mx-auto flex h-[calc(100vh-145px)] max-w-6xl gap-4">
+    <div className={`mx-auto flex max-w-6xl gap-4 ${
+      isMobile
+        ? 'w-full h-[calc(100vh-210px)] min-h-[500px]'
+        : 'h-[calc(100vh-145px)]'
+    }`}>
       {/* Sidebar: Conversation Threads */}
-      <div className={`${mobileShowThread ? 'hidden' : 'flex'} w-full flex-col overflow-hidden rounded-2xl border border-slate-200/90 dark:border-white/10 bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl shadow-xl md:flex md:w-80 md:shrink-0`}>
+      <div className={`${
+        isMobile
+          ? (mobileShowThread ? 'hidden' : 'flex w-full')
+          : `${mobileShowThread ? 'hidden' : 'flex'} w-full md:flex md:w-80 md:shrink-0`
+      } flex-col overflow-hidden rounded-2xl border border-slate-200/90 dark:border-white/10 bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl shadow-xl`}>
         <div className="border-b border-slate-200/80 dark:border-slate-800 p-4">
           <div className="flex items-center justify-between gap-2">
             <div>
@@ -189,17 +197,24 @@ export default function SmsManager() {
       </div>
 
       {/* Main Chat Thread Area */}
-      <div className={`${mobileShowThread ? 'flex' : 'hidden'} min-w-0 flex-1 flex-col overflow-hidden rounded-2xl border border-slate-200/90 dark:border-white/10 bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl shadow-xl md:flex`}>
+      <div className={`${
+        isMobile
+          ? (mobileShowThread ? 'flex w-full' : 'hidden')
+          : `${mobileShowThread ? 'flex' : 'hidden'} min-w-0 flex-1 md:flex`
+      } flex-col overflow-hidden rounded-2xl border border-slate-200/90 dark:border-white/10 bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl shadow-xl`}>
         {thread ? (
           <>
             {/* Thread Header */}
-            <div className="flex items-center gap-3 border-b border-slate-200/80 dark:border-slate-800 p-4 bg-white/40 dark:bg-slate-900/40">
+            <div className="flex items-center gap-3 border-b border-slate-200/80 dark:border-slate-800 p-3 sm:p-4 bg-white/40 dark:bg-slate-900/40">
               <button
                 type="button"
                 onClick={() => setMobileShowThread(false)}
-                className="btn-interactive text-slate-400 hover:text-slate-700 dark:hover:text-white p-1 rounded-lg md:hidden"
+                className={`btn-interactive text-slate-500 dark:text-slate-300 hover:text-slate-800 dark:hover:text-white p-2 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700/80 items-center justify-center cursor-pointer shadow-xs ${
+                  isMobile ? 'flex' : 'flex md:hidden'
+                }`}
+                title="Back to conversations list"
               >
-                <ArrowLeft className="h-5 w-5" />
+                <ArrowLeft className="h-4 w-4" />
               </button>
               <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-600 text-white shadow-xs shrink-0">
                 <User className="h-4 w-4" />

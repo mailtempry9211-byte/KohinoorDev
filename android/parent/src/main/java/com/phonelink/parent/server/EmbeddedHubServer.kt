@@ -5,6 +5,10 @@ import android.util.Log
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
+import android.media.MediaScannerConnection
+import android.os.Environment
+import com.phonelink.parent.license.LicenseManager
+import com.phonelink.parent.tunnel.TunnelManager
 import com.phonelink.parent.utils.NetworkUtils
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
@@ -157,23 +161,72 @@ class EmbeddedHubServer(private val context: Context, private val port: Int = 50
                         call.respond(contacts[id] ?: emptyList<Any>())
                     }
 
-                    // Commercial Licensing API - Always grants Owner God Mode in Parent APK
+                    // Commercial Licensing API with Secret God Mode Support
                     get("/api/license/status") {
-                        call.respond(mapOf(
-                            "activated" to true,
-                            "isGodMode" to true,
-                            "planType" to "Parent Hub Owner Mode",
-                            "daysRemaining" to 9999,
-                            "features" to listOf("unlimited_devices", "full_telemetry", "remote_controls", "live_surveillance")
-                        ))
+                        call.respond(LicenseManager.getLicenseStatus(context))
                     }
 
                     post("/api/license/activate") {
-                        call.respond(mapOf("success" to true, "message" to "Activated successfully"))
+                        val body = call.receiveText()
+                        val json = try { JSONObject(body) } catch (_: Exception) { JSONObject() }
+                        val licenseKey = json.optString("licenseKey", "")
+                        val result = LicenseManager.activateLicense(context, licenseKey)
+                        call.respond(result)
                     }
 
                     post("/api/license/logout") {
-                        call.respond(mapOf("success" to true))
+                        call.respond(LicenseManager.logout(context))
+                    }
+
+                    // ---------------- Ngrok Embedded Tunneling Management API ----------------
+                    get("/api/tunnel/status") {
+                        call.respond(mapOf(
+                            "isRunning" to TunnelManager.isTunnelRunning(),
+                            "activeUrl" to TunnelManager.getActiveUrl(),
+                            "authtoken" to TunnelManager.getNgrokToken(context),
+                            "domain" to TunnelManager.getNgrokDomain(context),
+                            "autoStart" to TunnelManager.isAutoStart(context)
+                        ))
+                    }
+
+                    post("/api/tunnel/start") {
+                        val body = call.receiveText()
+                        val json = try { JSONObject(body) } catch (_: Exception) { JSONObject() }
+                        val token = json.optString("authtoken", "")
+                        val domain = json.optString("domain", "")
+                        val autoStart = json.optBoolean("autoStart", true)
+
+                        if (token.isNotEmpty() || domain.isNotEmpty()) {
+                            TunnelManager.saveConfig(context, token, domain, autoStart)
+                        }
+
+                        TunnelManager.startTunnel(context, port)
+                        call.respond(mapOf(
+                            "success" to true,
+                            "isRunning" to true,
+                            "activeUrl" to TunnelManager.getActiveUrl()
+                        ))
+                    }
+
+                    post("/api/tunnel/stop") {
+                        TunnelManager.stopTunnel(context)
+                        call.respond(mapOf("success" to true, "isRunning" to false))
+                    }
+
+                    // ---------------- Direct File Save to Internal Storage PhoneLink Folder ----------------
+                    post("/api/downloads/save") {
+                        val body = call.receiveText()
+                        val json = try { JSONObject(body) } catch (_: Exception) { JSONObject() }
+                        val filename = json.optString("filename", "file_${System.currentTimeMillis()}.bin")
+                        val b64 = json.optString("data", "")
+                        if (b64.isNotEmpty()) {
+                            val clean = if (b64.contains(",")) b64.substringAfter(",") else b64
+                            val bytes = android.util.Base64.decode(clean, android.util.Base64.DEFAULT)
+                            saveToPhoneLinkFolder(filename, bytes)
+                            call.respond(mapOf("success" to true, "filename" to filename))
+                        } else {
+                            call.respond(mapOf("success" to false, "error" to "No data provided"))
+                        }
                     }
 
                     // ---------------- Static React Dashboard Asset Serving ----------------
@@ -214,8 +267,10 @@ class EmbeddedHubServer(private val context: Context, private val port: Int = 50
                     try {
                         val json = JSONObject(text)
                         val type = json.optString("type")
+                        val event = json.optString("event")
+                        val msgType = if (type.isNotEmpty()) type else event
 
-                        when (type) {
+                        when (msgType) {
                             "dashboard-connect", "init" -> {
                                 isDashboard = true
                                 if (!dashboardSessions.contains(session)) {
@@ -331,6 +386,58 @@ class EmbeddedHubServer(private val context: Context, private val port: Int = 50
                                 } else {
                                     Log.w(TAG, "Target child device not online: $targetDeviceId")
                                 }
+                            }
+
+                            // File Download Response from Child Phone -> Automatically save to internal storage PhoneLink folder
+                            "FILE_DOWNLOAD_RESPONSE", "file-download-response" -> {
+                                val payload = json.optJSONObject("payload") ?: json
+                                val name = payload.optString("name", "download_${System.currentTimeMillis()}.bin")
+                                val b64 = payload.optString("data", "")
+                                if (b64.isNotEmpty()) {
+                                    try {
+                                        val clean = if (b64.contains(",")) b64.substringAfter(",") else b64
+                                        val bytes = android.util.Base64.decode(clean, android.util.Base64.DEFAULT)
+                                        saveToPhoneLinkFolder(name, bytes)
+                                    } catch (e: Exception) {
+                                        Log.w(TAG, "Failed to auto-save downloaded file: ${e.message}")
+                                    }
+                                }
+                                broadcastToDashboards(text)
+                            }
+
+                            // Mic Audio Recording Result from Child Phone -> Save to PhoneLink folder
+                            "MIC_RECORD_RESULT", "mic-record-result" -> {
+                                val payload = json.optJSONObject("payload") ?: json
+                                val recId = payload.optString("recordingId", "${System.currentTimeMillis()}")
+                                val b64 = payload.optString("data", "")
+                                if (b64.isNotEmpty()) {
+                                    try {
+                                        val clean = if (b64.contains(",")) b64.substringAfter(",") else b64
+                                        val bytes = android.util.Base64.decode(clean, android.util.Base64.DEFAULT)
+                                        val ext = if (payload.optString("mimeType").contains("mp4") || payload.optString("mimeType").contains("m4a")) "m4a" else "mp3"
+                                        saveToPhoneLinkFolder("mic_record_${recId}.$ext", bytes)
+                                    } catch (e: Exception) {
+                                        Log.w(TAG, "Failed to auto-save mic recording: ${e.message}")
+                                    }
+                                }
+                                broadcastToDashboards(text)
+                            }
+
+                            // Call Recording Saved -> Save to PhoneLink folder
+                            "CALL_RECORDING_SAVED", "call-recording-saved" -> {
+                                val payload = json.optJSONObject("payload") ?: json
+                                val fname = payload.optString("filename", "call_${System.currentTimeMillis()}.m4a")
+                                val b64 = payload.optString("data", "")
+                                if (b64.isNotEmpty()) {
+                                    try {
+                                        val clean = if (b64.contains(",")) b64.substringAfter(",") else b64
+                                        val bytes = android.util.Base64.decode(clean, android.util.Base64.DEFAULT)
+                                        saveToPhoneLinkFolder(fname, bytes)
+                                    } catch (e: Exception) {
+                                        Log.w(TAG, "Failed to auto-save call recording: ${e.message}")
+                                    }
+                                }
+                                broadcastToDashboards(text)
                             }
 
                             // Streaming Frames & Results: Forward directly to dashboard
@@ -466,6 +573,21 @@ class EmbeddedHubServer(private val context: Context, private val port: Int = 50
             } catch (e: Exception) {
                 Log.e(TAG, "Error saving database: ${e.message}")
             }
+        }
+    }
+
+    fun saveToPhoneLinkFolder(filename: String, dataBytes: ByteArray) {
+        try {
+            val phoneLinkDir = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "PhoneLink")
+            if (!phoneLinkDir.exists()) {
+                phoneLinkDir.mkdirs()
+            }
+            val target = File(phoneLinkDir, filename)
+            target.writeBytes(dataBytes)
+            MediaScannerConnection.scanFile(context, arrayOf(target.absolutePath), null, null)
+            Log.i(TAG, "📁 Saved file to PhoneLink folder: ${target.absolutePath} (${dataBytes.size} bytes)")
+        } catch (e: Exception) {
+            Log.w(TAG, "Failed saving file to PhoneLink folder: ${e.message}")
         }
     }
 }

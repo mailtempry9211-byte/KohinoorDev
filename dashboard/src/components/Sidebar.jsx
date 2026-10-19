@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Smartphone, Battery, BatteryCharging, Wifi, WifiOff, Trash2, ShieldCheck, Radio, KeyRound, Crown, Globe } from 'lucide-react';
+import { Smartphone, Battery, BatteryCharging, Wifi, WifiOff, Trash2, ShieldCheck, Radio, KeyRound, Crown, Globe, X } from 'lucide-react';
 import { useStore } from '../store/StoreContext';
 
-export default function Sidebar() {
+export default function Sidebar({ isOpen = false, onClose, forceMobile = false }) {
   const { devices, activeDeviceId, setActiveDeviceId, removeDevice } = useStore();
   const [licenseStatus, setLicenseStatus] = useState(null);
 
@@ -23,19 +23,49 @@ export default function Sidebar() {
   const onlineCount = deviceList.filter((d) => d.online).length;
 
   return (
-    <aside className="flex h-full w-72 shrink-0 flex-col border-r border-slate-200/80 dark:border-slate-800/80 bg-white/60 dark:bg-slate-950/60 backdrop-blur-2xl select-none transition-colors">
-      {/* Header */}
-      <div className="px-4 py-4 border-b border-slate-200/80 dark:border-slate-800/60 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Radio className="h-4 w-4 text-indigo-500 dark:text-indigo-400 animate-pulse" />
-          <h2 className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 font-mono">
-            Connected Devices
-          </h2>
+    <>
+      {/* Mobile Backdrop Overlay */}
+      {isOpen && (
+        <div
+          className={`${forceMobile ? 'absolute' : 'fixed'} inset-0 z-40 bg-black/60 backdrop-blur-sm transition-opacity cursor-pointer ${
+            forceMobile ? 'block' : 'lg:hidden'
+          }`}
+          onClick={onClose}
+          aria-hidden="true"
+        />
+      )}
+
+      <aside
+        className={`${forceMobile ? 'absolute' : 'fixed'} inset-y-0 left-0 z-50 flex h-full w-72 max-w-[80%] flex-col border-r border-slate-200/80 dark:border-slate-800/80 bg-white/95 dark:bg-slate-950/95 backdrop-blur-2xl select-none transition-transform duration-300 ease-in-out ${
+          forceMobile
+            ? (isOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full')
+            : (isOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full lg:static lg:z-auto lg:w-72 lg:translate-x-0')
+        }`}
+      >
+        {/* Header */}
+        <div className="px-4 py-3.5 border-b border-slate-200/80 dark:border-slate-800/60 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Radio className="h-4 w-4 text-indigo-500 dark:text-indigo-400 animate-pulse" />
+            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 font-mono">
+              Connected Devices
+            </h2>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/60 text-slate-600 dark:text-slate-400">
+              <span className="text-emerald-600 dark:text-emerald-400 font-semibold">{onlineCount}</span> / {deviceList.length}
+            </span>
+            {onClose && (
+              <button
+                type="button"
+                onClick={onClose}
+                className="p-1 rounded-xl text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 lg:hidden cursor-pointer"
+                aria-label="Close sidebar"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
+          </div>
         </div>
-        <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/60 text-slate-600 dark:text-slate-400">
-          <span className="text-emerald-600 dark:text-emerald-400 font-semibold">{onlineCount}</span> / {deviceList.length}
-        </span>
-      </div>
 
       {/* Devices List */}
       <div className="flex-1 overflow-y-auto p-3 space-y-2.5 scrollbar-thin">
@@ -66,13 +96,17 @@ export default function Sidebar() {
           return (
             <div
               key={device.deviceId}
-              onClick={() => setActiveDeviceId(device.deviceId)}
+              onClick={() => {
+                setActiveDeviceId(device.deviceId);
+                onClose?.();
+              }}
               role="button"
               tabIndex={0}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' || e.key === ' ') {
                   e.preventDefault();
                   setActiveDeviceId(device.deviceId);
+                  onClose?.();
                 }
               }}
               className={`group relative w-full cursor-pointer rounded-2xl p-3.5 text-left transition-all duration-200 outline-none ${
@@ -242,6 +276,7 @@ export default function Sidebar() {
         </button>
       </div>
     </aside>
+  </>
   );
 }
 

@@ -97,7 +97,7 @@ const PRESET_COLORS = [
   { name: 'Charcoal', hex: '#18181b' }
 ];
 
-export default function Controls() {
+export default function Controls({ theme, isMobile = false }) {
   const {
     activeDeviceId,
     activeDevice,
@@ -222,7 +222,10 @@ export default function Controls() {
     pauseMonitoring,
     locations,
     sendCommand,
-    pushToast
+    pushToast,
+    isFindingPhone,
+    triggerFindPhone,
+    stopFindPhone
   } = useStore();
 
   const [lockScreenNote, setLockScreenNote] = useState('');
@@ -679,65 +682,56 @@ export default function Controls() {
 
   return (
     <div className="mx-auto max-w-6xl space-y-6 pb-12">
-      {/* Redesigned Glassmorphic Mission Control Header */}
-      <div className="flex flex-wrap items-center justify-between gap-4 p-5 rounded-2xl bg-white/70 dark:bg-slate-900/60 backdrop-blur-2xl border border-slate-200/90 dark:border-white/10 shadow-xl shadow-slate-200/20 dark:shadow-black/30">
-        <div>
-          <div className="flex items-center gap-3.5">
-            <div className="p-3 rounded-2xl bg-gradient-to-tr from-indigo-600 to-violet-600 text-white shadow-lg shadow-indigo-500/30 border border-indigo-400/30">
-              <Sliders className="h-5 w-5" />
-            </div>
-            <div>
-              <h2 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                Remote Controls &amp; System Hub
-              </h2>
-              <div className="flex flex-wrap items-center gap-2 mt-1">
-                <span className="text-xs text-slate-500 dark:text-slate-400">Target Device:</span>
-                <span className="text-xs font-bold text-indigo-700 dark:text-indigo-300 font-mono bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800/80 px-2.5 py-0.5 rounded-lg">
-                  {activeDevice?.deviceName || activeDeviceId}
+      {/* Redesigned Glassmorphic Mission Control Header - Ultra Responsive */}
+      <div className="flex flex-wrap items-center justify-between gap-2.5 p-3 sm:p-4 rounded-2xl bg-white/70 dark:bg-slate-900/60 backdrop-blur-2xl border border-slate-200/90 dark:border-white/10 shadow-xl shadow-slate-200/20 dark:shadow-black/30">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <div className="p-2 sm:p-2.5 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-600 text-white shadow-md shadow-indigo-500/30 border border-indigo-400/30 shrink-0">
+            <Sliders className="h-4 w-4" />
+          </div>
+          <div className="min-w-0">
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <span className="text-xs font-bold text-slate-900 dark:text-white truncate">
+                {activeDevice?.deviceName || activeDeviceId}
+              </span>
+              {activeDevice?.online ? (
+                <span className="inline-flex items-center gap-1 text-[9px] font-mono font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-500/30 px-1.5 py-0.2 rounded-full">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  Live
                 </span>
-                {activeDevice?.online ? (
-                  <span className="flex items-center gap-1 text-[10px] font-mono font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-500/30 px-2 py-0.5 rounded-full">
-                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                    Online
-                  </span>
-                ) : (
-                  <span className="text-[10px] font-mono text-slate-500 bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-2 py-0.5 rounded-full">
-                    Offline
-                  </span>
-                )}
-                {activeDevice?.monitoringPaused && (
-                  <span className="flex items-center gap-1 text-[10px] font-mono font-bold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/60 border border-amber-500/30 px-2.5 py-0.5 rounded-full">
-                    <Pause className="h-2.5 w-2.5" />
-                    Home Mode (Sync Paused)
-                  </span>
-                )}
-                {activeDevice?.battery !== undefined && (
-                  <span className="text-[10px] font-mono text-slate-700 dark:text-slate-300 bg-white/80 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 px-2 py-0.5 rounded-lg shadow-xs">
-                    🔋 {activeDevice.battery}%
-                  </span>
-                )}
-              </div>
+              ) : (
+                <span className="text-[9px] font-mono text-slate-500 bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-1.5 py-0.2 rounded-full">
+                  Offline
+                </span>
+              )}
+              {activeDevice?.battery !== undefined && (
+                <span className="text-[9px] font-mono text-slate-700 dark:text-slate-300 bg-white/80 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 px-1.5 py-0.2 rounded-md">
+                  🔋{activeDevice.battery}%
+                </span>
+              )}
             </div>
+            <p className="text-[10px] text-slate-500 dark:text-slate-400 font-mono truncate hidden sm:block">
+              Device Mission Control &amp; Remote Access Hub
+            </p>
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
-          {/* Home Mode (Pause Monitoring) Remote Toggle */}
+        <div className="flex items-center gap-1.5 shrink-0">
+          {/* Home Mode Toggle Mini Pill */}
           <button
             type="button"
             onClick={() => pauseMonitoring(!activeDevice?.monitoringPaused)}
-            className={`btn-interactive flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition-all shadow-md cursor-pointer border ${
+            className={`btn-interactive flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-[11px] font-bold transition-all shadow-xs cursor-pointer border ${
               activeDevice?.monitoringPaused
                 ? 'bg-amber-500 hover:bg-amber-600 text-slate-950 border-amber-400 shadow-amber-500/20'
                 : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700'
             }`}
             title="When active, keeps connection live but stops syncing SMS, calls, location & notifications"
           >
-            <Pause className="h-3.5 w-3.5" />
-            {activeDevice?.monitoringPaused ? 'Resume Monitoring' : 'Pause Monitoring (Home Mode)'}
+            <Pause className="h-3 w-3" />
+            <span>{activeDevice?.monitoringPaused ? 'Home On' : 'Home Mode'}</span>
           </button>
 
-          {/* Open PhoneLink App on Device Remote Action */}
+          {/* Open App On Device Mini Pill */}
           <button
             type="button"
             onClick={async () => {
@@ -748,35 +742,278 @@ export default function Controls() {
                 pushToast(`Could not open app: ${res?.error || 'phone offline'}`, 'error');
               }
             }}
-            className="btn-interactive flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 shadow-xs cursor-pointer"
-            title="Remotely launches PhoneLink settings on phone screen (even if disguised as Files or Calculator)"
+            className="btn-interactive flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-[11px] font-semibold bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 shadow-xs cursor-pointer"
+            title="Remotely launches PhoneLink settings on phone screen"
           >
-            <Smartphone className="h-3.5 w-3.5 text-indigo-500" />
-            Open On Device
+            <Smartphone className="h-3 w-3 text-indigo-500" />
+            <span className="hidden sm:inline">Open App</span>
           </button>
-
-          {controlSearch && (
-            <button
-              type="button"
-              onClick={() => setControlSearch('')}
-              className="btn-interactive px-3 py-1.5 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl transition cursor-pointer"
-            >
-              Reset Search
-            </button>
-          )}
         </div>
       </div>
 
-      {/* STICKY GLASS SUB-NAVIGATION PILL BAR & INSTANT SEARCH */}
-      <div className="sticky top-0 z-30 -mx-2 px-3 py-3 bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl border border-slate-200/90 dark:border-white/10 rounded-2xl shadow-2xl shadow-slate-200/40 dark:shadow-black/50 flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
+      {/* 🚀 QUICK CONTROL CENTER - 12 INTERACTIVE 1-TAP ACTION TILES */}
+      <div className="rounded-2xl p-3 sm:p-4 bg-white/70 dark:bg-slate-900/60 backdrop-blur-2xl border border-slate-200/90 dark:border-white/10 shadow-xl shadow-slate-200/20 dark:shadow-black/30">
+        <div className="flex items-center justify-between mb-2.5">
+          <div className="flex items-center gap-2">
+            <span className="flex h-2 w-2 rounded-full bg-indigo-500 animate-pulse" />
+            <h3 className="text-[11px] font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200 font-mono">
+              ⚡ Quick Control Center
+            </h3>
+          </div>
+          <span className="text-[10px] text-slate-400 font-mono">1-Tap Remote Actions</span>
+        </div>
+
+        {/* 12 Interactive Compact Tiles Matrix */}
+        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
+          {/* 1. Flashlight / Torch */}
+          <button
+            type="button"
+            onClick={() => sendQuickSetting('torch')}
+            className={`btn-interactive p-2.5 rounded-xl border text-center flex flex-col items-center justify-center gap-1 transition-all cursor-pointer select-none ${
+              quickSettings?.torchOn || torchOn
+                ? 'bg-amber-500/20 border-amber-500/70 text-amber-600 dark:text-amber-300 shadow-md shadow-amber-500/20'
+                : 'bg-white/80 dark:bg-slate-950/60 border-slate-200 dark:border-slate-800/80 text-slate-700 dark:text-slate-300 hover:border-amber-400/50'
+            }`}
+          >
+            <div className={`p-1.5 rounded-xl ${quickSettings?.torchOn || torchOn ? 'bg-amber-500 text-slate-950 shadow-xs' : 'bg-slate-100 dark:bg-slate-800 text-amber-500'}`}>
+              <Zap className="h-4 w-4" />
+            </div>
+            <span className="text-[11px] font-bold leading-tight">Torch</span>
+            <span className={`text-[9px] font-mono px-1.5 py-0.2 rounded font-bold uppercase ${
+              quickSettings?.torchOn || torchOn ? 'bg-amber-400/30 text-amber-700 dark:text-amber-300' : 'text-slate-400'
+            }`}>
+              {quickSettings?.torchOn || torchOn ? 'ON' : 'OFF'}
+            </span>
+          </button>
+
+          {/* 2. Haptic Vibration Alert */}
+          <button
+            type="button"
+            onClick={() => {
+              vibratePhone(500);
+              pushToast('Sent 500ms vibration to phone', 'info');
+            }}
+            className="btn-interactive p-2.5 rounded-xl border bg-white/80 dark:bg-slate-950/60 border-slate-200 dark:border-slate-800/80 text-slate-700 dark:text-slate-300 hover:border-teal-400/60 hover:bg-teal-500/10 text-center flex flex-col items-center justify-center gap-1 transition-all cursor-pointer select-none"
+          >
+            <div className="p-1.5 rounded-xl bg-teal-500/15 text-teal-500 dark:text-teal-400">
+              <Radio className="h-4 w-4" />
+            </div>
+            <span className="text-[11px] font-bold leading-tight">Vibrate</span>
+            <span className="text-[9px] font-mono text-teal-600 dark:text-teal-400 font-bold">500ms</span>
+          </button>
+
+          {/* 3. Loud Siren / Find Phone */}
+          {isFindingPhone ? (
+            <button
+              type="button"
+              onClick={() => stopFindPhone(activeDeviceId)}
+              className="btn-interactive p-2.5 rounded-xl border bg-rose-600 hover:bg-rose-500 border-rose-400 text-white shadow-lg shadow-rose-600/50 text-center flex flex-col items-center justify-center gap-1 transition-all cursor-pointer select-none animate-pulse"
+            >
+              <div className="p-1.5 rounded-xl bg-white/20 text-white">
+                <VolumeX className="h-4 w-4 animate-bounce" />
+              </div>
+              <span className="text-[11px] font-bold leading-tight">Stop Siren</span>
+              <span className="text-[9px] font-mono bg-white/30 text-white px-1.5 py-0.2 rounded font-black">RINGING</span>
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => {
+                if (window.confirm('Ring this phone at full volume, even on silent?')) {
+                  triggerFindPhone(activeDeviceId);
+                }
+              }}
+              className="btn-interactive p-2.5 rounded-xl border bg-white/80 dark:bg-slate-950/60 border-slate-200 dark:border-slate-800/80 text-slate-700 dark:text-slate-300 hover:border-rose-400/60 hover:bg-rose-500/10 text-center flex flex-col items-center justify-center gap-1 transition-all cursor-pointer select-none"
+            >
+              <div className="p-1.5 rounded-xl bg-rose-500/15 text-rose-500 dark:text-rose-400">
+                <Volume2 className="h-4 w-4" />
+              </div>
+              <span className="text-[11px] font-bold leading-tight">Find Siren</span>
+              <span className="text-[9px] font-mono text-rose-500 font-bold">Loud Alarm</span>
+            </button>
+          )}
+
+          {/* 4. Remote Screen Wake */}
+          <button
+            type="button"
+            onClick={async () => {
+              await wakeScreen();
+              pushToast('Turned target phone screen ON', 'success');
+            }}
+            className="btn-interactive p-2.5 rounded-xl border bg-white/80 dark:bg-slate-950/60 border-slate-200 dark:border-slate-800/80 text-slate-700 dark:text-slate-300 hover:border-emerald-400/60 hover:bg-emerald-500/10 text-center flex flex-col items-center justify-center gap-1 transition-all cursor-pointer select-none"
+          >
+            <div className="p-1.5 rounded-xl bg-emerald-500/15 text-emerald-500 dark:text-emerald-400">
+              <Sun className="h-4 w-4" />
+            </div>
+            <span className="text-[11px] font-bold leading-tight">Wake Screen</span>
+            <span className="text-[9px] font-mono text-emerald-600 dark:text-emerald-400 font-bold">Display ON</span>
+          </button>
+
+          {/* 5. Remote Screen Lock */}
+          <button
+            type="button"
+            onClick={() => {
+              lockDevice();
+              pushToast('Lock command sent to phone screen', 'info');
+            }}
+            className="btn-interactive p-2.5 rounded-xl border bg-white/80 dark:bg-slate-950/60 border-slate-200 dark:border-slate-800/80 text-slate-700 dark:text-slate-300 hover:border-violet-400/60 hover:bg-violet-500/10 text-center flex flex-col items-center justify-center gap-1 transition-all cursor-pointer select-none"
+          >
+            <div className="p-1.5 rounded-xl bg-violet-500/15 text-violet-500 dark:text-violet-400">
+              <Lock className="h-4 w-4" />
+            </div>
+            <span className="text-[11px] font-bold leading-tight">Lock Screen</span>
+            <span className="text-[9px] font-mono text-violet-600 dark:text-violet-400 font-bold">Instant Lock</span>
+          </button>
+
+          {/* 6. Ringer Mode Switcher */}
+          <button
+            type="button"
+            onClick={() => {
+              const current = volumeInfo?.ringerMode?.toLowerCase() || quickSettings?.ringerMode || 'normal';
+              if (current === 'normal') {
+                sendQuickSetting('ringer_vibrate');
+                pushToast('Ringer set to Vibrate', 'info');
+              } else if (current === 'vibrate') {
+                sendQuickSetting('ringer_silent');
+                pushToast('Ringer set to Silent', 'info');
+              } else {
+                sendQuickSetting('ringer_normal');
+                pushToast('Ringer set to Normal', 'info');
+              }
+            }}
+            className="btn-interactive p-2.5 rounded-xl border bg-white/80 dark:bg-slate-950/60 border-slate-200 dark:border-slate-800/80 text-slate-700 dark:text-slate-300 hover:border-sky-400/60 hover:bg-sky-500/10 text-center flex flex-col items-center justify-center gap-1 transition-all cursor-pointer select-none"
+          >
+            <div className="p-1.5 rounded-xl bg-sky-500/15 text-sky-500 dark:text-sky-400">
+              <BellOff className="h-4 w-4" />
+            </div>
+            <span className="text-[11px] font-bold leading-tight">Ringer</span>
+            <span className="text-[9px] font-mono text-sky-600 dark:text-sky-400 font-bold uppercase truncate max-w-full">
+              {volumeInfo?.ringerMode || quickSettings?.ringerMode || 'Normal'}
+            </span>
+          </button>
+
+          {/* 7. Instant Photo Snap */}
+          <button
+            type="button"
+            onClick={() => captureCamera({ facing: 'back' })}
+            disabled={cameraCapturing}
+            className="btn-interactive p-2.5 rounded-xl border bg-white/80 dark:bg-slate-950/60 border-slate-200 dark:border-slate-800/80 text-slate-700 dark:text-slate-300 hover:border-purple-400/60 hover:bg-purple-500/10 text-center flex flex-col items-center justify-center gap-1 transition-all cursor-pointer select-none disabled:opacity-40"
+          >
+            <div className="p-1.5 rounded-xl bg-purple-500/15 text-purple-500 dark:text-purple-400">
+              <Camera className={`h-4 w-4 ${cameraCapturing ? 'animate-spin' : ''}`} />
+            </div>
+            <span className="text-[11px] font-bold leading-tight">Photo Snap</span>
+            <span className="text-[9px] font-mono text-purple-600 dark:text-purple-400 font-bold">
+              {cameraCapturing ? 'Snapping...' : 'Silent Rear'}
+            </span>
+          </button>
+
+          {/* 8. Instant Mic Listen (15s) */}
+          <button
+            type="button"
+            onClick={() => recordMic(15)}
+            disabled={micRecording}
+            className={`btn-interactive p-2.5 rounded-xl border text-center flex flex-col items-center justify-center gap-1 transition-all cursor-pointer select-none disabled:opacity-40 ${
+              micRecording
+                ? 'bg-rose-500/20 border-rose-500/70 text-rose-600 dark:text-rose-300 animate-pulse'
+                : 'bg-white/80 dark:bg-slate-950/60 border-slate-200 dark:border-slate-800/80 text-slate-700 dark:text-slate-300 hover:border-rose-400/60 hover:bg-rose-500/10'
+            }`}
+          >
+            <div className={`p-1.5 rounded-xl ${micRecording ? 'bg-rose-500 text-white' : 'bg-rose-500/15 text-rose-500 dark:text-rose-400'}`}>
+              <Mic className={`h-4 w-4 ${micRecording ? 'animate-bounce' : ''}`} />
+            </div>
+            <span className="text-[11px] font-bold leading-tight">Mic Audio</span>
+            <span className="text-[9px] font-mono text-rose-500 font-bold">
+              {micRecording ? 'Listening...' : '15s Clip'}
+            </span>
+          </button>
+
+          {/* 9. Instant Screenshot Grab */}
+          <button
+            type="button"
+            onClick={() => captureScreenshot()}
+            disabled={screenshotCapturing}
+            className="btn-interactive p-2.5 rounded-xl border bg-white/80 dark:bg-slate-950/60 border-slate-200 dark:border-slate-800/80 text-slate-700 dark:text-slate-300 hover:border-indigo-400/60 hover:bg-indigo-500/10 text-center flex flex-col items-center justify-center gap-1 transition-all cursor-pointer select-none disabled:opacity-40"
+          >
+            <div className="p-1.5 rounded-xl bg-indigo-500/15 text-indigo-500 dark:text-indigo-400">
+              <Monitor className={`h-4 w-4 ${screenshotCapturing ? 'animate-spin' : ''}`} />
+            </div>
+            <span className="text-[11px] font-bold leading-tight">Screenshot</span>
+            <span className="text-[9px] font-mono text-indigo-600 dark:text-indigo-400 font-bold">
+              {screenshotCapturing ? 'Grabbing...' : 'Live Grab'}
+            </span>
+          </button>
+
+          {/* 10. Data Saver Mode Toggle */}
+          <button
+            type="button"
+            onClick={() => toggleMasterDataSaver(!syncConfig?.lowDataMode)}
+            className={`btn-interactive p-2.5 rounded-xl border text-center flex flex-col items-center justify-center gap-1 transition-all cursor-pointer select-none ${
+              syncConfig?.lowDataMode
+                ? 'bg-amber-500/20 border-amber-500/70 text-amber-600 dark:text-amber-300 shadow-md shadow-amber-500/20'
+                : 'bg-white/80 dark:bg-slate-950/60 border-slate-200 dark:border-slate-800/80 text-slate-700 dark:text-slate-300 hover:border-emerald-400/60'
+            }`}
+          >
+            <div className={`p-1.5 rounded-xl ${syncConfig?.lowDataMode ? 'bg-amber-500 text-slate-950' : 'bg-emerald-500/15 text-emerald-500 dark:text-emerald-400'}`}>
+              <Activity className="h-4 w-4" />
+            </div>
+            <span className="text-[11px] font-bold leading-tight">Data Saver</span>
+            <span className={`text-[9px] font-mono px-1 py-0.2 rounded font-bold uppercase ${
+              syncConfig?.lowDataMode ? 'bg-amber-400/30 text-amber-700 dark:text-amber-300' : 'text-emerald-600 dark:text-emerald-400'
+            }`}>
+              {syncConfig?.lowDataMode ? 'SAVER ON' : 'ACTIVE'}
+            </span>
+          </button>
+
+          {/* 11. Home Mode (Pause/Resume Monitoring) */}
+          <button
+            type="button"
+            onClick={() => pauseMonitoring(!activeDevice?.monitoringPaused)}
+            className={`btn-interactive p-2.5 rounded-xl border text-center flex flex-col items-center justify-center gap-1 transition-all cursor-pointer select-none ${
+              activeDevice?.monitoringPaused
+                ? 'bg-amber-500/20 border-amber-500/70 text-amber-600 dark:text-amber-300 shadow-md shadow-amber-500/20'
+                : 'bg-white/80 dark:bg-slate-950/60 border-slate-200 dark:border-slate-800/80 text-slate-700 dark:text-slate-300 hover:border-amber-400/60'
+            }`}
+          >
+            <div className={`p-1.5 rounded-xl ${activeDevice?.monitoringPaused ? 'bg-amber-500 text-slate-950' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'}`}>
+              <Pause className="h-4 w-4" />
+            </div>
+            <span className="text-[11px] font-bold leading-tight">Home Mode</span>
+            <span className={`text-[9px] font-mono px-1 py-0.2 rounded font-bold uppercase ${
+              activeDevice?.monitoringPaused ? 'bg-amber-400/30 text-amber-700 dark:text-amber-300' : 'text-slate-400'
+            }`}>
+              {activeDevice?.monitoringPaused ? 'PAUSED' : 'ONLINE'}
+            </span>
+          </button>
+
+          {/* 12. Full Telemetry Sync */}
+          <button
+            type="button"
+            onClick={async () => {
+              await Promise.all([refreshDeviceInfo(), fetchBatteryStats(), fetchVolumeInfo()]);
+              pushToast('All telemetry refreshed from phone', 'success');
+            }}
+            className="btn-interactive p-2.5 rounded-xl border bg-white/80 dark:bg-slate-950/60 border-slate-200 dark:border-slate-800/80 text-slate-700 dark:text-slate-300 hover:border-indigo-400/60 hover:bg-indigo-500/10 text-center flex flex-col items-center justify-center gap-1 transition-all cursor-pointer select-none"
+          >
+            <div className="p-1.5 rounded-xl bg-indigo-500/15 text-indigo-500 dark:text-indigo-400">
+              <RefreshCw className="h-4 w-4" />
+            </div>
+            <span className="text-[11px] font-bold leading-tight">Sync Now</span>
+            <span className="text-[9px] font-mono text-indigo-600 dark:text-indigo-400 font-bold">Refresh</span>
+          </button>
+        </div>
+      </div>
+
+      {/* STREAMLINED GLASS SUB-NAVIGATION PILL BAR & COMPACT SEARCH */}
+      <div className="sticky top-0 z-30 -mx-1 px-2.5 py-2 sm:py-2.5 bg-white/90 dark:bg-slate-900/90 backdrop-blur-2xl border border-slate-200/90 dark:border-white/10 rounded-2xl shadow-xl shadow-slate-200/30 dark:shadow-black/40 flex items-center justify-between gap-2 overflow-x-auto scrollbar-none">
+        <div className="flex items-center gap-1 shrink-0 overflow-x-auto scrollbar-none py-0.5">
           {[
-            { id: 'all', label: 'All Controls', icon: Sliders },
-            { id: 'hardware', label: '⚡ Hardware & Toggles', icon: Zap },
-            { id: 'surveillance', label: '👁️ Surveillance & Stream', icon: Eye },
-            { id: 'safety', label: '🛡️ Safety & Kid Shields', icon: Shield },
-            { id: 'automation', label: '⚙️ Automation & Data', icon: Cpu },
-            { id: 'danger', label: '⚠️ Device Actions', icon: AlertTriangle },
+            { id: 'all', label: 'All', icon: Sliders },
+            { id: 'hardware', label: '⚡ Hardware', icon: Zap },
+            { id: 'surveillance', label: '👁️ Stream', icon: Eye },
+            { id: 'safety', label: '🛡️ Safety', icon: Shield },
+            { id: 'automation', label: '⚙️ Auto', icon: Cpu },
+            { id: 'danger', label: '⚠️ Danger', icon: AlertTriangle },
           ].map((tab) => {
             const Icon = tab.icon;
             const isActive = controlTab === tab.id;
@@ -785,35 +1022,35 @@ export default function Controls() {
                 key={tab.id}
                 type="button"
                 onClick={() => setControlTab(tab.id)}
-                className={`btn-interactive px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap ${
+                className={`btn-interactive px-2.5 sm:px-3 py-1.5 rounded-xl text-[11px] font-bold flex items-center gap-1 transition-all cursor-pointer whitespace-nowrap ${
                   isActive
                     ? 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-md shadow-indigo-500/25 border border-indigo-400/30'
                     : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60 border border-transparent'
                 }`}
               >
-                <Icon className={`h-3.5 w-3.5 ${isActive ? 'text-white' : 'text-slate-400 dark:text-slate-500'}`} />
+                <Icon className={`h-3 w-3 ${isActive ? 'text-white' : 'text-slate-400 dark:text-slate-500'}`} />
                 <span>{tab.label}</span>
               </button>
             );
           })}
         </div>
 
-        <div className="relative min-w-[240px] flex-1 sm:flex-initial">
-          <Search className="absolute left-3.5 top-3 h-3.5 w-3.5 text-slate-400" />
+        <div className="relative min-w-[120px] max-w-[200px] flex-1">
+          <Search className="absolute left-2.5 top-2.5 h-3 w-3 text-slate-400" />
           <input
             type="text"
             value={controlSearch}
             onChange={(e) => setControlSearch(e.target.value)}
-            placeholder="Search 25+ controls (e.g. torch, cam, lock)..."
-            className="w-full pl-9 pr-8 py-2 rounded-xl bg-white/90 dark:bg-slate-950/80 border border-slate-300 dark:border-slate-800 text-xs font-medium text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 shadow-xs transition-all"
+            placeholder="Search..."
+            className="w-full pl-7 pr-6 py-1.5 rounded-xl bg-white/90 dark:bg-slate-950/80 border border-slate-300 dark:border-slate-800 text-[11px] font-medium text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:border-indigo-500 shadow-xs transition-all"
           />
           {controlSearch && (
             <button
               type="button"
               onClick={() => setControlSearch('')}
-              className="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
+              className="absolute right-2 top-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
             >
-              <X className="h-4 w-4" />
+              <X className="h-3 w-3" />
             </button>
           )}
         </div>
@@ -867,7 +1104,7 @@ export default function Controls() {
         </div>
 
         {/* Sync Channels Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className={isMobile ? "flex flex-col gap-2.5 w-full" : "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3"}>
           {/* Notifications */}
           <div className={`p-3 rounded-lg border flex items-center justify-between transition-colors ${
             syncConfig?.notifications && !syncConfig?.lowDataMode
@@ -1065,10 +1302,10 @@ export default function Controls() {
       </div>
 
       {/* Grid of Control Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className={isMobile ? "flex flex-col gap-4 w-full" : "grid gap-4 grid-cols-1 lg:grid-cols-2"}>
 
         {/* PARENTAL CONTROLS, APP BLOCKER & SCREEN TIME LIMITS */}
-        <div className={`rounded-2xl border border-purple-500/40 bg-white/70 dark:bg-slate-900/60 dark:bg-gradient-to-br dark:from-slate-900 dark:via-purple-950/20 dark:to-slate-950 p-5 shadow-xl flex flex-col justify-between md:col-span-2 ${isCardVisible("safety", ["parental", "blocker", "screen time", "kids", "doomscrolling"]) ? "" : "hidden"}`}>
+        <div className={`rounded-2xl border border-purple-500/40 bg-white/70 dark:bg-slate-900/60 dark:bg-gradient-to-br dark:from-slate-900 dark:via-purple-950/20 dark:to-slate-950 p-4 sm:p-5 shadow-xl flex flex-col justify-between ${isMobile ? '' : 'lg:col-span-2'} ${isCardVisible("safety", ["parental", "blocker", "screen time", "kids", "doomscrolling"]) ? "" : "hidden"}`}>
           <div>
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200/80 dark:border-slate-800 pb-3 mb-4">
               <div className="flex items-center gap-3">
@@ -1198,7 +1435,7 @@ export default function Controls() {
                   <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">📊 Today's App Usage Breakdown</span>
                   <span className="text-[10px] text-slate-500 dark:text-slate-400">{appUsage.apps.length} apps active</span>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-48 overflow-y-auto pr-1">
+                <div className={isMobile ? "flex flex-col gap-2 max-h-48 overflow-y-auto pr-1 w-full" : "grid grid-cols-1 md:grid-cols-2 gap-2 max-h-48 overflow-y-auto pr-1"}>
                   {appUsage.apps.slice(0, 8).map((app, idx) => (
                     <div key={idx} className="p-2 rounded bg-gray-900 border border-slate-200/80 dark:border-slate-800 flex items-center justify-between text-xs">
                       <div className="truncate mr-2">
@@ -1384,7 +1621,7 @@ export default function Controls() {
 
             {/* Parent PIN Setup */}
             {/* Parent PIN & Re-lock Policy Setup */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
+            <div className={isMobile ? "flex flex-col gap-3 mb-4 w-full" : "grid grid-cols-1 md:grid-cols-2 gap-3 mb-4"}>
               {/* PIN Box */}
               <div className="p-3.5 rounded-lg bg-slate-50 dark:bg-slate-950/70 border border-slate-200/80 dark:border-slate-800 flex flex-col justify-between">
                 <div>
@@ -1561,45 +1798,52 @@ export default function Controls() {
               </span>
             </div>
 
-            <div className="grid grid-cols-2 gap-3 mb-4">
-              <div className="p-2.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/70">
-                <span className="text-[10px] text-slate-500 dark:text-slate-400 block mb-1">Max Charge Cutoff</span>
-                <div className="flex items-center gap-2">
+            <div className="space-y-2 mb-3">
+              <div className="p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/70 flex items-center justify-between">
+                <div>
+                  <span className="text-xs font-semibold text-slate-800 dark:text-slate-200 block">Max Charge Cutoff</span>
+                  <span className="text-[10px] text-slate-500 dark:text-slate-400">Triggers alarm when reached</span>
+                </div>
+                <div className="flex items-center gap-1.5">
                   <input
                     type="number"
                     min="70"
                     max="100"
                     value={batteryCutoffInput}
                     onChange={(e) => setBatteryCutoffInput(Number(e.target.value))}
-                    className="w-16 bg-white dark:bg-gray-900 border border-slate-300 dark:border-gray-700 rounded px-2 py-0.5 text-xs text-slate-900 dark:text-white text-center font-mono shadow-inner"
+                    className="w-14 bg-white dark:bg-gray-900 border border-slate-300 dark:border-gray-700 rounded-lg px-2 py-1 text-xs text-slate-900 dark:text-white text-center font-mono font-bold shadow-inner"
                   />
-                  <span className="text-xs text-emerald-700 dark:text-emerald-400 font-bold">% cutoff</span>
+                  <span className="text-xs text-emerald-600 dark:text-emerald-400 font-bold">%</span>
                 </div>
               </div>
-              <div className="p-2.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/70">
-                <span className="text-[10px] text-slate-500 dark:text-slate-400 block mb-1">Overheat Temp Alert</span>
-                <div className="flex items-center gap-2">
+
+              <div className="p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/70 flex items-center justify-between">
+                <div>
+                  <span className="text-xs font-semibold text-slate-800 dark:text-slate-200 block">Thermal Warning</span>
+                  <span className="text-[10px] text-slate-500 dark:text-slate-400">Overheat alert threshold</span>
+                </div>
+                <div className="flex items-center gap-1.5">
                   <input
                     type="number"
                     min="35"
                     max="60"
                     value={batteryTempLimitInput}
                     onChange={(e) => setBatteryTempLimitInput(Number(e.target.value))}
-                    className="w-16 bg-white dark:bg-gray-900 border border-slate-300 dark:border-gray-700 rounded px-2 py-0.5 text-xs text-slate-900 dark:text-white text-center font-mono shadow-inner"
+                    className="w-14 bg-white dark:bg-gray-900 border border-slate-300 dark:border-gray-700 rounded-lg px-2 py-1 text-xs text-slate-900 dark:text-white text-center font-mono font-bold shadow-inner"
                   />
-                  <span className="text-xs text-amber-700 dark:text-amber-400 font-bold">°C alert</span>
+                  <span className="text-xs text-amber-600 dark:text-amber-400 font-bold">°C</span>
                 </div>
               </div>
             </div>
 
-            <div className="flex items-center justify-between text-xs text-slate-600 dark:text-slate-400 mb-4 bg-slate-50 dark:bg-slate-950/40 p-2.5 rounded-lg border border-slate-200/80 dark:border-slate-800/60 font-mono">
-              <span>Status: {activeDevice?.isCharging ? '⚡ Charging' : 'Discharging'}</span>
-              <span>Temp: {activeDevice?.temperatureC ? `${activeDevice.temperatureC}°C` : 'Normal'}</span>
+            <div className="flex items-center justify-between text-[11px] text-slate-600 dark:text-slate-400 mb-3 bg-slate-50 dark:bg-slate-950/40 p-2 rounded-lg border border-slate-200/80 dark:border-slate-800/60 font-mono">
+              <span>{activeDevice?.isCharging ? '⚡ Charging' : 'Discharging'}</span>
+              <span>{activeDevice?.temperatureC ? `${activeDevice.temperatureC}°C` : 'Normal Temp'}</span>
               <span>Health: {activeDevice?.health || 'Good'}</span>
             </div>
           </div>
 
-          <div className="flex gap-2">
+          <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={() => updateBatteryConfig({
@@ -1607,13 +1851,13 @@ export default function Controls() {
                 batteryMaxLevelCutoff: batteryCutoffInput,
                 batteryOverheatTempThreshold: batteryTempLimitInput
               })}
-              className={`flex-1 py-2 px-3 rounded-lg text-xs font-bold transition-all border cursor-pointer ${
+              className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-bold transition-all border cursor-pointer ${
                 batteryConfig?.batteryAlertsEnabled !== false
-                  ? 'border-emerald-300 dark:border-emerald-500/50 bg-emerald-100 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 hover:bg-emerald-200 dark:hover:bg-emerald-500/30'
-                  : 'border-slate-300 dark:border-gray-700 bg-slate-100 hover:bg-slate-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-slate-700 dark:text-slate-300'
+                  ? 'border-emerald-500/50 bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30'
+                  : 'border-slate-300 dark:border-gray-700 bg-slate-100 hover:bg-slate-200 dark:bg-gray-800 text-slate-700 dark:text-slate-300'
               }`}
             >
-              {batteryConfig?.batteryAlertsEnabled !== false ? '✓ Battery Protection ON' : 'Turn ON Protection'}
+              {batteryConfig?.batteryAlertsEnabled !== false ? '✓ Guard Enabled' : 'Enable Guard'}
             </button>
             <button
               type="button"
@@ -1622,9 +1866,9 @@ export default function Controls() {
                 batteryMaxLevelCutoff: batteryCutoffInput,
                 batteryOverheatTempThreshold: batteryTempLimitInput
               })}
-              className="py-2 px-3 rounded-lg text-xs font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-gray-800 dark:hover:bg-gray-700 border border-slate-300 dark:border-gray-700 text-slate-700 dark:text-slate-300 cursor-pointer transition-colors"
+              className="py-2.5 px-4 rounded-xl text-xs font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-gray-800 dark:hover:bg-gray-700 border border-slate-300 dark:border-gray-700 text-slate-700 dark:text-slate-300 cursor-pointer"
             >
-              Save Settings
+              Save
             </button>
           </div>
         </div>
@@ -1651,29 +1895,30 @@ export default function Controls() {
               </span>
             </div>
 
-            <div className="grid grid-cols-2 gap-3 mb-4">
-              <div>
-                <label className="text-[10px] text-slate-500 dark:text-slate-400 block mb-1">Interval</label>
+            <div className="space-y-2 mb-3">
+              <div className="p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/70 flex items-center justify-between">
+                <label className="text-xs font-semibold text-slate-800 dark:text-slate-200">Capture Frequency</label>
                 <select
                   value={timelapseIntervalInput}
                   onChange={(e) => setTimelapseIntervalInput(Number(e.target.value))}
-                  className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg p-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none"
+                  className="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg px-2.5 py-1 text-xs text-slate-900 dark:text-slate-100 font-medium focus:outline-none"
                 >
-                  <option value={1}>Every 1 Minute</option>
-                  <option value={2}>Every 2 Minutes</option>
-                  <option value={5}>Every 5 Minutes</option>
-                  <option value={10}>Every 10 Minutes</option>
-                  <option value={30}>Every 30 Minutes</option>
+                  <option value={1}>Every 1 min</option>
+                  <option value={2}>Every 2 mins</option>
+                  <option value={5}>Every 5 mins</option>
+                  <option value={10}>Every 10 mins</option>
+                  <option value={30}>Every 30 mins</option>
                 </select>
               </div>
-              <div>
-                <label className="text-[10px] text-slate-500 dark:text-slate-400 block mb-1">Camera Facing</label>
+
+              <div className="p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/70 flex items-center justify-between">
+                <label className="text-xs font-semibold text-slate-800 dark:text-slate-200">Camera Lens</label>
                 <select
                   value={timelapseFacingInput}
                   onChange={(e) => setTimelapseFacingInput(e.target.value)}
-                  className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg p-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none"
+                  className="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg px-2.5 py-1 text-xs text-slate-900 dark:text-slate-100 font-medium focus:outline-none"
                 >
-                  <option value="back">Back Camera</option>
+                  <option value="back">Rear Camera</option>
                   <option value="front">Front Camera</option>
                 </select>
               </div>
@@ -1807,34 +2052,35 @@ export default function Controls() {
               </span>
             </div>
 
-            <div className="grid grid-cols-2 gap-3 mb-3">
-              <div>
-                <label className="text-[10px] text-slate-500 dark:text-slate-400 block mb-1">Safe Zone Name</label>
+            <div className="space-y-2 mb-3">
+              <div className="p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/70 flex items-center justify-between gap-2">
+                <span className="text-xs font-semibold text-slate-800 dark:text-slate-200 shrink-0">Zone Name</span>
                 <input
                   type="text"
                   value={geofenceNameInput}
                   onChange={(e) => setGeofenceNameInput(e.target.value)}
-                  placeholder="e.g. Home, Office"
-                  className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg p-2 text-xs text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none"
+                  placeholder="e.g. Home, School"
+                  className="w-36 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg px-2.5 py-1 text-xs text-slate-900 dark:text-slate-100 text-right focus:outline-none"
                 />
               </div>
-              <div>
-                <label className="text-[10px] text-slate-500 dark:text-slate-400 block mb-1">Radius (Meters)</label>
+
+              <div className="p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/70 flex items-center justify-between">
+                <span className="text-xs font-semibold text-slate-800 dark:text-slate-200">Safety Radius</span>
                 <select
                   value={geofenceRadiusInput}
                   onChange={(e) => setGeofenceRadiusInput(Number(e.target.value))}
-                  className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg p-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none"
+                  className="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg px-2.5 py-1 text-xs text-slate-900 dark:text-slate-100 font-medium focus:outline-none"
                 >
-                  <option value={100}>100 meters (Tight)</option>
-                  <option value={300}>300 meters (Standard)</option>
-                  <option value={500}>500 meters (Neighborhood)</option>
-                  <option value={1000}>1,000 meters (1 KM)</option>
-                  <option value={3000}>3,000 meters (3 KM)</option>
+                  <option value={100}>100m (Tight)</option>
+                  <option value={300}>300m (Standard)</option>
+                  <option value={500}>500m (Area)</option>
+                  <option value={1000}>1 km (City)</option>
+                  <option value={3000}>3 km (Wide)</option>
                 </select>
               </div>
             </div>
 
-            <div className="mb-4">
+            <div className="mb-3">
               <button
                 type="button"
                 onClick={() => {
@@ -1848,15 +2094,15 @@ export default function Controls() {
                       radiusMeters: geofenceRadiusInput,
                       name: geofenceNameInput
                     });
-                    pushToast(`📍 Geofence center set to current phone location (${latestFix.latitude.toFixed(4)}, ${latestFix.longitude.toFixed(4)})`, 'success');
+                    pushToast(`📍 Geofence center set to current phone GPS`, 'success');
                   } else {
                     pushToast('No current location available. Request location first.', 'error');
                   }
                 }}
-                className="w-full py-1.5 px-3 rounded-lg text-xs font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-gray-700 transition-colors flex items-center justify-center gap-1.5"
+                className="btn-interactive w-full py-2.5 px-3 rounded-xl text-xs font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-gray-700 transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
               >
                 <MapPin className="h-3.5 w-3.5 text-amber-500 dark:text-amber-400" />
-                Set Current Phone GPS as Safe Center
+                Set Current GPS as Center
               </button>
             </div>
           </div>
@@ -1919,7 +2165,7 @@ export default function Controls() {
             </div>
           </div>
 
-          <div className="flex gap-2">
+          <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={() => updateAutoReply({
@@ -1927,10 +2173,10 @@ export default function Controls() {
                 message: autoReplyMsgInput,
                 packages: ['com.whatsapp', 'com.google.android.apps.messaging', 'com.android.mms']
               })}
-              className={`flex-1 py-2 px-3 rounded-lg text-xs font-bold transition-all border ${
+              className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-bold transition-all border cursor-pointer ${
                 autoReply?.enabled
-                  ? 'border-cyan-500/50 bg-cyan-500/20 text-cyan-300 hover:bg-cyan-500/30'
-                  : 'border-slate-300 dark:border-gray-700 bg-slate-100 hover:bg-slate-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-slate-700 dark:text-slate-300'
+                  ? 'border-cyan-500/50 bg-cyan-500/20 text-cyan-300'
+                  : 'border-slate-300 dark:border-gray-700 bg-slate-100 dark:bg-gray-800 text-slate-700 dark:text-slate-300'
               }`}
             >
               {autoReply?.enabled ? '✓ Auto-Responder Active' : 'Enable Auto-Reply'}
@@ -1942,7 +2188,7 @@ export default function Controls() {
                 message: autoReplyMsgInput,
                 packages: ['com.whatsapp', 'com.google.android.apps.messaging', 'com.android.mms']
               })}
-              className="py-2 px-3 rounded-lg text-xs font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-gray-800 dark:hover:bg-gray-700 border border-slate-300 dark:border-gray-700 text-slate-700 dark:text-slate-300"
+              className="py-2.5 px-4 rounded-xl text-xs font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-gray-800 dark:hover:bg-gray-700 border border-slate-300 dark:border-gray-700 text-slate-700 dark:text-slate-300 cursor-pointer"
             >
               Save Text
             </button>
@@ -1950,62 +2196,62 @@ export default function Controls() {
         </div>
 
         {/* 4. NETWORK DATA USAGE TRACKER */}
-        <div className={`rounded-2xl border border-indigo-500/40 bg-white/70 dark:bg-slate-900/60 dark:bg-gradient-to-br dark:from-slate-900 dark:via-indigo-950/20 dark:to-slate-950 p-5 shadow-xl flex flex-col justify-between ${isCardVisible("automation", ["network", "data usage", "traffic", "wifi", "cellular"]) ? "" : "hidden"}`}>
+        <div className={`rounded-2xl border border-indigo-500/40 bg-white/70 dark:bg-slate-900/60 dark:bg-gradient-to-br dark:from-slate-900 dark:via-indigo-950/20 dark:to-slate-950 p-4 sm:p-5 shadow-xl flex flex-col justify-between ${isCardVisible("automation", ["network", "data usage", "traffic", "wifi", "cellular"]) ? "" : "hidden"}`}>
           <div>
-            <div className="flex items-center justify-between mb-4 border-b border-slate-200/80 dark:border-slate-800 pb-3">
-              <div className="flex items-center gap-2.5">
-                <div className="p-2 rounded-lg bg-indigo-500/20 border border-indigo-500/40 text-indigo-400">
+            <div className="flex items-center justify-between mb-3 border-b border-slate-200/80 dark:border-slate-800 pb-2.5">
+              <div className="flex items-center gap-2">
+                <div className="p-1.5 rounded-lg bg-indigo-500/20 border border-indigo-500/40 text-indigo-400">
                   <Wifi className="h-4 w-4" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-slate-900 dark:text-slate-100 text-sm">Network Data Usage Tracker</h3>
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400">Per-app mobile vs Wi-Fi consumption</p>
+                  <h3 className="font-bold text-slate-900 dark:text-slate-100 text-xs sm:text-sm">Network Data Usage Tracker</h3>
+                  <p className="text-[10px] text-slate-500 dark:text-slate-400">Per-app mobile vs Wi-Fi consumption</p>
                 </div>
               </div>
               <button
                 type="button"
                 onClick={() => requestNetworkUsage()}
-                className="px-2.5 py-1 rounded text-xs font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-gray-700 transition-colors"
+                className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-gray-700 transition-colors cursor-pointer"
               >
                 🔄 Refresh
               </button>
             </div>
 
-            <div className="grid grid-cols-3 gap-2 mb-4 text-center">
-              <div className="p-2 bg-slate-50 dark:bg-slate-950 rounded-lg border border-slate-200/80 dark:border-slate-800">
-                <span className="text-[10px] text-slate-500 dark:text-slate-400 block">Total</span>
+            <div className={isMobile ? "flex flex-col gap-2 mb-3 w-full" : "grid grid-cols-3 gap-2 mb-3 text-center"}>
+              <div className={`p-2.5 bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-200/80 dark:border-slate-800 ${isMobile ? 'flex items-center justify-between' : ''}`}>
+                <span className="text-[11px] text-slate-500 dark:text-slate-400 block font-medium">Total Network Data</span>
                 <span className="text-xs font-bold text-slate-900 dark:text-white font-mono">
                   {((networkUsage?.summary?.totalBytes || 0) / (1024 * 1024)).toFixed(1)} MB
                 </span>
               </div>
-              <div className="p-2 bg-slate-50 dark:bg-slate-950 rounded-lg border border-slate-200/80 dark:border-slate-800">
-                <span className="text-[10px] text-emerald-400 block">Mobile</span>
-                <span className="text-xs font-bold text-emerald-300 font-mono">
+              <div className={`p-2.5 bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-200/80 dark:border-slate-800 ${isMobile ? 'flex items-center justify-between' : ''}`}>
+                <span className="text-[11px] text-emerald-500 block font-medium">Mobile Cellular Data</span>
+                <span className="text-xs font-bold text-emerald-400 font-mono">
                   {((networkUsage?.summary?.mobileBytes || 0) / (1024 * 1024)).toFixed(1)} MB
                 </span>
               </div>
-              <div className="p-2 bg-slate-50 dark:bg-slate-950 rounded-lg border border-slate-200/80 dark:border-slate-800">
-                <span className="text-[10px] text-cyan-400 block">Wi-Fi</span>
-                <span className="text-xs font-bold text-cyan-300 font-mono">
+              <div className={`p-2.5 bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-200/80 dark:border-slate-800 ${isMobile ? 'flex items-center justify-between' : ''}`}>
+                <span className="text-[11px] text-cyan-500 block font-medium">Wi-Fi Data</span>
+                <span className="text-xs font-bold text-cyan-400 font-mono">
                   {((networkUsage?.summary?.wifiBytes || 0) / (1024 * 1024)).toFixed(1)} MB
                 </span>
               </div>
             </div>
 
-            <div className="max-h-36 overflow-y-auto space-y-1.5 pr-1">
+            <div className="max-h-36 overflow-y-auto space-y-1.5 pr-1 scrollbar-none">
               {(networkUsage?.apps || []).slice(0, 5).map((app) => (
-                <div key={app.packageName} className="flex items-center justify-between p-1.5 bg-slate-50/80 dark:bg-slate-950/60 rounded border border-slate-200/80 dark:border-slate-800/80 text-xs">
+                <div key={app.packageName} className="flex items-center justify-between p-2 bg-slate-50/80 dark:bg-slate-950/60 rounded-lg border border-slate-200/80 dark:border-slate-800/80 text-xs">
                   <div className="min-w-0 pr-2">
                     <span className="font-semibold text-slate-800 dark:text-slate-200 truncate block">{app.appName || app.packageName}</span>
-                    <span className="text-[10px] text-gray-500 font-mono">{app.packageName}</span>
+                    <span className="text-[10px] text-gray-500 font-mono truncate block">{app.packageName}</span>
                   </div>
-                  <span className="text-xs font-mono font-bold text-indigo-300 shrink-0">
+                  <span className="text-xs font-mono font-bold text-indigo-400 shrink-0">
                     {((app.totalBytes || 0) / (1024 * 1024)).toFixed(1)} MB
                   </span>
                 </div>
               ))}
               {(!networkUsage?.apps || networkUsage.apps.length === 0) && (
-                <div className="text-center py-4 text-xs text-gray-500 italic">
+                <div className="text-center py-3 text-xs text-gray-500 italic">
                   Click 'Refresh' to inspect per-app data usage from device.
                 </div>
               )}
@@ -2014,40 +2260,41 @@ export default function Controls() {
         </div>
 
         {/* 10. SCHEDULED REMOTE COMMANDS */}
-        <div className={`rounded-2xl border border-rose-500/40 bg-white/70 dark:bg-slate-900/60 dark:bg-gradient-to-br dark:from-slate-900 dark:via-rose-950/20 dark:to-slate-950 p-5 shadow-xl flex flex-col justify-between ${isCardVisible("automation", ["scheduled", "cron", "timer", "commands", "remote schedule"]) ? "" : "hidden"}`}>
+        <div className={`rounded-2xl border border-rose-500/40 bg-white/70 dark:bg-slate-900/60 dark:bg-gradient-to-br dark:from-slate-900 dark:via-rose-950/20 dark:to-slate-950 p-4 sm:p-5 shadow-xl flex flex-col justify-between ${isCardVisible("automation", ["scheduled", "cron", "timer", "commands", "remote schedule"]) ? "" : "hidden"}`}>
           <div>
-            <div className="flex items-center justify-between mb-4 border-b border-slate-200/80 dark:border-slate-800 pb-3">
-              <div className="flex items-center gap-2.5">
-                <div className="p-2 rounded-lg bg-rose-500/20 border border-rose-500/40 text-rose-400">
+            <div className="flex items-center justify-between mb-3 border-b border-slate-200/80 dark:border-slate-800 pb-2.5">
+              <div className="flex items-center gap-2">
+                <div className="p-1.5 rounded-lg bg-rose-500/20 border border-rose-500/40 text-rose-400">
                   <Clock className="h-4 w-4" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-slate-900 dark:text-slate-100 text-sm">Scheduled Remote Commands</h3>
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400">Trigger remote actions at a future time</p>
+                  <h3 className="font-bold text-slate-900 dark:text-slate-100 text-xs sm:text-sm">Scheduled Remote Commands</h3>
+                  <p className="text-[10px] text-slate-500 dark:text-slate-400">Trigger actions at a future time</p>
                 </div>
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3 mb-3">
-              <div>
-                <label className="text-[10px] text-slate-500 dark:text-slate-400 block mb-1">Select Command</label>
+            <div className="space-y-2 mb-3">
+              <div className="p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/70 flex items-center justify-between">
+                <span className="text-xs font-semibold text-slate-800 dark:text-slate-200">Action</span>
                 <select
                   value={schedCommand}
                   onChange={(e) => setSchedCommand(e.target.value)}
-                  className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg p-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none"
+                  className="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg px-2.5 py-1 text-xs text-slate-900 dark:text-slate-100 font-medium focus:outline-none"
                 >
                   <option value="LOCK_COMMAND">Screen Lock</option>
                   <option value="FIND_PHONE_COMMAND">Loud Alarm</option>
-                  <option value="TORCH_COMMAND">Toggle Flashlight</option>
+                  <option value="TORCH_COMMAND">Toggle Torch</option>
                   <option value="DND_SET_COMMAND">Enable DND Mode</option>
                 </select>
               </div>
-              <div>
-                <label className="text-[10px] text-slate-500 dark:text-slate-400 block mb-1">Run In (Minutes)</label>
+
+              <div className="p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/70 flex items-center justify-between">
+                <span className="text-xs font-semibold text-slate-800 dark:text-slate-200">Execute In</span>
                 <select
                   value={schedMinutes}
                   onChange={(e) => setSchedMinutes(Number(e.target.value))}
-                  className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg p-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none"
+                  className="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg px-2.5 py-1 text-xs text-slate-900 dark:text-slate-100 font-medium focus:outline-none"
                 >
                   <option value={5}>5 Minutes</option>
                   <option value={15}>15 Minutes</option>
@@ -2297,7 +2544,7 @@ export default function Controls() {
                   </span>
                 </div>
 
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5 pt-1">
+                <div className={isMobile ? "flex flex-col gap-1.5 pt-1 w-full" : "grid grid-cols-2 sm:grid-cols-3 gap-1.5 pt-1"}>
                   {[
                     { id: 'WEATHER_CLOCK', label: '⛅ Weather & Clock', desc: 'Live temp & time' },
                     { id: 'WEATHER_ONLY', label: '🌦️ Weather Only', desc: 'Forecast & radar' },
@@ -2430,14 +2677,14 @@ export default function Controls() {
               {camouflage?.calculatorDisguise ? '✓ Full Camouflage Active' : '🧮 Activate iOS Calculator Camouflage'}
             </button>
 
-            <div className="grid grid-cols-2 gap-2 pt-1">
+            <div className={isMobile ? "flex flex-col gap-2 pt-1 w-full" : "grid grid-cols-2 gap-2 pt-1"}>
               <button
                 type="button"
                 onClick={() => {
                   sendQuickSetting('pin_widget');
                   pushToast('Clock Widget Pinning request sent to phone!', 'info');
                 }}
-                className="py-2 px-2.5 rounded-lg border border-cyan-200 dark:border-gray-700 bg-cyan-50 dark:bg-gray-800/80 hover:bg-cyan-100 dark:hover:bg-gray-700 text-cyan-800 dark:text-cyan-300 text-[11px] font-semibold transition flex items-center justify-center gap-1.5 cursor-pointer"
+                className="w-full py-2.5 px-3 rounded-lg border border-cyan-200 dark:border-gray-700 bg-cyan-50 dark:bg-gray-800/80 hover:bg-cyan-100 dark:hover:bg-gray-700 text-cyan-800 dark:text-cyan-300 text-xs font-semibold transition flex items-center justify-center gap-1.5 cursor-pointer shadow-xs"
                 title="Send 1-tap request to add Live Clock Widget to phone home screen"
               >
                 <span>📌 Pin Clock Widget</span>
@@ -2449,7 +2696,7 @@ export default function Controls() {
                   sendQuickSetting('notification_settings');
                   pushToast('Opened Notification Settings on phone', 'info');
                 }}
-                className="py-2 px-2.5 rounded-lg border border-amber-200 dark:border-gray-700 bg-amber-50 dark:bg-gray-800/80 hover:bg-amber-100 dark:hover:bg-gray-700 text-amber-800 dark:text-amber-300 text-[11px] font-semibold transition flex items-center justify-center gap-1.5 cursor-pointer"
+                className="w-full py-2.5 px-3 rounded-lg border border-amber-200 dark:border-gray-700 bg-amber-50 dark:bg-gray-800/80 hover:bg-amber-100 dark:hover:bg-gray-700 text-amber-800 dark:text-amber-300 text-xs font-semibold transition flex items-center justify-center gap-1.5 cursor-pointer shadow-xs"
                 title="Open app notification settings on phone to silence or hide"
               >
                 <span>🔔 Mute/Hide Notification</span>
@@ -2507,26 +2754,26 @@ export default function Controls() {
                   <span>Free: {((storageAnalysis.freeBytes || 0) / (1024 * 1024 * 1024)).toFixed(1)} GB</span>
                 </div>
 
-                <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-200/60 dark:border-slate-800/60 text-[11px]">
-                  <div className="p-2 rounded-lg bg-slate-50 dark:bg-slate-950/60">
+                <div className={isMobile ? "flex flex-col gap-2 pt-2 border-t border-slate-200/60 dark:border-slate-800/60 text-xs w-full" : "grid grid-cols-2 gap-2 pt-2 border-t border-slate-200/60 dark:border-slate-800/60 text-[11px]"}>
+                  <div className={`p-2.5 rounded-lg bg-slate-50 dark:bg-slate-950/60 ${isMobile ? 'flex items-center justify-between' : ''}`}>
                     <span className="text-slate-500 block">Photos / Images</span>
                     <span className="font-mono font-bold text-slate-900 dark:text-slate-100">
                       {((storageAnalysis.imagesBytes || 0) / (1024 * 1024)).toFixed(1)} MB
                     </span>
                   </div>
-                  <div className="p-2 rounded-lg bg-slate-50 dark:bg-slate-950/60">
+                  <div className={`p-2.5 rounded-lg bg-slate-50 dark:bg-slate-950/60 ${isMobile ? 'flex items-center justify-between' : ''}`}>
                     <span className="text-slate-500 block">Videos &amp; Movies</span>
                     <span className="font-mono font-bold text-slate-900 dark:text-slate-100">
                       {((storageAnalysis.videosBytes || 0) / (1024 * 1024)).toFixed(1)} MB
                     </span>
                   </div>
-                  <div className="p-2 rounded-lg bg-slate-50 dark:bg-slate-950/60">
+                  <div className={`p-2.5 rounded-lg bg-slate-50 dark:bg-slate-950/60 ${isMobile ? 'flex items-center justify-between' : ''}`}>
                     <span className="text-slate-500 block">Audio &amp; Calls</span>
                     <span className="font-mono font-bold text-slate-900 dark:text-slate-100">
                       {((storageAnalysis.audioBytes || 0) / (1024 * 1024)).toFixed(1)} MB
                     </span>
                   </div>
-                  <div className="p-2 rounded-lg bg-slate-50 dark:bg-slate-950/60">
+                  <div className={`p-2.5 rounded-lg bg-slate-50 dark:bg-slate-950/60 ${isMobile ? 'flex items-center justify-between' : ''}`}>
                     <span className="text-slate-500 block">Docs &amp; Downloads</span>
                     <span className="font-mono font-bold text-slate-900 dark:text-slate-100">
                       {((storageAnalysis.docsBytes || 0) / (1024 * 1024)).toFixed(1)} MB
@@ -2646,152 +2893,165 @@ export default function Controls() {
               Remote hardware toggles &amp; quick setting panels (Wi-Fi, Bluetooth, Hotspot, Auto-Rotate, Torch, DND, Ringer &amp; Status Shade).
             </p>
 
-            <div className="grid grid-cols-2 gap-2.5 mb-3">
+            <div className={isMobile ? "flex flex-col gap-2 mb-3 w-full" : "grid grid-cols-2 gap-2.5 mb-3"}>
               {/* Wi-Fi Control */}
               <button
                 type="button"
                 onClick={() => sendQuickSetting('wifi', { enable: !quickSettings?.wifiEnabled })}
-                className={`p-2.5 rounded-lg border text-left flex flex-col gap-1 transition ${
+                className={`p-3 rounded-xl border text-left flex items-center justify-between transition w-full ${
                   quickSettings?.wifiEnabled
                     ? 'border-cyan-500/40 bg-cyan-500/10 dark:bg-cyan-950/20 text-cyan-700 dark:text-cyan-300'
                     : 'border-slate-200/80 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-950/60 text-slate-700 dark:text-slate-300 hover:border-cyan-400/40'
                 }`}
               >
-                <div className="flex items-center justify-between">
-                  <span className="flex items-center gap-1.5 text-xs font-semibold">
-                    <Wifi className="h-3.5 w-3.5 text-cyan-500 dark:text-cyan-400" /> Wi-Fi
-                  </span>
-                  <span className={`text-[10px] font-mono uppercase px-1.5 py-0.5 rounded font-bold ${
-                    quickSettings?.wifiEnabled
-                      ? 'bg-cyan-100 dark:bg-cyan-950/80 text-cyan-800 dark:text-cyan-300 border border-cyan-200 dark:border-cyan-800'
-                      : 'bg-slate-200/80 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
-                  }`}>
-                    {quickSettings?.wifiEnabled ? 'ON' : 'OFF'}
-                  </span>
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className={`p-2 rounded-lg ${quickSettings?.wifiEnabled ? 'bg-cyan-500/20 text-cyan-500 dark:text-cyan-400' : 'bg-slate-100 dark:bg-slate-800 text-slate-500'}`}>
+                    <Wifi className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <span className="text-xs font-bold text-slate-900 dark:text-white block">Wi-Fi Connection</span>
+                    <span className="text-[10px] text-slate-500 dark:text-slate-400 block truncate">Toggle remote Wi-Fi adapter</span>
+                  </div>
                 </div>
-                <span className="text-[10px] text-slate-500 dark:text-slate-400">Toggle Wi-Fi</span>
+                <span className={`text-[10px] font-mono uppercase px-2.5 py-1 rounded-full font-bold border ${
+                  quickSettings?.wifiEnabled
+                    ? 'bg-cyan-100 dark:bg-cyan-950/80 text-cyan-800 dark:text-cyan-300 border-cyan-300 dark:border-cyan-800'
+                    : 'bg-slate-200/80 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-300 dark:border-slate-700'
+                }`}>
+                  {quickSettings?.wifiEnabled ? 'ON' : 'OFF'}
+                </span>
               </button>
 
               {/* Hotspot / Tethering */}
               <button
                 type="button"
                 onClick={() => sendQuickSetting('hotspot', { enable: !quickSettings?.hotspotEnabled })}
-                className={`p-2.5 rounded-lg border text-left flex flex-col gap-1 transition ${
+                className={`p-3 rounded-xl border text-left flex items-center justify-between transition w-full ${
                   quickSettings?.hotspotEnabled
                     ? 'border-amber-500/40 bg-amber-500/10 dark:bg-amber-950/20 text-amber-700 dark:text-amber-300'
                     : 'border-slate-200/80 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-950/60 text-slate-700 dark:text-slate-300 hover:border-amber-400/40'
                 }`}
               >
-                <div className="flex items-center justify-between">
-                  <span className="flex items-center gap-1.5 text-xs font-semibold">
-                    <Signal className="h-3.5 w-3.5 text-amber-500 dark:text-amber-400" /> Hotspot
-                  </span>
-                  <span className={`text-[10px] font-mono uppercase px-1.5 py-0.5 rounded font-bold ${
-                    quickSettings?.hotspotEnabled
-                      ? 'bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800'
-                      : 'bg-slate-200/80 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
-                  }`}>
-                    {quickSettings?.hotspotEnabled ? 'ON' : 'OFF'}
-                  </span>
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className={`p-2 rounded-lg ${quickSettings?.hotspotEnabled ? 'bg-amber-500/20 text-amber-500 dark:text-amber-400' : 'bg-slate-100 dark:bg-slate-800 text-slate-500'}`}>
+                    <Signal className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <span className="text-xs font-bold text-slate-900 dark:text-white block">Portable Hotspot</span>
+                    <span className="text-[10px] text-slate-500 dark:text-slate-400 block truncate">Share mobile data tethering</span>
+                  </div>
                 </div>
-                <span className="text-[10px] text-slate-500 dark:text-slate-400">Toggle Hotspot</span>
+                <span className={`text-[10px] font-mono uppercase px-2.5 py-1 rounded-full font-bold border ${
+                  quickSettings?.hotspotEnabled
+                    ? 'bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300 border-amber-300 dark:border-amber-800'
+                    : 'bg-slate-200/80 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-300 dark:border-slate-700'
+                }`}>
+                  {quickSettings?.hotspotEnabled ? 'ON' : 'OFF'}
+                </span>
               </button>
-
-
 
               {/* Auto-Rotate */}
               <button
                 type="button"
                 onClick={() => sendQuickSetting('auto_rotate')}
-                className={`p-2.5 rounded-lg border text-left flex flex-col gap-1 transition ${
+                className={`p-3 rounded-xl border text-left flex items-center justify-between transition w-full ${
                   quickSettings?.autoRotate
                     ? 'border-emerald-500/40 bg-emerald-500/10 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-300'
                     : 'border-slate-200/80 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-950/60 text-slate-700 dark:text-slate-300 hover:border-emerald-400/40'
                 }`}
               >
-                <div className="flex items-center justify-between">
-                  <span className="flex items-center gap-1.5 text-xs font-semibold">
-                    <RotateCw className="h-3.5 w-3.5 text-emerald-500 dark:text-emerald-400" /> Auto-Rotate
-                  </span>
-                  <span className={`text-[10px] font-mono uppercase px-1.5 py-0.5 rounded font-bold ${
-                    quickSettings?.autoRotate
-                      ? 'bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800'
-                      : 'bg-slate-200/80 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
-                  }`}>
-                    {quickSettings?.autoRotate ? 'ON' : 'LOCKED'}
-                  </span>
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className={`p-2 rounded-lg ${quickSettings?.autoRotate ? 'bg-emerald-500/20 text-emerald-500 dark:text-emerald-400' : 'bg-slate-100 dark:bg-slate-800 text-slate-500'}`}>
+                    <RotateCw className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <span className="text-xs font-bold text-slate-900 dark:text-white block">Screen Auto-Rotate</span>
+                    <span className="text-[10px] text-slate-500 dark:text-slate-400 block truncate">Orientation sensor lock</span>
+                  </div>
                 </div>
-                <span className="text-[10px] text-slate-500 dark:text-slate-400">Screen Orientation</span>
+                <span className={`text-[10px] font-mono uppercase px-2.5 py-1 rounded-full font-bold border ${
+                  quickSettings?.autoRotate
+                    ? 'bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 border-emerald-300 dark:border-emerald-800'
+                    : 'bg-slate-200/80 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-300 dark:border-slate-700'
+                }`}>
+                  {quickSettings?.autoRotate ? 'ON' : 'LOCKED'}
+                </span>
               </button>
 
               {/* Flashlight / Torch */}
               <button
                 type="button"
                 onClick={() => sendQuickSetting('torch')}
-                className={`p-2.5 rounded-lg border text-left flex flex-col gap-1 transition ${
+                className={`p-3 rounded-xl border text-left flex items-center justify-between transition w-full ${
                   quickSettings?.torchOn || torchOn
                     ? 'border-amber-500/40 bg-amber-500/10 dark:bg-yellow-950/20 text-amber-700 dark:text-yellow-300'
                     : 'border-slate-200/80 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-950/60 text-slate-700 dark:text-slate-300 hover:border-amber-400/40'
                 }`}
               >
-                <div className="flex items-center justify-between">
-                  <span className="flex items-center gap-1.5 text-xs font-semibold">
-                    <Zap className="h-3.5 w-3.5 text-amber-500 dark:text-yellow-400" /> Flashlight
-                  </span>
-                  <span className={`text-[10px] font-mono uppercase px-1.5 py-0.5 rounded font-bold ${
-                    quickSettings?.torchOn || torchOn
-                      ? 'bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800'
-                      : 'bg-slate-200/80 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
-                  }`}>
-                    {quickSettings?.torchOn || torchOn ? 'ON' : 'OFF'}
-                  </span>
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className={`p-2 rounded-lg ${quickSettings?.torchOn || torchOn ? 'bg-amber-500/20 text-amber-500 dark:text-yellow-400' : 'bg-slate-100 dark:bg-slate-800 text-slate-500'}`}>
+                    <Zap className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <span className="text-xs font-bold text-slate-900 dark:text-white block">Rear Flashlight Torch</span>
+                    <span className="text-[10px] text-slate-500 dark:text-slate-400 block truncate">High intensity camera LED</span>
+                  </div>
                 </div>
-                <span className="text-[10px] text-slate-500 dark:text-slate-400">Rear LED Torch</span>
+                <span className={`text-[10px] font-mono uppercase px-2.5 py-1 rounded-full font-bold border ${
+                  quickSettings?.torchOn || torchOn
+                    ? 'bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300 border-amber-300 dark:border-amber-800'
+                    : 'bg-slate-200/80 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-300 dark:border-slate-700'
+                }`}>
+                  {quickSettings?.torchOn || torchOn ? 'ON' : 'OFF'}
+                </span>
               </button>
 
               {/* Do Not Disturb */}
               <button
                 type="button"
                 onClick={() => sendQuickSetting('dnd')}
-                className={`p-2.5 rounded-lg border text-left flex flex-col gap-1 transition ${
+                className={`p-3 rounded-xl border text-left flex items-center justify-between transition w-full ${
                   quickSettings?.dndActive || dndStatus
                     ? 'border-purple-500/40 bg-purple-500/10 dark:bg-purple-950/20 text-purple-700 dark:text-purple-300'
                     : 'border-slate-200/80 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-950/60 text-slate-700 dark:text-slate-300 hover:border-purple-400/40'
                 }`}
               >
-                <div className="flex items-center justify-between">
-                  <span className="flex items-center gap-1.5 text-xs font-semibold">
-                    <BellOff className="h-3.5 w-3.5 text-purple-500 dark:text-purple-400" /> DND Mode
-                  </span>
-                  <span className={`text-[10px] font-mono uppercase px-1.5 py-0.5 rounded font-bold ${
-                    quickSettings?.dndActive || dndStatus
-                      ? 'bg-purple-100 dark:bg-purple-950/80 text-purple-800 dark:text-purple-300 border border-purple-200 dark:border-purple-800'
-                      : 'bg-slate-200/80 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
-                  }`}>
-                    {quickSettings?.dndActive || dndStatus ? 'ON' : 'OFF'}
-                  </span>
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className={`p-2 rounded-lg ${quickSettings?.dndActive || dndStatus ? 'bg-purple-500/20 text-purple-500 dark:text-purple-400' : 'bg-slate-100 dark:bg-slate-800 text-slate-500'}`}>
+                    <BellOff className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <span className="text-xs font-bold text-slate-900 dark:text-white block">Do Not Disturb (DND)</span>
+                    <span className="text-[10px] text-slate-500 dark:text-slate-400 block truncate">Silence incoming notifications</span>
+                  </div>
                 </div>
-                <span className="text-[10px] text-slate-500 dark:text-slate-400">Silence All Alerts</span>
+                <span className={`text-[10px] font-mono uppercase px-2.5 py-1 rounded-full font-bold border ${
+                  quickSettings?.dndActive || dndStatus
+                    ? 'bg-purple-100 dark:bg-purple-950/80 text-purple-800 dark:text-purple-300 border-purple-300 dark:border-purple-800'
+                    : 'bg-slate-200/80 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-300 dark:border-slate-700'
+                }`}>
+                  {quickSettings?.dndActive || dndStatus ? 'ON' : 'OFF'}
+                </span>
               </button>
             </div>
 
             {/* Quick Settings Shade & Notifications Shade Pulldown */}
-            <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-200/80 dark:border-slate-800/80">
+            <div className={isMobile ? "flex flex-col gap-2 pt-2 border-t border-slate-200/80 dark:border-slate-800/80 w-full" : "grid grid-cols-2 gap-2 pt-2 border-t border-slate-200/80 dark:border-slate-800/80"}>
               <button
                 type="button"
                 onClick={() => sendQuickSetting('shade')}
-                className="py-1.5 px-2.5 rounded-lg border border-slate-300 dark:border-slate-800 bg-slate-100 hover:bg-slate-200 dark:bg-slate-950/70 dark:hover:bg-gray-800 text-slate-700 dark:text-slate-300 text-[11px] font-medium transition flex items-center justify-center gap-1.5 cursor-pointer"
+                className="w-full py-2.5 px-3 rounded-xl border border-slate-300 dark:border-slate-800 bg-slate-100 hover:bg-slate-200 dark:bg-slate-950/70 dark:hover:bg-gray-800 text-slate-700 dark:text-slate-300 text-xs font-semibold transition flex items-center justify-center gap-2 cursor-pointer shadow-xs"
                 title="Pull down the Android Quick Settings tile shade"
               >
-                <Sliders className="h-3 w-3 text-cyan-600 dark:text-cyan-400" /> Pull Down Tiles
+                <Sliders className="h-3.5 w-3.5 text-cyan-600 dark:text-cyan-400" /> Pull Down Android Quick Settings
               </button>
               <button
                 type="button"
                 onClick={() => sendQuickSetting('notifications_shade')}
-                className="py-1.5 px-2.5 rounded-lg border border-slate-300 dark:border-slate-800 bg-slate-100 hover:bg-slate-200 dark:bg-slate-950/70 dark:hover:bg-gray-800 text-slate-700 dark:text-slate-300 text-[11px] font-medium transition flex items-center justify-center gap-1.5 cursor-pointer"
+                className="w-full py-2.5 px-3 rounded-xl border border-slate-300 dark:border-slate-800 bg-slate-100 hover:bg-slate-200 dark:bg-slate-950/70 dark:hover:bg-gray-800 text-slate-700 dark:text-slate-300 text-xs font-semibold transition flex items-center justify-center gap-2 cursor-pointer shadow-xs"
                 title="Pull down notification shade"
               >
-                <Bell className="h-3 w-3 text-emerald-600 dark:text-emerald-400" /> Pull Notifications
+                <Bell className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" /> Pull Down Notification Shade
               </button>
             </div>
           </div>
@@ -2862,7 +3122,7 @@ export default function Controls() {
             {/* Ringer Profiles Selector */}
             <div className="mb-4">
               <label className="text-xs text-slate-500 dark:text-slate-400 block mb-1.5">Ringer Profile</label>
-              <div className="grid grid-cols-3 gap-2">
+              <div className={isMobile ? "flex flex-col gap-2 w-full" : "grid grid-cols-3 gap-2"}>
                 <button
                   type="button"
                   onClick={() => setRingerProfile('normal')}
@@ -2992,7 +3252,7 @@ export default function Controls() {
                   {dndStatus?.mode || 'OFF'}
                 </span>
               </div>
-              <div className="grid grid-cols-3 gap-2">
+              <div className={isMobile ? "flex flex-col gap-2 w-full" : "grid grid-cols-3 gap-2"}>
                 <button
                   type="button"
                   onClick={() => setDndMode('OFF')}
@@ -3136,7 +3396,7 @@ export default function Controls() {
 
               <div>
                 <label className="text-xs text-slate-500 dark:text-slate-400 block mb-1.5">Preset Patterns</label>
-                <div className="grid grid-cols-2 gap-2">
+                <div className={isMobile ? "flex flex-col gap-2 w-full" : "grid grid-cols-2 gap-2"}>
                   {PRESET_PATTERNS.map((p) => (
                     <button
                       key={p.label}
@@ -3193,7 +3453,7 @@ export default function Controls() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className={isMobile ? "flex flex-col gap-3 w-full" : "grid grid-cols-2 gap-4"}>
                 <div>
                   <div className="flex justify-between text-xs text-slate-500 dark:text-slate-400 mb-1">
                     <span>Speed</span>
@@ -3948,7 +4208,7 @@ export default function Controls() {
         {deviceInfo ? (
           <div className="space-y-5">
             {/* Spec chips */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 text-xs">
+            <div className={isMobile ? "flex flex-col gap-2.5 text-xs w-full" : "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 text-xs"}>
               <div className="bg-slate-50 dark:bg-slate-950/70 p-3 rounded-xl border border-slate-200 dark:border-slate-800">
                 <span className="text-gray-500 block text-[10px]">Model & Brand</span>
                 <span className="font-semibold text-slate-800 dark:text-slate-200 truncate block mt-0.5">
@@ -4005,7 +4265,7 @@ export default function Controls() {
             </div>
 
             {/* RAM & Storage bars */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+            <div className={isMobile ? "flex flex-col gap-3 text-xs w-full" : "grid grid-cols-1 md:grid-cols-2 gap-4 text-xs"}>
               {/* RAM */}
               <div className="bg-slate-50 dark:bg-slate-950/70 p-3.5 rounded-xl border border-slate-200 dark:border-slate-800">
                 <div className="flex justify-between items-center mb-1.5">
@@ -4124,7 +4384,7 @@ export default function Controls() {
             {wifiInfo.scanResults && wifiInfo.scanResults.length > 0 && (
               <div>
                 <h5 className="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2">Nearby Wi-Fi Networks ({wifiInfo.scanResults.length})</h5>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 max-h-48 overflow-y-auto scrollbar-thin pr-1">
+                <div className={isMobile ? "flex flex-col gap-2 max-h-48 overflow-y-auto scrollbar-thin pr-1 w-full" : "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 max-h-48 overflow-y-auto scrollbar-thin pr-1"}>
                   {wifiInfo.scanResults.map((r, i) => (
                     <div key={i} className="bg-slate-50 dark:bg-slate-950 p-2.5 rounded-lg border border-slate-200/80 dark:border-slate-800/80 text-xs">
                       <div className="flex justify-between items-center">
@@ -4213,7 +4473,7 @@ export default function Controls() {
               : 'No applications match your filter.'}
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 max-h-80 overflow-y-auto scrollbar-thin pr-1">
+          <div className={isMobile ? "flex flex-col gap-2.5 max-h-80 overflow-y-auto scrollbar-thin pr-1 w-full" : "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 max-h-80 overflow-y-auto scrollbar-thin pr-1"}>
             {filteredApps.map((app) => (
               <div
                 key={app.packageName}
@@ -4465,7 +4725,7 @@ export default function Controls() {
         <div className="space-y-4">
           <div>
             <label className="text-xs text-slate-500 dark:text-slate-400 block mb-1.5 font-medium">Camera Facing</label>
-            <div className="grid grid-cols-2 gap-2">
+            <div className={isMobile ? "flex flex-col gap-2 w-full" : "grid grid-cols-2 gap-2"}>
               <button
                 type="button"
                 onClick={() => setCameraFacing('back')}
@@ -4591,7 +4851,7 @@ export default function Controls() {
           {/* Mode Selector */}
           <div>
             <label className="text-xs text-slate-500 dark:text-slate-400 block mb-1.5 font-medium">Surveillance Mode</label>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+            <div className={isMobile ? "flex flex-col gap-2 w-full" : "grid grid-cols-1 sm:grid-cols-3 gap-2"}>
               <button
                 type="button"
                 onClick={() => setSurveillanceMode('cam_mic')}
@@ -4636,11 +4896,11 @@ export default function Controls() {
 
           {/* Camera Settings (Facing, Quality, FPS) */}
           {surveillanceMode !== 'mic_only' && (
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className={isMobile ? "flex flex-col gap-3 w-full" : "grid grid-cols-1 sm:grid-cols-3 gap-3"}>
               {/* Lens Selection */}
               <div>
                 <label className="text-xs text-slate-500 dark:text-slate-400 block mb-1.5">Camera Lens</label>
-                <div className="grid grid-cols-2 gap-2">
+                <div className={isMobile ? "flex flex-col gap-2 w-full" : "grid grid-cols-2 gap-2"}>
                   <button
                     type="button"
                     onClick={() => {
@@ -4981,7 +5241,7 @@ export default function Controls() {
         <div className="space-y-4">
           <div>
             <label className="text-xs text-slate-500 dark:text-slate-400 block mb-1.5">Stream Refresh Rate</label>
-            <div className="grid grid-cols-6 gap-2">
+            <div className={isMobile ? "grid grid-cols-3 gap-1.5 w-full" : "grid grid-cols-6 gap-2"}>
               {[2, 5, 10, 15, 20, 30].map((fps) => (
                 <button
                   key={fps}
@@ -4994,7 +5254,7 @@ export default function Controls() {
                       : 'border-slate-200/80 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-500 dark:text-slate-400 hover:text-white'
                   }`}
                 >
-                  {fps} FPS {fps === 15 && '(Default)'}
+                  {fps} FPS {fps === 15 && !isMobile && '(Default)'}
                 </button>
               ))}
             </div>
@@ -5273,7 +5533,7 @@ export default function Controls() {
           )}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+        <div className={isMobile ? "flex flex-col gap-4 text-xs w-full" : "grid grid-cols-1 md:grid-cols-2 gap-4 text-xs"}>
           <div>
             <label className="text-slate-700 dark:text-slate-300 font-semibold block mb-1.5">Emergency Message</label>
             <textarea
@@ -5645,7 +5905,7 @@ export default function Controls() {
         {cellularInfo ? (
           <div className="space-y-4">
             {/* Primary Signal & Network Badge */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div className={isMobile ? "flex flex-col gap-2 w-full" : "grid grid-cols-2 sm:grid-cols-4 gap-3"}>
               <div className="bg-slate-50 dark:bg-slate-950/70 p-3 rounded-xl border border-slate-200 dark:border-slate-800">
                 <span className="text-[11px] text-slate-500 dark:text-slate-400 block mb-1">Signal Strength</span>
                 <div className="flex items-center gap-2">
@@ -5701,7 +5961,7 @@ export default function Controls() {
             {Array.isArray(cellularInfo.sims) && cellularInfo.sims.length > 0 ? (
               <div>
                 <span className="text-xs font-medium text-slate-700 dark:text-slate-300 block mb-2">Active SIM Cards:</span>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className={isMobile ? "flex flex-col gap-2.5 w-full" : "grid grid-cols-1 sm:grid-cols-2 gap-3"}>
                   {cellularInfo.sims.map((sim, idx) => (
                     <div key={idx} className="bg-slate-50 dark:bg-slate-950/70 p-3 rounded-xl border border-slate-200 dark:border-slate-800 flex items-center justify-between">
                       <div className="flex items-center gap-2.5">
@@ -5788,7 +6048,7 @@ export default function Controls() {
             </div>
 
             {/* Categories Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className={isMobile ? "flex flex-col gap-2.5 w-full" : "grid grid-cols-1 sm:grid-cols-2 gap-3"}>
               {Array.isArray(junkScanData.categories) && junkScanData.categories.map((cat) => (
                 <div key={cat.id} className="bg-slate-50 dark:bg-slate-950/70 p-3 rounded-xl border border-slate-200 dark:border-slate-800 flex flex-col justify-between">
                   <div>

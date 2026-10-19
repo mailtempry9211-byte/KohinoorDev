@@ -2,22 +2,32 @@ package com.phonelink.parent.ui
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.DownloadManager
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.graphics.Color
+import android.media.MediaScannerConnection
+import android.net.Uri
 import android.net.http.SslError
 import android.os.Build
 import android.os.Bundle
+import android.os.Environment
 import android.os.Handler
 import android.os.Looper
+import android.util.Base64
+import android.util.Log
+import android.view.Gravity
 import android.view.View
 import android.webkit.ConsoleMessage
 import android.webkit.GeolocationPermissions
+import android.webkit.JavascriptInterface
 import android.webkit.PermissionRequest
 import android.webkit.SslErrorHandler
+import android.webkit.URLUtil
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
@@ -25,7 +35,10 @@ import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Button
+import android.widget.CheckBox
 import android.widget.EditText
+import android.widget.LinearLayout
+import android.widget.ScrollView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
@@ -35,14 +48,19 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.phonelink.parent.R
 import com.phonelink.parent.server.ParentServerService
+import com.phonelink.parent.tunnel.TunnelManager
 import com.phonelink.parent.utils.NetworkUtils
+import java.io.File
 
 class ParentMainActivity : AppCompatActivity() {
 
+    private val TAG = "ParentMainActivity"
+
     private lateinit var webView: WebView
-    private lateinit var tvServerStatus: TextView
+    private lateinit var tvServerStatusDot: TextView
     private lateinit var tvServerAddress: TextView
     private lateinit var btnCopyAddress: Button
+    private lateinit var btnTunnelSettings: Button
     private lateinit var btnModeSwitch: Button
     private lateinit var btnRefreshWeb: Button
 
@@ -67,11 +85,23 @@ class ParentMainActivity : AppCompatActivity() {
         requestPermissionsIfNeeded()
         setupBackHandler()
 
+        // Ensure internal storage PhoneLink download directory exists
+        ensurePhoneLinkFolder()
+
         // Ensure background server is started
         ParentServerService.start(this)
 
         setupWebView()
         updateHeaderInfo()
+
+        // Auto-start Ngrok tunnel if enabled
+        if (TunnelManager.isAutoStart(this) && TunnelManager.getNgrokToken(this).isNotEmpty()) {
+            TunnelManager.startTunnel(this, 5000) { isLive, url ->
+                handler.post {
+                    updateHeaderInfo()
+                }
+            }
+        }
 
         // Poll address & server status periodically
         handler.postDelayed(object : Runnable {
@@ -82,11 +112,20 @@ class ParentMainActivity : AppCompatActivity() {
         }, 3000)
     }
 
+    private fun ensurePhoneLinkFolder(): File {
+        val dir = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "PhoneLink")
+        if (!dir.exists()) {
+            dir.mkdirs()
+        }
+        return dir
+    }
+
     private fun initViews() {
         webView = findViewById(R.id.webView)
-        tvServerStatus = findViewById(R.id.tvServerStatus)
+        tvServerStatusDot = findViewById(R.id.tvServerStatusDot)
         tvServerAddress = findViewById(R.id.tvServerAddress)
         btnCopyAddress = findViewById(R.id.btnCopyAddress)
+        btnTunnelSettings = findViewById(R.id.btnTunnelSettings)
         btnModeSwitch = findViewById(R.id.btnModeSwitch)
         btnRefreshWeb = findViewById(R.id.btnRefreshWeb)
 
@@ -95,7 +134,13 @@ class ParentMainActivity : AppCompatActivity() {
             val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
             val clip = ClipData.newPlainText("PhoneLink Server Address", address)
             clipboard.setPrimaryClip(clip)
-            Toast.makeText(this, "Copied! In child app, connect to: $address", Toast.LENGTH_LONG).show()
+
+            val childDomain = address.removePrefix("https://").removePrefix("http://")
+            Toast.makeText(this, "Copied! In child app, enter: $childDomain", Toast.LENGTH_LONG).show()
+        }
+
+        btnTunnelSettings.setOnClickListener {
+            showTunnelSettingsDialog()
         }
 
         btnModeSwitch.setOnClickListener {
@@ -109,21 +154,26 @@ class ParentMainActivity : AppCompatActivity() {
     }
 
     private fun updateHeaderInfo() {
-        val ip = NetworkUtils.getLocalIpAddress(this)
         val port = 5000
-        val isWifi = NetworkUtils.isWifiConnected(this)
-        val connectedDevices = ParentServerService.instance?.getServer()?.getConnectedDeviceCount() ?: 0
+        val isTunnelLive = TunnelManager.isTunnelRunning()
+        val tunnelUrl = TunnelManager.getActiveUrl()
 
-        if (isLocalMode) {
-            val netType = if (isWifi) "Wi-Fi" else "Hotspot/Mobile"
-            tvServerStatus.text = "🟢 Server Active • $connectedDevices Device(s) Live • $netType"
+        if (isTunnelLive && !tunnelUrl.isNullOrEmpty() && !tunnelUrl.startsWith("Connecting")) {
+            tvServerStatusDot.text = "☁️"
+            tvServerAddress.text = tunnelUrl
+            btnTunnelSettings.text = "☁️ On"
+            btnTunnelSettings.setTextColor(ContextCompat.getColor(this, R.color.green))
+        } else if (isLocalMode) {
+            val ip = NetworkUtils.getLocalIpAddress(this)
+            tvServerStatusDot.text = "🟢"
             tvServerAddress.text = "http://$ip:$port"
-            btnModeSwitch.text = "Remote URL"
+            btnTunnelSettings.text = "☁️ Tunnel"
+            btnTunnelSettings.setTextColor(ContextCompat.getColor(this, R.color.cyan))
         } else {
             val remoteUrl = prefs.getString(PREF_REMOTE_URL, "") ?: ""
-            tvServerStatus.text = "🌐 Connected to Cloud/Remote Hub"
+            tvServerStatusDot.text = "🌐"
             tvServerAddress.text = remoteUrl.ifEmpty { "No remote URL set" }
-            btnModeSwitch.text = "Local Hub"
+            btnTunnelSettings.text = "☁️ Tunnel"
         }
     }
 
@@ -144,6 +194,32 @@ class ParentMainActivity : AppCompatActivity() {
             ws.mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
         }
 
+        // Bridge to save downloads directly to internal storage PhoneLink folder
+        webView.addJavascriptInterface(PhoneLinkJsBridge(), "AndroidPhoneLink")
+
+        webView.setDownloadListener { url, userAgent, contentDisposition, mimeType, contentLength ->
+            try {
+                if (url.startsWith("blob:") || url.startsWith("data:")) {
+                    // Blob URLs are handled via JS Bridge
+                    return@setDownloadListener
+                }
+                val request = DownloadManager.Request(Uri.parse(url))
+                val filename = URLUtil.guessFileName(url, contentDisposition, mimeType)
+                request.setMimeType(mimeType)
+                request.addRequestHeader("User-Agent", userAgent)
+                request.setDescription("PhoneLink file download")
+                request.setTitle(filename)
+                request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+                request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "PhoneLink/$filename")
+
+                val dm = getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
+                dm.enqueue(request)
+                Toast.makeText(this, "Downloading $filename to Downloads/PhoneLink...", Toast.LENGTH_SHORT).show()
+            } catch (e: Exception) {
+                Log.e(TAG, "Download listener error: ${e.message}")
+            }
+        }
+
         webView.webChromeClient = object : WebChromeClient() {
             override fun onConsoleMessage(cm: ConsoleMessage?): Boolean {
                 return super.onConsoleMessage(cm)
@@ -162,13 +238,38 @@ class ParentMainActivity : AppCompatActivity() {
         }
 
         webView.webViewClient = object : WebViewClient() {
-            override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
-                super.onPageStarted(view, url, favicon)
-            }
-
             override fun onPageFinished(view: WebView?, url: String?) {
                 super.onPageFinished(view, url)
                 reloadRetryCount = 0
+
+                // Inject hook for browser download links to auto-save into PhoneLink folder
+                val jsHook = """
+                    (function() {
+                        if (window.__phonelink_hook_installed) return;
+                        window.__phonelink_hook_installed = true;
+                        
+                        const originalClick = HTMLAnchorElement.prototype.click;
+                        HTMLAnchorElement.prototype.click = function() {
+                            if (this.download && this.href && window.AndroidPhoneLink) {
+                                try {
+                                    if (this.href.startsWith('data:')) {
+                                        window.AndroidPhoneLink.saveFile(this.download, this.href);
+                                    } else if (this.href.startsWith('blob:')) {
+                                        fetch(this.href).then(r => r.blob()).then(blob => {
+                                            const reader = new FileReader();
+                                            reader.onloadend = () => {
+                                                window.AndroidPhoneLink.saveFile(this.download, reader.result);
+                                            };
+                                            reader.readAsDataURL(blob);
+                                        });
+                                    }
+                                } catch(e) {}
+                            }
+                            return originalClick.apply(this, arguments);
+                        };
+                    })();
+                """.trimIndent()
+                webView.evaluateJavascript(jsHook, null)
             }
 
             override fun onReceivedError(
@@ -186,7 +287,7 @@ class ParentMainActivity : AppCompatActivity() {
             }
 
             override fun onReceivedSslError(view: WebView?, handler: SslErrorHandler?, error: SslError?) {
-                handler?.proceed() // Allow self-signed or internal IP certs if needed
+                handler?.proceed()
             }
         }
 
@@ -195,7 +296,6 @@ class ParentMainActivity : AppCompatActivity() {
 
     private fun loadCurrentDashboard() {
         if (isLocalMode) {
-            // Give server 500ms to initialize on first launch if needed
             handler.postDelayed({
                 webView.loadUrl(DEFAULT_LOCAL_URL)
             }, 600)
@@ -208,6 +308,148 @@ class ParentMainActivity : AppCompatActivity() {
                 showModeSwitchDialog()
             }
         }
+    }
+
+    /**
+     * Native JavaScript Bridge to save files and audio downloads into PhoneLink folder
+     */
+    inner class PhoneLinkJsBridge {
+        @JavascriptInterface
+        fun saveFile(filename: String, base64Data: String) {
+            try {
+                val clean = if (base64Data.contains(",")) base64Data.substringAfter(",") else base64Data
+                val bytes = Base64.decode(clean, Base64.DEFAULT)
+                val targetDir = ensurePhoneLinkFolder()
+                val targetFile = File(targetDir, filename)
+                targetFile.writeBytes(bytes)
+                MediaScannerConnection.scanFile(this@ParentMainActivity, arrayOf(targetFile.absolutePath), null, null)
+
+                runOnUiThread {
+                    Toast.makeText(this@ParentMainActivity, "📁 Saved to PhoneLink/${targetFile.name}", Toast.LENGTH_SHORT).show()
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error saving file from bridge: ${e.message}")
+            }
+        }
+    }
+
+    /**
+     * Out-of-network Ngrok Port Forwarding Settings Dialog
+     */
+    private fun showTunnelSettingsDialog() {
+        val currentToken = TunnelManager.getNgrokToken(this)
+        val currentDomain = TunnelManager.getNgrokDomain(this)
+        val isAuto = TunnelManager.isAutoStart(this)
+        val isRunning = TunnelManager.isTunnelRunning()
+        val currentUrl = TunnelManager.getActiveUrl()
+
+        val layout = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(48, 32, 48, 16)
+        }
+
+        // Live Status Indicator
+        val statusText = TextView(this).apply {
+            textSize = 13f
+            if (isRunning && !currentUrl.isNullOrEmpty()) {
+                text = "🟢 Status: ACTIVE\n🔗 Live URL: $currentUrl"
+                setTextColor(Color.parseColor("#10B981"))
+            } else {
+                text = "⚪ Status: STOPPED (Local Network Only)"
+                setTextColor(Color.parseColor("#94A3B8"))
+            }
+            setPadding(0, 0, 0, 24)
+        }
+        layout.addView(statusText)
+
+        // Claimed Domain Input
+        val lblDomain = TextView(this).apply {
+            text = "Ngrok Claimed Domain (e.g. your-name.ngrok-free.app):"
+            textSize = 12f
+            setTextColor(Color.parseColor("#94A3B8"))
+        }
+        layout.addView(lblDomain)
+
+        val etDomain = EditText(this).apply {
+            hint = "talented-wolf-primarily.ngrok-free.app"
+            setText(currentDomain)
+            textSize = 14f
+            setTextColor(Color.parseColor("#F1F5F9"))
+            setHintTextColor(Color.parseColor("#64748B"))
+        }
+        layout.addView(etDomain)
+
+        // Authtoken Input
+        val lblToken = TextView(this).apply {
+            text = "Ngrok Authtoken (from dashboard.ngrok.com):"
+            textSize = 12f
+            setTextColor(Color.parseColor("#94A3B8"))
+            setPadding(0, 16, 0, 0)
+        }
+        layout.addView(lblToken)
+
+        val etToken = EditText(this).apply {
+            hint = "Paste your Ngrok authtoken here"
+            setText(currentToken)
+            textSize = 14f
+            setTextColor(Color.parseColor("#F1F5F9"))
+            setHintTextColor(Color.parseColor("#64748B"))
+        }
+        layout.addView(etToken)
+
+        // Auto-start Checkbox
+        val cbAutoStart = CheckBox(this).apply {
+            text = "Auto-start tunnel when Parent Hub opens"
+            isChecked = isAuto
+            setTextColor(Color.parseColor("#E2E8F0"))
+            setPadding(0, 16, 0, 16)
+        }
+        layout.addView(cbAutoStart)
+
+        val scrollView = ScrollView(this).apply {
+            addView(layout)
+        }
+
+        val dialog = AlertDialog.Builder(this)
+            .setTitle("☁️ Embedded Ngrok Port Forwarding")
+            .setView(scrollView)
+            .setPositiveButton(if (isRunning) "Restart Tunnel" else "Start Tunnel") { _, _ ->
+                val domain = etDomain.text.toString().trim()
+                val token = etToken.text.toString().trim()
+                TunnelManager.saveConfig(this, token, domain, cbAutoStart.isChecked)
+
+                Toast.makeText(this, "Starting Ngrok tunnel...", Toast.LENGTH_SHORT).show()
+                TunnelManager.startTunnel(this, 5000) { success, liveUrl ->
+                    handler.post {
+                        updateHeaderInfo()
+                        if (success && !liveUrl.isNullOrEmpty() && !liveUrl.startsWith("Connecting")) {
+                            Toast.makeText(this, "Ngrok Live! In child app connect to: ${liveUrl.removePrefix("https://").removePrefix("http://")}", Toast.LENGTH_LONG).show()
+                        } else if (!success) {
+                            Toast.makeText(this, "Tunnel failed: $liveUrl", Toast.LENGTH_LONG).show()
+                        }
+                    }
+                }
+            }
+            .setNeutralButton(if (isRunning) "Stop Tunnel" else "Save Settings") { _, _ ->
+                val domain = etDomain.text.toString().trim()
+                val token = etToken.text.toString().trim()
+                TunnelManager.saveConfig(this, token, domain, cbAutoStart.isChecked)
+
+                if (isRunning) {
+                    TunnelManager.stopTunnel(this) { _, _ ->
+                        handler.post {
+                            updateHeaderInfo()
+                            Toast.makeText(this, "Ngrok Tunnel Stopped", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                } else {
+                    Toast.makeText(this, "Settings Saved", Toast.LENGTH_SHORT).show()
+                }
+            }
+            .setNegativeButton("Close", null)
+            .create()
+
+        dialog.show()
     }
 
     private fun showModeSwitchDialog() {
@@ -255,7 +497,6 @@ class ParentMainActivity : AppCompatActivity() {
                 if (webView.canGoBack()) {
                     webView.goBack()
                 } else {
-                    // Minimize to background instead of stopping server
                     moveTaskToBack(true)
                 }
             }
@@ -263,15 +504,24 @@ class ParentMainActivity : AppCompatActivity() {
     }
 
     private fun requestPermissionsIfNeeded() {
+        val permissions = mutableListOf<String>()
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
                 != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(
-                    this,
-                    arrayOf(Manifest.permission.POST_NOTIFICATIONS),
-                    101
-                )
+                permissions.add(Manifest.permission.POST_NOTIFICATIONS)
             }
+        }
+
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+                permissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+            }
+        }
+
+        if (permissions.isNotEmpty()) {
+            ActivityCompat.requestPermissions(this, permissions.toTypedArray(), 101)
         }
     }
 
@@ -280,4 +530,3 @@ class ParentMainActivity : AppCompatActivity() {
         handler.removeCallbacksAndMessages(null)
     }
 }
-
