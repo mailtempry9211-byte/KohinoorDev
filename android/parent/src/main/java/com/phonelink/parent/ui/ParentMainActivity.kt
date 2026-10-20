@@ -202,6 +202,10 @@ class ParentMainActivity : AppCompatActivity() {
 
     @SuppressLint("SetJavaScriptEnabled")
     private fun setupWebView() {
+        // Hardware GPU acceleration and smooth nested fling
+        webView.setLayerType(View.LAYER_TYPE_HARDWARE, null)
+        webView.isNestedScrollingEnabled = true
+
         val ws: WebSettings = webView.settings
         ws.javaScriptEnabled = true
         ws.domStorageEnabled = true
@@ -211,7 +215,12 @@ class ParentMainActivity : AppCompatActivity() {
         ws.mediaPlaybackRequiresUserGesture = false
         ws.useWideViewPort = true
         ws.loadWithOverviewMode = true
-        ws.cacheMode = WebSettings.LOAD_NO_CACHE
+        ws.cacheMode = WebSettings.LOAD_DEFAULT
+        ws.setRenderPriority(WebSettings.RenderPriority.HIGH)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            ws.safeBrowsingEnabled = false
+        }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             ws.mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
@@ -657,5 +666,10 @@ class ParentMainActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         handler.removeCallbacksAndMessages(null)
+        try {
+            webView.stopLoading()
+            webView.removeAllViews()
+            webView.destroy()
+        } catch (_: Exception) {}
     }
 }

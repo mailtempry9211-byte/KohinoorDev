@@ -161,18 +161,22 @@ html.dark .glass-pill {
   width: 100% !important;
 }
 
-/* Section entrance animation */
+/* Section entrance animation: cleans up transform upon completion so position: fixed modals never get trapped! */
 .section-enter {
-  animation: sectionEnter 0.25s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: sectionEnter 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 @keyframes sectionEnter {
-  from {
+  0% {
     opacity: 0;
-    transform: translateY(6px) scale(0.995);
+    transform: translateY(6px);
   }
-  to {
+  99% {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 1;
+    transform: none; /* Crucial: clears containing block so position: fixed modals stick to the viewport */
   }
 }
 

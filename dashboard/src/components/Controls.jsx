@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import {
   Sliders,
   Volume2,
@@ -5438,8 +5439,8 @@ export default function Controls({ theme, isMobile = false }) {
       </div>
 
       {/* Permissions Modal / Drawer */}
-      {inspectApp && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
+      {inspectApp && typeof document !== "undefined" && createPortal(
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
           <div className="w-full max-w-lg rounded-xl border border-slate-200/80 dark:border-slate-800 bg-gray-900 p-6 shadow-2xl flex flex-col max-h-[85vh]">
             <div className="flex items-start justify-between border-b border-slate-200/80 dark:border-slate-800 pb-3 mb-4">
               <div>
@@ -5505,7 +5506,8 @@ export default function Controls({ theme, isMobile = false }) {
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* 8. LOST MODE EMERGENCY BANNER */}
@@ -5831,8 +5833,8 @@ export default function Controls({ theme, isMobile = false }) {
       </div>
 
       {/* Photo Preview Modal */}
-      {selectedPhoto && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4 backdrop-blur-sm">
+      {selectedPhoto && typeof document !== 'undefined' && createPortal(
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/85 p-4 backdrop-blur-sm animate-fade-in">
           <div className="w-full max-w-xl rounded-xl border border-slate-200/80 dark:border-slate-800 bg-gray-900 p-5 shadow-2xl flex flex-col max-h-[90vh]">
             <div className="flex items-center justify-between border-b border-slate-200/80 dark:border-slate-800 pb-3 mb-3">
               <div>
@@ -5879,7 +5881,8 @@ export default function Controls({ theme, isMobile = false }) {
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* CELLULAR & DUAL-SIM TELEMETRY */}
@@ -6119,8 +6122,8 @@ export default function Controls({ theme, isMobile = false }) {
       </div>
 
       {/* Wipe Confirmation Modal */}
-      {showWipeModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+      {showWipeModal && typeof document !== "undefined" && createPortal(
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
           <div className="w-full max-w-md rounded-xl border border-red-700 bg-slate-50 dark:bg-slate-950 p-6 shadow-2xl space-y-4">
             <div className="flex items-center gap-3 text-red-400 border-b border-red-900/60 pb-3">
               <AlertTriangle className="h-6 w-6 flex-shrink-0 animate-bounce" />
@@ -6169,12 +6172,13 @@ export default function Controls({ theme, isMobile = false }) {
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* TIMELAPSE PHOTO VIEWER & DOWNLOAD MODAL */}
-      {showTimelapseModal && selectedTimelapsePhoto && (
-        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
+      {showTimelapseModal && selectedTimelapsePhoto && typeof document !== "undefined" && createPortal(
+        <div className="fixed inset-0 z-[9999] bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-gray-900 border border-blue-500/40 rounded-2xl max-w-2xl w-full p-5 shadow-2xl flex flex-col gap-4 max-h-[90vh]">
             <div className="flex items-center justify-between border-b border-slate-200/80 dark:border-slate-800 pb-3">
               <div className="flex items-center gap-2">
@@ -6253,7 +6257,8 @@ export default function Controls({ theme, isMobile = false }) {
               </div>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
