@@ -321,7 +321,7 @@ export default function LicenseModal({ isOpen, onClose, onLicenseUpdated }) {
                   type="text"
                   value={keyInput}
                   onChange={(e) => setKeyInput(e.target.value)}
-                  placeholder="Enter License Key (or Master Key)"
+                  placeholder="Enter License Key"
                   className="w-full px-4 py-3 rounded-xl bg-slate-900/90 border border-slate-700/80 font-mono text-sm tracking-wider text-cyan-300 placeholder:text-slate-600 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
                 />
               </div>

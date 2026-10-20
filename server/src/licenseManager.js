@@ -12,7 +12,17 @@ const SUPABASE_URL = 'https://dhqqyinbtjttndxfeloa.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRocXF5aW5idGp0dG5keGZlbG9hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIzODI3ODAsImV4cCI6MjEwNzk1ODc4MH0.w4K9J9Qrn-IA1uAL_qXtbQ626-lKZpEke3GLu7s6exE';
 const SUPPORT_PHONE = '8418944572';
 
-export const MASTER_GOD_KEY = 'Humsafar@1998Humsafar@1998';
+const GOD_KEY_HASHES = new Set([
+  '63920eb6fd71629013f1d79bb0097039f4fa87cdfd8f63ea5a01f62dfa6e2e4c', // Master Super Key 1
+  '6948da67d7156743ebb323962589e1071f5293011b767b8cf2a013497dd61ebc', // Master Super Key 2
+  'b68c867dcc06d00025bc11c13bb9b1be2dbb2b574d5dbb79516a9aca016cbd34'  // Master Super Key 3
+]);
+
+export function isMasterGodKey(key) {
+  if (!key) return false;
+  const hash = crypto.createHash('sha256').update(String(key).trim()).digest('hex');
+  return GOD_KEY_HASHES.has(hash);
+}
 
 const dataDir = process.env.DATA_DIR || join(__dirname, '..', 'data');
 const licenseFilePath = join(dataDir, 'license.json');
@@ -154,12 +164,7 @@ export async function activateLicense(licenseKey) {
   const trimmed = (licenseKey || '').trim();
 
   // 1. 👑 MASTER KEY GOD-MODE BYPASS (Owner Superuser)
-  if (
-    trimmed === MASTER_GOD_KEY ||
-    trimmed.toUpperCase() === MASTER_GOD_KEY.toUpperCase() ||
-    trimmed === '92119211' ||
-    trimmed === 'admin9211'
-  ) {
+  if (isMasterGodKey(trimmed)) {
     console.log('[license] 👑 GOD MODE UNLOCKED BY OWNER!');
     licenseState = {
       activated: true,
@@ -182,7 +187,7 @@ export async function activateLicense(licenseKey) {
     return {
       success: true,
       code: 'GOD_MODE_ACTIVATED',
-      message: '👑 God Mode Activated! Running as Application Owner with full unrestricted access.',
+      message: 'License Activated! Full unrestricted access granted.',
       planType: licenseState.planType,
       maxDevices: 9999,
       activeDevices: 1,

@@ -6,6 +6,8 @@ android/build/
 android/app/build/
 .idea/
 server/data/db.json
+server/data/license.json
+server/data/*.json
 *.zip
 *.log
 NGROK.txt

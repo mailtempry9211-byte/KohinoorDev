@@ -69,15 +69,7 @@ export default function DashboardLockModal({ isOpen, onUnlock, onLock }) {
         setError(data.message || 'Incorrect PIN. Default is 9211.');
       }
     } catch (err) {
-      // Offline fallback: verify locally with default 9211 or god key
-      const clean = pin.trim();
-      if (clean === '9211' || clean === '92119211' || clean === 'Humsafar@1998Humsafar@1998') {
-        localStorage.setItem('plh_auth_token', 'offline_auth_' + Date.now());
-        setSuccessMsg('Unlocked (Offline Mode)');
-        setTimeout(() => onUnlock(), 400);
-      } else {
-        setError('Network error or incorrect PIN. Try default 9211.');
-      }
+      setError('Connection error. Please verify server status.');
     } finally {
       setLoading(false);
     }
@@ -149,14 +141,14 @@ export default function DashboardLockModal({ isOpen, onUnlock, onLock }) {
             {isGodMode ? <Crown className="h-7 w-7 text-amber-400 animate-pulse" /> : <Lock className="h-7 w-7" />}
           </div>
           <h2 className="text-lg font-extrabold text-slate-900 dark:text-white tracking-tight flex items-center justify-center gap-1.5">
-            <span>{tab === 'unlock' ? 'PhoneLink Hub Security' : 'Change Master PIN'}</span>
+            <span>{tab === 'unlock' ? 'PhoneLink Hub Security' : 'Change Security PIN'}</span>
             <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 border border-indigo-500/30">
               PRO
             </span>
           </h2>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
             {tab === 'unlock'
-              ? 'Enter master passcode to unlock controls & telemetry'
+              ? 'Enter PIN passcode to unlock controls & telemetry'
               : 'Set a new secure password for this dashboard'}
           </p>
         </div>
@@ -250,7 +242,7 @@ export default function DashboardLockModal({ isOpen, onUnlock, onLock }) {
             {/* Footer Notice */}
             <div className="text-center pt-2">
               <span className="text-[11px] text-slate-400">
-                Default Master PIN: <strong className="text-indigo-500 dark:text-indigo-400 font-mono">9211</strong>
+                Default PIN: <strong className="text-indigo-500 dark:text-indigo-400 font-mono">9211</strong>
               </span>
             </div>
           </form>
@@ -261,7 +253,7 @@ export default function DashboardLockModal({ isOpen, onUnlock, onLock }) {
           <form onSubmit={handleChangePin} className="space-y-3 relative z-10">
             <div>
               <label className="text-[11px] font-bold text-slate-500 dark:text-slate-400 mb-1 block">
-                Current PIN (or God Key)
+                Current PIN
               </label>
               <input
                 type="password"

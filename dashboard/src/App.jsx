@@ -114,9 +114,58 @@ export default function App() {
     setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
   };
 
+  const INACTIVITY_TIMEOUT_MS = 30 * 60 * 1000; // 30 minutes
+
   const [isDashboardLocked, setIsDashboardLocked] = useState(() => {
-    return !localStorage.getItem('plh_auth_token');
+    // If running in packaged desktop Electron EXE or Android Parent App, skip lock
+    const isDesktopExe = typeof window !== 'undefined' && Boolean(window.electronAPI || navigator.userAgent.includes('Electron'));
+    if (isDesktopExe) return false;
+
+    const token = localStorage.getItem('plh_auth_token');
+    const lastActive = parseInt(localStorage.getItem('plh_last_activity') || '0', 10);
+    if (!token) return true;
+    // Check if 30 minutes of inactivity elapsed
+    if (Date.now() - lastActive > INACTIVITY_TIMEOUT_MS) {
+      localStorage.removeItem('plh_auth_token');
+      return true;
+    }
+    // Token is valid and was active within last 30 minutes - keep logged in across refresh!
+    return false;
   });
+
+  // 30-Minute Inactivity Auto-Logout Tracker (Web Deployments)
+  useEffect(() => {
+    if (isDashboardLocked) return;
+
+    localStorage.setItem('plh_last_activity', Date.now().toString());
+
+    let throttleTimer = null;
+    const updateActivity = () => {
+      if (!throttleTimer) {
+        throttleTimer = setTimeout(() => {
+          localStorage.setItem('plh_last_activity', Date.now().toString());
+          throttleTimer = null;
+        }, 1000);
+      }
+    };
+
+    const userEvents = ['mousedown', 'keydown', 'touchstart', 'scroll'];
+    userEvents.forEach((evt) => window.addEventListener(evt, updateActivity, { passive: true }));
+
+    const idleCheckInterval = setInterval(() => {
+      const lastActive = parseInt(localStorage.getItem('plh_last_activity') || '0', 10);
+      if (Date.now() - lastActive > INACTIVITY_TIMEOUT_MS) {
+        localStorage.removeItem('plh_auth_token');
+        setIsDashboardLocked(true);
+      }
+    }, 20000);
+
+    return () => {
+      userEvents.forEach((evt) => window.removeEventListener(evt, updateActivity));
+      clearInterval(idleCheckInterval);
+      if (throttleTimer) clearTimeout(throttleTimer);
+    };
+  }, [isDashboardLocked]);
   const [showLicenseModal, setShowLicenseModal] = useState(false);
   const [showGuideModal, setShowGuideModal] = useState(false);
   const [showTunnelModal, setShowTunnelModal] = useState(false);
