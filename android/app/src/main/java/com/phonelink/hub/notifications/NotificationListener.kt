@@ -57,6 +57,7 @@ class NotificationListener : NotificationListenerService() {
         super.onNotificationPosted(sbn)
         if (!com.phonelink.hub.data.DevicePrefs.notificationSyncEnabled ||
             !com.phonelink.hub.data.DevicePrefs.syncNotifications ||
+            com.phonelink.hub.data.DevicePrefs.monitoringPaused ||
             com.phonelink.hub.data.DevicePrefs.lowDataMode) {
             Log.d(TAG, "Notification sync paused, dropping notification from ${sbn.packageName}")
             return

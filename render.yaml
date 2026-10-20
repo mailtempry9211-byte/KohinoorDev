@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: phonelink-hub
+    runtime: node
+    plan: free
+    region: oregon
+    buildCommand: npm run build
+    startCommand: node server/src/index.js
+    envVars:
+      - key: NODE_VERSION
+        value: 20.18.0
+      - key: PORT
+        value: 10000
+

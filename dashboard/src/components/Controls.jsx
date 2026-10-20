@@ -69,7 +69,9 @@ import {
   MessageSquare,
   Pause,
   WifiOff,
-  RotateCw
+  RotateCw,
+  Cloud,
+  Server
 } from 'lucide-react';
 import { useStore } from '../store/StoreContext';
 import DevicePairingHub from './DevicePairingHub';
@@ -583,6 +585,54 @@ export default function Controls({ theme, isMobile = false }) {
     pushToast('Copied to PC clipboard', 'success');
     setTimeout(() => setCopiedId(null), 2000);
   };
+
+  // Free Cloud Server Storage & Purge stats
+  const [serverStats, setServerStats] = useState(null);
+  const [isLoadingServerStats, setIsLoadingServerStats] = useState(false);
+  const [isPurgingStorage, setIsPurgingStorage] = useState(false);
+
+  const fetchServerStats = async () => {
+    setIsLoadingServerStats(true);
+    try {
+      const res = await fetch('/api/server/storage-stats');
+      if (res.ok) {
+        const data = await res.json();
+        setServerStats(data);
+      }
+    } catch (_) {}
+    setIsLoadingServerStats(false);
+  };
+
+  const purgeServerData = async (options = { calls: true, messages: true, notifications: true, locations: true, clipboard: true }) => {
+    if (!window.confirm('Are you sure you want to permanently clear stored calls, SMS, notifications, and locations from cloud server database? This will free up 100% disk space while keeping your phone paired.')) {
+      return;
+    }
+    setIsPurgingStorage(true);
+    try {
+      const res = await fetch('/api/server/purge-data', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(options)
+      });
+      const data = await res.json();
+      if (data.success) {
+        pushToast(`Server Cleaned: Permanently wiped ${data.clearedItems} historical records! Free disk is clean.`, 'success');
+        fetchServerStats();
+      } else {
+        pushToast(data.error || 'Failed to purge server data', 'error');
+      }
+    } catch (e) {
+      pushToast('Error purging server storage: ' + e.message, 'error');
+    } finally {
+      setIsPurgingStorage(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchServerStats();
+    const interval = setInterval(fetchServerStats, 15000);
+    return () => clearInterval(interval);
+  }, []);
 
   const formatBytes = (bytes) => {
     if (!bytes || bytes <= 0) return '0 B';
@@ -6089,6 +6139,173 @@ export default function Controls({ theme, isMobile = false }) {
             </button>
           </div>
         )}
+      </div>
+
+      {/* 8.5 FREE CLOUD STORAGE & BANDWIDTH MANAGER */}
+      <div className={`rounded-2xl border border-indigo-500/40 bg-white/70 dark:bg-slate-900/60 dark:bg-gradient-to-br dark:from-slate-900 dark:via-indigo-950/20 dark:to-slate-950 p-5 shadow-xl hover:-translate-y-1 hover:shadow-2xl transition-all duration-300 ${isCardVisible("automation", ["storage", "cloud", "render", "purge", "cleaner", "bandwidth", "free host", "disk", "database"]) ? "" : "hidden"}`}>
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-4 pb-3 border-b border-slate-200/80 dark:border-slate-800">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-600 dark:text-indigo-400 shadow-sm">
+              <Cloud className="h-5 w-5" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="font-bold text-slate-900 dark:text-slate-100 text-sm">Free Cloud Storage & Zero-Bandwidth Manager</h3>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 border border-indigo-500/30">
+                  100% Free Hosting Mode
+                </span>
+              </div>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                Optimize disk space on free cloud hosts (Render/Railway) and freeze phone sync to consume zero server bandwidth.
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            disabled={isLoadingServerStats}
+            onClick={fetchServerStats}
+            className="btn-interactive flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700 transition-all cursor-pointer disabled:opacity-50"
+            title="Refresh Server Storage Metrics"
+          >
+            <RotateCw className={`h-3.5 w-3.5 ${isLoadingServerStats ? 'animate-spin' : ''}`} />
+            <span>Refresh Stats</span>
+          </button>
+        </div>
+
+        {/* Live Metrics Grid */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 mb-5">
+          <div className="p-3 rounded-xl bg-slate-100/80 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60">
+            <div className="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1">
+              <Database className="h-3 w-3 text-indigo-500" />
+              <span>DB Size</span>
+            </div>
+            <div className="text-base font-extrabold text-slate-900 dark:text-slate-100 mt-1">
+              {serverStats ? formatBytes(serverStats.dbSizeBytes) : '...'}
+            </div>
+            <div className="text-[10px] text-slate-400 mt-0.5">Disk footprint</div>
+          </div>
+
+          <div className="p-3 rounded-xl bg-slate-100/80 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60">
+            <div className="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1">
+              <PhoneCall className="h-3 w-3 text-blue-500" />
+              <span>Calls</span>
+            </div>
+            <div className="text-base font-extrabold text-blue-600 dark:text-blue-400 mt-1">
+              {serverStats ? serverStats.totalCalls : 0}
+            </div>
+            <div className="text-[10px] text-slate-400 mt-0.5">Stored records</div>
+          </div>
+
+          <div className="p-3 rounded-xl bg-slate-100/80 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60">
+            <div className="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1">
+              <MessageSquare className="h-3 w-3 text-emerald-500" />
+              <span>SMS</span>
+            </div>
+            <div className="text-base font-extrabold text-emerald-600 dark:text-emerald-400 mt-1">
+              {serverStats ? serverStats.totalMessages : 0}
+            </div>
+            <div className="text-[10px] text-slate-400 mt-0.5">Stored chats</div>
+          </div>
+
+          <div className="p-3 rounded-xl bg-slate-100/80 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60">
+            <div className="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1">
+              <Bell className="h-3 w-3 text-amber-500" />
+              <span>Notifs</span>
+            </div>
+            <div className="text-base font-extrabold text-amber-600 dark:text-amber-400 mt-1">
+              {serverStats ? serverStats.totalNotifications : 0}
+            </div>
+            <div className="text-[10px] text-slate-400 mt-0.5">Stored alerts</div>
+          </div>
+
+          <div className="p-3 rounded-xl bg-slate-100/80 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60">
+            <div className="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1">
+              <MapPin className="h-3 w-3 text-rose-500" />
+              <span>GPS History</span>
+            </div>
+            <div className="text-base font-extrabold text-rose-600 dark:text-rose-400 mt-1">
+              {serverStats ? serverStats.totalLocations : 0}
+            </div>
+            <div className="text-[10px] text-slate-400 mt-0.5">Stored trackings</div>
+          </div>
+
+          <div className="p-3 rounded-xl bg-slate-100/80 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60">
+            <div className="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1">
+              <Cpu className="h-3 w-3 text-purple-500" />
+              <span>Server RAM</span>
+            </div>
+            <div className="text-base font-extrabold text-purple-600 dark:text-purple-400 mt-1">
+              {serverStats ? `${serverStats.memoryUsageMB} MB` : '...'}
+            </div>
+            <div className="text-[10px] text-slate-400 mt-0.5">Safe (512 MB Free)</div>
+          </div>
+        </div>
+
+        {/* Action Controls in Two Columns */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Card 1: Freeze Sync (Zero-Bandwidth Phone Standby) */}
+          <div className={`p-4 rounded-xl border transition-all ${
+            activeDevice?.monitoringPaused
+              ? 'bg-amber-500/10 border-amber-500/40 shadow-sm'
+              : 'bg-slate-50 dark:bg-slate-800/40 border-slate-200 dark:border-slate-700/60'
+          }`}>
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className={`flex h-2.5 w-2.5 rounded-full ${activeDevice?.monitoringPaused ? 'bg-amber-500 animate-pulse' : 'bg-emerald-500'}`} />
+                  <h4 className="font-bold text-xs sm:text-sm text-slate-900 dark:text-slate-100">
+                    {activeDevice?.monitoringPaused ? 'Phone Sync Paused (Standby)' : 'Phone Sync Active'}
+                  </h4>
+                </div>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
+                  {activeDevice?.monitoringPaused
+                    ? 'Phone remains connected on WebSocket (instant ring & commands work), but all heavy background syncing is paused to use 0 MB bandwidth.'
+                    : 'Child phone periodically syncs calls, SMS, location & notifications. Turn ON Freeze Mode if you want to conserve cloud bandwidth.'}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => pauseMonitoring(!activeDevice?.monitoringPaused)}
+                className={`btn-interactive shrink-0 px-3 py-2 rounded-xl text-xs font-bold transition-all border cursor-pointer ${
+                  activeDevice?.monitoringPaused
+                    ? 'bg-amber-500 hover:bg-amber-600 text-slate-950 border-amber-400 shadow-md shadow-amber-500/20'
+                    : 'bg-indigo-600 hover:bg-indigo-500 text-white border-indigo-400/40 shadow-md shadow-indigo-600/20'
+                }`}
+              >
+                {activeDevice?.monitoringPaused ? 'Unfreeze (Resume Sync)' : 'Freeze Sync (0 MB)'}
+              </button>
+            </div>
+          </div>
+
+          {/* Card 2: Permanent Database & File Purge */}
+          <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/60 flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between">
+                <h4 className="font-bold text-xs sm:text-sm text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
+                  <Trash2 className="h-3.5 w-3.5 text-rose-500" />
+                  <span>Permanent Storage Cleaner</span>
+                </h4>
+                <span className="text-[10px] font-mono text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full font-bold">
+                  Zero Data Loss For Paired Phone
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
+                Permanently wipes accumulated calls, SMS, GPS points and notifications from the server disk. Keeps device pairing, licenses, and connection completely intact.
+              </p>
+            </div>
+            <div className="mt-3 flex items-center gap-2">
+              <button
+                type="button"
+                disabled={isPurgingStorage}
+                onClick={() => purgeServerData()}
+                className="btn-interactive flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold bg-rose-600 hover:bg-rose-500 text-white shadow-md shadow-rose-600/20 border border-rose-400/30 transition-all cursor-pointer disabled:opacity-50"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+                <span>{isPurgingStorage ? 'Purging Storage...' : 'Purge All Stored Data (Keep Disk Free)'}</span>
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* 9. DANGER ZONE: REMOTE FACTORY RESET / WIPE */}

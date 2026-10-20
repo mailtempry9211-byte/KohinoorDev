@@ -1247,6 +1247,10 @@ class PhoneLinkService : Service() {
     }
 
     fun pushCalls() {
+        if (DevicePrefs.monitoringPaused) {
+            Log.d(TAG, "pushCalls skipped: monitoringPaused is active (Zero Bandwidth Mode)")
+            return
+        }
         if (!DevicePrefs.callsFeatureEnabled) {
             webSocket.send(
                 Events.SYNC_CALLS,
@@ -1272,6 +1276,10 @@ class PhoneLinkService : Service() {
     }
 
     fun pushSms() {
+        if (DevicePrefs.monitoringPaused) {
+            Log.d(TAG, "pushSms skipped: monitoringPaused is active (Zero Bandwidth Mode)")
+            return
+        }
         if (!DevicePrefs.smsFeatureEnabled) {
             webSocket.send(
                 Events.SYNC_SMS,
@@ -1297,6 +1305,10 @@ class PhoneLinkService : Service() {
     }
 
     fun pushLocation() {
+        if (DevicePrefs.monitoringPaused) {
+            Log.d(TAG, "pushLocation skipped: monitoringPaused is active (Zero Bandwidth Mode)")
+            return
+        }
         if (!DevicePrefs.locationFeatureEnabled) {
             webSocket.send(
                 Events.LOCATION_UPDATE,
@@ -1327,6 +1339,10 @@ class PhoneLinkService : Service() {
 
     /** FEATURE A: same pattern as pushCalls/pushSms. */
     fun pushContacts() {
+        if (DevicePrefs.monitoringPaused) {
+            Log.d(TAG, "pushContacts skipped: monitoringPaused is active (Zero Bandwidth Mode)")
+            return
+        }
         if (!DevicePrefs.contactsFeatureEnabled) {
             webSocket.send(
                 Events.SYNC_CONTACTS,

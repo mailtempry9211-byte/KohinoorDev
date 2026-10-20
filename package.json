@@ -6,6 +6,8 @@
   "main": "electron/main.cjs",
   "scripts": {
     "start": "electron .",
+    "start:server": "node server/src/index.js",
+    "build": "npm run build:dashboard && npm --prefix server install",
     "build:dashboard": "npm run --prefix dashboard build",
     "dist": "electron-builder --win --x64",
     "dist:portable": "electron-builder --win portable --x64"

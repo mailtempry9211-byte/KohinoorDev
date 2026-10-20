@@ -4,7 +4,7 @@ import { createServer } from 'http';
 import cors from 'cors';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
-import { mkdirSync, existsSync } from 'fs';
+import { mkdirSync, existsSync, statSync } from 'fs';
 import { JSONFilePreset } from 'lowdb/node';
 import { randomUUID } from 'crypto';
 import os from 'os';
@@ -1265,6 +1265,95 @@ app.get('/api/tunnel', (req, res) => {
     status: getTunnelStatus(),
     config: db.data.tunnelConfig || {}
   });
+});
+
+// ------------------------------------------------------------- Server Storage & Purge API (Free Cloud Space Optimization)
+app.get('/api/server/storage-stats', (req, res) => {
+  let dbSizeBytes = 0;
+  const dbFile = join(dataDir, 'db.json');
+  try {
+    if (existsSync(dbFile)) {
+      dbSizeBytes = statSync(dbFile).size;
+    }
+  } catch (_) {}
+
+  const countItems = (val) => {
+    if (!val) return 0;
+    if (Array.isArray(val)) return val.length;
+    if (typeof val === 'object') {
+      let sum = 0;
+      for (const k of Object.keys(val)) {
+        if (Array.isArray(val[k])) sum += val[k].length;
+      }
+      return sum;
+    }
+    return 0;
+  };
+
+  const totalCalls = countItems(db.data.calls);
+  const totalMessages = countItems(db.data.messages);
+  const totalLocations = countItems(db.data.locations);
+  const totalNotifications = countItems(db.data.notifications);
+  const totalContacts = countItems(db.data.contacts);
+  const totalClipboard = countItems(db.data.clipboardHistory);
+  const memoryUsageMB = (process.memoryUsage().rss / (1024 * 1024)).toFixed(1);
+
+  res.json({
+    dbSizeBytes,
+    totalCalls,
+    totalMessages,
+    totalLocations,
+    totalNotifications,
+    totalContacts,
+    totalClipboard,
+    memoryUsageMB,
+    uptimeSec: Math.floor(process.uptime())
+  });
+});
+
+app.post('/api/server/purge-data', async (req, res) => {
+  try {
+    const { calls = true, messages = true, notifications = true, locations = true, clipboard = true } = req.body || {};
+
+    let clearedItems = 0;
+    const clearField = (field) => {
+      let count = 0;
+      if (Array.isArray(db.data[field])) {
+        count = db.data[field].length;
+        db.data[field] = [];
+      } else if (db.data[field] && typeof db.data[field] === 'object') {
+        for (const k of Object.keys(db.data[field])) {
+          if (Array.isArray(db.data[field][k])) {
+            count += db.data[field][k].length;
+            db.data[field][k] = [];
+          }
+        }
+      }
+      return count;
+    };
+
+    if (calls) clearedItems += clearField('calls');
+    if (messages) clearedItems += clearField('messages');
+    if (notifications) clearedItems += clearField('notifications');
+    if (locations) clearedItems += clearField('locations');
+    if (clipboard) {
+      clearedItems += clearField('clipboardHistory');
+      db.data.clipboard = {};
+    }
+
+    await db.write();
+
+    // Broadcast reset event to live dashboard so UI updates immediately
+    broadcastToDashboard('SERVER_STORAGE_PURGED', { clearedItems, timestamp: Date.now() });
+
+    res.json({
+      success: true,
+      clearedItems,
+      message: `Permanently cleared ${clearedItems} stored items. Storage is clean!`
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
 });
 
 // ------------------------------------------------------------- Commercial Licensing API
