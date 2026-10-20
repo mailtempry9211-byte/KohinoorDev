@@ -1564,17 +1564,6 @@ class PhoneLinkService : Service() {
     }
 
     private fun handleScreenshot() {
-        if (!com.phonelink.hub.media.MediaProjectionHolder.hasConsent) {
-            webSocket.send(
-                Events.SCREENSHOT_RESULT,
-                JSONObject().apply {
-                    put("deviceId", DevicePrefs.deviceId)
-                    put("success", false)
-                    put("error", "Screen capture permission not granted on device")
-                }
-            )
-            return
-        }
         updateNotification("Screen capture: taking screenshot")
         com.phonelink.hub.media.ScreenshotController.capture(this) { result ->
             updateNotification(if (isServiceConnected) "Connected to dashboard" else "Disconnected")

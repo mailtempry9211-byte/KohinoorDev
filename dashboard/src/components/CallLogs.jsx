@@ -286,12 +286,17 @@ export default function CallLogs() {
                     <p className="truncate text-sm font-semibold text-slate-900 dark:text-slate-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
                       {call.name || call.number || 'Unknown'}
                     </p>
-                    <p className="text-xs font-mono text-slate-500 dark:text-slate-400 mt-0.5">
-                      {call.number} • {formatTime(call.timestamp)}
-                    </p>
+                    <div className="flex flex-wrap items-center gap-1.5 text-xs font-mono text-slate-500 dark:text-slate-400 mt-0.5">
+                      <span>{call.number}</span>
+                      <span>•</span>
+                      <span>{formatTime(call.timestamp)}</span>
+                      <span className="inline-flex sm:hidden font-semibold text-indigo-600 dark:text-indigo-400">
+                        • {call.type === 'missed' ? 'Missed' : formatDuration(call.duration)}
+                      </span>
+                    </div>
                   </div>
 
-                  <span className="hidden shrink-0 text-xs font-mono text-slate-500 dark:text-slate-400 sm:block px-2.5 py-1 rounded-md bg-slate-100 dark:bg-slate-800/80 border border-slate-200/60 dark:border-slate-700/60">
+                  <span className="hidden sm:inline-flex shrink-0 text-xs font-mono font-semibold text-indigo-600 dark:text-indigo-300 px-2.5 py-1 rounded-md bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200/60 dark:border-indigo-800/60">
                     {call.type === 'missed' ? 'Missed' : formatDuration(call.duration)}
                   </span>
 

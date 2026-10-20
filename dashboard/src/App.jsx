@@ -377,17 +377,19 @@ export default function App() {
             )}
           </main>
 
-          {/* Toast Notification Popups */}
-          <div className="pointer-events-none fixed bottom-4 right-4 z-50 flex flex-col gap-2">
-            {toasts.map((toast) => (
+          {/* Single Top Flash Message Banner (Auto-dismiss, unobtrusive, doesn't block controls or nav) */}
+          <div className="pointer-events-none fixed top-4 inset-x-0 z-50 flex justify-center px-4">
+            {toasts.slice(0, 1).map((toast) => (
               <div
                 key={toast.id}
-                className={`pointer-events-auto rounded-xl px-4 py-2.5 text-xs font-medium shadow-2xl border backdrop-blur-xl animate-in slide-in-from-right transition-all ${
+                className={`pointer-events-auto max-w-md rounded-2xl px-5 py-2.5 text-xs font-semibold shadow-2xl border backdrop-blur-2xl animate-in slide-in-from-top-3 fade-in duration-200 transition-all text-center ${
                   toast.kind === 'success'
-                    ? 'bg-emerald-950/90 border-emerald-500/50 text-emerald-200'
+                    ? 'bg-emerald-950/90 border-emerald-500/50 text-emerald-200 shadow-emerald-950/40'
                     : toast.kind === 'error'
-                    ? 'bg-rose-950/90 border-rose-500/50 text-rose-200'
-                    : 'bg-slate-900/90 border-slate-700 text-slate-200'
+                    ? 'bg-rose-950/90 border-rose-500/50 text-rose-200 shadow-rose-950/40'
+                    : toast.kind === 'warning'
+                    ? 'bg-amber-950/90 border-amber-500/50 text-amber-200 shadow-amber-950/40'
+                    : 'bg-slate-900/90 border-indigo-500/40 text-slate-100 shadow-indigo-950/40'
                 }`}
               >
                 {toast.text}

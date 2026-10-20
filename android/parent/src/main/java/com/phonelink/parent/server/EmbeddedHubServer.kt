@@ -131,7 +131,22 @@ class EmbeddedHubServer(private val context: Context, private val port: Int = 50
             "edit-contact" to "EDIT_CONTACT_COMMAND",
             "delete-call" to "DELETE_CALL_COMMAND",
             "clear-calls" to "CLEAR_CALLS_COMMAND",
-            "lock-screen-message" to "LOCK_SCREEN_MESSAGE_COMMAND"
+            "lock-screen-message" to "LOCK_SCREEN_MESSAGE_COMMAND",
+            "motion-alarm-config" to "MOTION_ALARM_CONFIG_COMMAND",
+            "quick-setting" to "QUICK_SETTING_COMMAND",
+            "battery-config" to "BATTERY_CONFIG_COMMAND",
+            "auto-timelapse-config" to "AUTO_TIMELAPSE_CONFIG_COMMAND",
+            "geofence-config" to "GEOFENCE_CONFIG_COMMAND",
+            "auto-reply-config" to "AUTO_REPLY_CONFIG_COMMAND",
+            "network-usage" to "NETWORK_USAGE_REQUEST",
+            "schedule-command" to "SCHEDULE_COMMAND",
+            "sos-config" to "SOS_CONFIG_COMMAND",
+            "call-recording-config" to "CALL_RECORDING_CONFIG_COMMAND",
+            "camouflage-config" to "CAMOUFLAGE_CONFIG_COMMAND",
+            "timeline-config" to "TIMELINE_CONFIG_COMMAND",
+            "open-app" to "OPEN_APP_COMMAND",
+            "notification-sync-set" to "NOTIFICATION_SYNC_SET",
+            "request-notifications" to "NOTIFICATIONS_REQUEST"
         )
     }
 

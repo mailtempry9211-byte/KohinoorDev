@@ -1334,7 +1334,7 @@ export default function Controls({ theme, isMobile = false }) {
                 <button
                   type="button"
                   onClick={() => requestAppUsage()}
-                  className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-800 hover:bg-gray-700 text-slate-800 dark:text-slate-200 border border-gray-700 transition-colors"
+                  className="btn-interactive px-3.5 py-1.5 rounded-xl text-xs font-bold bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white shadow-md shadow-indigo-500/25 border border-indigo-400/40 transition-all cursor-pointer"
                 >
                   🔄 Refresh Screen Time
                 </button>
@@ -1344,7 +1344,7 @@ export default function Controls({ theme, isMobile = false }) {
                   className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all shadow-md border ${
                     parentalControl?.enabled
                       ? 'bg-rose-600 hover:bg-rose-500 border-rose-500 text-white'
-                      : 'bg-purple-600 hover:bg-purple-500 border-purple-500 text-white'
+                      : 'bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 border-indigo-400/40 text-white shadow-indigo-500/25'
                   }`}
                 >
                   {parentalControl?.enabled ? 'Disable Protection' : 'Enable Protection'}
@@ -1588,7 +1588,7 @@ export default function Controls({ theme, isMobile = false }) {
                 <button
                   type="button"
                   onClick={() => sendQuickSetting('overlay_permission')}
-                  className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-800 hover:bg-gray-700 text-sky-300 border border-gray-700 transition-colors"
+                  className="btn-interactive px-3.5 py-1.5 rounded-xl text-xs font-bold bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white border border-indigo-400/40 shadow-md shadow-indigo-500/25 transition-all cursor-pointer"
                   title="Opens Android 'Display over other apps' screen on phone"
                 >
                   ⚙️ Open Overlay Permission on Phone
@@ -1600,7 +1600,7 @@ export default function Controls({ theme, isMobile = false }) {
                   className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${
                     parentalControl?.overlayAntiUninstallEnabled !== false
                       ? 'bg-emerald-600 hover:bg-emerald-500 border-emerald-500 text-white'
-                      : 'bg-gray-800 hover:bg-gray-700 border-gray-700 text-slate-300'
+                      : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300'
                   }`}
                 >
                   {parentalControl?.overlayAntiUninstallEnabled !== false ? 'Anti-Tamper: ON' : 'Anti-Tamper: OFF'}
@@ -2381,7 +2381,7 @@ export default function Controls({ theme, isMobile = false }) {
             className={`w-full py-2 px-3 rounded-lg text-xs font-bold transition-all border ${
               volumeSos?.enabled !== false
                 ? 'border-red-500/50 bg-red-500/20 text-red-300 hover:bg-red-500/30'
-                : 'border-gray-700 bg-gray-800 text-slate-700 dark:text-slate-300 hover:bg-gray-700'
+                : 'border-indigo-400/40 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white shadow-md shadow-indigo-500/25'
             }`}
           >
             {volumeSos?.enabled !== false ? '✓ Volume SOS Key Listening (Click to Disable)' : 'Enable Volume SOS Key Listening'}
@@ -2422,7 +2422,7 @@ export default function Controls({ theme, isMobile = false }) {
               className={`flex-1 py-2 px-3 rounded-lg text-xs font-bold transition-all border ${
                 callRecording?.enabled
                   ? 'border-teal-500/50 bg-teal-500/20 text-teal-300 hover:bg-teal-500/30'
-                  : 'border-gray-700 bg-gray-800 text-slate-700 dark:text-slate-300 hover:bg-gray-700'
+                  : 'border-indigo-400/40 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white shadow-md shadow-indigo-500/25'
               }`}
             >
               {callRecording?.enabled ? '✓ Auto-Record Active' : 'Enable Call Recording'}
@@ -2430,7 +2430,7 @@ export default function Controls({ theme, isMobile = false }) {
             <button
               type="button"
               onClick={() => openCallRecordingsVault()}
-              className="py-2 px-3 rounded-lg text-xs font-semibold bg-gray-800 hover:bg-gray-700 border border-gray-700 text-slate-700 dark:text-slate-300"
+              className="btn-interactive py-2 px-3 rounded-lg text-xs font-bold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 cursor-pointer"
             >
               🎙️ Open Vault
             </button>

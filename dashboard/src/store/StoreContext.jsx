@@ -95,10 +95,32 @@ export function StoreProvider({ children }) {
     });
   }, []);
 
+  const showNotificationToastsRef = useRef(false);
+  const [showNotificationToasts, setShowNotificationToasts] = useState(() => {
+    try {
+      const v = localStorage.getItem('phonelink_show_notif_toasts') === 'true';
+      showNotificationToastsRef.current = v;
+      return v;
+    } catch {
+      return false;
+    }
+  });
+
+  const toggleNotificationToasts = useCallback((enable) => {
+    setShowNotificationToasts((prev) => {
+      const val = typeof enable === 'boolean' ? enable : !prev;
+      showNotificationToastsRef.current = val;
+      try {
+        localStorage.setItem('phonelink_show_notif_toasts', String(val));
+      } catch {}
+      return val;
+    });
+  }, []);
+
   const pushToast = useCallback((text, kind = 'info') => {
     const id = Date.now() + Math.random();
-    setToasts((t) => [...t, { id, text, kind }]);
-    setTimeout(() => setToasts((t) => t.filter((x) => x.id !== id)), 4000);
+    setToasts(() => [{ id, text, kind }]);
+    setTimeout(() => setToasts((t) => t.filter((x) => x.id !== id)), 2500);
   }, []);
 
   const dismissAlert = useCallback(() => {
@@ -273,8 +295,10 @@ function titleOrApp(appName, title, text) {
   if (text) return `${appName || 'Android'}: ${text}`;
   return appName || 'New notification';
 }
-          const toastText = titleOrApp(p.appName, p.title, p.text);
-          pushToast(toastText, 'info');
+          if (showNotificationToastsRef.current) {
+            const toastText = titleOrApp(p.appName, p.title, p.text);
+            pushToast(toastText, 'info');
+          }
           break;
         }
 
@@ -1429,6 +1453,8 @@ function titleOrApp(appName, title, text) {
         await sendCommand('find-phone-stop', { deviceId });
         pushToast('Silencing phone alarm...', 'info');
       },
+      showNotificationToasts,
+      toggleNotificationToasts,
       removeDevice: async (deviceId) => {
         try {
           const res = await fetch(`/api/devices/${deviceId}`, { method: 'DELETE' });
@@ -1450,7 +1476,7 @@ function titleOrApp(appName, title, text) {
         return false;
       }
     }),
-    [devices, activeDeviceId, currentTab, callLogsSubTab, deviceSyncConfig, parentalControlState, appUsageData, batteryAlertConfig, autoTimelapseConfig, latestTimelapseFrame, timelapseGallery, geofenceConfig, autoReplyConfig, networkUsageData, scheduledCommands, volumeSosConfig, callRecordingConfig, camouflageConfig, quickSettingsStatus, storageAnalysisData, findPhoneAlerting, calls, messages, locations, contacts, files, notifications, connected, incomingCallAlert, smsAlert, toasts, sendCommand, dismissAlert, dismissSmsAlert, pushToast, deviceInfo, installedApps, wifiInfo, clipboardHistory, clipboardCapture, appPermissions, callBlocklist, micRecording, latestMicAudio, cameraCapturing, latestCameraPhoto, screenshotCapturing, latestScreenshot, screenRecording, latestScreenFrame, cameraStreaming, latestCameraFrame, torchOn, liveListening, latestAudioChunk, volumeInfo, batteryStats, lostModeState, galleryPhotos, galleryLoading, cellularInfo, dndStatus, strobeActive, junkScanData, isScanningJunk, motionAlarmState, walkieTalkieActive]
+    [devices, activeDeviceId, currentTab, callLogsSubTab, deviceSyncConfig, parentalControlState, appUsageData, batteryAlertConfig, autoTimelapseConfig, latestTimelapseFrame, timelapseGallery, geofenceConfig, autoReplyConfig, networkUsageData, scheduledCommands, volumeSosConfig, callRecordingConfig, camouflageConfig, quickSettingsStatus, storageAnalysisData, findPhoneAlerting, calls, messages, locations, contacts, files, notifications, connected, incomingCallAlert, smsAlert, toasts, sendCommand, dismissAlert, dismissSmsAlert, pushToast, deviceInfo, installedApps, wifiInfo, clipboardHistory, clipboardCapture, appPermissions, callBlocklist, micRecording, latestMicAudio, cameraCapturing, latestCameraPhoto, screenshotCapturing, latestScreenshot, screenRecording, latestScreenFrame, cameraStreaming, latestCameraFrame, torchOn, liveListening, latestAudioChunk, volumeInfo, batteryStats, lostModeState, galleryPhotos, galleryLoading, cellularInfo, dndStatus, strobeActive, junkScanData, isScanningJunk, motionAlarmState, walkieTalkieActive, showNotificationToasts, toggleNotificationToasts]
   );
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;

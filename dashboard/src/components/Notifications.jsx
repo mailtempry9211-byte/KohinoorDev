@@ -10,7 +10,9 @@ export default function Notifications() {
     markNotificationRead,
     dismissNotification,
     dismissAllNotifications,
-    refreshNotifications
+    refreshNotifications,
+    showNotificationToasts,
+    toggleNotificationToasts
   } = useStore();
   const [filterUnread, setFilterUnread] = useState(false);
   const [notifRefreshing, setNotifRefreshing] = useState(false);
@@ -64,6 +66,17 @@ export default function Notifications() {
             <RefreshCw className={`h-3.5 w-3.5 text-indigo-500 ${notifRefreshing ? 'animate-spin' : ''}`} />
             Refresh
           </button>
+          <label className="flex items-center gap-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 px-3.5 py-2 text-xs font-medium text-slate-700 dark:text-slate-300 cursor-pointer" title="Toggle real-time popup banners on screen">
+            <input
+              type="checkbox"
+              checked={showNotificationToasts}
+              onChange={(e) => toggleNotificationToasts(e.target.checked)}
+              className="h-3.5 w-3.5 rounded border-slate-300 dark:border-slate-700 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+            />
+            <span className={showNotificationToasts ? 'text-indigo-600 dark:text-indigo-400 font-bold' : 'text-slate-500'}>
+              Popups: {showNotificationToasts ? 'ON' : 'Muted'}
+            </span>
+          </label>
           <label className="flex items-center gap-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 px-3.5 py-2 text-xs font-medium text-slate-700 dark:text-slate-300 cursor-pointer">
             <input
               type="checkbox"
