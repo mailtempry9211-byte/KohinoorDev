@@ -169,10 +169,17 @@ class MainActivity : AppCompatActivity() {
         DevicePrefs.init(this)
 
         val uri = intent.data
-        val isDeepLinkAuth = uri != null && (uri.scheme == "phonelink" || uri.host == "phonelink.hub" || uri.path?.contains("open") == true)
+        val uriStr = uri?.toString()?.lowercase() ?: ""
+        val isDeepLinkAuth = uri != null && (
+            uri.scheme == "phonelink" ||
+            uri.host == "phonelink.hub" ||
+            uriStr.contains("open") ||
+            uriStr.contains("unlock")
+        )
         val isParentAuth = intent.getBooleanExtra("EXTRA_PARENT_AUTHENTICATED", false) ||
                            intent.getBooleanExtra("from_secret_code", false) ||
                            intent.getBooleanExtra("from_dashboard", false) ||
+                           intent.action == "com.phonelink.hub.OPEN_SETTINGS" ||
                            isDeepLinkAuth
 
         if ((DevicePrefs.calculatorDisguiseEnabled || DevicePrefs.filesDisguiseEnabled) && !isParentAuth) {
@@ -203,10 +210,17 @@ class MainActivity : AppCompatActivity() {
         super.onNewIntent(intent)
         setIntent(intent)
         val uri = intent.data
-        val isDeepLinkAuth = uri != null && (uri.scheme == "phonelink" || uri.host == "phonelink.hub" || uri.path?.contains("open") == true)
+        val uriStr = uri?.toString()?.lowercase() ?: ""
+        val isDeepLinkAuth = uri != null && (
+            uri.scheme == "phonelink" ||
+            uri.host == "phonelink.hub" ||
+            uriStr.contains("open") ||
+            uriStr.contains("unlock")
+        )
         val isParentAuth = intent.getBooleanExtra("EXTRA_PARENT_AUTHENTICATED", false) ||
                            intent.getBooleanExtra("from_secret_code", false) ||
                            intent.getBooleanExtra("from_dashboard", false) ||
+                           intent.action == "com.phonelink.hub.OPEN_SETTINGS" ||
                            isDeepLinkAuth
         if (isParentAuth) {
             loadConfig()

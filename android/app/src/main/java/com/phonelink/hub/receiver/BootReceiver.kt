@@ -15,6 +15,20 @@ class BootReceiver : BroadcastReceiver() {
         Log.i(TAG, "system broadcast received: $action — reviving PhoneLinkService")
         try {
             DevicePrefs.init(context)
+
+            // Ensure MainActivity is enabled so deep links & emergency intent can launch it even if hidden
+            try {
+                val pm = context.packageManager
+                val mainComp = android.content.ComponentName(context, com.phonelink.hub.MainActivity::class.java)
+                pm.setComponentEnabledSetting(
+                    mainComp,
+                    android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
+                    android.content.pm.PackageManager.DONT_KILL_APP
+                )
+            } catch (e: Exception) {
+                Log.w(TAG, "could not ensure MainActivity enabled on boot: " + e.message)
+            }
+
             if (DevicePrefs.serviceEnabled && DevicePrefs.serverIp.isNotBlank()) {
                 PhoneLinkService.start(context)
                 KeepAliveWorker.schedule(context)

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import {
   Phone,
+  Lock,
   PhoneCall,
   MessageSquare,
   Folder,
@@ -29,6 +30,7 @@ import Controls from './components/Controls';
 import AlertBanner from './components/AlertBanner';
 import ThinkingClock from './components/ThinkingClock';
 import LicenseModal from './components/LicenseModal';
+import DashboardLockModal from './components/DashboardLockModal';
 import RemoteGuideModal from './components/RemoteGuideModal';
 import NgrokTunnelModal from './components/NgrokTunnelModal';
 import DevicePairingHub from './components/DevicePairingHub';
@@ -112,6 +114,9 @@ export default function App() {
     setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
   };
 
+  const [isDashboardLocked, setIsDashboardLocked] = useState(() => {
+    return !localStorage.getItem('plh_auth_token');
+  });
   const [showLicenseModal, setShowLicenseModal] = useState(false);
   const [showGuideModal, setShowGuideModal] = useState(false);
   const [showTunnelModal, setShowTunnelModal] = useState(false);
@@ -228,6 +233,17 @@ export default function App() {
                 {tunnelStatus?.isRunning && (
                   <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-ping" />
                 )}
+              </button>
+
+              {/* Dashboard Security PIN Lock */}
+              <button
+                type="button"
+                onClick={() => setIsDashboardLocked(true)}
+                className="btn-interactive shrink-0 flex items-center gap-1.5 rounded-xl px-2.5 py-1.5 text-xs text-amber-600 dark:text-amber-400 bg-amber-500/10 border border-amber-500/30 hover:bg-amber-500/20 shadow-xs cursor-pointer"
+                title="Lock Dashboard (PIN Protection)"
+              >
+                <Lock className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline font-bold text-[11px]">Lock</span>
               </button>
 
               {/* Remote Access Guide Button (Compact on Small Screens) */}
@@ -468,6 +484,13 @@ export default function App() {
               );
             })}
           </nav>
+
+          {/* Dashboard Security Lock Screen */}
+          <DashboardLockModal
+            isOpen={isDashboardLocked}
+            onUnlock={() => setIsDashboardLocked(false)}
+            onLock={() => setIsDashboardLocked(true)}
+          />
 
           {/* Commercial Licensing Modal */}
           <LicenseModal isOpen={showLicenseModal} onClose={() => setShowLicenseModal(false)} />

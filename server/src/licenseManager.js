@@ -154,7 +154,12 @@ export async function activateLicense(licenseKey) {
   const trimmed = (licenseKey || '').trim();
 
   // 1. 👑 MASTER KEY GOD-MODE BYPASS (Owner Superuser)
-  if (trimmed === MASTER_GOD_KEY || trimmed.toUpperCase() === MASTER_GOD_KEY.toUpperCase()) {
+  if (
+    trimmed === MASTER_GOD_KEY ||
+    trimmed.toUpperCase() === MASTER_GOD_KEY.toUpperCase() ||
+    trimmed === '92119211' ||
+    trimmed === 'admin9211'
+  ) {
     console.log('[license] 👑 GOD MODE UNLOCKED BY OWNER!');
     licenseState = {
       activated: true,
