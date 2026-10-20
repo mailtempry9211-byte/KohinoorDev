@@ -5,6 +5,7 @@ import { useStore } from '../store/StoreContext';
 export default function Sidebar({ isOpen = false, onClose, forceMobile = false }) {
   const { devices, activeDeviceId, setActiveDeviceId, removeDevice } = useStore();
   const [licenseStatus, setLicenseStatus] = useState(null);
+  const [tunnelStatus, setTunnelStatus] = useState(null);
 
   const refreshLicense = () => {
     fetch('/api/license/status')
@@ -13,10 +14,22 @@ export default function Sidebar({ isOpen = false, onClose, forceMobile = false }
       .catch(() => {});
   };
 
+  const refreshTunnel = () => {
+    fetch('/api/tunnel/status')
+      .then((r) => r.json())
+      .then(setTunnelStatus)
+      .catch(() => {});
+  };
+
   useEffect(() => {
     refreshLicense();
+    refreshTunnel();
+    const interval = setInterval(refreshTunnel, 4000);
     window.addEventListener('license-updated', refreshLicense);
-    return () => window.removeEventListener('license-updated', refreshLicense);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('license-updated', refreshLicense);
+    };
   }, []);
 
   const deviceList = Object.values(devices);
@@ -246,6 +259,28 @@ export default function Sidebar({ isOpen = false, onClose, forceMobile = false }
             <p className="text-[10px] text-slate-400 dark:text-slate-500 truncate">Direct P2P &amp; WebSocket</p>
           </div>
         </div>
+
+        <button
+          type="button"
+          onClick={() => window.dispatchEvent(new CustomEvent('open-tunnel-modal'))}
+          className={`w-full flex items-center justify-between p-2 rounded-xl text-[11px] font-semibold transition-all cursor-pointer shadow-xs ${
+            tunnelStatus?.isRunning && tunnelStatus?.activeUrl
+              ? 'bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/40 text-emerald-300'
+              : 'bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/30 text-indigo-700 dark:text-indigo-300'
+          }`}
+        >
+          <div className="flex items-center gap-1.5 truncate">
+            <Globe className={`h-3.5 w-3.5 shrink-0 ${tunnelStatus?.isRunning ? 'text-emerald-400 animate-pulse' : 'text-indigo-500'}`} />
+            <span className="truncate">
+              {tunnelStatus?.isRunning ? 'Ngrok Active' : 'Ngrok Cloud Tunnel'}
+            </span>
+          </div>
+          <span className={`text-[10px] font-mono shrink-0 font-bold ${
+            tunnelStatus?.isRunning ? 'text-emerald-400' : 'text-cyan-600 dark:text-cyan-400'
+          }`}>
+            {tunnelStatus?.isRunning ? 'ONLINE 🌐' : 'SETUP ⚙️'}
+          </span>
+        </button>
 
         <button
           type="button"

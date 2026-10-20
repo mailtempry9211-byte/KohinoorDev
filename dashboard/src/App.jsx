@@ -30,6 +30,7 @@ import AlertBanner from './components/AlertBanner';
 import ThinkingClock from './components/ThinkingClock';
 import LicenseModal from './components/LicenseModal';
 import RemoteGuideModal from './components/RemoteGuideModal';
+import NgrokTunnelModal from './components/NgrokTunnelModal';
 import DevicePairingHub from './components/DevicePairingHub';
 import PhoneSimulatorFrame from './components/PhoneSimulatorFrame';
 import { useStore } from './store/StoreContext';
@@ -113,11 +114,28 @@ export default function App() {
 
   const [showLicenseModal, setShowLicenseModal] = useState(false);
   const [showGuideModal, setShowGuideModal] = useState(false);
+  const [showTunnelModal, setShowTunnelModal] = useState(false);
+  const [tunnelStatus, setTunnelStatus] = useState(null);
+
+  const fetchTunnel = () => {
+    fetch('/api/tunnel/status')
+      .then((r) => r.json())
+      .then(setTunnelStatus)
+      .catch(() => {});
+  };
 
   useEffect(() => {
-    const handler = () => setShowLicenseModal(true);
-    window.addEventListener('open-license-modal', handler);
-    return () => window.removeEventListener('open-license-modal', handler);
+    fetchTunnel();
+    const interval = setInterval(fetchTunnel, 4000);
+    const licenseHandler = () => setShowLicenseModal(true);
+    const tunnelHandler = () => setShowTunnelModal(true);
+    window.addEventListener('open-license-modal', licenseHandler);
+    window.addEventListener('open-tunnel-modal', tunnelHandler);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('open-license-modal', licenseHandler);
+      window.removeEventListener('open-tunnel-modal', tunnelHandler);
+    };
   }, []);
 
   useEffect(() => {
@@ -192,6 +210,26 @@ export default function App() {
             </div>
 
             <div className="flex items-center gap-1.5 sm:gap-2">
+              {/* Ngrok Cloud Tunnel Setup Button (Always Accessible) */}
+              <button
+                type="button"
+                onClick={() => setShowTunnelModal(true)}
+                className={`btn-interactive shrink-0 flex items-center gap-1.5 rounded-xl px-2.5 sm:px-3 py-1.5 text-xs font-semibold border shadow-xs cursor-pointer transition-all ${
+                  tunnelStatus?.isRunning && tunnelStatus?.activeUrl
+                    ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-600 dark:text-emerald-400'
+                    : 'bg-indigo-500/10 dark:bg-indigo-950/40 border-indigo-300 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-500/20'
+                }`}
+                title="Configure Embedded Ngrok Cloud Tunnel"
+              >
+                <Globe className={`h-3.5 w-3.5 ${tunnelStatus?.isRunning ? 'text-emerald-500 animate-pulse' : 'text-indigo-500 dark:text-indigo-400'}`} />
+                <span className="font-bold text-[11px]">
+                  {tunnelStatus?.isRunning ? 'Ngrok Active' : 'Ngrok Setup'}
+                </span>
+                {tunnelStatus?.isRunning && (
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-ping" />
+                )}
+              </button>
+
               {/* Remote Access Guide Button (Compact on Small Screens) */}
               <button
                 type="button"
@@ -436,6 +474,9 @@ export default function App() {
 
           {/* Remote Access & Port Forwarding Guide Modal */}
           <RemoteGuideModal isOpen={showGuideModal} onClose={() => setShowGuideModal(false)} />
+
+          {/* Ngrok Cloud Tunnel Engine Modal */}
+          <NgrokTunnelModal isOpen={showTunnelModal} onClose={() => setShowTunnelModal(false)} />
         </div>
       </div>
     </div>
