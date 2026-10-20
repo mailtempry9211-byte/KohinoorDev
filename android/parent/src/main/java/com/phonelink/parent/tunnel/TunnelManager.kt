@@ -28,6 +28,7 @@ object TunnelManager {
     const val PREF_TUNNEL_ENABLED = "tunnel_enabled"
     const val PREF_NGROK_TOKEN = "ngrok_authtoken"
     const val PREF_NGROK_DOMAIN = "ngrok_domain"
+    const val PREF_NGROK_PORT = "ngrok_port"
     const val PREF_AUTO_START = "tunnel_auto_start"
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -62,6 +63,10 @@ object TunnelManager {
 
     fun getNgrokToken(context: Context): String {
         return getPrefs(context).getString(PREF_NGROK_TOKEN, "") ?: ""
+    }
+
+    fun getNgrokPort(context: Context): Int {
+        return getPrefs(context).getInt(PREF_NGROK_PORT, 5000)
     }
 
     fun getActiveUrl(): String? = activeTunnelUrl
@@ -136,9 +141,10 @@ object TunnelManager {
      */
     fun startTunnel(
         context: Context,
-        port: Int = 5000,
+        port: Int = 0,
         onStatusChange: ((Boolean, String?) -> Unit)? = null
     ) {
+        val targetPort = if (port > 0) port else getNgrokPort(context)
         val prefs = getPrefs(context)
         val rawDomain = prefs.getString(PREF_NGROK_DOMAIN, "")?.trim() ?: ""
         val token = prefs.getString(PREF_NGROK_TOKEN, "")?.trim() ?: ""
@@ -164,7 +170,7 @@ object TunnelManager {
                 appendLog("========================================")
                 appendLog("🚀 Initializing PhoneLink Ngrok Tunnel Engine")
                 appendLog("Device ABI: ${Build.SUPPORTED_ABIS.joinToString(", ")}")
-                appendLog("Target local port: $port")
+                appendLog("Target local port: $targetPort")
                 appendLog("Claimed domain: ${if (cleanDomain.isNotEmpty()) cleanDomain else "(random sub-domain)"}")
                 appendLog("Auth token provided: ${if (token.isNotEmpty()) "Yes (len=${token.length})" else "No"}")
 
@@ -206,6 +212,9 @@ object TunnelManager {
                 if (token.isNotEmpty()) {
                     sbConfig.append("authtoken: \"$token\"\n")
                 }
+                // Bypass CRL revocation checks & automatic update calls that fail on Android without /etc/resolv.conf
+                sbConfig.append("crl_noverify: true\n")
+                sbConfig.append("update_check: false\n")
                 sbConfig.append("dns_resolver_ips:\n")
                 for (dns in dnsList) {
                     sbConfig.append("  - \"$dns\"\n")
@@ -220,7 +229,7 @@ object TunnelManager {
                 val cmd = mutableListOf<String>()
                 cmd.add(ngrokBin.absolutePath)
                 cmd.add("http")
-                cmd.add("$port")
+                cmd.add("$targetPort")
                 cmd.add("--config=${configFile.absolutePath}")
                 cmd.add("--log=stdout")
                 cmd.add("--log-format=term")
@@ -355,14 +364,16 @@ object TunnelManager {
         context: Context,
         token: String,
         domain: String,
-        autoStart: Boolean
+        autoStart: Boolean,
+        port: Int = 5000
     ) {
         val cleanDomain = domain.removePrefix("https://").removePrefix("http://").trimEnd('/').trim()
         getPrefs(context).edit()
             .putString(PREF_NGROK_TOKEN, token.trim())
             .putString(PREF_NGROK_DOMAIN, cleanDomain)
+            .putInt(PREF_NGROK_PORT, if (port > 0) port else 5000)
             .putBoolean(PREF_AUTO_START, autoStart)
             .apply()
-        appendLog("Saved configuration: domain='$cleanDomain', autoStart=$autoStart")
+        appendLog("Saved configuration: domain='$cleanDomain', port=$port, autoStart=$autoStart")
     }
 }

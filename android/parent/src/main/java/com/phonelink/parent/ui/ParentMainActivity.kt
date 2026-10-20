@@ -156,6 +156,14 @@ class ParentMainActivity : AppCompatActivity() {
             showModeSwitchDialog()
         }
 
+        tvServerAddress.setOnClickListener {
+            showModeSwitchDialog()
+        }
+
+        tvServerStatusDot.setOnClickListener {
+            showModeSwitchDialog()
+        }
+
         btnRefreshWeb.setOnClickListener {
             webView.reload()
             Toast.makeText(this, "Reloading dashboard...", Toast.LENGTH_SHORT).show()
@@ -351,6 +359,7 @@ class ParentMainActivity : AppCompatActivity() {
     private fun showTunnelSettingsDialog() {
         val currentToken = TunnelManager.getNgrokToken(this)
         val currentDomain = TunnelManager.getNgrokDomain(this)
+        val currentPort = TunnelManager.getNgrokPort(this)
         val isAuto = TunnelManager.isAutoStart(this)
 
         val layout = LinearLayout(this).apply {
@@ -418,6 +427,25 @@ class ParentMainActivity : AppCompatActivity() {
             setHintTextColor(Color.parseColor("#64748B"))
         }
         layout.addView(etToken)
+
+        // Target Local Port Input
+        val lblPort = TextView(this).apply {
+            text = "Target Local Port (Phone Server Port, default: 5000):"
+            textSize = 12f
+            setTextColor(Color.parseColor("#94A3B8"))
+            setPadding(0, 12, 0, 0)
+        }
+        layout.addView(lblPort)
+
+        val etPort = EditText(this).apply {
+            hint = "5000"
+            setText(currentPort.toString())
+            inputType = android.text.InputType.TYPE_CLASS_NUMBER
+            textSize = 13f
+            setTextColor(Color.parseColor("#F1F5F9"))
+            setHintTextColor(Color.parseColor("#64748B"))
+        }
+        layout.addView(etPort)
 
         // Auto-start Checkbox
         val cbAutoStart = CheckBox(this).apply {
@@ -514,10 +542,11 @@ class ParentMainActivity : AppCompatActivity() {
             .setPositiveButton(if (TunnelManager.isTunnelRunning()) "Restart Tunnel" else "Start Tunnel") { _, _ ->
                 val domain = etDomain.text.toString().trim()
                 val token = etToken.text.toString().trim()
-                TunnelManager.saveConfig(this, token, domain, cbAutoStart.isChecked)
+                val targetPort = etPort.text.toString().trim().toIntOrNull() ?: 5000
+                TunnelManager.saveConfig(this, token, domain, cbAutoStart.isChecked, targetPort)
 
-                Toast.makeText(this, "Starting Ngrok tunnel...", Toast.LENGTH_SHORT).show()
-                TunnelManager.startTunnel(this, 5000) { success, liveUrl ->
+                Toast.makeText(this, "Starting Ngrok tunnel on port $targetPort...", Toast.LENGTH_SHORT).show()
+                TunnelManager.startTunnel(this, targetPort) { success, liveUrl ->
                     handler.post {
                         updateHeaderInfo()
                         refreshStatusView()
@@ -532,7 +561,8 @@ class ParentMainActivity : AppCompatActivity() {
             .setNeutralButton("Stop Tunnel") { _, _ ->
                 val domain = etDomain.text.toString().trim()
                 val token = etToken.text.toString().trim()
-                TunnelManager.saveConfig(this, token, domain, cbAutoStart.isChecked)
+                val targetPort = etPort.text.toString().trim().toIntOrNull() ?: 5000
+                TunnelManager.saveConfig(this, token, domain, cbAutoStart.isChecked, targetPort)
 
                 TunnelManager.stopTunnel(this) { _, _ ->
                     handler.post {

