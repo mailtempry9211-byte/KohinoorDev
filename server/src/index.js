@@ -9,6 +9,7 @@ import { JSONFilePreset } from 'lowdb/node';
 import { randomUUID } from 'crypto';
 import os from 'os';
 import { getLicenseStatus, activateLicense, replaceAndActivateDevice, logoutLicense, initLicenseManager } from './licenseManager.js';
+import { startTunnel, stopTunnel, getTunnelStatus } from './tunnel.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -1197,10 +1198,72 @@ app.post('/api/command/:name', async (req, res) => {
 
 app.get('/api/server-info', (req, res) => {
   const ip = getLocalIP();
+  const status = getTunnelStatus();
   res.json({
     localIp: ip,
     port: PORT,
-    localUrl: `http://${ip}:${PORT}`
+    localUrl: `http://${ip}:${PORT}`,
+    tunnel: status,
+    tunnelConfig: db.data.tunnelConfig || {}
+  });
+});
+
+// ------------------------------------------------------------- ngrok Embedded Cloud Tunnel Management API
+app.get('/api/tunnel/status', (req, res) => {
+  const status = getTunnelStatus();
+  const conf = db.data.tunnelConfig || {};
+  res.json({
+    isRunning: Boolean(status.isRunning),
+    activeUrl: status.activeUrl || null,
+    authtoken: conf.authtoken || status.authtoken || '',
+    domain: conf.domain || status.domain || '',
+    autoStart: conf.autoStart !== undefined ? conf.autoStart : (status.autoStart ?? false),
+    error: status.error || null
+  });
+});
+
+app.post('/api/tunnel/start', async (req, res) => {
+  try {
+    const { authtoken, domain, autoStart } = req.body || {};
+    const token = (authtoken || db.data.tunnelConfig?.authtoken || '').trim();
+    const dom = domain !== undefined ? domain.trim() : (db.data.tunnelConfig?.domain || '').trim();
+    const auto = autoStart !== undefined ? Boolean(autoStart) : (db.data.tunnelConfig?.autoStart ?? true);
+
+    db.data.tunnelConfig = {
+      authtoken: token,
+      domain: dom,
+      autoStart: auto
+    };
+    await db.write();
+
+    const status = await startTunnel({ port: PORT, authtoken: token, domain: dom, autoStart: auto, dataDir });
+    res.json({
+      success: true,
+      isRunning: Boolean(status.isRunning),
+      activeUrl: status.activeUrl
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.post('/api/tunnel/stop', async (req, res) => {
+  try {
+    if (db.data.tunnelConfig) {
+      db.data.tunnelConfig.autoStart = false;
+      await db.write();
+    }
+    const status = await stopTunnel();
+    res.json({ success: true, isRunning: false, activeUrl: null });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.get('/api/tunnel', (req, res) => {
+  res.json({
+    status: getTunnelStatus(),
+    config: db.data.tunnelConfig || {}
   });
 });
 
@@ -1259,7 +1322,7 @@ if (existsSync(distPath)) {
 
 const PORT = parseInt(process.env.PORT || process.argv[2] || '5000', 10);
 
-httpServer.listen(PORT, '0.0.0.0', () => {
+httpServer.listen(PORT, '0.0.0.0', async () => {
   const ip = getLocalIP();
   console.log(`
 ====================================
@@ -1270,4 +1333,20 @@ httpServer.listen(PORT, '0.0.0.0', () => {
   In the Android app connect to: ${ip} (Port: ${PORT})
 ====================================
 `);
+
+  // Auto-start embedded ngrok tunnel if previously configured and active
+  if (db.data?.tunnelConfig?.autoStart && db.data?.tunnelConfig?.authtoken) {
+    console.log('[ngrok] Auto-starting embedded ngrok tunnel from saved config...');
+    try {
+      await startTunnel({
+        port: PORT,
+        authtoken: db.data.tunnelConfig.authtoken,
+        domain: db.data.tunnelConfig.domain,
+        autoStart: true,
+        dataDir
+      });
+    } catch (e) {
+      console.warn('[ngrok] Auto-start tunnel notice:', e.message);
+    }
+  }
 });

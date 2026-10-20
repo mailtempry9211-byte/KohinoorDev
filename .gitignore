@@ -15,4 +15,6 @@ lawnchair-16-dev/
 dist-electron/
 release/
 unusable/
+server/bin/*.exe
+server/bin/*.tmp
 

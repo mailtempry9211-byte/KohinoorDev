@@ -1,6 +1,8 @@
 name: Build PhoneLink Hub Standalone Windows EXE
 
 on:
+  push:
+    branches: [ main ]
   workflow_dispatch:
 
 jobs:
@@ -37,6 +39,15 @@ jobs:
         run: |
           npm install --no-audit
           node node_modules/electron/install.js
+
+      - name: Download & Bundle ngrok.exe into Server Bin
+        shell: cmd
+        run: |
+          if not exist "server\bin" mkdir "server\bin"
+          curl.exe -L -o "server\bin\ngrok.zip" "https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-windows-amd64.zip"
+          tar.exe -xf "server\bin\ngrok.zip" -C "server\bin"
+          del "server\bin\ngrok.zip"
+          server\bin\ngrok.exe version
 
       - name: Prepare winCodeSign Cache (Bypass Darwin symlinks)
         shell: cmd
