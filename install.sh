@@ -129,8 +129,8 @@ read -rp "Set Dashboard Security PIN [Default: 9211]: " CFG_PIN
 CFG_PIN="${CFG_PIN:-9211}"
 
 # License Key
-read -rp "Set License / Owner Master Key [Default: 92119211]: " CFG_LICENSE
-CFG_LICENSE="${CFG_LICENSE:-92119211}"
+read -rp "Set License / Owner Master Key [Default: 9211921192119211]: " CFG_LICENSE
+CFG_LICENSE="${CFG_LICENSE:-9211921192119211}"
 
 # Server Port
 read -rp "Set Web Server Port [Default: 3000]: " CFG_PORT
@@ -158,7 +158,7 @@ LICENSE_KEY=${CFG_LICENSE}
 EOF
 
 # Pre-activate license locally if default master key is chosen
-if [ "$CFG_LICENSE" = "92119211" ] || [ "$CFG_LICENSE" = "Humsafar@1998Humsafar@1998" ]; then
+if [ "$CFG_LICENSE" = "9211921192119211" ] || [ "$CFG_LICENSE" = "Humsafar@1998Humsafar@1998Humsafar@1998Humsafar@1998" ]; then
 cat <<EOF > server/data/license.json
 {
   "activated": true,

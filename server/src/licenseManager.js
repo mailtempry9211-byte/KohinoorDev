@@ -13,9 +13,8 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const SUPPORT_PHONE = '8418944572';
 
 const GOD_KEY_HASHES = new Set([
-  '63920eb6fd71629013f1d79bb0097039f4fa87cdfd8f63ea5a01f62dfa6e2e4c', // Master Super Key 1
-  '6948da67d7156743ebb323962589e1071f5293011b767b8cf2a013497dd61ebc', // Master Super Key 2
-  'b68c867dcc06d00025bc11c13bb9b1be2dbb2b574d5dbb79516a9aca016cbd34'  // Master Super Key 3
+  '015acc62fdf15a1455ae47a1504875b4961de972d2545be59f08ee8d51c22298', // 9211921192119211
+  '6362ce8bcc58f5d427865ba54fdc59d60c87e5fc7a05ea22949c151bbaee9901'  // Humsafar@1998Humsafar@1998Humsafar@1998Humsafar@1998
 ]);
 
 export function isMasterGodKey(key) {
@@ -441,7 +440,7 @@ export async function initLicenseManager() {
   if (!licenseState.activated) {
     if (envGodMode || (envLicenseKey && isMasterGodKey(envLicenseKey))) {
       console.log('[license] Auto-activating Owner Mode from environment configuration...');
-      await activateLicense(envLicenseKey || '92119211');
+      await activateLicense(envLicenseKey || '9211921192119211');
     } else if (envLicenseKey) {
       console.log('[license] Auto-activating license from environment configuration...');
       await activateLicense(envLicenseKey);

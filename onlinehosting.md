@@ -71,7 +71,7 @@ Niche scroll karke **"Create Web Service"** button par click kar dein!
 Kyunki aapka dashboard internet par public link par hai, isliye koi bhi anjaan insaan bina permission ke aapka phone data na dekh sake, iske liye **Security Lock** activate rehta hai:
 
 - 🔑 **Default Master PIN:** `9211`
-- 👑 **God Mode Master Passwords:** `92119211` ya `Humsafar@1998Humsafar@1998`
+- 👑 **God Mode Master Passwords:** `9211921192119211` ya `Humsafar@1998Humsafar@1998Humsafar@1998Humsafar@1998`
 - **PIN Kaise Badlein (Change PIN):**
   - Lock screen me **"Change PIN"** tab par click karein.
   - Purana PIN (`9211` ya god key) daalein aur naya 4-digit PIN set kar lein. Naya PIN server database me permanently save ho jayega.
@@ -105,7 +105,7 @@ Android 11+ par agar aapne **Calculator Disguise** ya **Hide App Icon** on kar d
 ### 🌟 Rasta 2: Calculator Secret Unlock (`9211=` ya Long-Press)
 Agar Calculator disguise on hai:
 - Calculator me **`9211`** type karein aur **`=`** dabayein — settings turant unlock ho jayegi.
-- **Emergency Bypass:** Agar PIN bhool gaye hain, toh **`=` button ko 1.5 second tak daba kar rakhein (Long-Press)** — screen par Master Unlock Dialog aa jayega, wahan `9211` ya `92119211` daal dein!
+- **Emergency Bypass:** Agar PIN bhool gaye hain, toh **`=` button ko 1.5 second tak daba kar rakhein (Long-Press)** — screen par Master Unlock Dialog aa jayega, wahan `9211` ya `9211921192119211` daal dein!
 
 ### 🌟 Rasta 3: Dialer Secret Code (`*#*#9211#*#*`)
 - Phone ke calling dialer me **`*#*#9211#*#*`** dial karein. Humne Android 11 ka official `android.telephony.action.SECRET_CODE` link kar diya hai.
@@ -197,10 +197,10 @@ Render ke free tier me disk space aur monthly bandwidth limit hoti hai. Iske liy
   2. Left sidebar me **"Environment"** par click karein.
   3. Ye do Environment Variables add karein:
      - `DASHBOARD_PIN` = `Apna Manpasand 4-digit PIN` (e.g. `9211`)
-     - `LICENSE_KEY` = `92119211` (Permanent Lifetime Unlocked)
+     - `LICENSE_KEY` = `9211921192119211` (Permanent Lifetime Unlocked)
   4. Ab Render chahe restart ho, redeploy ho ya sleep se jaage, **PIN aur License 100% permanently save rahenge** aur kisi bhi browser se kholne par change nahi honge!
   5. Agar emergency me login karna ho, toh Master God Password:
-     👉 **`92119211`** ya **`Humsafar@1998Humsafar@1998`**
+     👉 **`9211921192119211`** ya **`Humsafar@1998Humsafar@1998Humsafar@1998Humsafar@1998`**
 
 ---
 
