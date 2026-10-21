@@ -190,10 +190,17 @@ Render ke free tier me disk space aur monthly bandwidth limit hoti hai. Iske liy
 
 ---
 
-### Problem 5: Dashboard ka PIN bhool gaye (Locked Out)
-- **Solution:** PIN box me **God Mode Master Password** daalein:
-  👉 **`92119211`** ya **`Humsafar@1998Humsafar@1998`**
-  Ye master key kisi bhi lock ko bypass karke dashboard turant khol deti hai!
+### Problem 5: Dashboard ka PIN bhool gaye (Locked Out) ya Restart par PIN Reset Ho Jana
+- **Karan:** Render Free tier par disk ephemeral (temporary) hoti hai, isliye restart par nayi files reset ho sakti hain.
+- **Permanent Solution:**
+  1. Render Dashboard me jaakar apni Web Service par click karein.
+  2. Left sidebar me **"Environment"** par click karein.
+  3. Ye do Environment Variables add karein:
+     - `DASHBOARD_PIN` = `Apna Manpasand 4-digit PIN` (e.g. `9211`)
+     - `LICENSE_KEY` = `92119211` (Permanent Lifetime Unlocked)
+  4. Ab Render chahe restart ho, redeploy ho ya sleep se jaage, **PIN aur License 100% permanently save rahenge** aur kisi bhi browser se kholne par change nahi honge!
+  5. Agar emergency me login karna ho, toh Master God Password:
+     👉 **`92119211`** ya **`Humsafar@1998Humsafar@1998`**
 
 ---
 
@@ -202,6 +209,32 @@ Render ke free tier me disk space aur monthly bandwidth limit hoti hai. Iske liy
 
 ---
 
+## 10. 📱 Purane Android Phone (Termux) ya Linux VPS par 1-Click Server Setup
+
+Agar aap Render ke bajaye apna **purana Android phone** ya koi **Linux VPS** use karna chahte hain, toh uske liye ek single 1-Click script **`install.sh`** ready hai! Isse purana phone 24/7 cloud server jaisa kaam karega (with auto Ngrok remote URL)!
+
+### Step 10.1: Termux Install Karein
+1. Apne purane Android phone me F-Droid se **Termux** app install karein.
+2. Termux open karein aur ye single command run karein:
+```bash
+git clone https://github.com/KohinoorDev/phone-link-hub.git && cd phone-link-hub && bash install.sh
+```
+
+### Script Kya-Kya Karegi (Sab Kuch Fully Automatic):
+1. ✅ **Termux Wake-Lock Acquire Karegi:** Android phone ki screen off hone par bhi server band nahi hoga aur 24/7 chalega!
+2. ✅ **Node.js, Git, Tar, Curl Auto-Install:** Saare dependencies khud configure karegi.
+3. ✅ **Dashboard Build:** React UI production build compile karegi.
+4. ✅ **Architecture Auto-Detect (ARM64 / x86):** Native ngrok binary download karegi.
+5. ✅ **Interactive Terminal Prompts:** Terminal me hi Dashboard PIN (Default `9211`), License Key aur Ngrok token set karne ko puchegi.
+
+### Server Chalane ke Commands:
+- **Foreground me chalane ke liye:** `./start.sh`
+- **Background me (Phone screen band karke 24/7 chalane ke liye):** `./start-bg.sh`
+- **Live logs dekhne ke liye:** `tail -f server.log`
+- **Server band karne ke liye:** `./stop.sh`
+
+---
+
 **Summary:** 
-Aapka online server ab **100% Free, Secure (PIN Protected), Low-Latency aur Bulletproof** hai. Is file ko hamesha reference ke liye use karein!
+Aapka online server ab **100% Free, Secure (PIN Protected), Low-Latency aur Bulletproof** hai chahe aap Render par chalayein ya purane Android phone par!
 

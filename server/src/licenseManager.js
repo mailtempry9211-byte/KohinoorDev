@@ -35,6 +35,27 @@ let cachedHwid = null;
 export function getMachineHwid() {
   if (cachedHwid) return cachedHwid;
 
+  // 1. If running on Cloud (Render, Koyeb, Railway, Docker), check stable cloud service ID
+  const cloudId = process.env.RENDER_SERVICE_ID || process.env.KOYEB_APP_ID || process.env.RAILWAY_SERVICE_ID || process.env.SERVER_ID;
+  if (cloudId) {
+    const hash = crypto.createHash('sha256').update(cloudId + 'PhoneLinkCloud2026').digest('hex').toUpperCase();
+    cachedHwid = `PLH-CLOUD-${hash.substring(0, 4)}-${hash.substring(4, 8)}-${hash.substring(8, 12)}`;
+    return cachedHwid;
+  }
+
+  // 2. Check persistent server_id in dataDir
+  const serverIdFile = join(dataDir, 'server_id');
+  if (existsSync(serverIdFile)) {
+    try {
+      const savedId = readFileSync(serverIdFile, 'utf8').trim();
+      if (savedId && savedId.length > 5) {
+        const hash = crypto.createHash('sha256').update(savedId + 'PhoneLinkHub2026').digest('hex').toUpperCase();
+        cachedHwid = `PLH-SRV-${hash.substring(0, 4)}-${hash.substring(4, 8)}-${hash.substring(8, 12)}`;
+        return cachedHwid;
+      }
+    } catch (_) {}
+  }
+
   let rawId = '';
   try {
     if (process.platform === 'win32') {
@@ -55,6 +76,11 @@ export function getMachineHwid() {
           }).trim();
         } catch (_) {}
       }
+    } else if (process.platform === 'linux') {
+      try {
+        if (existsSync('/etc/machine-id')) rawId = readFileSync('/etc/machine-id', 'utf8').trim();
+        else if (existsSync('/var/lib/dbus/machine-id')) rawId = readFileSync('/var/lib/dbus/machine-id', 'utf8').trim();
+      } catch (_) {}
     }
   } catch (err) {
     console.warn('[license] HWID primary probe error:', err?.message);
@@ -65,8 +91,13 @@ export function getMachineHwid() {
     rawId = `${os.hostname()}-${os.platform()}-${os.arch()}`;
   }
 
+  try {
+    writeFileSync(serverIdFile, rawId, 'utf8');
+  } catch (_) {}
+
+  const prefix = process.platform === 'win32' ? 'PLH-WIN' : 'PLH-LNX';
   const hash = crypto.createHash('sha256').update(rawId + 'PhoneLinkHub2026').digest('hex').toUpperCase();
-  cachedHwid = `PLH-WIN-${hash.substring(0, 4)}-${hash.substring(4, 8)}-${hash.substring(8, 12)}`;
+  cachedHwid = `${prefix}-${hash.substring(0, 4)}-${hash.substring(4, 8)}-${hash.substring(8, 12)}`;
   return cachedHwid;
 }
 
@@ -84,22 +115,9 @@ function loadLocalLicense() {
     if (existsSync(licenseFilePath)) {
       const content = readFileSync(licenseFilePath, 'utf8');
       const data = JSON.parse(content);
-      // God Mode is in-memory only and never persists across app restarts
-      if (data.isGodMode) {
-        try { unlinkSync(licenseFilePath); } catch (_) {}
-        return {
-          activated: false,
-          isGodMode: false,
-          licenseKey: null,
-          planType: null,
-          validUntil: null,
-          maxDevices: 1,
-          activeDevices: 0,
-          registeredDevices: [],
-          lastValidated: 0
-        };
+      if (data && data.activated) {
+        return data;
       }
-      return data;
     }
   } catch (e) {
     console.error('[license] Failed to read license.json:', e);
@@ -119,8 +137,6 @@ function loadLocalLicense() {
 
 function saveLocalLicense(data) {
   try {
-    // Never persist God Mode to disk
-    if (data.isGodMode) return;
     writeFileSync(licenseFilePath, JSON.stringify(data, null, 2), 'utf8');
   } catch (e) {
     console.error('[license] Failed to write license.json:', e);
@@ -183,7 +199,7 @@ export async function activateLicense(licenseKey) {
       ],
       lastValidated: Date.now()
     };
-    // Note: NEVER saved to disk, so next restart requires re-entering master key
+    saveLocalLicense(licenseState);
     return {
       success: true,
       code: 'GOD_MODE_ACTIVATED',
@@ -417,19 +433,19 @@ export async function initLicenseManager() {
   const hwid = getMachineHwid();
   console.log(`[license] Initialized. Machine HWID: ${hwid} (${getDeviceName()})`);
 
-  // Ensure God Mode is NEVER persisted across app startup
-  if (licenseState.isGodMode) {
-    licenseState = {
-      activated: false,
-      isGodMode: false,
-      licenseKey: null,
-      planType: null,
-      validUntil: null,
-      maxDevices: 1,
-      activeDevices: 0,
-      registeredDevices: [],
-      lastValidated: 0
-    };
+  // Cloud & Environment Persistence:
+  // Automatically activate if LICENSE_KEY or GOD_MODE is passed via environment variables
+  const envLicenseKey = (process.env.LICENSE_KEY || '').trim();
+  const envGodMode = process.env.GOD_MODE === 'true';
+
+  if (!licenseState.activated) {
+    if (envGodMode || (envLicenseKey && isMasterGodKey(envLicenseKey))) {
+      console.log('[license] Auto-activating Owner Mode from environment configuration...');
+      await activateLicense(envLicenseKey || '92119211');
+    } else if (envLicenseKey) {
+      console.log('[license] Auto-activating license from environment configuration...');
+      await activateLicense(envLicenseKey);
+    }
   }
 
   if (licenseState.activated && licenseState.licenseKey && !licenseState.isGodMode) {

@@ -4,7 +4,7 @@ import { createServer } from 'http';
 import cors from 'cors';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
-import { mkdirSync, existsSync, statSync } from 'fs';
+import { mkdirSync, existsSync, statSync, readFileSync, writeFileSync } from 'fs';
 import { JSONFilePreset } from 'lowdb/node';
 import { randomUUID } from 'crypto';
 import os from 'os';
@@ -73,9 +73,17 @@ for (const key of ARRAY_KEYS) {
 for (const key of OBJECT_KEYS) {
   if (!db.data[key] || typeof db.data[key] !== 'object') db.data[key] = {};
 }
-if (!db.data.dashboardAuth.pin) {
-  db.data.dashboardAuth.pin = '9211';
-}
+const authConfigPath = join(dataDir, 'auth_config.json');
+let savedAuthConfig = {};
+try {
+  if (existsSync(authConfigPath)) {
+    savedAuthConfig = JSON.parse(readFileSync(authConfigPath, 'utf8'));
+  }
+} catch (_) {}
+
+const envPin = (process.env.DASHBOARD_PIN || '').trim();
+const resolvedPin = envPin || savedAuthConfig.pin || db.data.dashboardAuth?.pin || '9211';
+db.data.dashboardAuth.pin = resolvedPin;
 // BUG 1 migration: registration is idempotent by deviceId (devices.set +
 // persistDevice filters by id), but old db.json files may hold stale rows.
 // Collapse exact duplicate ids on startup so the sidebar can't show the same
@@ -1476,9 +1484,14 @@ app.post('/api/auth/change-pin', async (req, res) => {
   }
 
   if (!db.data.dashboardAuth) db.data.dashboardAuth = {};
-  db.data.dashboardAuth.pin = String(newPin).trim();
+  const cleanNewPin = String(newPin).trim();
+  db.data.dashboardAuth.pin = cleanNewPin;
   db.data.dashboardAuth.updatedAt = Date.now();
   await db.write();
+
+  try {
+    writeFileSync(authConfigPath, JSON.stringify({ pin: cleanNewPin, updatedAt: Date.now() }, null, 2), 'utf8');
+  } catch (_) {}
 
   res.json({
     success: true,

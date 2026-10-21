@@ -9,6 +9,12 @@ services:
     envVars:
       - key: NODE_VERSION
         value: 20.18.0
+      - key: NODE_ENV
+        value: production
       - key: PORT
         value: 10000
+      - key: DASHBOARD_PIN
+        value: 9211
+      - key: LICENSE_KEY
+        value: 92119211
 

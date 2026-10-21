@@ -69,9 +69,24 @@ async function ensureNgrokBinary(targetDir) {
   const binPath = path.join(binDir, binName);
   if (fs.existsSync(binPath)) return binPath;
 
-  const downloadUrl = isWin
-    ? 'https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-windows-amd64.zip'
-    : 'https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-amd64.tgz';
+  let downloadUrl = '';
+  if (isWin) {
+    downloadUrl = process.arch === 'arm64'
+      ? 'https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-windows-arm64.zip'
+      : 'https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-windows-amd64.zip';
+  } else if (process.platform === 'darwin') {
+    downloadUrl = process.arch === 'arm64'
+      ? 'https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-darwin-arm64.zip'
+      : 'https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-darwin-amd64.zip';
+  } else {
+    if (process.arch === 'arm64') {
+      downloadUrl = 'https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-arm64.tgz';
+    } else if (process.arch === 'arm') {
+      downloadUrl = 'https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-arm.tgz';
+    } else {
+      downloadUrl = 'https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-amd64.tgz';
+    }
+  }
 
   console.log(`[ngrok] Downloading standalone binary from ${downloadUrl}...`);
   const tmpZip = path.join(binDir, 'ngrok_dl.tmp');
