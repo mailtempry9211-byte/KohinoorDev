@@ -128,16 +128,12 @@ echo -e "\n${CYAN}${BOLD}[3/5] Quick Server Configuration (Press Enter for Defau
 read -rp "Set Dashboard Security PIN [Default: 9211]: " CFG_PIN
 CFG_PIN="${CFG_PIN:-9211}"
 
-# License Key
-read -rp "Set License / Owner Master Key [Default: 9211921192119211]: " CFG_LICENSE
-CFG_LICENSE="${CFG_LICENSE:-9211921192119211}"
-
 # Server Port
 read -rp "Set Web Server Port [Default: 3000]: " CFG_PORT
 CFG_PORT="${CFG_PORT:-3000}"
 
 # Ngrok Authtoken
-echo -e "${WHITE}To access your server from outside your home Wi-Fi via Ngrok:${NC}"
+echo -e "${WHITE}To access your server remotely from outside your home Wi-Fi via Ngrok:${NC}"
 echo -e "${WHITE}Get a free token at https://dashboard.ngrok.com/get-started/your-authtoken${NC}"
 read -rp "Enter Ngrok Authtoken (Optional - press Enter to skip): " CFG_NGROK_TOKEN
 
@@ -154,34 +150,18 @@ cat <<EOF > .env
 NODE_ENV=production
 PORT=${CFG_PORT}
 DASHBOARD_PIN=${CFG_PIN}
-LICENSE_KEY=${CFG_LICENSE}
 EOF
 
-# Pre-activate license locally if default master key is chosen
-if [ "$CFG_LICENSE" = "9211921192119211" ] || [ "$CFG_LICENSE" = "Humsafar@1998Humsafar@1998Humsafar@1998Humsafar@1998" ]; then
-cat <<EOF > server/data/license.json
+if [ -n "$CFG_NGROK_TOKEN" ]; then
+  cat <<EOF > server/data/tunnel_config.json
 {
-  "activated": true,
-  "isGodMode": true,
-  "licenseKey": "OWNER-GOD-MODE-ACTIVE",
-  "planType": "👑 Owner God Mode (Unrestricted)",
-  "validUntil": "2126-01-01T00:00:00.000Z",
-  "maxDevices": 9999,
-  "activeDevices": 1,
-  "registeredDevices": [
-    {
-      "hwid": "PLH-LOCAL-SERVER",
-      "device_name": "Always-On Master Terminal",
-      "activated_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-    }
-  ],
-  "lastValidated": $(date +%s%3N)
+  "authtoken": "${CFG_NGROK_TOKEN}",
+  "autoStart": true
 }
 EOF
 fi
 
-if [ -n "$CFG_NGROK_TOKEN" ]; then
-  cat <<EOF > server/data/tunnel_config.json
+echo -e "${GREEN}[✔] Configuration saved! PIN: ${CFG_PIN}${NC}"
 {
   "authtoken": "${CFG_NGROK_TOKEN}",
   "autoStart": true
@@ -291,7 +271,7 @@ echo -e "${WHITE}Your PhoneLink Hub server is ready to run 24/7!${NC}\n"
 echo -e "${BOLD}Dashboard Access Details:${NC}"
 echo -e "  • Local Wi-Fi URL  : ${CYAN}http://${LOCAL_IP}:${CFG_PORT}${NC}"
 echo -e "  • Dashboard PIN    : ${YELLOW}${CFG_PIN}${NC}"
-echo -e "  • License Status   : ${GREEN}Permanently Unlocked${NC}"
+echo -e "  • License Status   : ${YELLOW}Activate via Web Dashboard License popup${NC}"
 
 if [ -n "$CFG_NGROK_TOKEN" ]; then
   echo -e "  • Ngrok Remote     : ${GREEN}Autostart Enabled (Check URL on startup or Dashboard)${NC}"
