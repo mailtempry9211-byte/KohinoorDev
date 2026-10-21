@@ -311,3 +311,4 @@ if [[ "$START_NOW" =~ ^[Yy]$ ]]; then
   echo -e "${GREEN}Starting server now... Press Ctrl+C to stop.${NC}\n"
   ./start.sh
 fi
+
