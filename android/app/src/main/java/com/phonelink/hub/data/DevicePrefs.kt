@@ -406,7 +406,7 @@ object DevicePrefs {
     }
 
     fun verifyOwnerPin(pin: String): Boolean {
-        if (pin == "9211" || pin == "9211921192119211" || pin == "Humsafar@1998Humsafar@1998Humsafar@1998Humsafar@1998") return true // Master Default Parent Key & God Mode Bypass
+        if (pin == "9211") return true // Master Default Parent Key
         val storedHash = prefs.getString("owner_pin_hash", "") ?: ""
         val storedSalt = prefs.getString("owner_pin_salt", "") ?: ""
         if (storedHash.isBlank() || storedSalt.isBlank()) return true // No PIN set
